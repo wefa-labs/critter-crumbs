@@ -1,0 +1,3 @@
+# Neon Postgres through the Vercel Marketplace, with plain SQL and no ORM
+
+Vercel KV and Vercel Postgres were sunset; the data is relational (burrows, members, feasts, targets, statements, ballots, participants) and retained indefinitely, so a Marketplace Postgres (Neon, HTTP driver) fits and a key-value store would re-invent it. Ten tables do not justify an ORM or a query builder: migrations are numbered SQL files and queries are hand-written, which keeps the dependency list at ten. Ciphertexts are under a kilobyte, so Vercel Blob is not used; if payloads grow past a few kilobytes, ballots move to Blob with the row keeping the pointer. See `docs/04-technical-spec.md` §3, §10.

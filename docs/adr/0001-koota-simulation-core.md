@@ -1,0 +1,3 @@
+# The critter simulation is an ECS on Koota
+
+Per-frame and per-crumb state (rigs, pours, counts, the feast run, sound events) lives in a Koota world outside React, ticked by one `tick(now)` with injected time; the 3D scene and the Simple view are two renderers over the same traits. We chose Koota over an in-house world for its queries, change tracking, relations and React bindings from the React Three Fiber maintainers, at a few kilobytes. Consequence: React never holds real-time state and never runs inside the tick; app state that changes per network round trip stays in ordinary React state. See `docs/03-game-design.md` §7.
