@@ -540,5 +540,5 @@ Two agents, A (core) and B (app), from Wednesday 2026-09-03. Rehearsal-ready bui
 | TQ1 | The production domain | `crittercrumbs.app` |
 | TQ2 | Shutter API key or plan and who holds it | T14 |
 | TQ3 | EAS chain | Base, confirmed |
-| TQ4 | The `LICENSE` holder (PRD Q9) | WEFA LLC; a for-profit product; the repo will move to the WEFA organisation |
+| TQ4 | The `LICENSE` holder (PRD Q9) | WEFA LLC; a for-profit product; the repo lives at `wefa-labs/critter-crumbs` |
 | TQ5 | Rehearsal posts a public result on Base | Yes, T13 |

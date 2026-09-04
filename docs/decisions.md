@@ -14,3 +14,4 @@ Append-only. One line per decision that is not already in `docs/01`–`04`. Form
 | 2026-09-02 | Domain `crittercrumbs.app`; Base confirmed for EAS; rehearsal posts its result on Base; the project account holds the Shutter API key (default tier first); for-profit product, licence holder = the owning company (name pending) | Reviewer answers to TQ1–TQ5 | Afolabi |
 | 2026-09-02 | Licence holder is WEFA LLC; repository to be transferred to the WEFA GitHub organisation | Reviewer | Afolabi |
 | 2026-09-03 | Ten mattpocock/skills vendored in `.agents/skills` (cross-agent), `.claude/skills` symlink, `CLAUDE.md` → `AGENTS.md`, git guardrail hook, `CONTEXT.md` glossary, ADRs 0001–0004 | Agent-driven build foundation | Afolabi / Claude |
+| 2026-09-03 | Repository moved to `wefa-labs/critter-crumbs`; git guardrail narrowed so an ordinary push is allowed while destructive git remains blocked (33 cases in `.claude/hooks/`) | Reviewer | Afolabi |

@@ -58,9 +58,9 @@ Ten skills from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, 
 | `wait-what` | A message you do not understand; re-pitched in the glossary's words | `/wait-what` | `$wait-what` |
 | `research` | The verify-list in `docs/04-technical-spec.md` §18 and any other question needing primary sources | model-invoked | model-invoked |
 | `handoff` | Ending a session with work in flight | `/handoff` | `$handoff` |
-| `git-guardrails-claude-code` | Already installed here (Claude Code only): `.claude/hooks/block-dangerous-git.sh` blocks push, reset --hard, clean, branch -D, checkout . — Codex runs in its own sandbox with approvals instead | — | — |
+| `git-guardrails-claude-code` | Already installed here (Claude Code only), customised: an ordinary push is allowed; force pushes, remote deletions, hard resets, forced cleans, forced branch deletion, wholesale checkout/restore and history rewrites are blocked. Patterns live in `.claude/hooks/block-dangerous-git.sh` and are covered by `.claude/hooks/guardrail-cases.txt`; change them only with `.claude/hooks/test-guardrail.sh` passing. Codex runs in its own sandbox with approvals instead | — | — |
 
-**Configuration the skills expect** (in place of `/setup-matt-pocock-skills`, which is not installed): glossary `CONTEXT.md` (glossary only, no implementation detail) · ADRs in `docs/adr/` (one paragraph each, numbered) · specs in `docs/` · tracker: GitHub issues on this repository (moving to the WEFA organisation) with labels `ready-for-agent`, `blocked`, `needs-human`; local fallback `.scratch/<feature>/issues/` (ignored by git) · decisions that are not ADRs go in `docs/decisions.md`.
+**Configuration the skills expect** (in place of `/setup-matt-pocock-skills`, which is not installed): glossary `CONTEXT.md` (glossary only, no implementation detail) · ADRs in `docs/adr/` (one paragraph each, numbered) · specs in `docs/` · tracker: GitHub issues on `wefa-labs/critter-crumbs` with labels `ready-for-agent`, `blocked`, `needs-human`; local fallback `.scratch/<feature>/issues/` (ignored by git) · decisions that are not ADRs go in `docs/decisions.md`.
 
 ## Commands
 

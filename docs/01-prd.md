@@ -375,7 +375,7 @@ Preconditions: the rehearsal feast has completed, in September (§10). Measureme
 | # | Question | Blocks |
 |---|---|---|
 | Q8 | Can one member remove another from a burrow, or only leave themselves? | Burrow member list UI |
-| Q9 | The exact copyright holder for the `LICENSE` file | Resolved 2026-09-02: WEFA LLC (repo to move to the WEFA organisation) |
+| Q9 | The exact copyright holder for the `LICENSE` file | Resolved 2026-09-02: WEFA LLC; repo at `wefa-labs/critter-crumbs` |
 
 ## 13. What the other documents own
 

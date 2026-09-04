@@ -1,0 +1,34 @@
+# expectation|command — "allow" means exit 0, "block" means exit 2
+allow|git push
+allow|git push -u origin docs/foundation
+allow|git push origin main
+allow|git push --set-upstream origin feature/x
+allow|git status
+allow|git commit -m "work"
+allow|git reset HEAD~1
+allow|git reset --soft HEAD~1
+allow|git clean -n
+allow|git branch -d merged-branch
+allow|git checkout main
+allow|git checkout -b feature/x
+allow|git restore --staged src/file.ts
+allow|git push origin my-f
+allow|git push origin feature-fast
+allow|git fetch --prune
+block|git push --force
+block|git push --force-with-lease origin main
+block|git push -f origin main
+block|git push origin main -f
+block|git push --mirror
+block|git push origin --delete old-branch
+block|git push origin +main:main
+block|git reset --hard
+block|git reset --hard HEAD~3
+block|git clean -fd
+block|git clean -f
+block|git branch -D main
+block|git checkout .
+block|git restore .
+block|git filter-branch --all
+block|git reflog expire --expire=now --all
+block|git gc --prune=now
