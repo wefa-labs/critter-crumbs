@@ -47,3 +47,13 @@ test('API profile rejects skipped variants', async () => {
   const { headers } = await connect();
   expect((await api({ method: 'PUT', path: '/api/me', headers, body: { variant: 3 } })).status).toBe(400);
 });
+
+test('API keeping a critter irreversibly locks its identity across sessions', async () => {
+  const { api, connect, close } = await apiHarness(); disposals.push(close);
+  const { headers } = await connect();
+  const kept = await api({ method: 'PUT', path: '/api/me', headers, body: { variant: 1, keepCritter: true } });
+  expect(kept.body).toMatchObject({ variant: 1, critterLocked: true });
+  const next = await connect();
+  expect((await api({ method: 'PUT', path: '/api/me', headers: next.headers, body: { variant: 2 } })).status).toBe(400);
+  expect((await api({ method: 'PUT', path: '/api/me', headers: next.headers, body: { variant: 1, keepCritter: true } })).status).toBe(200);
+});

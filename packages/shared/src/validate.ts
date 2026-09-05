@@ -53,10 +53,11 @@ export function parseUuid(value: unknown): string {
   if (typeof value !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) throw new ValidationError();
   return value.toLowerCase();
 }
-export function parseProfileUpdate(value: unknown): { displayName?: string; variant?: number } {
-  const input = record(value), result: { displayName?: string; variant?: number } = {};
+export function parseProfileUpdate(value: unknown): { displayName?: string; variant?: number; keepCritter?: true } {
+  const input = record(value), result: { displayName?: string; variant?: number; keepCritter?: true } = {};
   if (input.displayName !== undefined) result.displayName = text(input.displayName, 1, 80, 'name.label', true);
   if (input.variant !== undefined) result.variant = integer(input.variant, 0, 4);
+  if (input.keepCritter !== undefined) { if (input.keepCritter !== true) throw new ValidationError(); result.keepCritter = true; }
   return result;
 }
 export function parseStatement(value: unknown): string { return text(value, 0, 2000, 'gathering.limit'); }

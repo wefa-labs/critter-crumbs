@@ -1,26 +1,11 @@
 import { afterEach, expect, test } from 'vitest';
-import { createLocalAccount, buildSignInMessage, type SignInChallenge } from '@critter-crumbs/core';
-import { createApi } from '../../api/_lib/api.js';
-import { openTestDatabase } from './support.js';
+import { createLocalAccount } from '@critter-crumbs/core';
+import { apiHarness } from './support.js';
 
 const disposals: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const dispose of disposals.splice(0)) await dispose(); });
 async function setup() {
-  const db = await openTestDatabase(); disposals.push(() => db.close());
-  let now = 1800000000123;
-  const api = createApi({ db, clock: () => now, sessionSecret: 'local-session-secret-for-tests-only', origin: 'http://localhost:5173' });
-  async function signedRequest(key = '1') {
-    const account = createLocalAccount(`0x${key.padStart(64, '0')}`);
-    const challenge = (await api({ method: 'GET', path: '/api/session/nonce' })).body;
-    const signature = await account.signMessage(buildSignInMessage(account.address, challenge as unknown as SignInChallenge));
-    return { method: 'POST', path: '/api/session', body: { address: account.address, nonce: challenge.nonce, signature } };
-  }
-  async function connect(key = '1') {
-    const request = await signedRequest(key), connected = await api(request);
-    expect(connected.status).toBe(200);
-    return { request, connected, headers: { cookie: connected.headers['Set-Cookie']!.split(';')[0]! } };
-  }
-  return { api, signedRequest, connect, advance: (ms: number) => { now += ms; } };
+  const harness = await apiHarness(); disposals.push(harness.close); return harness;
 }
 test('API lifecycle signs in locally, creates a burrow, and reads it with the session cookie', async () => {
   const { api, connect } = await setup(); const { headers, connected, request } = await connect();
@@ -63,7 +48,7 @@ test('API rejects a signature from another address', async () => {
 test.each([['no session', false, 401], ['nonmember session', true, 403]] as const)('API protects burrow reads with %s', async (_, hasSession, status) => {
   const { api, connect } = await setup(); const { headers } = await connect();
   const created = await api({ method: 'POST', path: '/api/burrows', headers, body: { name: 'Oak' } });
-  const incoming = hasSession ? (await connect('2')).headers : {};
+  const incoming = hasSession ? (await connect(2)).headers : {};
   expect((await api({ method: 'GET', path: `/api/burrows/${created.body.id}`, headers: incoming })).status).toBe(status);
 });
 test('API rejects cross-origin writes', async () => {

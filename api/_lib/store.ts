@@ -4,7 +4,7 @@ import type { Database, Row } from './database.js';
 export const timestamp = (now: number) => new Date(now).toISOString();
 const milliseconds = (value: unknown) => value === null || value === undefined ? null : new Date(value as string | number).getTime();
 export function profileFromRow(row: Row): Profile {
-  return { address: getAddress(String(row.address)), variant: Number(row.variant), rerollsUsed: Number(row.rerolls_used),
+  return { address: getAddress(String(row.address)), variant: Number(row.variant), rerollsUsed: Number(row.rerolls_used), critterLocked: Boolean(row.critter_locked),
     displayName: row.display_name as string | null, ensName: row.ens_name as string | null,
     ensCheckedAt: milliseconds(row.ens_checked_at), createdAt: milliseconds(row.created_at)! };
 }
@@ -28,13 +28,19 @@ export function createStore(db: Database) {
       const [row] = await db.query('select * from profiles where address=$1', [address]);
       return row ? profileFromRow(row) : null;
     },
-    async updateProfile(address: Address, update: { displayName?: string; variant?: number }) {
+    async updateProfile(address: Address, update: { displayName?: string; variant?: number; keepCritter?: true }) {
       const [rows] = await db.batch([{ text: `update profiles set
         display_name=coalesce($2,display_name), variant=coalesce($3,variant),
+        critter_locked=critter_locked or $4 or coalesce($3=4,false),
         rerolls_used=rerolls_used+case when $3::int>variant then 1 else 0 end
-        where address=$1 and ($3::int is null or $3=variant or ($3=variant+1 and rerolls_used<4)) returning *`,
-        values: [address, update.displayName ?? null, update.variant ?? null] }]);
+        where address=$1 and ($3::int is null or $3=variant or ($3=variant+1 and rerolls_used<4 and not critter_locked)) returning *`,
+        values: [address, update.displayName ?? null, update.variant ?? null, update.keepCritter ?? false] }]);
       return rows?.[0] ? profileFromRow(rows[0]) : null;
+    },
+    async cacheEns(address: Address, name: string | null, now: number) {
+      const [rows] = await db.batch([{ text: `update profiles set ens_name=$2,ens_checked_at=$3
+        where address=$1 and (ens_checked_at is null or ens_checked_at<=$3::timestamptz) returning *`, values: [address, name, timestamp(now)] }]);
+      return rows?.[0] ? profileFromRow(rows[0]) : this.profile(address);
     },
     async burrows(address: Address) {
       return db.query(`select b.id,b.name from burrows b join burrow_members m on m.burrow_id=b.id where m.address=$1 and m.left_at is null order by b.created_at,b.id`, [address]);
