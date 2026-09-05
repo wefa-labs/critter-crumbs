@@ -32,7 +32,7 @@ test('API gathering opens a draft with mock registration and hides statements un
   expect((await api({ method: 'PUT', path: `${path}/statements/${target.id}`, headers: owner.headers, body: { body: 'Helped with the garden.' } })).status).toBe(200);
   expect((await api({ method: 'GET', path, headers: member.headers })).body.statements).toEqual([]);
   advance(1000);
-  expect((await api({ method: 'GET', path, headers: member.headers })).body.statements).toContainEqual(expect.objectContaining({ body: 'Helped with the garden.' }));
+  expect((await api({ method: 'GET', path, headers: member.headers })).body.statements).toContainEqual(expect.objectContaining({ body: 'Helped with the garden.', authorAddress: owner.account.address }));
 });
 
 test.each([false, true])('API creator cancels before scattering, opened=%s', async open => {
@@ -101,11 +101,11 @@ test('API concurrent open requests reserve one registration attempt', async () =
   expect((await first).status).toBe(200);
   expect((await api(request)).status).toBe(200); expect(calls).toBe(1);
 });
-test('API public feast metadata excludes statements and encryption material', async () => {
+test.each([false, true])('API arrival metadata excludes statements and encryption material, aggregatePublic=%s', async aggregatePublic => {
   const { api, createFeast, close } = await apiHarness(); disposals.push(close);
-  const { path } = await createFeast({ open: true, aggregatePublic: true });
+  const { path } = await createFeast({ open: true, aggregatePublic });
   const response = await api({ method: 'GET', path });
-  expect(response.status).toBe(200); expect(response.body.title).toBe('Fixture');
+  expect(response.status).toBe(200); expect(response.body).toMatchObject({ title: 'Fixture', burrowName: 'Oak', aggregatePublic });
   for (const key of ['statements', 'registration', 'participants', 'participation', 'closeRecord']) expect(response.body).not.toHaveProperty(key);
 });
 

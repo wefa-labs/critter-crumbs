@@ -1,8 +1,8 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { optionTargetId, phaseAt, type Timelock } from '@critter-crumbs/core';
 import { hex, integer, parseFeastSetup, parseStatement, type Address, type Registration, type Target } from '@critter-crumbs/shared';
-import { bytesToHex, concatHex, keccak256, stringToHex } from 'viem';
-import type { Database } from './database.js';
+import { bytesToHex, concatHex, getAddress, keccak256, stringToHex } from 'viem';
+import type { Database, Row } from './database.js';
 import { HttpError } from './errors.js';
 import { activeMember, createBurrowTransactions, requireMember, timestamp, type BurrowSnapshot } from './burrow-transactions.js';
 import { dbHex, feastClock, feastFromRow, milliseconds, targetFromRow } from './feast-rows.js';
@@ -17,21 +17,24 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     const member = actor ? activeMember(snapshot, actor) : undefined;
     if (row.status === 'draft' && (!member || row.created_by !== actor)) throw new HttpError(403, 'burrow.unknown.title');
     if (!member) {
-      if (!row.aggregate_public) throw new HttpError(actor ? 403 : 401, 'burrow.unknown.title');
-      const targets = row.kind === 'people' && ['draft', 'gathering'].includes(phaseAt(feastClock(row), snapshot.now)) ? peopleTargets(snapshot.members) : snapshot.targets.filter(target => target.feast_id === id).map(targetFromRow);
-      return { id, title: row.title, context: row.context, kind: row.kind, ...feastClock(row), aggregatePublic: true, targets, phase: phaseAt(feastClock(row), snapshot.now), serverNow: snapshot.now };
+      const targets = visibleTargets(snapshot, row);
+      return { id, burrowName: snapshot.burrow.name, title: row.title, context: row.context, kind: row.kind, ...feastClock(row), aggregatePublic: row.aggregate_public, targets, phase: phaseAt(feastClock(row), snapshot.now), serverNow: snapshot.now };
     }
     return view(snapshot, id, actor!);
   }
+  function visibleTargets(snapshot: BurrowSnapshot, row: Row) {
+    return row.kind === 'people' && ['draft', 'gathering'].includes(phaseAt(feastClock(row), snapshot.now))
+      ? peopleTargets(snapshot.members) : snapshot.targets.filter(target => target.feast_id === row.id).map(targetFromRow);
+  }
   function view(snapshot: BurrowSnapshot, id: string, actor: Address) {
     const row = snapshot.feasts.find(row => row.id === id)!;
-    const targets = row.kind === 'people' && ['draft', 'gathering'].includes(phaseAt(feastClock(row), snapshot.now)) ? peopleTargets(snapshot.members) : snapshot.targets.filter(target => target.feast_id === id).map(targetFromRow);
+    const targets = visibleTargets(snapshot, row);
     const feast = feastFromRow(row, targets, snapshot.participants.filter(participant => participant.feast_id === id).map(participant => String(participant.address)));
     const phase = phaseAt(feast, snapshot.now);
     const statements = snapshot.statements.filter(statement => statement.feast_id === id && targets.some(target => target.id === dbHex(statement.target_id)));
     return { ...feast, phase, serverNow: snapshot.now,
       statements: statements.filter(statement => ['scattering', 'feast'].includes(phase) || sameAddress(String(statement.author_address), actor))
-        .map(statement => ({ targetId: dbHex(statement.target_id), authorAddress: statement.author_address, body: statement.body, updatedAt: milliseconds(statement.updated_at) })),
+        .map(statement => ({ targetId: dbHex(statement.target_id), authorAddress: getAddress(String(statement.author_address)), body: statement.body, updatedAt: milliseconds(statement.updated_at) })),
       participation: { written: statements.filter(statement => String(statement.body).length > 0).map(statement => dbHex(statement.target_id)), scattered: [] }, ownBallotUids: [] };
   }
   async function location(id: string) {
