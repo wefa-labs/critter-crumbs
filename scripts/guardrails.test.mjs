@@ -8,7 +8,7 @@ const check = async (code, file) => (await eslint.lintText(code, { filePath: pat
 const has = async (code, file, rule) => (await check(code, file)).some((message) => message.ruleId === `critter-crumbs/${rule}`);
 
 test('HTML injection forms fail lint, while textContent is allowed', async () => {
-  for (const code of ['element.innerHTML = text;', 'element["outerHTML"] = text;', 'element.insertAdjacentHTML("beforeend", text);', 'const { innerHTML } = element;', 'const view = <div dangerouslySetInnerHTML={data} />;']) {
+  for (const code of ['element.innerHTML = text;', 'element["outerHTML"] = text;', 'element[`innerHTML`] = text;', 'element.insertAdjacentHTML("beforeend", text);', 'const { innerHTML } = element;', 'const view = <div dangerouslySetInnerHTML={data} />;']) {
     assert.equal(await has(code, 'packages/app/src/probe.tsx', 'no-html'), true, code);
   }
   assert.equal(await has('element.textContent = text;', 'packages/app/src/probe.ts', 'no-html'), false);
@@ -24,7 +24,7 @@ test('clock reads and aliases fail outside the exact adapter allow-list', async 
 });
 
 test('workspace imports reject reverse and private paths across each syntax', async () => {
-  for (const code of ['import "@critter-crumbs/app";', 'export * from "@critter-crumbs/app";', 'import("@critter-crumbs/app");', 'require("@critter-crumbs/app");', 'import "@critter-crumbs/shared/src/index.js";', 'import "../../shared/src/index.js";']) {
+  for (const code of ['import "@critter-crumbs/app";', 'export * from "@critter-crumbs/app";', 'import("@critter-crumbs/app");', 'import(`@critter-crumbs/app`);', 'import(target);', 'require(`@critter-crumbs/app`);', 'import app = require("@critter-crumbs/app");', 'require("@critter-crumbs/app");', 'import "@critter-crumbs/shared/src/index.js";', 'import "../../shared/src/index.js";']) {
     assert.equal(await has(code, 'packages/core/src/probe.ts', 'imports'), true, code);
   }
   assert.equal(await has('import "@critter-crumbs/core";', 'packages/shared/src/probe.ts', 'imports'), true);

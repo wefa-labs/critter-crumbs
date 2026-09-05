@@ -70,3 +70,7 @@ cat package/package.json package/LICENSE package/dist/index.d.ts
 ```
 
 The per-file gzip measurements used Python's `gzip.compress(bytes, compresslevel=9, mtime=0)`. No runtime import, crypto behavior, or complete browser build was tested in this research.
+
+## Foundation integration proof
+
+The foundation uses explicit Vite middleware to serve the inspected BLST bytes during development, and emits the same files during production builds. HTTP checks confirmed both files' content types and byte equality; the build succeeds with install scripts disabled. This verifies asset delivery, not encryption behavior, which belongs to the later Timelock implementation.

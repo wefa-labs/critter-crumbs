@@ -13,7 +13,12 @@ const structuralAttributes = new Set([
   'htmlFor', 'autoComplete', 'inputMode', 'method', 'action', 'loading',
   'width', 'height', 'viewBox', 'fill', 'stroke', 'd', 'tabIndex',
 ]);
-const propertyName = (node) => node.computed ? node.property.value : node.property.name;
+const staticString = (node) => {
+  if (typeof node?.value === 'string') return node.value;
+  if (node?.type === 'TemplateLiteral' && node.expressions.length === 0) return node.quasis[0].value.cooked;
+  return undefined;
+};
+const propertyName = (node) => node.computed ? staticString(node.property) : node.property.name;
 const relativeFile = (context) => path.relative(root, context.filename).split(path.sep).join('/');
 const owner = (file) => /^(?:packages\/(shared|core|app)|(?:api)(?=\/))/.exec(file)?.[1] ?? (file.startsWith('api/') ? 'api' : null);
 const definition = (message, create) => ({ meta: { type: 'problem', schema: [], messages: { forbidden: message } }, create });
@@ -82,9 +87,20 @@ export default {
         ImportDeclaration: (node) => check(node, node.source.value),
         ExportNamedDeclaration: (node) => { if (node.source) check(node, node.source.value); },
         ExportAllDeclaration: (node) => check(node, node.source.value),
-        ImportExpression: (node) => check(node, node.source.value),
-        CallExpression: (node) => { if (node.callee.name === 'require') check(node, node.arguments[0]?.value); },
+        ImportExpression: (node) => {
+          const value = staticString(node.source);
+          if (value === undefined) context.report({ node, messageId: 'forbidden' });
+          else check(node, value);
+        },
+        CallExpression: (node) => { if (node.callee.name === 'require') {
+          const value = staticString(node.arguments[0]);
+          if (value === undefined) context.report({ node, messageId: 'forbidden' });
+          else check(node, value);
+        } },
         TSImportType: (node) => check(node, node.argument?.value ?? node.argument?.literal?.value),
+        TSImportEqualsDeclaration: (node) => {
+          if (node.moduleReference.type === 'TSExternalModuleReference') check(node, staticString(node.moduleReference.expression));
+        },
       };
     }),
     'copy-ids': definition('Keep visible wording in packages/shared/src/copy.ts and use its copy IDs.', (context) => {

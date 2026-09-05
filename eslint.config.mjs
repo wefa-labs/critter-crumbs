@@ -16,7 +16,7 @@ export default [
     },
   },
   {
-    files: ['packages/*/src/**/*.{ts,tsx,js,mjs}', 'api/**/*.{ts,js,mjs}'],
+    files: ['packages/*/src/**/*.{ts,tsx,js,jsx,mjs}', 'api/**/*.{ts,js,mjs}'],
     rules: { 'critter-crumbs/imports': 'error' },
   },
   {

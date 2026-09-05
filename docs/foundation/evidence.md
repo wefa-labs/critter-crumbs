@@ -1,6 +1,6 @@
 # Foundation validation evidence
 
-Validated on 2026-09-04 with Node 22.22.1 and npm 11.19.1. All commands below exited 0. npm install scripts remained disabled and the seven-day release delay remained enabled. The full audit reports 18 low and 28 moderate development findings; zero high or critical findings.
+Validated on 2026-09-04 with Node 22.22.1 and npm 11.19.1. All commands below exited 0. npm install scripts remained disabled and the seven-day release delay remained enabled. The full audit reports 18 low and 28 moderate development findings; zero high or critical findings. Runtime-only audit reports zero vulnerabilities.
 
 ## node --version
 
@@ -72,73 +72,79 @@ Run `npm audit` for details.
 
  Test Files  3 passed (3)
       Tests  3 passed (3)
-   Start at  22:57:29
-   Duration  98ms (transform 47ms, setup 0ms, import 68ms, tests 4ms, environment 0ms)
+   Start at  23:07:09
+   Duration  94ms (transform 45ms, setup 0ms, import 63ms, tests 3ms, environment 0ms)
 
 TAP version 13
 # Subtest: budgets count static imports and reject an oversized app shell
 ok 1 - budgets count static imports and reject an oversized app shell
   ---
-  duration_ms: 5.646416
+  duration_ms: 6.226
   type: 'test'
   ...
 # Subtest: the three budget rejects an oversized lazy chunk
 ok 2 - the three budget rejects an oversized lazy chunk
   ---
-  duration_ms: 9.867416
+  duration_ms: 9.149125
   type: 'test'
   ...
 # Subtest: named lazy chunks cannot become static app imports
 ok 3 - named lazy chunks cannot become static app imports
   ---
-  duration_ms: 0.173458
+  duration_ms: 0.189834
   type: 'test'
   ...
 # Subtest: empty chunks pass and crypto is measured without inventing a spec cap
 ok 4 - empty chunks pass and crypto is measured without inventing a spec cap
   ---
-  duration_ms: 0.485791
+  duration_ms: 0.509209
+  type: 'test'
+  ...
+# Subtest: development serves the published BLST files with browser content types
+ok 5 - development serves the published BLST files with browser content types
+  ---
+  duration_ms: 47.884625
   type: 'test'
   ...
 # Subtest: the EAS development cross-check entry loads with Node
-ok 5 - the EAS development cross-check entry loads with Node
+ok 6 - the EAS development cross-check entry loads with Node
   ---
-  duration_ms: 75.932334
+  duration_ms: 140.974083
   type: 'test'
   ...
 # Subtest: HTML injection forms fail lint, while textContent is allowed
-ok 6 - HTML injection forms fail lint, while textContent is allowed
+ok 7 - HTML injection forms fail lint, while textContent is allowed
   ---
-  duration_ms: 253.523708
+  duration_ms: 250.9065
   type: 'test'
   ...
 # Subtest: clock reads and aliases fail outside the exact adapter allow-list
-ok 7 - clock reads and aliases fail outside the exact adapter allow-list
+ok 8 - clock reads and aliases fail outside the exact adapter allow-list
   ---
-  duration_ms: 14.502583
+  duration_ms: 10.964584
   type: 'test'
   ...
 # Subtest: workspace imports reject reverse and private paths across each syntax
-ok 8 - workspace imports reject reverse and private paths across each syntax
+ok 9 - workspace imports reject reverse and private paths across each syntax
   ---
-  duration_ms: 3.923834
+  duration_ms: 4.6615
   type: 'test'
   ...
 # Subtest: visible JSX wording and indirect literals require copy IDs
-ok 9 - visible JSX wording and indirect literals require copy IDs
+ok 10 - visible JSX wording and indirect literals require copy IDs
   ---
-  duration_ms: 6.012708
+  duration_ms: 5.043333
   type: 'test'
   ...
-1..9
-# tests 9
+1..10
+# tests 10
 # suites 0
-# pass 9
+# pass 10
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 384.278583
+# duration_ms 376.63625
 
 > critter-crumbs@0.0.0 check:workspaces
 > node scripts/probe-workspaces.mjs
@@ -146,7 +152,7 @@ ok 9 - visible JSX wording and indirect literals require copy IDs
 Node v22.22.1; npm 11.19.1; @vercel/node 9.0.1; build-utils 14.6.1; nft 1.10.0
 Skipping "install" command...
 Using built-in TypeScript 5.9.3 since "typescript" is missing from "devDependencies"
-source: emitted function exit=1, output=Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-1MaItM/source/output/node_modules/@critter-crumbs/core/src/index.ts' imported from /private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-1MaItM/source/output/api/probe.js
+source: emitted function exit=1, output=Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-E1nNjF/source/output/node_modules/@critter-crumbs/core/src/index.ts' imported from /private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-E1nNjF/source/output/api/probe.js
 Skipping "install" command...
 Using built-in TypeScript 5.9.3 since "typescript" is missing from "devDependencies"
 dist: emitted function exit=0, output=core:shared
@@ -365,7 +371,7 @@ To address all issues possible (including breaking changes), run:
 
 Some issues need review, and may require choosing
 a different dependency.
-audited 852 packages in 5s
+audited 852 packages in 4s
 
 852 packages have verified registry signatures
 
@@ -400,7 +406,7 @@ computing gzip size...
 ../../dist/assets/crypto-l0sNRNKZ.js             0.00 kB │ gzip:   0.02 kB
 ../../dist/assets/three-l0sNRNKZ.js              0.00 kB │ gzip:   0.02 kB
 ../../dist/assets/index-B5Qt9EMX.js              0.71 kB │ gzip:   0.40 kB
-✓ built in 42ms
+✓ built in 40ms
 ```
 
 ## npm audit --audit-level=high
@@ -632,6 +638,15 @@ automated/codex	Work prepared by Codex	#6F42C1
 blocked	Waiting on a recorded dependency	#D93F0B
 ```
 
+## Additional proof
+
+- `npm test --workspaces`: all three package-local commands passed.
+- `npm audit --omit=dev --audit-level=high`: found 0 vulnerabilities.
+- `npm run e2e:install`: explicitly installed Chromium; Chromium 151.0.7922.34 launched and closed successfully. Lifecycle E2E remains phase 3 work.
+- `npm run dev:app`: started the TypeScript watcher and Vite. Two private shared source edits appeared in emitted JavaScript; both BLST files returned HTTP 200 with exact published bytes and correct content types. Ctrl-C stopped the owned processes and freed port 5173. Temporary probe source/output was removed.
+- The guardrail regression suite passed after adding TypeScript import-equals syntax alongside quoted/template import checks.
+- The optional external `dev check` found pre-existing missing Coop/TAS-Hub directories and unrelated guidance/manifests outside this repository. This repository does not depend on that workbench.
+
 ## Dependency table
 
 | Package | Exact version | Manifest licence | Own licence | Gzipped archive (bytes) |
@@ -701,3 +716,5 @@ blocked	Waiting on a recorded dependency	#D93F0B
 | 2026-09-04 | Supersede `viem@2.56.3` with `2.56.0` | The newer release is younger than the enabled seven-day delay; retain the policy. viem's replacement archive and licence were reverified | Codex |
 | 2026-09-04 | Use patched dev transitive `undici@6.28.0` instead of `6.28.1` | Retain the seven-day release delay while selecting a patched version | Codex |
 | 2026-09-04 | Use patched dev transitive `serialize-javascript@7.1.0` instead of `7.1.1` | Retain the seven-day release delay while selecting a patched version | Codex |
+| 2026-09-04 | Supervise a TypeScript build watcher in both dev modes; serve BLST bytes through Vite middleware and emit them during production builds | Built package exports must refresh during development, and Vite serve does not support Rollup emitFile; verified edits and HTTP asset responses | Codex |
+| 2026-09-04 | Require statically known import and require targets in application modules | Check import direction for quoted and template strings; unresolved dynamic paths cannot be checked reliably | Codex |

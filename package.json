@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "dev": "npm run compile && node scripts/dev.mjs",
-    "dev:app": "vite --config packages/app/vite.config.ts",
+    "dev:app": "npm run compile && node scripts/dev.mjs --app-only",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -b && tsc -p tsconfig.tools.json",
     "test": "npm run compile && vitest run && node --test scripts/*.test.mjs",

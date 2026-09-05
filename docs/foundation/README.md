@@ -19,7 +19,7 @@ Each package has `src/index.ts`, `test/smoke.test.ts`, a tsconfig extending the 
 {".": {"types": "./dist/index.d.ts", "default": "./dist/index.js"}}
 ```
 
-Import by package name. Cross-package relative paths and private subpaths fail lint. Shared cannot import core or app; core cannot import app; root functions may import core and shared. Tests import through the same public entries. Shared compiles before core and app.
+Import by package name. Cross-package relative paths and private subpaths fail lint. Dynamic imports and `require` calls must use static strings so their direction can be checked. Shared cannot import core or app; core cannot import app; root functions may import core and shared. Tests import through the same public entries. Shared compiles before core and app.
 
 Select Node 22.22.1 (npm 11.19.1), then run from the repository root:
 
@@ -32,7 +32,7 @@ npm run build
 
 `check` runs lint, typecheck, the package smoke tests, tooling regressions, isolated Vercel workspace proof, verified direct-runtime licences, dependency audit, and registry signature verification. `build` emits `dist/`, copies Shutter's prebuilt BLST assets explicitly, and enforces gzip limits. Install scripts remain disabled. `npm run e2e:install` explicitly installs Chromium; `npm run e2e` has no lifecycle test until phase 3 and must not be reported as passing now. `npm run migrate` and `npm run seed` deliberately fail with a phase 2 requirement until their implementations exist.
 
-`npm run dev:app` starts Vite alone. After a person completes [the setup request](needs-human-setup.md), `npm run dev` runs Vite on port 5173 and `vercel dev` on port 3000; Vite proxies `/api`. Mock mode is the local default. Preview and production remain separate configurations, as Technical Spec §13 requires.
+`npm run dev:app` compiles the workspaces, then starts Vite and a TypeScript build watcher. After a person completes [the setup request](needs-human-setup.md), `npm run dev` runs the same watcher, Vite on port 5173, and `vercel dev` on port 3000; Vite proxies `/api` and serves the prebuilt BLST assets in development. Mock mode is the local default. Preview and production remain separate configurations, as Technical Spec §13 requires.
 
 Clock access in all linted source and tooling is restricted to `api/_lib/clock.ts`, `packages/app/src/sim/ticker-host.ts`, and `packages/core/src/api-client/clock-offset.ts`. Those adapters do not exist yet. Logic accepts time as an input. Component files (`.tsx` and `.jsx`, plus `.ts`/`.js` under screens and components) keep visible wording in `packages/shared/src/copy.ts`: use `copy['id']` or `copy('id')`. Structural attributes and type literals are allowed; indirect visible string literals also fail lint.
 

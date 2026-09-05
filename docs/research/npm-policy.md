@@ -69,3 +69,5 @@ The clean install enforced the seven-day delay and rejected recent direct pins. 
 ## Compatibility result
 
 A fresh `npm install` with npm 11.19.1, `ignore-scripts=true`, and `min-release-age=7` completed successfully. No package-specific script or release-age exception was used. Playwright 1.62.1 installed Chromium explicitly into an OS temporary directory, then launched and closed Chromium 151.0.7922.34 successfully. No lifecycle E2E exists in this phase. The final clean-install/check/build outputs are recorded separately in `docs/foundation/evidence.md`.
+
+The review identified missing development coverage. Both dev modes now supervise a TypeScript watcher; a temporary private shared source changed twice and the emitted JavaScript followed both edits. `/blst.js` and `/blst.wasm` returned HTTP 200 with the correct MIME type and exact published bytes through the app-only server. The server and watcher shut down on Ctrl-C; a regression test repeats HTTP asset validation.

@@ -66,3 +66,5 @@ Append-only. One line per decision that is not already in `docs/01`–`04`. Form
 | 2026-09-04 | Supersede `viem@2.56.3` with `2.56.0` | The newer release is younger than the enabled seven-day delay; retain the policy. viem's replacement archive and licence were reverified | Codex |
 | 2026-09-04 | Use patched dev transitive `undici@6.28.0` instead of `6.28.1` | Retain the seven-day release delay while selecting a patched version | Codex |
 | 2026-09-04 | Use patched dev transitive `serialize-javascript@7.1.0` instead of `7.1.1` | Retain the seven-day release delay while selecting a patched version | Codex |
+| 2026-09-04 | Supervise a TypeScript build watcher in both dev modes; serve BLST bytes through Vite middleware and emit them during production builds | Built package exports must refresh during development, and Vite serve does not support Rollup emitFile; verified edits and HTTP asset responses | Codex |
+| 2026-09-04 | Require statically known import and require targets in application modules | Check import direction for quoted and template strings; unresolved dynamic paths cannot be checked reliably | Codex |
