@@ -1,0 +1,20 @@
+import { createServer } from 'node:http';
+import { schemaUID, ballotSchema, type EasConfig } from '@critter-crumbs/core';
+import { createApi } from '../api/_lib/api.js';
+import { nodeHandler } from '../api/_lib/http.js';
+import { createServerClock } from '../api/_lib/clock.js';
+import { serverTimelock } from '../api/_lib/timelock.js';
+import { localData } from './local-data.js';
+const data = await localData(), clock = createServerClock(data.offset, data.saveOffset);
+const timelock = serverTimelock(data.db, clock.now, { mode: 'mock', production: false, mockSecret: data.mockSecret });
+const eas: EasConfig = { chainId: 84532, address: '0x4200000000000000000000000000000000000021', ballotSchemaUid: schemaUID(ballotSchema) };
+const api = createApi({ db: data.db, clock: clock.now, sessionSecret: data.sessionSecret, timelock, eas, origin: process.env.APP_ORIGIN || 'http://127.0.0.1:5173',
+  dev: { enabled: process.env.DEV_ENDPOINTS_ENABLED === 'true', production: false, mode: 'mock', setTime: clock.setTime, releaseKey: timelock.release } });
+const port = Number(process.env.LOCAL_API_PORT || '3000');
+if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('LOCAL_API_PORT must be between 1024 and 65535');
+const server = createServer(nodeHandler(api, clock.now));
+server.listen(port, '127.0.0.1', () => console.log(`Mock API: http://127.0.0.1:${port}; persistent data:`, data.directory));
+let stopping = false;
+const stop = () => { if (stopping) return; stopping = true; server.close(() => { void data.db.close().then(() => process.exit()); }); };
+process.on('SIGINT', stop); process.on('SIGTERM', stop);
+server.on('error', error => { console.error(error.message); void data.db.close().then(() => { process.exitCode = 1; }); });

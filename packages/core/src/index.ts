@@ -7,3 +7,4 @@ export * from './target-id.js';
 export * from './tally/index.js';
 export * from './eas/index.js';
 export * from './publication.js';
+export * from './api-client/index.js';

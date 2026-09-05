@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { verifySignInMessage, type Timelock, type EasConfig } from '@critter-crumbs/core';
-import { hex, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError } from '@critter-crumbs/shared';
+import { hex, integer, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError, type Hex } from '@critter-crumbs/shared';
 import type { Database } from './database.js';
 import { createStore } from './store.js';
 import { sessionCookies } from './session.js';
@@ -12,9 +12,11 @@ import { createFeasts } from './feasts.js';
 import { createBurrows } from './burrows.js';
 import { HttpError } from './errors.js';
 import { responseHeaders } from './http.js';
+import { seedFixtures } from './seed.js';
 export interface ApiRequest { method: string; path: string; headers?: Record<string, string | undefined>; body?: unknown }
 export interface ApiReply { status: number; headers: Record<string, string>; body: Record<string, unknown> }
-export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock; eas?: EasConfig }
+export interface DevControls { enabled: boolean; production: boolean; mode: string; setTime: (now: number) => void | Promise<void>; releaseKey: (identity: Hex) => void | Promise<void> }
+export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock; eas?: EasConfig; dev?: DevControls }
 export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promise<ApiReply> {
   const store = createStore(deps.db), cookies = sessionCookies(deps.sessionSecret);
   const profiles = createProfiles(deps.db, deps.clock, deps.ens);
@@ -22,7 +24,7 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
   const keys = createKeys(deps.db, deps.clock, deps.timelock);
   const ballots = createBallots(deps.db, deps.clock, deps.eas);
   const feasts = createFeasts(deps.db, deps.clock, deps.timelock);
-  return async request => {
+  const handle = async (request: ApiRequest): Promise<ApiReply> => {
     const now = deps.clock();
     const headers = responseHeaders(deps.connectOrigins);
     const reply = (status: number, body: Record<string, unknown>): ApiReply => ({ status, headers, body: { ...body, serverNow: body.serverNow ?? deps.clock() } });
@@ -30,6 +32,14 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
       const incoming = Object.fromEntries(Object.entries(request.headers ?? {}).map(([name, value]) => [name.toLowerCase(), value]));
       if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && incoming.origin && incoming.origin !== deps.origin) throw new HttpError(403, 'err.generic');
       const path = request.path.split('?')[0]!;
+      if (path.startsWith('/api/dev/')) {
+        const dev = deps.dev;
+        if (!dev?.enabled || dev.production || dev.mode !== 'mock' || request.method !== 'POST') throw new HttpError(404, 'err.generic');
+        if (path === '/api/dev/seed') return reply(201, await seedFixtures(handle, deps.clock, request.body, dev.setTime));
+        if (path === '/api/dev/time') { await dev.setTime(integer(record(request.body).now, 0, 8640000000000000)); return reply(200, {}); }
+        if (path === '/api/dev/release-key') { await dev.releaseKey(hex(record(request.body).identity, 32)); return reply(200, {}); }
+        throw new HttpError(404, 'err.generic');
+      }
       if (path === '/api/session/nonce' && request.method === 'GET') {
         const nonce = randomBytes(16).toString('hex'); await store.createNonce(nonce, now);
         return reply(200, { nonce, issuedAt: now, expiresAt: now + 600000 });
@@ -96,4 +106,5 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
       return reply(503, { error: 'err.storeUnreachable' });
     }
   };
+  return handle;
 }

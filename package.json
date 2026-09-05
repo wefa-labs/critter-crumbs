@@ -28,11 +28,13 @@
     "vercel-build": "PATH=\"$PWD/.vercel/bun/bin:$PATH\" .vercel/bun/bin/bun run build",
     "e2e": "playwright test",
     "e2e:install": "playwright install chromium",
-    "migrate": "node scripts/phase-2-required.mjs migrate",
-    "seed": "node scripts/phase-2-required.mjs seed",
+    "migrate": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/migrate.js",
+    "seed": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/seed.js",
     "check:workspaces": "node scripts/probe-workspaces.mjs",
     "check:toolchain": "node scripts/check-toolchain.mjs",
-    "check:development-assets": "node --test scripts/development-assets.test.mjs"
+    "check:development-assets": "node --test scripts/development-assets.test.mjs",
+    "compile:server": "tsc -p tsconfig.server.json",
+    "dev:local": "bun run compile && bun run compile:server && node --env-file-if-exists=.env scripts/dev.mjs --local"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
