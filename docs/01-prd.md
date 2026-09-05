@@ -17,6 +17,15 @@ Downstream: `02-design-system.md` · `03-game-design.md` · `04-technical-spec.m
 
 > Everyone gets a handful of crumbs to share.
 
+**The problem (P13).** A group decides how to share something out. It usually goes one of four ways.
+
+- **Someone proposes a split.** Whoever goes first sets the anchor, and everyone else adjusts by a little.
+- **The visible work wins.** Loud, recent and demonstrable beats quiet, early and structural.
+- **Everyone can see who gave what.** Giving turns into trading, and the numbers end up describing who is owed rather than who did the work.
+- **It goes to a show of hands.** The result tracks who is best known.
+
+Critter Crumbs changes one thing: nobody sees where anyone's crumbs went until every crumb is in.
+
 Critter Crumbs is a private way for a group to decide how something gets shared out. Your burrow gathers, everyone gets the same handful of crumbs, and you scatter yours where you think they should go. Every crumb stays private until the feast — then it all opens at once.
 
 Two use cases, one mechanic:
@@ -353,6 +362,7 @@ Preconditions: the rehearsal feast has completed, in September (§10). Measureme
 | P10 | One critter per address, shared across all burrows; re-rolls happen once, at first meeting | F2 |
 | P11 | A people feast that falls below three critters before scattering opens ends without scattering; the burrow is told; anyone can start a new one | §6 |
 | P12 | License form: an explicit `LICENSE` file — "Copyright © 2026 {holder}. All rights reserved." — plus a short notice that the source is published for review only and no rights to use, copy, modify or distribute are granted. This is the most protective option and can be relaxed to an open license later; the reverse is hard | §13 |
+| P13 | The problem statement: four ways a group's split goes wrong, and the one thing Critter Crumbs changes | §1 |
 
 ### Resolved in review, 2026-09-01
 
