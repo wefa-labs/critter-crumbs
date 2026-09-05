@@ -18,7 +18,7 @@ function createShutterTimelock(mode: ShutterMode, config: ShutterConfig): Timelo
   const apiOrigin = url.origin;
   return {
     ...shutterCrypto(config.sdk, config.random),
-    register: config.server ? shutterRegistration({ mode, chainId: mode === 'chiado' ? 10200 : 100, apiOrigin, registry: config.server.registry, keyBroadcast: config.server.keyBroadcast, registrant: config.server.registrant }, config.server, transport) : async () => { throw new ShutterError('configuration'); },
+    register: config.server ? shutterRegistration({ mode, chainId: mode === 'chiado' ? 10200 : 100, apiOrigin, registry: config.server.registry, keyBroadcast: config.server.keyBroadcast, registrant: config.server.registrant }, config.server, transport, config.random) : async () => { throw new ShutterError('configuration'); },
     async getKey(identity: string): Promise<Uint8Array | null> {
       const normalized = hex(identity, 32);
       let response: Response;
