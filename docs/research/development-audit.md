@@ -23,3 +23,7 @@ The EAS 2.10.0 native ESM entry fails in Node 22 because it requests `isEqual` a
 ## Verified scope
 
 After a fresh resolution from the reviewed manifests and eligible pins, installation reports 18 low and 28 moderate findings, with zero high or critical findings. Vercel's emitted dist function works with the patched tree, and the EAS public CommonJS entry loads. Final audit output is preserved in `docs/foundation/evidence.md`. Broader unused Hardhat and Vercel framework behavior remains outside this foundation's proof.
+
+## Bun migration
+
+Bun 1.4.2 imports the reviewed versions and override selectors. Its full audit reports six advisory records: three low and three moderate, with zero high or critical. Bun and npm count findings differently; the change from npm’s 46 affected development findings is not evidence of 40 fixes. Current command output is in `docs/foundation/evidence.md`.

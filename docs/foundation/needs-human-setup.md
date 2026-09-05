@@ -5,7 +5,7 @@ Intended label: `needs-human`. This is one issue draft covering Phase 1's human 
 A person must:
 
 - Enable GitHub Issues and file this draft once, using the command below.
-- Create and link the Vercel project to `wefa-labs/critter-crumbs`, with repository root as project root, Node 22, build `npm run build`, and output `dist`. Do not set the project root to `packages/app`.
+- Create and link the Vercel project to `wefa-labs/critter-crumbs`, with repository root as project root, Node 22, build `bun run build`, and output `dist`. Do not set the project root to `packages/app`.
 - Provision Neon through the Vercel Marketplace, create the development branch, and select a Vercel function region next to Neon. Add that region to `vercel.json` after it is known.
 - Set the variables listed below in the appropriate local and Vercel environments. Acquire Shutter and RPC credentials and the EAS schema identifiers where needed; no values belong in git or the issue.
 - Replace `https://shutter-api.invalid` and `https://base-rpc.invalid` in the CSP with the selected browser connection hosts before a real deployment.

@@ -7,8 +7,8 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 
 const toolRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const npmCli = process.env.npm_execpath;
-assert(npmCli, 'Run this probe with npm run check:workspaces.');
+const bunCli = process.env.npm_execpath;
+assert(bunCli, 'Run this probe with bun run check:workspaces.');
 const require = createRequire(join(toolRoot, 'package.json'));
 const { build } = require('@vercel/node');
 const { FileFsRef, download } = require('@vercel/build-utils');
@@ -24,7 +24,7 @@ async function put(path, text) {
 }
 
 function runNode(args, cwd) {
-  const result = spawnSync(process.execPath, args, { cwd, encoding: 'utf8', env: { ...process.env, npm_config_update_notifier: 'false' } });
+  const result = spawnSync(process.execPath, args, { cwd, encoding: 'utf8', env: process.env });
   if (result.status !== 0) {
     throw new Error(`Node exited ${result.status}: ${result.stderr || result.stdout}`);
   }
@@ -52,7 +52,7 @@ async function probe(shape) {
     name: 'critter-crumbs-resolution-probe', private: true, type: 'module',
     engines: { node: '22.x' }, workspaces: ['packages/shared', 'packages/core'],
   }, null, 2));
-  await put(join(workPath, '.npmrc'), 'ignore-scripts=true\naudit=false\nfund=false\n');
+  await put(join(workPath, 'bunfig.toml'), '[install]\nignoreScripts = true\nlinker = "hoisted"\n');
   await put(join(workPath, 'tsconfig.json'), JSON.stringify({ compilerOptions: {
     target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true,
     skipLibCheck: true, types: [], declaration: true,
@@ -71,7 +71,9 @@ async function probe(shape) {
   await put(join(workPath, 'packages/core/src/index.ts'), 'import { marker as shared } from "@critter-crumbs/shared";\nexport const marker: string = `core:${shared}`;\n');
   await put(join(workPath, 'api/probe.ts'), 'import { marker } from "@critter-crumbs/core";\nexport default function probe(): string { return marker; }\n');
 
-  const npmOutput = runNode([npmCli, 'install', '--offline', '--ignore-scripts', '--audit=false', '--fund=false', '--package-lock=false'], workPath);
+  const installation = spawnSync(bunCli, ['install', '--offline', '--ignore-scripts'], { cwd: workPath, encoding: 'utf8', env: process.env });
+  assert.equal(installation.status, 0, installation.stderr);
+  const bunOutput = installation.stdout.trim();
   const inputLinks = {};
   for (const name of ['shared', 'core']) {
     const path = join(workPath, 'node_modules/@critter-crumbs', name);
@@ -104,7 +106,7 @@ async function probe(shape) {
     cwd: outputPath, encoding: 'utf8', env: process.env,
   });
   const summary = {
-    shape, npmOutput, inputLinks, runtime: output.runtime, handler: output.handler,
+    shape, bunOutput, inputLinks, runtime: output.runtime, handler: output.handler,
     emittedFiles: Object.keys(output.files).sort(), outputLinks,
     coreExports: JSON.parse(await readFile(join(outputPath, 'packages/core/package.json'), 'utf8')).exports,
     invocation: { exit: invocation.status, stdout: invocation.stdout.trim(), error: invocation.stderr.split('\n').filter(line => /Error \[|Cannot find module/.test(line)).join('\n') },
@@ -117,7 +119,9 @@ async function probe(shape) {
   return summary;
 }
 
-console.log(`Node ${process.version}; npm ${runNode([npmCli, '--version'], scratch)}; @vercel/node ${builderVersion}; build-utils ${buildUtilsVersion}; nft ${nftVersion}`);
+const version = spawnSync(bunCli, ['--version'], { encoding: 'utf8' });
+assert.equal(version.status, 0, version.stderr);
+console.log(`Node ${process.version}; Bun ${version.stdout.trim()}; @vercel/node ${builderVersion}; build-utils ${buildUtilsVersion}; nft ${nftVersion}`);
 const results = [];
 for (const shape of ['source', 'dist']) results.push(await probe(shape));
 await put(join(scratch, 'results.json'), JSON.stringify(results, null, 2));

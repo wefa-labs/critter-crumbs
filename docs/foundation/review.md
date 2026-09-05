@@ -27,3 +27,11 @@ Standards: 0 documented violations. One low-priority baseline smell identified d
 Spec: all three P2 findings resolved. The Spec agent reran the four guardrail tests and the HTTP asset regression successfully. Remaining behavior gaps: 0. Introduced unrequested scope: 0. GitHub Issues remains disabled, with the human setup request saved as a draft.
 
 Remaining findings after corrections: Standards 0; Spec 0.
+
+## Bun migration review against `8b8732c`
+
+The user explicitly replaced npm with the latest Bun. Separate Standards and Spec agents reviewed the migration, including the Bun lockfile, policy controls, checksum-pinned bootstrap, CI, and Node function compatibility.
+
+Standards: 0 documented violations and 0 actionable baseline smells.
+
+Spec: the review identified a Vercel function-build fallback that could select managed Bun. Both build routes now use `vercel-build`, which invokes the exact local Bun executable and prepends its directory for nested commands. Root invocation with the older global Bun and function-directory invocation both passed. The Spec agent also verified toolchain checks, runtime licences/integrity, and independently materialized function output through Bun workspace links. Remaining findings: 0. Unrequested scope: 0.

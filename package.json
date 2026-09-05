@@ -6,31 +6,32 @@
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22.22.1 <23",
-    "npm": "11.19.1"
+    "bun": "1.4.2"
   },
-  "packageManager": "npm@11.19.1",
+  "packageManager": "bun@1.4.2",
   "workspaces": [
     "packages/shared",
     "packages/core",
     "packages/app"
   ],
   "scripts": {
-    "dev": "npm run compile && node scripts/dev.mjs",
-    "dev:app": "npm run compile && node scripts/dev.mjs --app-only",
+    "dev": "bun run compile && node scripts/dev.mjs",
+    "dev:app": "bun run compile && node scripts/dev.mjs --app-only",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -b && tsc -p tsconfig.tools.json",
-    "test": "npm run compile && vitest run && node --test scripts/*.test.mjs",
+    "test": "bun run compile && vitest run && node --test scripts/*.test.mjs",
     "compile": "tsc -b",
-    "check:licenses": "node scripts/check-dependencies.mjs",
-    "check:audit": "npm audit --audit-level=high && npm audit signatures",
-    "check": "npm run lint && npm run typecheck && npm test && npm run check:workspaces && npm run check:licenses && npm run check:audit",
-    "build": "npm run compile && vite build --config packages/app/vite.config.ts",
-    "vercel-build": "npm run build",
+    "check:licenses": "bun scripts/check-dependencies.mjs",
+    "check:audit": "bun audit --audit-level=high",
+    "check": "bun run check:toolchain && bun run lint && bun run typecheck && bun run test && bun run check:workspaces && bun run check:licenses && bun run check:audit",
+    "build": "bun run compile && vite build --config packages/app/vite.config.ts",
+    "vercel-build": "PATH=\"$PWD/.vercel/bun/bin:$PATH\" .vercel/bun/bin/bun run build",
     "e2e": "playwright test",
     "e2e:install": "playwright install chromium",
     "migrate": "node scripts/phase-2-required.mjs migrate",
     "seed": "node scripts/phase-2-required.mjs seed",
-    "check:workspaces": "node scripts/probe-workspaces.mjs"
+    "check:workspaces": "node scripts/probe-workspaces.mjs",
+    "check:toolchain": "node scripts/check-toolchain.mjs"
   },
   "devDependencies": {
     "vite": "7.3.6",
@@ -62,5 +63,6 @@
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",
     "@critter-crumbs/shared": "0.0.0"
-  }
+  },
+  "trustedDependencies": []
 }

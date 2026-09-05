@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "npm install --global npm@11.19.1 --ignore-scripts && npm ci",
-  "buildCommand": "npm run build",
+  "installCommand": "node scripts/install-bun.mjs && .vercel/bun/bin/bun install --frozen-lockfile --ignore-scripts",
+  "buildCommand": "bun run vercel-build",
   "devCommand": null,
   "outputDirectory": "dist",
   "rewrites": [

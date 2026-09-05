@@ -1,5 +1,7 @@
 # npm policy verification
 
+Historical verification: the user subsequently selected Bun. Current policy and commands are in [Bun policy](bun-policy.md) and the [foundation guide](../foundation/README.md).
+
 Checked 2026-09-04 for Phase 1 verification items 3 and 4; updated after the npm 10 installation failure.
 
 **Selected toolchain:** Node 22.22.1 with npm 11.19.1. The bundled npm 10.9.4 crashed while resolving the required development dependencies. npm 11.19.1 contains a relevant peer-resolution fix, supports a seven-day release delay, and verifies installed signatures without applying that delay again. Keep `ignore-scripts=true`. The clean install, complete check, build, and explicit Playwright browser launch passed; see [validation evidence](../foundation/evidence.md).

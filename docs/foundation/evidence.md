@@ -1,6 +1,8 @@
 # Foundation validation evidence
 
-Validated on 2026-09-04 with Node 22.22.1 and npm 11.19.1. All commands below exited 0. npm install scripts remained disabled and the seven-day release delay remained enabled. The full audit reports 18 low and 28 moderate development findings; zero high or critical findings. Runtime-only audit reports zero vulnerabilities.
+Current package manager: Bun 1.4.2, verified as the latest stable release on 2026-09-05 UTC. Node 22.22.1 remains the function/tool runtime. All commands below exited 0. The install used a clean node_modules directory and a frozen bun.lock, with install scripts disabled and a seven-day dependency release age.
+
+Bun’s complete audit reports six advisory records (three low, three moderate); the high-severity gate passes. Its count is not comparable to npm’s earlier affected-package count. Registry signature/attestation verification is not available in Bun; reviewed archive integrity remains enforced. Historical npm evidence is preserved in git history.
 
 ## node --version
 
@@ -8,132 +10,115 @@ Validated on 2026-09-04 with Node 22.22.1 and npm 11.19.1. All commands below ex
 v22.22.1
 ```
 
-## npm --version
+## bun --version
 
 ```text
-11.19.1
+1.4.2
 ```
 
-## npm ci
+## bun install --frozen-lockfile --ignore-scripts
 
 ```text
-npm warn deprecated stream-to-promise@2.2.0: Deprecated. Use node:stream/promises and node:stream/consumers instead.
-npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
-npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
-npm warn deprecated glob@7.2.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-npm warn deprecated glob@8.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-npm warn deprecated ethereumjs-abi@0.6.8: This library has been deprecated and usage is discouraged.
-npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
-npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
-npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+bun install v1.4.2 (744846f84)
 
-added 855 packages, and audited 859 packages in 7s
++ @ethereum-attestation-service/eas-sdk@2.10.0
++ @types/node@22.20.1
++ @types/react@19.2.18
++ @types/react-dom@19.2.5
++ @types/three@0.185.4
++ @typescript-eslint/eslint-plugin@8.68.0
++ @typescript-eslint/parser@8.68.0
++ @vitejs/plugin-react@5.2.0
++ eslint@9.39.5
++ playwright@1.62.1
++ typescript@5.9.3
++ vercel@59.9.1
++ vite@7.3.6
++ vitest@4.1.11
++ @critter-crumbs/core@workspace:packages/core
++ @critter-crumbs/shared@workspace:packages/shared
 
-46 vulnerabilities (18 low, 28 moderate)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues possible (including breaking changes), run:
-  npm audit fix --force
-
-Some issues need review, and may require choosing
-a different dependency.
-
-Run `npm audit` for details.
+791 packages installed [638.00ms]
 ```
 
-## npm run check
+## bun run check
 
 ```text
-
-> critter-crumbs@0.0.0 check
-> npm run lint && npm run typecheck && npm test && npm run check:workspaces && npm run check:licenses && npm run check:audit
-
-
-> critter-crumbs@0.0.0 lint
-> eslint . --max-warnings 0
-
-
-> critter-crumbs@0.0.0 typecheck
-> tsc -b && tsc -p tsconfig.tools.json
-
-
-> critter-crumbs@0.0.0 test
-> npm run compile && vitest run && node --test scripts/*.test.mjs
-
-
-> critter-crumbs@0.0.0 compile
-> tsc -b
-
+$ bun run check:toolchain && bun run lint && bun run typecheck && bun run test && bun run check:workspaces && bun run check:licenses && bun run check:audit
+$ node scripts/check-toolchain.mjs
+Bun 1.4.2; Node v22.22.1.
+$ eslint . --max-warnings 0
+$ tsc -b && tsc -p tsconfig.tools.json
+$ bun run compile && vitest run && node --test scripts/*.test.mjs
+$ tsc -b
 
  RUN  v4.1.11 /private/tmp/critter-crumbs-foundation-59aed86
 
 
  Test Files  3 passed (3)
       Tests  3 passed (3)
-   Start at  23:14:41
-   Duration  104ms (transform 53ms, setup 0ms, import 71ms, tests 4ms, environment 0ms)
+   Start at  23:52:04
+   Duration  97ms (transform 41ms, setup 0ms, import 60ms, tests 4ms, environment 0ms)
 
 TAP version 13
 # Subtest: budgets count static imports and reject an oversized app shell
 ok 1 - budgets count static imports and reject an oversized app shell
   ---
-  duration_ms: 6.792583
+  duration_ms: 5.418542
   type: 'test'
   ...
 # Subtest: the three budget rejects an oversized lazy chunk
 ok 2 - the three budget rejects an oversized lazy chunk
   ---
-  duration_ms: 12.929917
+  duration_ms: 10.36125
   type: 'test'
   ...
 # Subtest: named lazy chunks cannot become static app imports
 ok 3 - named lazy chunks cannot become static app imports
   ---
-  duration_ms: 0.196541
+  duration_ms: 0.188292
   type: 'test'
   ...
 # Subtest: empty chunks pass and crypto is measured without inventing a spec cap
 ok 4 - empty chunks pass and crypto is measured without inventing a spec cap
   ---
-  duration_ms: 0.517792
+  duration_ms: 0.501291
   type: 'test'
   ...
 # Subtest: development serves the published BLST files with browser content types
 ok 5 - development serves the published BLST files with browser content types
   ---
-  duration_ms: 50.593167
+  duration_ms: 65.587375
   type: 'test'
   ...
 # Subtest: the EAS development cross-check entry loads with Node
 ok 6 - the EAS development cross-check entry loads with Node
   ---
-  duration_ms: 150.607958
+  duration_ms: 130.208917
   type: 'test'
   ...
 # Subtest: HTML injection forms fail lint, while textContent is allowed
 ok 7 - HTML injection forms fail lint, while textContent is allowed
   ---
-  duration_ms: 262.017417
+  duration_ms: 252.421292
   type: 'test'
   ...
 # Subtest: clock reads and aliases fail outside the exact adapter allow-list
 ok 8 - clock reads and aliases fail outside the exact adapter allow-list
   ---
-  duration_ms: 11.659292
+  duration_ms: 10.931083
   type: 'test'
   ...
 # Subtest: workspace imports reject reverse and private paths across each syntax
 ok 9 - workspace imports reject reverse and private paths across each syntax
   ---
-  duration_ms: 6.177625
+  duration_ms: 6.817916
   type: 'test'
   ...
 # Subtest: visible JSX wording and indirect literals require copy IDs
 ok 10 - visible JSX wording and indirect literals require copy IDs
   ---
-  duration_ms: 5.825083
+  duration_ms: 4.538958
   type: 'test'
   ...
 1..10
@@ -144,252 +129,31 @@ ok 10 - visible JSX wording and indirect literals require copy IDs
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 407.420125
-
-> critter-crumbs@0.0.0 check:workspaces
-> node scripts/probe-workspaces.mjs
-
-Node v22.22.1; npm 11.19.1; @vercel/node 9.0.1; build-utils 14.6.1; nft 1.10.0
+# duration_ms 385.043542
+$ node scripts/probe-workspaces.mjs
+Node v22.22.1; Bun 1.4.2; @vercel/node 9.0.1; build-utils 14.6.1; nft 1.10.0
+Detected `bun.lock` generated by bun@1.x
 Skipping "install" command...
 Using built-in TypeScript 5.9.3 since "typescript" is missing from "devDependencies"
-source: emitted function exit=1, output=Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-bEExrU/source/output/node_modules/@critter-crumbs/core/src/index.ts' imported from /private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-bEExrU/source/output/api/probe.js
+source: emitted function exit=1, output=Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-Kx6I1e/source/output/node_modules/@critter-crumbs/core/src/index.ts' imported from /private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-Kx6I1e/source/output/api/probe.js
+Detected `bun.lock` generated by bun@1.x
 Skipping "install" command...
 Using built-in TypeScript 5.9.3 since "typescript" is missing from "devDependencies"
 dist: emitted function exit=0, output=core:shared
 Built dist exports pass through preserved workspace links.
-
-> critter-crumbs@0.0.0 check:licenses
-> node scripts/check-dependencies.mjs
-
+$ bun scripts/check-dependencies.mjs
 9 exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified.
+$ bun audit --audit-level=high
+bun audit v1.4.2 (744846f84)
 
-> critter-crumbs@0.0.0 check:audit
-> npm audit --audit-level=high && npm audit signatures
-
-# npm audit report
-
-@tootallnate/once  <2.0.1
-@tootallnate/once vulnerable to Incorrect Control Flow Scoping - https://github.com/advisories/GHSA-vpq2-c234-7xj6
-fix available via `npm audit fix --force`
-Will install vercel@50.41.0, which is a breaking change
-node_modules/@tootallnate/once
-  @vercel/fun  *
-  Depends on vulnerable versions of @tootallnate/once
-  node_modules/@vercel/fun
-    vercel  >=25.1.1-canary.0
-    Depends on vulnerable versions of @vercel/backends
-    Depends on vulnerable versions of @vercel/elysia
-    Depends on vulnerable versions of @vercel/express
-    Depends on vulnerable versions of @vercel/fastify
-    Depends on vulnerable versions of @vercel/fun
-    Depends on vulnerable versions of @vercel/h3
-    Depends on vulnerable versions of @vercel/hono
-    Depends on vulnerable versions of @vercel/hydrogen
-    Depends on vulnerable versions of @vercel/koa
-    Depends on vulnerable versions of @vercel/nestjs
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/python
-    Depends on vulnerable versions of @vercel/python-analysis
-    Depends on vulnerable versions of @vercel/redwood
-    Depends on vulnerable versions of @vercel/remix-builder
-    Depends on vulnerable versions of @vercel/rust
-    Depends on vulnerable versions of @vercel/static-build
-    Depends on vulnerable versions of smol-toml
-    node_modules/vercel
-
-ajv  7.0.0-alpha.0 - 8.17.1
-Severity: moderate
-ajv has ReDoS when using `$data` option - https://github.com/advisories/GHSA-2g4f-4pwh-qvx6
-fix available via `npm audit fix --force`
-Will install vercel@50.41.0, which is a breaking change
-node_modules/@vercel/static-config/node_modules/ajv
-  @vercel/static-config  *
-  Depends on vulnerable versions of ajv
-  node_modules/@vercel/static-config
-    @vercel/backends  <=0.0.23 || >=0.8.21
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/backends
-      @vercel/cervel  >=0.1.29
-      Depends on vulnerable versions of @vercel/backends
-      node_modules/@vercel/cervel
-        @vercel/express  *
-        Depends on vulnerable versions of @vercel/cervel
-        Depends on vulnerable versions of @vercel/node
-        Depends on vulnerable versions of @vercel/static-config
-        node_modules/@vercel/express
-    @vercel/elysia  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/elysia
-    @vercel/fastify  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/fastify
-    @vercel/h3  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/h3
-    @vercel/hono  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/hono
-    @vercel/hydrogen  >=1.0.1
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/hydrogen
-    @vercel/koa  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/koa
-    @vercel/nestjs  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/nestjs
-    @vercel/node  >=2.1.1-canary.0
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/node
-    @vercel/redwood  >=2.1.0
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/redwood
-    @vercel/remix-builder  *
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/remix-builder
-    @vercel/static-build  >=2.0.7
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/static-build
-
-cookie  <0.7.0
-cookie accepts cookie name, path, and domain with out of bounds characters - https://github.com/advisories/GHSA-pxg6-pf52-xh8x
-No fix available
-node_modules/cookie
-  @sentry/node  4.0.0-beta.0 - 7.74.2-alpha.1
-  Depends on vulnerable versions of cookie
-  node_modules/@sentry/node
-    hardhat  0.1.0-rc.0 - 3.0.0-next.32
-    Depends on vulnerable versions of @ethersproject/abi
-    Depends on vulnerable versions of @metamask/eth-sig-util
-    Depends on vulnerable versions of @nomicfoundation/ethereumjs-common
-    Depends on vulnerable versions of @nomicfoundation/ethereumjs-tx
-    Depends on vulnerable versions of @nomicfoundation/ethereumjs-util
-    Depends on vulnerable versions of @sentry/node
-    Depends on vulnerable versions of uuid
-    node_modules/hardhat
-      @ethereum-attestation-service/eas-contracts  *
-      Depends on vulnerable versions of hardhat
-      node_modules/@ethereum-attestation-service/eas-contracts
-        @ethereum-attestation-service/eas-sdk  *
-        Depends on vulnerable versions of @ethereum-attestation-service/eas-contracts
-        node_modules/@ethereum-attestation-service/eas-sdk
-
-elliptic  *
-Elliptic Uses a Cryptographic Primitive with a Risky Implementation - https://github.com/advisories/GHSA-848j-6mx2-7j84
-No fix available
-node_modules/elliptic
-  @ethersproject/signing-key  <=5.8.0
-  Depends on vulnerable versions of elliptic
-  node_modules/@ethersproject/signing-key
-    @ethersproject/transactions  <=5.8.0
-    Depends on vulnerable versions of @ethersproject/signing-key
-    node_modules/@ethersproject/transactions
-      @ethersproject/abstract-provider  *
-      Depends on vulnerable versions of @ethersproject/transactions
-      node_modules/@ethersproject/abstract-provider
-        @ethersproject/abstract-signer  *
-        Depends on vulnerable versions of @ethersproject/abstract-provider
-        node_modules/@ethersproject/abstract-signer
-          @ethersproject/hash  5.0.6 - 5.8.0
-          Depends on vulnerable versions of @ethersproject/abstract-signer
-          node_modules/@ethersproject/hash
-            @ethersproject/abi  5.0.10 - 5.8.0
-            Depends on vulnerable versions of @ethersproject/hash
-            node_modules/@ethersproject/abi
-  ethereumjs-util  1.0.2 - 2.4.0 || 4.5.1 || 5.2.1 || 6.2.1 || >=7.0.3
-  Depends on vulnerable versions of elliptic
-  Depends on vulnerable versions of ethereum-cryptography
-  node_modules/ethereumjs-util
-    @metamask/eth-sig-util  <=4.0.1
-    Depends on vulnerable versions of ethereumjs-util
-    node_modules/@metamask/eth-sig-util
-  secp256k1  >=2.0.0
-  Depends on vulnerable versions of elliptic
-  node_modules/secp256k1
-    ethereum-cryptography  0.1.0 - 0.1.3
-    Depends on vulnerable versions of secp256k1
-    node_modules/@nomicfoundation/ethereumjs-tx/node_modules/ethereum-cryptography
-    node_modules/@nomicfoundation/ethereumjs-util/node_modules/ethereum-cryptography
-    node_modules/ethereumjs-util/node_modules/ethereum-cryptography
-      @nomicfoundation/ethereumjs-tx  *
-      Depends on vulnerable versions of @nomicfoundation/ethereumjs-common
-      Depends on vulnerable versions of @nomicfoundation/ethereumjs-util
-      Depends on vulnerable versions of ethereum-cryptography
-      node_modules/@nomicfoundation/ethereumjs-tx
-      @nomicfoundation/ethereumjs-util  *
-      Depends on vulnerable versions of ethereum-cryptography
-      node_modules/@nomicfoundation/ethereumjs-util
-        @nomicfoundation/ethereumjs-common  *
-        Depends on vulnerable versions of @nomicfoundation/ethereumjs-util
-        node_modules/@nomicfoundation/ethereumjs-common
-
-smol-toml  <1.6.1
-Severity: moderate
-smol-toml: Denial of Service via TOML documents containing thousands of consecutive commented lines - https://github.com/advisories/GHSA-v3rj-xjv7-4jmq
-fix available via `npm audit fix --force`
-Will install vercel@50.41.0, which is a breaking change
-node_modules/smol-toml
-  @vercel/python-analysis  *
-  Depends on vulnerable versions of smol-toml
-  node_modules/@vercel/python-analysis
-    @vercel/python  6.11.0 - 6.12.0 || >=6.14.1
-    Depends on vulnerable versions of @vercel/python-analysis
-    node_modules/@vercel/python
-  @vercel/rust  >=1.0.6
-  Depends on vulnerable versions of smol-toml
-  node_modules/@vercel/rust
-
-uuid  <11.1.1
-Severity: moderate
-uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided - https://github.com/advisories/GHSA-w5hq-g745-h8pq
-No fix available
-node_modules/hardhat/node_modules/uuid
-node_modules/uuid
-  @metamask/utils  >=8.4.0
-  Depends on vulnerable versions of uuid
-  node_modules/@metamask/utils
-    @metamask/abi-utils  >=2.0.3
-    Depends on vulnerable versions of @metamask/utils
-    node_modules/@metamask/abi-utils
-      @openzeppelin/merkle-tree  >=1.0.8
-      Depends on vulnerable versions of @metamask/abi-utils
-      node_modules/@openzeppelin/merkle-tree
-
-46 vulnerabilities (18 low, 28 moderate)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues possible (including breaking changes), run:
-  npm audit fix --force
-
-Some issues need review, and may require choosing
-a different dependency.
-audited 852 packages in 4s
-
-852 packages have verified registry signatures
-
-167 packages have verified attestations
-(use --json --include-attestations to view attestation details)
+No vulnerabilities found (checked 794 packages, 6 below --audit-level=high) [175.00ms]
 ```
 
-## npm run build
+## bun run build
 
 ```text
-
-> critter-crumbs@0.0.0 build
-> npm run compile && vite build --config packages/app/vite.config.ts
-
-
-> critter-crumbs@0.0.0 compile
-> tsc -b
-
+$ bun run compile && vite build --config packages/app/vite.config.ts
+$ tsc -b
 vite v7.3.6 building client environment for production...
 transforming...
 ✓ 5 modules transformed.
@@ -406,217 +170,50 @@ computing gzip size...
 ../../dist/assets/crypto-l0sNRNKZ.js             0.00 kB │ gzip:   0.02 kB
 ../../dist/assets/three-l0sNRNKZ.js              0.00 kB │ gzip:   0.02 kB
 ../../dist/assets/index-B5Qt9EMX.js              0.71 kB │ gzip:   0.40 kB
-✓ built in 40ms
+✓ built in 45ms
 ```
 
-## npm audit --audit-level=high
+## bun audit --audit-level=high
 
 ```text
-# npm audit report
+bun audit v1.4.2 (744846f84)
 
-@tootallnate/once  <2.0.1
-@tootallnate/once vulnerable to Incorrect Control Flow Scoping - https://github.com/advisories/GHSA-vpq2-c234-7xj6
-fix available via `npm audit fix --force`
-Will install vercel@50.41.0, which is a breaking change
-node_modules/@tootallnate/once
-  @vercel/fun  *
-  Depends on vulnerable versions of @tootallnate/once
-  node_modules/@vercel/fun
-    vercel  >=25.1.1-canary.0
-    Depends on vulnerable versions of @vercel/backends
-    Depends on vulnerable versions of @vercel/elysia
-    Depends on vulnerable versions of @vercel/express
-    Depends on vulnerable versions of @vercel/fastify
-    Depends on vulnerable versions of @vercel/fun
-    Depends on vulnerable versions of @vercel/h3
-    Depends on vulnerable versions of @vercel/hono
-    Depends on vulnerable versions of @vercel/hydrogen
-    Depends on vulnerable versions of @vercel/koa
-    Depends on vulnerable versions of @vercel/nestjs
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/python
-    Depends on vulnerable versions of @vercel/python-analysis
-    Depends on vulnerable versions of @vercel/redwood
-    Depends on vulnerable versions of @vercel/remix-builder
-    Depends on vulnerable versions of @vercel/rust
-    Depends on vulnerable versions of @vercel/static-build
-    Depends on vulnerable versions of smol-toml
-    node_modules/vercel
+No vulnerabilities found (checked 794 packages, 6 below --audit-level=high) [182.00ms]
+```
 
-ajv  7.0.0-alpha.0 - 8.17.1
-Severity: moderate
-ajv has ReDoS when using `$data` option - https://github.com/advisories/GHSA-2g4f-4pwh-qvx6
-fix available via `npm audit fix --force`
-Will install vercel@50.41.0, which is a breaking change
-node_modules/@vercel/static-config/node_modules/ajv
-  @vercel/static-config  *
-  Depends on vulnerable versions of ajv
-  node_modules/@vercel/static-config
-    @vercel/backends  <=0.0.23 || >=0.8.21
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/backends
-      @vercel/cervel  >=0.1.29
-      Depends on vulnerable versions of @vercel/backends
-      node_modules/@vercel/cervel
-        @vercel/express  *
-        Depends on vulnerable versions of @vercel/cervel
-        Depends on vulnerable versions of @vercel/node
-        Depends on vulnerable versions of @vercel/static-config
-        node_modules/@vercel/express
-    @vercel/elysia  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/elysia
-    @vercel/fastify  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/fastify
-    @vercel/h3  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/h3
-    @vercel/hono  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/hono
-    @vercel/hydrogen  >=1.0.1
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/hydrogen
-    @vercel/koa  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/koa
-    @vercel/nestjs  *
-    Depends on vulnerable versions of @vercel/node
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/nestjs
-    @vercel/node  >=2.1.1-canary.0
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/node
-    @vercel/redwood  >=2.1.0
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/redwood
-    @vercel/remix-builder  *
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/remix-builder
-    @vercel/static-build  >=2.0.7
-    Depends on vulnerable versions of @vercel/static-config
-    node_modules/@vercel/static-build
+## bun run --filter @critter-crumbs/* test
 
-cookie  <0.7.0
-cookie accepts cookie name, path, and domain with out of bounds characters - https://github.com/advisories/GHSA-pxg6-pf52-xh8x
-No fix available
-node_modules/cookie
-  @sentry/node  4.0.0-beta.0 - 7.74.2-alpha.1
-  Depends on vulnerable versions of cookie
-  node_modules/@sentry/node
-    hardhat  0.1.0-rc.0 - 3.0.0-next.32
-    Depends on vulnerable versions of @ethersproject/abi
-    Depends on vulnerable versions of @metamask/eth-sig-util
-    Depends on vulnerable versions of @nomicfoundation/ethereumjs-common
-    Depends on vulnerable versions of @nomicfoundation/ethereumjs-tx
-    Depends on vulnerable versions of @nomicfoundation/ethereumjs-util
-    Depends on vulnerable versions of @sentry/node
-    Depends on vulnerable versions of uuid
-    node_modules/hardhat
-      @ethereum-attestation-service/eas-contracts  *
-      Depends on vulnerable versions of hardhat
-      node_modules/@ethereum-attestation-service/eas-contracts
-        @ethereum-attestation-service/eas-sdk  *
-        Depends on vulnerable versions of @ethereum-attestation-service/eas-contracts
-        node_modules/@ethereum-attestation-service/eas-sdk
-
-elliptic  *
-Elliptic Uses a Cryptographic Primitive with a Risky Implementation - https://github.com/advisories/GHSA-848j-6mx2-7j84
-No fix available
-node_modules/elliptic
-  @ethersproject/signing-key  <=5.8.0
-  Depends on vulnerable versions of elliptic
-  node_modules/@ethersproject/signing-key
-    @ethersproject/transactions  <=5.8.0
-    Depends on vulnerable versions of @ethersproject/signing-key
-    node_modules/@ethersproject/transactions
-      @ethersproject/abstract-provider  *
-      Depends on vulnerable versions of @ethersproject/transactions
-      node_modules/@ethersproject/abstract-provider
-        @ethersproject/abstract-signer  *
-        Depends on vulnerable versions of @ethersproject/abstract-provider
-        node_modules/@ethersproject/abstract-signer
-          @ethersproject/hash  5.0.6 - 5.8.0
-          Depends on vulnerable versions of @ethersproject/abstract-signer
-          node_modules/@ethersproject/hash
-            @ethersproject/abi  5.0.10 - 5.8.0
-            Depends on vulnerable versions of @ethersproject/hash
-            node_modules/@ethersproject/abi
-  ethereumjs-util  1.0.2 - 2.4.0 || 4.5.1 || 5.2.1 || 6.2.1 || >=7.0.3
-  Depends on vulnerable versions of elliptic
-  Depends on vulnerable versions of ethereum-cryptography
-  node_modules/ethereumjs-util
-    @metamask/eth-sig-util  <=4.0.1
-    Depends on vulnerable versions of ethereumjs-util
-    node_modules/@metamask/eth-sig-util
-  secp256k1  >=2.0.0
-  Depends on vulnerable versions of elliptic
-  node_modules/secp256k1
-    ethereum-cryptography  0.1.0 - 0.1.3
-    Depends on vulnerable versions of secp256k1
-    node_modules/@nomicfoundation/ethereumjs-tx/node_modules/ethereum-cryptography
-    node_modules/@nomicfoundation/ethereumjs-util/node_modules/ethereum-cryptography
-    node_modules/ethereumjs-util/node_modules/ethereum-cryptography
-      @nomicfoundation/ethereumjs-tx  *
-      Depends on vulnerable versions of @nomicfoundation/ethereumjs-common
-      Depends on vulnerable versions of @nomicfoundation/ethereumjs-util
-      Depends on vulnerable versions of ethereum-cryptography
-      node_modules/@nomicfoundation/ethereumjs-tx
-      @nomicfoundation/ethereumjs-util  *
-      Depends on vulnerable versions of ethereum-cryptography
-      node_modules/@nomicfoundation/ethereumjs-util
-        @nomicfoundation/ethereumjs-common  *
-        Depends on vulnerable versions of @nomicfoundation/ethereumjs-util
-        node_modules/@nomicfoundation/ethereumjs-common
-
-smol-toml  <1.6.1
-Severity: moderate
-smol-toml: Denial of Service via TOML documents containing thousands of consecutive commented lines - https://github.com/advisories/GHSA-v3rj-xjv7-4jmq
-fix available via `npm audit fix --force`
-Will install vercel@50.41.0, which is a breaking change
-node_modules/smol-toml
-  @vercel/python-analysis  *
-  Depends on vulnerable versions of smol-toml
-  node_modules/@vercel/python-analysis
-    @vercel/python  6.11.0 - 6.12.0 || >=6.14.1
-    Depends on vulnerable versions of @vercel/python-analysis
-    node_modules/@vercel/python
-  @vercel/rust  >=1.0.6
-  Depends on vulnerable versions of smol-toml
-  node_modules/@vercel/rust
-
-uuid  <11.1.1
-Severity: moderate
-uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided - https://github.com/advisories/GHSA-w5hq-g745-h8pq
-No fix available
-node_modules/hardhat/node_modules/uuid
-node_modules/uuid
-  @metamask/utils  >=8.4.0
-  Depends on vulnerable versions of uuid
-  node_modules/@metamask/utils
-    @metamask/abi-utils  >=2.0.3
-    Depends on vulnerable versions of @metamask/utils
-    node_modules/@metamask/abi-utils
-      @openzeppelin/merkle-tree  >=1.0.8
-      Depends on vulnerable versions of @metamask/abi-utils
-      node_modules/@openzeppelin/merkle-tree
-
-46 vulnerabilities (18 low, 28 moderate)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues possible (including breaking changes), run:
-  npm audit fix --force
-
-Some issues need review, and may require choosing
-a different dependency.
+```text
+@critter-crumbs/shared test:
+@critter-crumbs/shared test:  RUN  v4.1.11 /private/tmp/critter-crumbs-foundation-59aed86
+@critter-crumbs/shared test:
+@critter-crumbs/shared test:
+@critter-crumbs/shared test:  Test Files  1 passed (1)
+@critter-crumbs/shared test:       Tests  1 passed (1)
+@critter-crumbs/shared test:    Start at  23:52:07
+@critter-crumbs/shared test:    Duration  83ms (transform 12ms, setup 0ms, import 16ms, tests 1ms, environment 0ms)
+@critter-crumbs/shared test:
+@critter-crumbs/shared test: Exited with code 0
+@critter-crumbs/core test:
+@critter-crumbs/core test:  RUN  v4.1.11 /private/tmp/critter-crumbs-foundation-59aed86
+@critter-crumbs/core test:
+@critter-crumbs/core test:
+@critter-crumbs/core test:  Test Files  1 passed (1)
+@critter-crumbs/core test:       Tests  1 passed (1)
+@critter-crumbs/core test:    Start at  23:52:07
+@critter-crumbs/core test:    Duration  83ms (transform 12ms, setup 0ms, import 16ms, tests 1ms, environment 0ms)
+@critter-crumbs/core test:
+@critter-crumbs/core test: Exited with code 0
+@critter-crumbs/app test:
+@critter-crumbs/app test:  RUN  v4.1.11 /private/tmp/critter-crumbs-foundation-59aed86
+@critter-crumbs/app test:
+@critter-crumbs/app test:
+@critter-crumbs/app test:  Test Files  1 passed (1)
+@critter-crumbs/app test:       Tests  1 passed (1)
+@critter-crumbs/app test:    Start at  23:52:07
+@critter-crumbs/app test:    Duration  83ms (transform 13ms, setup 0ms, import 17ms, tests 1ms, environment 0ms)
+@critter-crumbs/app test:
+@critter-crumbs/app test: Exited with code 0
 ```
 
 ## gh label list --repo wefa-labs/critter-crumbs
@@ -636,18 +233,25 @@ needs-human	Requires a person to resolve before work can proceed	#B60205
 ready-for-agent	Defined work ready for an agent	#0E8A16
 automated/codex	Work prepared by Codex	#6F42C1
 blocked	Waiting on a recorded dependency	#D93F0B
+draft	Pull request awaiting human review	#C5DEF5
 ```
 
 ## Additional proof
 
-- `npm test --workspaces`: all three package-local commands passed.
-- `npm audit --omit=dev --audit-level=high`: found 0 vulnerabilities.
-- `npm run e2e:install`: explicitly installed Chromium; Chromium 151.0.7922.34 launched and closed successfully. Lifecycle E2E remains phase 3 work.
-- `npm run dev:app`: started the TypeScript watcher and Vite. Two private shared source edits appeared in emitted JavaScript; both BLST files returned HTTP 200 with exact published bytes and correct content types. Ctrl-C stopped the owned processes and freed port 5173. Temporary probe source/output was removed.
-- The guardrail regression suite passed after adding TypeScript import-equals syntax alongside quoted/template import checks.
-- The optional external `dev check` found pre-existing missing Coop/TAS-Hub directories and unrelated guidance/manifests outside this repository. This repository does not depend on that workbench.
+- The shared checksum-pinned bootstrap downloaded and ran Bun 1.4.2 on macOS arm64. CI exercises its Linux x64 path.
+- An isolated fixture confirmed bunfig.toml suppresses root postinstall even without the --ignore-scripts flag.
+- `bun run e2e:install` exited 0. Chromium 151.0.7922.34 launched and closed with Bun-installed dependencies; no lifecycle E2E exists yet.
+- The full check exercises the HTTP BLST assets and the actual Vercel bundler using Bun workspace symlinks. Built exports work; source exports retain the documented emission failure.
+- Runtime versions, own licences, archive integrity, and gzip records are unchanged by the package-manager migration.
+- The Vercel fallback passed when launched by the machine’s older Bun 1.3.10: the script explicitly selected the pinned binary. The Spec agent also verified function-directory invocation. CI builds through this same entry.
 
 ## Dependency table
+
+# Runtime dependency evidence
+
+Checked 2026-09-04 with Node 22.22.1. Initial archives used npm 10.9.4; the eligible viem replacement used npm 11.19.1. Each exact published archive was downloaded with `npm pack --ignore-scripts`; its manifest and own licence were read before installation. Sizes below are gzip-compressed npm archives, including declarations and other package files, not browser chunks.
+
+Technical Spec §11 says ten runtime dependencies, but names nine active packages and explicitly excludes `@vercel/functions`. The foundation uses those nine.
 
 | Package | Exact version | Manifest licence | Own licence | Gzipped archive (bytes) |
 |---|---|---|---|---:|
@@ -661,9 +265,13 @@ blocked	Waiting on a recorded dependency	#D93F0B
 | [`@shutter-network/shutter-sdk`](https://registry.npmjs.org/@shutter-network/shutter-sdk/0.0.2) | `0.0.2` | ISC | MIT | 286,989 |
 | [`@neondatabase/serverless`](https://registry.npmjs.org/@neondatabase/serverless/1.1.0) | `1.1.0` | MIT | MIT | 131,636 |
 
-## Decisions added
+Fiber omits its own licence from the archive; [its exact published source revision supplies the MIT grant](fiber-license.md), preserved in `licenses/react-three-fiber-LICENSE`. [Shutter's MIT licence differs from its ISC metadata](shutter-sdk-v1.md); both are permitted. Koota is ISC and Neon is MIT, correcting the §11 licence labels.
 
-| Date | Decision | Why | Who |
+`scripts/runtime-dependencies.json` records archive integrity and licence SHA-256 values for the automated check. Installation and validation results are recorded in the foundation evidence.
+
+## Added decisions
+
+| Date | Decision | Reason | By |
 |---|---|---|---|
 | 2026-09-04 | Use npm workspaces at `packages/{shared,core,app}`, with one public entry each; keep `api/`, `db/`, `scripts/`, `tests/e2e/` at the root | Package interfaces enforce the workstream seams; Vercel requires root functions | Codex |
 | 2026-09-04 | Interpret §11 as nine active runtime packages; do not add `@vercel/functions` | The table counts ten but names nine packages and explicitly rejects the functions helper | Codex |
@@ -718,3 +326,9 @@ blocked	Waiting on a recorded dependency	#D93F0B
 | 2026-09-04 | Use patched dev transitive `serialize-javascript@7.1.0` instead of `7.1.1` | Retain the seven-day release delay while selecting a patched version | Codex |
 | 2026-09-04 | Supervise a TypeScript build watcher in both dev modes; serve BLST bytes through Vite middleware and emit them during production builds | Built package exports must refresh during development, and Vite serve does not support Rollup emitFile; verified edits and HTTP asset responses | Codex |
 | 2026-09-04 | Require statically known import and require targets in application modules | Check import direction for quoted and template strings; unresolved dynamic paths cannot be checked reliably | Codex |
+| 2026-09-05 | Supersede npm with Bun 1.4.2 at the user’s request | Latest stable release verified from Bun’s official release API; commit bun.lock, .bun-version, and exact packageManager/engines pins; retain Node 22 for functions and Node-based tools | Codex |
+| 2026-09-05 | Preserve the reviewed dependency versions and version-qualified overrides in Bun lockfile format 3 | Bun 1.4.2 supports these selectors; use the hoisted linker for the existing public-package and Vercel bundler setup | Codex |
+| 2026-09-05 | Enforce exact saves, disabled install scripts, and a seven-day dependency release age in bunfig.toml | Frozen installs run in CI and Vercel; no dependency script or release-age exceptions; the explicitly requested latest Bun tool is pinned separately | Codex |
+| 2026-09-05 | Use Bun’s high-severity audit and retain reviewed archive integrity checks | Bun has no registry signature or attestation audit command; the earlier npm signature proof is historical, not a current check; see docs/research/bun-policy.md | Codex |
+| 2026-09-05 | Bootstrap Bun 1.4.2 in CI and Vercel from official archives with pinned SHA-256 checksums | Vercel’s Bun detection does not guarantee an exact package-manager patch; reuse one local installer without selecting the Bun Functions runtime or changing global tools | Codex |
+| 2026-09-05 | Treat Bun as external build tooling, not a shipped runtime dependency | Bun itself is MIT; its own licence also lists linked LGPL libraries; no Bun binary enters the app output | Codex |

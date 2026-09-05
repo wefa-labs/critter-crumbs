@@ -138,3 +138,7 @@ The portable probe is retained at `scripts/probe-workspaces.mjs`. Run `npm run c
 ## Final release-policy pin
 
 The seven-day release policy selected Vercel CLI 59.9.1, which includes `@vercel/node@9.0.1` and `@vercel/build-utils@14.6.1` with `@vercel/nft@1.10.0`. The retained probe was rerun: source exports again failed after emission, and dist exports returned `core:shared` with exit 0. This repeat also used the repository's actual `api/tsconfig.json` and base tsconfig. The earlier complete output above is retained as historical evidence; the final command output is in the foundation evidence.
+
+## Bun migration
+
+The retained probe now creates its isolated workspace symlinks with Bun 1.4.2 and a Bun lockfile. Run `bun run check:workspaces`; built-output imports still return `core:shared`, and source exports still fail after emission. The package boundary decision is unchanged. Historical npm command output above records the original experiment.

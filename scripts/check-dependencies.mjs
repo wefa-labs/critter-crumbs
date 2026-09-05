@@ -7,7 +7,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const json = (file) => JSON.parse(readFileSync(path.resolve(root, file), 'utf8'));
 const runtime = json('scripts/runtime-dependencies.json');
 const dev = json('scripts/dev-dependencies.json');
-const lock = json('package-lock.json');
+const lock = Bun.JSONC.parse(readFileSync(path.resolve(root, 'bun.lock'), 'utf8'));
 const overrides = json('scripts/dev-overrides.json');
 const manifests = ['package.json', ...['shared', 'core', 'app'].map((name) => `packages/${name}/package.json`)];
 const found = new Map();
@@ -34,7 +34,8 @@ for (const item of runtime) {
   if (!permissive.has(item.license) || !permissive.has(installed.license)) fail(`${item.name}: licence requires human review.`);
   const notice = readFileSync(path.resolve(root, item.notice ? `${directory}/${item.notice}` : item.sourceNotice));
   if (createHash('sha256').update(notice).digest('hex') !== item.noticeSha256) fail(`${item.name}: own licence changed; verify it again.`);
-  if (lock.packages[directory]?.integrity !== item.integrity) fail(`${item.name}: archive integrity differs from measured evidence.`);
+  const locked = lock.packages[item.name];
+  if (locked?.[0] !== `${item.name}@${item.version}` || locked.at(-1) !== item.integrity) fail(`${item.name}: archive integrity differs from measured evidence.`);
   if (!(item.gzipArchiveBytes > 0)) fail(`${item.name}: missing gzip measurement.`);
 }
 const rootManifest = json('package.json');

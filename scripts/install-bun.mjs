@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+const release = JSON.parse(await readFile(join(root, 'scripts/bun-release.json'), 'utf8'));
+const version = (await readFile(join(root, '.bun-version'), 'utf8')).trim();
+assert.equal(release.version, version, 'Refresh the official archive checksums when updating Bun.');
+const archive = release.archives[`${process.platform}-${process.arch}`];
+assert(archive, 'The Bun bootstrap supports macOS and Linux on arm64 and x64.');
+const response = await fetch(`https://github.com/oven-sh/bun/releases/download/bun-v${version}/${archive.name}.zip`, { signal: AbortSignal.timeout(120_000) });
+assert(response.ok, `Bun download failed: HTTP ${response.status}.`);
+const bytes = Buffer.from(await response.arrayBuffer());
+assert.equal(createHash('sha256').update(bytes).digest('hex'), archive.sha256, 'Bun archive checksum differs from the reviewed release.');
+const destination = join(root, '.vercel/bun');
+await mkdir(join(destination, 'bin'), { recursive: true });
+await writeFile(join(destination, 'release.zip'), bytes);
+execFileSync('unzip', ['-oq', join(destination, 'release.zip'), '-d', destination]);
+await rename(join(destination, archive.name, 'bun'), join(destination, 'bin/bun'));
+assert.equal(execFileSync(join(destination, 'bin/bun'), ['--version'], { encoding: 'utf8' }).trim(), version);
+console.log(`Installed Bun ${version} from the verified ${archive.name} archive.`);

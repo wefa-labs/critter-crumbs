@@ -64,6 +64,6 @@ Ten skills from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, 
 
 ## Commands
 
-Use Node 22.22.1 and npm 11.19.1. `npm ci` · `npm run check` (lint, typecheck, tests, licences, vulnerability and signature audits) · `npm run build` (compiles workspaces, builds the app, enforces chunk budgets) · `npm test` · `npm run dev:app` (Vite only) · `npm run dev` (Vite + `vercel dev`, mock by default; human project setup required) · `npm run e2e:install` (explicit Chromium install) · `npm run e2e` (phase 3 lifecycle) · `npm run migrate` and `npm run seed` (phase 2 implementations required). See `docs/foundation/README.md`.
+Use Bun 1.4.2 for package management and scripts; Node 22.22.1 for the function toolchain. `bun install --frozen-lockfile --ignore-scripts` · `bun run check` (lint, typecheck, tests, licences, vulnerability audit and archive integrity) · `bun run build` (compiles workspaces, builds the app, enforces chunk budgets) · `bun run test` · `bun run dev:app` (Vite only) · `bun run dev` (Vite + `vercel dev`, mock by default; human project setup required) · `bun run e2e:install` (explicit Chromium install) · `bun run e2e` (phase 3 lifecycle) · `bun run migrate` and `bun run seed` (phase 2 implementations required). See `docs/foundation/README.md`.
 
 Environment variables and modes: `04-technical-spec.md` §13. `SHUTTER_MODE=mock` is the default locally and must never be set in production.
