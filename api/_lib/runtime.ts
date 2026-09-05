@@ -1,5 +1,5 @@
 import { easDomain, type EasConfig } from '@critter-crumbs/core';
-import { hex, parseAddress } from '@critter-crumbs/shared';
+import { hex, parseAddress, parseDevEndpointsEnabled } from '@critter-crumbs/shared';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createApi } from './api.js';
 import { createNeonDatabase } from './database.js';
@@ -20,7 +20,7 @@ export default async function runtime(request: IncomingMessage, response: Server
       const db = createNeonDatabase(DATABASE_URL);
       const timelock = serverTimelock(db, clock.now, { mode: SHUTTER_MODE || 'mock', production: NODE_ENV === 'production', ...(MOCK_SECRET ? { mockSecret: MOCK_SECRET } : {}) });
       handler = nodeHandler(createApi({ db, timelock, ...(eas ? { eas } : {}), sessionSecret: SESSION_SECRET, origin: APP_ORIGIN, clock: clock.now, connectOrigins, ...(MAINNET_RPC_URL ? { ens: mainnetEns(MAINNET_RPC_URL) } : {}),
-        dev: { enabled: DEV_ENDPOINTS_ENABLED === 'true', production: NODE_ENV === 'production', mode: SHUTTER_MODE || 'mock', setTime: clock.setTime, releaseKey: timelock.release } }), clock.now);
+        dev: { enabled: parseDevEndpointsEnabled(DEV_ENDPOINTS_ENABLED), production: NODE_ENV === 'production', mode: SHUTTER_MODE || 'mock', setTime: clock.setTime, releaseKey: timelock.release } }), clock.now);
     }
     await handler(request, response);
   } catch {

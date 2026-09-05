@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 const local = process.argv.includes('--local');
-const env = { ...process.env, SHUTTER_MODE: process.env.SHUTTER_MODE ?? 'mock', VERCEL_TELEMETRY_DISABLED: '1', ...(local ? { DEV_ENDPOINTS_ENABLED: process.env.DEV_ENDPOINTS_ENABLED ?? 'true' } : {}) };
+const env = { ...process.env, SHUTTER_MODE: process.env.SHUTTER_MODE ?? 'mock', VERCEL_TELEMETRY_DISABLED: '1', ...(local ? { DEV_ENDPOINTS_ENABLED: process.env.DEV_ENDPOINTS_ENABLED ?? '1' } : {}) };
 const commands = [
   ['tsc', ['-b', '--watch', '--preserveWatchOutput']],
   local ? ['node', ['scripts/vite-local.mjs']] : ['vite', ['--config', 'packages/app/vite.config.ts']],

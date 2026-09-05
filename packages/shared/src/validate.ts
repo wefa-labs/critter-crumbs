@@ -75,3 +75,5 @@ export function parseSequence(value: unknown): string {
   if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value) || value.length > 19 || BigInt(value) > 9223372036854775807n) throw new ValidationError();
   return value;
 }
+/** §13 uses "1"; accept the explicit "true" alias used by local tooling too. */
+export function parseDevEndpointsEnabled(value: unknown): boolean { return value === '1' || value === 'true'; }

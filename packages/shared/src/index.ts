@@ -6,3 +6,4 @@ export { ValidationError, record, text, integer, boolean, hex, parseFeastSetup }
 export { parseAddress, parseUuid, parseProfileUpdate, parseStatement, parseAllocationPayload } from './validate.js';
 export { parseSignedOffchainAttestation } from './eas-validate.js';
 export { parseSequence } from './validate.js';
+export { parseDevEndpointsEnabled } from './validate.js';

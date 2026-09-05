@@ -11,16 +11,42 @@ test('API client shares GET requests and advances from serverNow without replayi
   client.invalidate(); await client.get('/api/me'); expect(calls).toBe(2); expect(client.now()).toBe(5000);
 });
 
-test('API client retries failed reads, invalidates on writes and reports clock skew once with copy-ID errors', async () => {
-  const warnings: unknown[] = [], requests: RequestInit[] = []; let calls = 0;
-  const client = createApiClient({ clock: () => 1000, onClockSkew: (...args) => warnings.push(args), fetch: async (_path, init) => {
-    requests.push(init!); calls++;
-    return calls === 1 ? Response.json({ error: 'err.keyUnreachable', detail: 'pending', serverNow: 601001 }, { status: 503, headers: { 'Retry-After': '5' } }) : Response.json({ serverNow: 601001, calls });
+test('API client exposes server copy IDs and retry metadata', async () => {
+  const client = createApiClient({ clock: () => 1000, fetch: async () => Response.json({ error: 'err.keyUnreachable', detail: 'pending', serverNow: 5000 }, { status: 503, headers: { 'Retry-After': '5' } }) });
+  await expect(client.get('/api/feasts/example/key')).rejects.toMatchObject({ copyId: 'err.keyUnreachable', status: 503, detail: 'pending', retryAfter: '5' });
+});
+
+test('API client retries a failed read instead of caching its failure', async () => {
+  let available = false;
+  const client = createApiClient({ clock: () => 1000, fetch: async () => {
+    if (!available) throw new Error('Offline');
+    return Response.json({ serverNow: 5000, name: 'Oak' });
   } });
-  await expect(client.get('/api/me')).rejects.toMatchObject({ copyId: 'err.keyUnreachable', status: 503, detail: 'pending', retryAfter: '5' });
-  expect(client.now()).toBe(601001); expect(warnings).toEqual([['err.clockSkew', 600001]]);
-  expect(await client.get('/api/me')).toMatchObject({ calls: 2 });
+  await expect(client.get('/api/me')).rejects.toMatchObject({ copyId: 'err.storeUnreachable' });
+  available = true;
+  expect(await client.get('/api/me')).toMatchObject({ name: 'Oak' });
+});
+
+test('API client writes JSON and invalidates the previously read state', async () => {
+  let name = 'Oak';
+  const client = createApiClient({ clock: () => 1000, fetch: async (_path, init) => {
+    if (init?.method === 'PUT') {
+      expect(init).toMatchObject({ credentials: 'same-origin', headers: { 'Content-Type': 'application/json' } });
+      name = (JSON.parse(String(init.body)) as { displayName: string }).displayName;
+    }
+    return Response.json({ serverNow: 5000, name });
+  } });
+  expect(await client.get('/api/me')).toMatchObject({ name: 'Oak' });
   await client.write('/api/me', 'PUT', { displayName: 'Moss' });
-  expect(requests[2]).toMatchObject({ method: 'PUT', credentials: 'same-origin', body: '{"displayName":"Moss"}', headers: { 'Content-Type': 'application/json' } });
-  expect(await client.get('/api/me')).toMatchObject({ calls: 4 }); expect(warnings).toHaveLength(1);
+  expect(await client.get('/api/me')).toMatchObject({ name: 'Moss' });
+});
+
+test('API client reports skew above five minutes once, including on error responses', async () => {
+  const warnings: unknown[] = []; let stamp = 301000;
+  const client = createApiClient({ clock: () => 1000, onClockSkew: (...args) => warnings.push(args), fetch: async () => Response.json({ serverNow: stamp, error: 'err.generic' }, { status: 503 }) });
+  await client.get('/api/me').catch(() => {}); expect(warnings).toEqual([]);
+  stamp = 601001;
+  await client.get('/api/me').catch(() => {});
+  await client.get('/api/me').catch(() => {});
+  expect(warnings).toEqual([['err.clockSkew', 600001]]); expect(client.now()).toBe(601001);
 });

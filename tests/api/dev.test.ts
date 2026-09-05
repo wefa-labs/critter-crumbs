@@ -1,3 +1,4 @@
+import { parseDevEndpointsEnabled } from '@critter-crumbs/shared';
 import { afterEach, expect, test } from 'vitest';
 import { apiHarness } from './support.js';
 const disposals: (() => Promise<void>)[] = [];
@@ -59,4 +60,11 @@ test('API dev seed accepts one feast type and rejects coerced phase or kind valu
   for (const body of [{ phase: ['gathering'] }, { kind: ['people'] }, { phase: 'void', kind: 'options' }]) expect((await api({ method: 'POST', path: '/api/dev/seed', body })).status).toBe(400);
   const seeded = await api({ method: 'POST', path: '/api/dev/seed', body: { phase: 'scattering', kind: 'options' } });
   expect(seeded.status).toBe(201); expect(seeded.body.feasts).toMatchObject([{ kind: 'options', phase: 'scattering' }]); expect(seeded.body.feasts).toHaveLength(1);
+});
+
+test.each([['1', 200], ['true', 200], ['0', 404], ['false', 404], [undefined, 404]] as const)('API dev controls parse DEV_ENDPOINTS_ENABLED=%s as status %s', async (enabled, status) => {
+  let now = 1800000000000;
+  const { api, close } = await apiHarness({ clock: () => now, dev: { enabled: parseDevEndpointsEnabled(enabled), production: false, mode: 'mock', setTime: value => { now = value; }, releaseKey() {} } }); disposals.push(close);
+  const response = await api({ method: 'POST', path: '/api/dev/time', body: { now: 1800000001000 } });
+  expect(response.status).toBe(status);
 });
