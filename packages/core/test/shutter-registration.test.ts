@@ -21,11 +21,10 @@ test('timelock registration recovers a lost POST response after restart without 
   expect(fixture.posts).toHaveLength(1);
 });
 
-test('timelock registration rejects changed deadline or prefix when resuming a saved attempt', async () => {
+test.each(['deadline', 'prefix'] as const)('timelock registration rejects changed %s when resuming a saved attempt', async change => {
   const fixture = registrationFixture(), timelock = createChiadoTimelock({ fetch: fixture.fetch, server: fixture.server });
   await timelock.register(feastId, fixture.deadline, fixture.prefix);
-  await expect(timelock.register(feastId, fixture.deadline + 2000, fixture.prefix)).rejects.toMatchObject({ reason: 'configuration' });
-  await expect(timelock.register(feastId, fixture.deadline, `0x${'ff'.repeat(32)}`)).rejects.toMatchObject({ reason: 'configuration' });
+  await expect(timelock.register(feastId, fixture.deadline + (change === 'deadline' ? 2000 : 0), change === 'prefix' ? `0x${'ff'.repeat(32)}` : fixture.prefix)).rejects.toMatchObject({ reason: 'configuration' });
   expect(fixture.posts).toHaveLength(1);
 });
 
@@ -138,4 +137,11 @@ test('timelock registration retries a completed empty log search when historical
   logsAvailable = true;
   expect(await adapter.register(feastId, fixture.deadline, fixture.prefix)).toEqual(fixture.expected);
   expect(fixture.posts).toHaveLength(1);
+});
+
+test('timelock registration uses supplied randomness when creating an identity prefix', async () => {
+  const fixture = registrationFixture({ dynamic: true });
+  const first = await createChiadoTimelock({ fetch: fixture.fetch, server: fixture.server, random: length => new Uint8Array(length).fill(42) }).register(feastId, fixture.deadline);
+  const other = registrationFixture({ dynamic: true });
+  expect(await createChiadoTimelock({ fetch: other.fetch, server: other.server, random: length => new Uint8Array(length).fill(42) }).register(feastId, other.deadline)).toEqual(first);
 });

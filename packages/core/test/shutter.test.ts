@@ -30,9 +30,11 @@ test.each([[429, 'rate_limited'], [500, 'upstream'], [400, 'upstream']] as const
   const adapter = createChiadoTimelock({ fetch: async () => new Response('upstream response', { status, headers: { 'Retry-After': '60' } }) });
   await expect(adapter.getKey(fixture.chiado.message.identity)).rejects.toMatchObject({ reason, ...(status === 429 ? { retryAfter: '60' } : {}) });
 });
-test('timelock distinguishes malformed successful key data and transport failure', async () => {
+test('timelock rejects malformed successful key data', async () => {
   const malformed = createChiadoTimelock({ fetch: async () => Response.json({ message: { identity: fixture.chiado.message.identity, decryption_key: '0x', decryption_timestamp: 1800000000 } }) });
   await expect(malformed.getKey(fixture.chiado.message.identity)).rejects.toMatchObject({ reason: 'invalid_response' });
+});
+test('timelock reports transport failure', async () => {
   const offline = createChiadoTimelock({ fetch: async () => { throw new Error('Offline'); } });
   await expect(offline.getKey(fixture.chiado.message.identity)).rejects.toMatchObject({ reason: 'upstream' });
 });

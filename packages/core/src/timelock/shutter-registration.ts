@@ -22,7 +22,7 @@ import { hex, integer, parseAddress, parseUuid, record } from '@critter-crumbs/s
 import { ShutterError } from './shutter.js';
 const registryAbi = parseAbi(['function registrations(bytes32 identity) view returns (uint64 eon,uint64 timestamp)', 'event IdentityRegistered(uint64 eon,bytes32 identityPrefix,address sender,uint64 timestamp)']);
 const keyAbi = parseAbi(['function getEonKey(uint64 eon) view returns (bytes)']);
-export function shutterRegistration(deployment: ShutterDeployment, server: ShutterServerConfig, transport: typeof fetch) {
+export function shutterRegistration(deployment: ShutterDeployment, server: ShutterServerConfig, transport: typeof fetch, random: (length: number) => Uint8Array = length => crypto.getRandomValues(new Uint8Array(length))) {
   const client = createPublicClient({ transport: http(server.rpcUrl, { fetchFn: transport, timeout: 10000, retryCount: 0 }) });
   async function request(path: string, body?: unknown) {
     let response: Response;
@@ -43,7 +43,7 @@ export function shutterRegistration(deployment: ShutterDeployment, server: Shutt
   return async (feastId: string, decryptionTimestamp: number, identityPrefix?: Hex): Promise<Registration> => {
     parseUuid(feastId); const timestamp = Math.ceil(integer(decryptionTimestamp, 0, 8640000000000000) / 1000);
     let attempt = await server.journal.read(feastId);
-    const prefix = hex(identityPrefix ?? attempt?.identityPrefix ?? keccak256(concatHex([stringToHex(`critter-crumbs${feastId}`), bytesToHex(crypto.getRandomValues(new Uint8Array(32)))])), 32);
+    const prefix = hex(identityPrefix ?? attempt?.identityPrefix ?? keccak256(concatHex([stringToHex(`critter-crumbs${feastId}`), hex(bytesToHex(random(32)), 32)])), 32);
     if (await client.getChainId() !== deployment.chainId) throw new ShutterError('configuration');
     if (!attempt) {
       const identity = keccak256(concatHex([hex(prefix, 32), parseAddress(deployment.registrant)]));
