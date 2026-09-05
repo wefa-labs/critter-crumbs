@@ -7,3 +7,5 @@ export interface Timelock {
   decrypt(ciphertext: Uint8Array, key: Uint8Array): Promise<Uint8Array>;
 }
 export { createMockTimelock } from './mock.js';
+export * from './shutter.js';
+export { readFeastKey } from './read-key.js';

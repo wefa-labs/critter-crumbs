@@ -4,10 +4,10 @@ import { schemaUID, ballotSchema, type EasConfig } from '@critter-crumbs/core';
 import { createApi } from '../api/_lib/api.js';
 import { nodeHandler } from '../api/_lib/http.js';
 import { createServerClock } from '../api/_lib/clock.js';
-import { serverTimelock } from '../api/_lib/timelock.js';
+import { mockServerTimelock } from '../api/_lib/timelock.js';
 import { localData } from './local-data.js';
 const data = await localData(), clock = createServerClock(data.offset, data.saveOffset);
-const timelock = serverTimelock(data.db, clock.now, { mode: 'mock', production: false, mockSecret: data.mockSecret });
+const timelock = mockServerTimelock(data.db, clock.now, data.mockSecret);
 const eas: EasConfig = { chainId: 84532, address: '0x4200000000000000000000000000000000000021', ballotSchemaUid: schemaUID(ballotSchema) };
 const api = createApi({ db: data.db, clock: clock.now, sessionSecret: data.sessionSecret, timelock, eas, origin: process.env.APP_ORIGIN || 'http://127.0.0.1:5173',
   dev: { enabled: parseDevEndpointsEnabled(process.env.DEV_ENDPOINTS_ENABLED), production: false, mode: 'mock', setTime: clock.setTime, releaseKey: timelock.release } });

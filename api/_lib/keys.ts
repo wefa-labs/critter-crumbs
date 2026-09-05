@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { phaseAt, type Timelock } from '@critter-crumbs/core';
+import { phaseAt, ShutterError, type Timelock } from '@critter-crumbs/core';
 import type { Address } from '@critter-crumbs/shared';
 import { createBurrowTransactions, requireMember, timestamp } from './burrow-transactions.js';
 import { dbHex, feastClock, milliseconds } from './feast-rows.js';
@@ -34,6 +34,7 @@ export function createKeys(db: Database, clock: () => number, timelock?: Timeloc
     } catch (error) {
       await transactions.write(burrowId, (_, _now, bind) => ({ sql: [`update feasts set shutter_key_started_at=null,shutter_key_token=null where id=${bind(id)}::uuid and shutter_key_token=${bind(token)}::uuid and exists(select 1 from gate)`], result: undefined }));
       if (error instanceof HttpError) throw error;
+      if (error instanceof ShutterError && error.reason === 'rate_limited' && error.retryAfter && /^\d+$/.test(error.retryAfter)) throw unavailable(Math.max(1, Math.min(86400, Number(error.retryAfter))));
       throw unavailable();
     }
   }

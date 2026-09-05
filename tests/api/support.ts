@@ -7,12 +7,12 @@ export async function openTestDatabase() {
   return db;
 }
 
-import { buildSignInMessage, createLocalAccount, createMockTimelock, type SignInChallenge } from '@critter-crumbs/core';
+import { buildSignInMessage, createLocalAccount, createMockTimelock, type SignInChallenge, type Timelock } from '@critter-crumbs/core';
 import { createApi, type ApiDependencies } from '../../api/_lib/api.js';
 export const testAccount = (n: number) => createLocalAccount(`0x${n.toString(16).padStart(64, '0')}`);
-export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> = {}) {
+export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> & { timelockFactory?: (db: ApiDependencies['db'], clock: () => number) => Timelock } = {}) {
   const db = await openTestDatabase(); const sessions = new Map<string, { cookie: string }>(); let now = 1800000000123;
-  const dependencies = { db, clock: () => now, sessionSecret: 'local-session-secret-for-tests-only', origin: 'http://localhost:5173', timelock: createMockTimelock({ secret: 'mock-secret-for-local-tests-only-32', clock: options.clock ?? (() => now) }), ...options };
+  const dependencies = { db, clock: () => now, sessionSecret: 'local-session-secret-for-tests-only', origin: 'http://localhost:5173', timelock: options.timelockFactory?.(db, options.clock ?? (() => now)) ?? createMockTimelock({ secret: 'mock-secret-for-local-tests-only-32', clock: options.clock ?? (() => now) }), ...options };
   const api = createApi(dependencies);
   async function signedRequest(n = 1) {
     const account = testAccount(n), challenge = (await api({ method: 'GET', path: '/api/session/nonce' })).body;
@@ -60,5 +60,5 @@ export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> =
     return { owner, members, burrowId, feastId, path, created };
   }
 
-  return { api, anotherApi: () => createApi(dependencies), connect, signedRequest, openFeastFixture, createFeast, clock: () => now, advance: (ms: number) => { now += ms; }, close: () => db.close() };
+  return { api, anotherApi: () => createApi({ ...dependencies, ...(options.timelockFactory ? { timelock: options.timelockFactory(db, dependencies.clock) } : {}) }), connect, signedRequest, openFeastFixture, createFeast, clock: () => now, advance: (ms: number) => { now += ms; }, close: () => db.close() };
 }
