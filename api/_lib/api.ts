@@ -1,21 +1,21 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { verifySignInMessage } from '@critter-crumbs/core';
-import { hex, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError, type CopyId } from '@critter-crumbs/shared';
+import { hex, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError } from '@critter-crumbs/shared';
 import type { Database } from './database.js';
 import { createStore } from './store.js';
 import { sessionCookies } from './session.js';
 import { createProfiles } from './profiles.js';
 import type { EnsResolver } from './ens.js';
+import { createBurrows } from './burrows.js';
+import { HttpError } from './errors.js';
 import { responseHeaders } from './http.js';
 export interface ApiRequest { method: string; path: string; headers?: Record<string, string | undefined>; body?: unknown }
 export interface ApiReply { status: number; headers: Record<string, string>; body: Record<string, unknown> }
 export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver }
-class HttpError extends Error {
-  constructor(readonly status: number, readonly copyId: CopyId) { super(copyId); }
-}
 export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promise<ApiReply> {
   const store = createStore(deps.db), cookies = sessionCookies(deps.sessionSecret);
   const profiles = createProfiles(deps.db, deps.clock, deps.ens);
+  const burrows = createBurrows(deps.db, deps.clock, deps.ens);
   return async request => {
     const now = deps.clock();
     const headers = responseHeaders(deps.connectOrigins);
@@ -57,13 +57,20 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
       }
       const burrowMatch = /^\/api\/burrows\/([^/]+)$/.exec(path);
       if (burrowMatch && request.method === 'GET') {
-        const burrow = await store.burrow(parseUuid(burrowMatch[1]), address);
+        const burrow = await burrows.read(parseUuid(burrowMatch[1]), address);
         if (!burrow) throw new HttpError(403, 'burrow.unknown.title');
         return reply(200, burrow);
       }
+      const memberMatch = /^\/api\/burrows\/([^/]+)\/(members|join|leave)$/.exec(path);
+      if (memberMatch && request.method === 'POST') {
+        const id = parseUuid(memberMatch[1]);
+        const result = memberMatch[2] === 'leave' ? await burrows.leave(id, address) : memberMatch[2] === 'join' ? await burrows.join(id, address)
+          : await burrows.add(id, address, text(record(request.body).address, 1, 255, 'burrow.add.label', true));
+        return reply(200, result);
+      }
       throw new HttpError(404, 'err.generic');
     } catch (error) {
-      if (error instanceof HttpError) return reply(error.status, { error: error.copyId });
+      if (error instanceof HttpError) return reply(error.status, { error: error.copyId, ...(error.detail ? { detail: error.detail } : {}) });
       if (error instanceof ValidationError) return reply(400, { error: error.copyId });
       return reply(503, { error: 'err.storeUnreachable' });
     }

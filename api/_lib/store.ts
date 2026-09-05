@@ -50,12 +50,6 @@ export function createStore(db: Database) {
         insert into burrows (id,name,created_by,created_at) values ($1,$2,$3,$4) returning id
       ) insert into burrow_members (burrow_id,address,added_by,joined_at) select id,$3,$3,$4 from created`, values: [id, name, address, timestamp(now)] }]);
     },
-    async burrow(id: string, address: Address) {
-      const [row] = await db.query(`select b.id,b.name,b.revision from burrows b
-        join burrow_members m on m.burrow_id=b.id where b.id=$1 and m.address=$2 and m.left_at is null`, [id, address]);
-      if (!row) return null;
-      const members = await db.query(`select p.*,m.joined_at,m.left_at from profiles p join burrow_members m on p.address=m.address where m.burrow_id=$1 order by m.address`, [id]);
-      return { ...row, members: members.map(member => ({ ...profileFromRow(member), joinedAt: milliseconds(member.joined_at), leftAt: milliseconds(member.left_at) })), feasts: [] };
-    },
+
   };
 }
