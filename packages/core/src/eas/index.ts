@@ -47,3 +47,6 @@ export function decodeBallot(data: Hex): { feastId: Hex; shutterIdentity: Hex; c
   if (encodeAbiParameters(parseAbiParameters(ballotSchema), [feastId, shutterIdentity, ciphertext, payloadVersion]) !== data) throw new TypeError('Noncanonical scatter encoding');
   return { feastId, shutterIdentity, ciphertext, payloadVersion };
 }
+export * from './result.js';
+export * from './reader.js';
+export * from './transactions.js';

@@ -1,11 +1,12 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { verifySignInMessage, type Timelock, type EasConfig } from '@critter-crumbs/core';
+import { verifySignInMessage, type Timelock, type EasConfig, type EasReader } from '@critter-crumbs/core';
 import { hex, integer, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError, type Hex } from '@critter-crumbs/shared';
 import type { Database } from './database.js';
 import { createStore } from './store.js';
 import { sessionCookies } from './session.js';
 import { createProfiles } from './profiles.js';
 import type { EnsResolver } from './ens.js';
+import { createResults } from './results.js';
 import { createKeys } from './keys.js';
 import { createBallots } from './ballots.js';
 import { createFeasts } from './feasts.js';
@@ -16,11 +17,12 @@ import { seedFixtures } from './seed.js';
 export interface ApiRequest { method: string; path: string; headers?: Record<string, string | undefined>; body?: unknown }
 export interface ApiReply { status: number; headers: Record<string, string>; body: Record<string, unknown> }
 export interface DevControls { enabled: boolean; production: boolean; mode: string; setTime: (now: number) => void | Promise<void>; releaseKey: (identity: Hex) => void | Promise<void> }
-export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock; eas?: EasConfig; dev?: DevControls }
+export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock; eas?: EasConfig; dev?: DevControls; resultReader?: EasReader }
 export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promise<ApiReply> {
   const store = createStore(deps.db), cookies = sessionCookies(deps.sessionSecret);
   const profiles = createProfiles(deps.db, deps.clock, deps.ens);
   const burrows = createBurrows(deps.db, deps.clock, deps.ens);
+  const results = createResults(deps.db, deps.clock, deps.resultReader);
   const keys = createKeys(deps.db, deps.clock, deps.timelock);
   const ballots = createBallots(deps.db, deps.clock, deps.eas);
   const feasts = createFeasts(deps.db, deps.clock, deps.timelock);
@@ -86,6 +88,8 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
           : await burrows.add(id, address, text(record(request.body).address, 1, 255, 'burrow.add.label', true));
         return reply(200, result);
       }
+      const resultMatch = /^\/api\/feasts\/([^/]+)\/result-attestation$/.exec(path);
+      if (resultMatch && request.method === 'POST') return reply(200, await results.record(parseUuid(resultMatch[1]), address, request.body));
       const keyMatch = /^\/api\/feasts\/([^/]+)\/key$/.exec(path);
       if (keyMatch && request.method === 'GET') return reply(200, await keys.read(parseUuid(keyMatch[1]), address));
       const ballotMatch = /^\/api\/feasts\/([^/]+)\/ballots$/.exec(path);

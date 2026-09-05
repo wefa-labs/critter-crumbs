@@ -1,3 +1,4 @@
+import { resultView } from './results.js';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { optionTargetId, phaseAt, type Timelock } from '@critter-crumbs/core';
 import { hex, integer, parseFeastSetup, parseStatement, type Address, type Registration, type Target } from '@critter-crumbs/shared';
@@ -18,7 +19,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     if (row.status === 'draft' && (!member || row.created_by !== actor)) throw new HttpError(403, 'burrow.unknown.title');
     if (!member) {
       const targets = visibleTargets(snapshot, row);
-      return { id, burrowName: snapshot.burrow.name, title: row.title, context: row.context, kind: row.kind, ...feastClock(row), aggregatePublic: row.aggregate_public, targets, phase: phaseAt(feastClock(row), snapshot.now), serverNow: snapshot.now };
+      return { ...(row.aggregate_public && phaseAt(feastClock(row), snapshot.now) === 'feast' ? resultView(row) : {}), id, burrowName: snapshot.burrow.name, title: row.title, context: row.context, kind: row.kind, ...feastClock(row), aggregatePublic: row.aggregate_public, targets, phase: phaseAt(feastClock(row), snapshot.now), serverNow: snapshot.now };
     }
     return view(snapshot, id, actor!);
   }
@@ -33,7 +34,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     const phase = phaseAt(feast, snapshot.now);
     const statements = snapshot.statements.filter(statement => statement.feast_id === id && targets.some(target => target.id === dbHex(statement.target_id)));
     const ballots = snapshot.ballots.filter(ballot => ballot.feast_id === id);
-    return { ...feast, phase, serverNow: snapshot.now,
+    return { ...feast, ...resultView(row), phase, serverNow: snapshot.now,
       statements: statements.filter(statement => ['scattering', 'feast'].includes(phase) || sameAddress(String(statement.author_address), actor))
         .map(statement => ({ targetId: dbHex(statement.target_id), authorAddress: getAddress(String(statement.author_address)), body: statement.body, updatedAt: milliseconds(statement.updated_at) })),
       participation: { written: statements.filter(statement => String(statement.body).length > 0).map(statement => dbHex(statement.target_id)), scattered: [...new Set(ballots.map(ballot => String(ballot.attester)))].sort().map(address => getAddress(address)) }, ownBallotUids: ballots.filter(ballot => ballot.attester === actor).map(ballot => dbHex(ballot.uid)) };

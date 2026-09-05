@@ -46,3 +46,6 @@ export interface SignedOffchainAttestation {
   types: { Attest: { name: string; type: 'uint16' | 'bytes32' | 'address' | 'uint64' | 'bool' | 'bytes' }[] };
   message: OffchainMessage; signature: { v: 27 | 28; r: Hex; s: Hex };
 }
+export interface ResultAggregate { feastId: Hex; publishedSetHash: Hex; crumbsIssued: number; scatterers: number; targetIds: Hex[]; owners: Address[]; crumbs: number[] }
+export interface ResultAttestation { chainId: 8453 | 84532; txHash: Hex; uid: Hex; attester: Address; postedAt: number; aggregate: ResultAggregate }
+export interface ResultView { resultAttestation: ResultAttestation | null; aggregate: ResultAggregate | null }
