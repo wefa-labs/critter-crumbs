@@ -4,3 +4,4 @@ export { createLocalAccount, buildSignInMessage, verifySignInMessage, type Accou
 export * from './account/injected.js';
 export * from './timelock/index.js';
 export * from './target-id.js';
+export * from './tally/index.js';

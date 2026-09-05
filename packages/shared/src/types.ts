@@ -23,3 +23,15 @@ export interface Feast extends FeastClock, Omit<FeastSetup, 'options'> {
 export interface AllocationPayload { v: 1; feast: string; scatterer: Address; participants: Hex; allocation: [Hex, number][]; nonce: string }
 export interface ApiError { error: import('./copy.js').CopyId; serverNow: number }
 export type ApiResponse<T> = T & { serverNow: number };
+export interface TallyCandidate { seq: string; uid: Hex; attester: Address; plaintext: string | null }
+export interface TallyInput {
+  feastId: string; publishedSetHash: Hex; crumbsIssued: number;
+  targets: Pick<Target, 'id' | 'ownerAddress' | 'position'>[]; participants: Address[]; ballots: TallyCandidate[];
+}
+export interface TallyResult {
+  counted: PublishedEntry[];
+  rejected: { attester: Address; seq: string; reason: 'not_participant' | 'unreadable' | 'invalid_payload' }[];
+  didNotScatter: Address[];
+  totals: { targetId: Hex; crumbs: number; share: [number, number] }[];
+  totalScattered: number; ties: Hex[][]; resultHash: Hex;
+}
