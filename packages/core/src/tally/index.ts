@@ -14,7 +14,7 @@ function unique(values: readonly (string | number)[]): void {
   if (new Set(values).size !== values.length) throw new TypeError('Ambiguous tally input');
 }
 function sequence(value: string): string {
-  if (!/^[1-9][0-9]*$/.test(value) || value.length > 19 || BigInt(value) > 9223372036854775807n) throw new TypeError('Invalid sequence');
+  if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value) || value.length > 19 || BigInt(value) > 9223372036854775807n) throw new TypeError('Invalid sequence');
   return value;
 }
 function normalize(raw: TallyInput): TallyInput {

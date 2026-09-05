@@ -165,3 +165,10 @@ test('tally orders sequences above the JavaScript safe-integer range without rou
 test('tally participant hash matches the independent sorted-address vector', () => {
   expect(participantSetHash([...addresses].reverse())).toBe('0x24cc7572e55798da348c9f57fb9e956316454d202033d117bb9b9a98adf64a89');
 });
+
+test('tally rejects numeric sequence metadata that would collide with its string spelling', () => {
+  const input = fixture(), valid = candidate(input, 0, [0, 100, 0, 0]);
+  input.ballots = [{ ...valid, seq: 1 as unknown as string, plaintext: null }, valid];
+  expect(() => tally(input)).toThrow();
+  expect(() => tally({ ...input, ballots: [...input.ballots].reverse() })).toThrow();
+});
