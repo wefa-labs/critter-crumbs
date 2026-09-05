@@ -94,3 +94,36 @@ test.each(['members', 'join', 'leave'])('API %s rejects a signed-in nonmember', 
   const created = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
   expect((await api({ method: 'POST', path: `/api/burrows/${created.body.id}/${action}`, headers: stranger.headers, body: { address: testAccount(3).address } })).status).toBe(403);
 });
+
+test('API burrow phase and serverNow use the same checked snapshot across a deadline', async () => {
+  let crossing = false, reads = 0; const initial = 1800000000123;
+  const { api, connect, close, openFeastFixture } = await apiHarness({ clock: () => crossing ? initial + (++reads <= 2 ? 999 : 1000) : initial }); disposals.push(close);
+  const owner = await connect();
+  const created = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
+  const path = `/api/burrows/${created.body.id}`;
+  for (const n of [2, 3]) await api({ method: 'POST', path: `${path}/members`, headers: owner.headers, body: { address: testAccount(n).address } });
+  await openFeastFixture(String(created.body.id), owner.account.address); crossing = true;
+  const result = await api({ method: 'GET', path, headers: owner.headers });
+  expect(result.body).toMatchObject({ serverNow: initial + 999, feasts: [{ phase: 'gathering', participantsFrozenAt: null }] });
+});
+
+test('API explicitly re-adding a former member restores admission', async () => {
+  const { api, connect, close } = await apiHarness(); disposals.push(close);
+  const owner = await connect(), member = await connect(2);
+  const created = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
+  const path = `/api/burrows/${created.body.id}`, add = { method: 'POST', path: `${path}/members`, headers: owner.headers, body: { address: member.account.address } };
+  await api(add); await api({ method: 'POST', path: `${path}/join`, headers: member.headers });
+  await api({ method: 'POST', path: `${path}/leave`, headers: member.headers }); await api(add);
+  expect((await api({ method: 'POST', path: `${path}/join`, headers: member.headers })).status).toBe(200);
+});
+
+test('API burrow summaries reveal a draft only to its creator', async () => {
+  const { api, connect, close, openFeastFixture } = await apiHarness(); disposals.push(close);
+  const owner = await connect(), member = await connect(2);
+  const created = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
+  const path = `/api/burrows/${created.body.id}`;
+  await api({ method: 'POST', path: `${path}/members`, headers: owner.headers, body: { address: member.account.address } });
+  await openFeastFixture(String(created.body.id), owner.account.address, 'draft');
+  expect((await api({ method: 'GET', path, headers: member.headers })).body.feasts).toEqual([]);
+  expect((await api({ method: 'GET', path, headers: owner.headers })).body.feasts).toHaveLength(1);
+});

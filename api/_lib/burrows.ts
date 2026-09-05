@@ -7,7 +7,7 @@ export function createBurrows(db: Database, clock: () => number, ens?: EnsResolv
   const transactions = createBurrowTransactions(db, clock);
   return {
     async read(id: string, address: Address) {
-      const snapshot = await transactions.read(id); requireMember(snapshot, address); return burrowView(snapshot, clock());
+      const snapshot = await transactions.read(id); requireMember(snapshot, address); return burrowView(snapshot, address);
     },
     async add(id: string, actor: Address, input: string) {
       requireMember(await transactions.read(id), actor);
@@ -22,7 +22,7 @@ export function createBurrows(db: Database, clock: () => number, ens?: EnsResolv
         const member = bind(address), actorParam = bind(actor), at = bind(timestamp(now));
         return { result: undefined, sql: [
           `insert into profiles (address,created_at) select ${member},${at}::timestamptz from gate on conflict (address) do nothing`,
-          `insert into burrow_members (burrow_id,address,added_by) select id,${member},${actorParam} from gate on conflict (burrow_id,address) do nothing`,
+          `insert into burrow_members (burrow_id,address,added_by) select id,${member},${actorParam} from gate on conflict (burrow_id,address) do update set left_at=null`,
         ] };
       });
       return this.read(id, actor);

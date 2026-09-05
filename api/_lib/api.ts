@@ -19,7 +19,7 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
   return async request => {
     const now = deps.clock();
     const headers = responseHeaders(deps.connectOrigins);
-    const reply = (status: number, body: Record<string, unknown>): ApiReply => ({ status, headers, body: { ...body, serverNow: deps.clock() } });
+    const reply = (status: number, body: Record<string, unknown>): ApiReply => ({ status, headers, body: { ...body, serverNow: body.serverNow ?? deps.clock() } });
     try {
       const incoming = Object.fromEntries(Object.entries(request.headers ?? {}).map(([name, value]) => [name.toLowerCase(), value]));
       if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && incoming.origin && incoming.origin !== deps.origin) throw new HttpError(403, 'err.generic');
