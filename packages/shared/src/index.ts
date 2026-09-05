@@ -4,3 +4,5 @@ export { copy, formatCopy, type CopyId, type CopyParams } from './copy.js';
 export * from './feel.js';
 export { ValidationError, record, text, integer, boolean, hex, parseFeastSetup } from './validate.js';
 export { parseAddress, parseUuid, parseProfileUpdate, parseStatement, parseAllocationPayload } from './validate.js';
+export { parseSignedOffchainAttestation } from './eas-validate.js';
+export { parseSequence } from './validate.js';

@@ -32,10 +32,11 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     const feast = feastFromRow(row, targets, snapshot.participants.filter(participant => participant.feast_id === id).map(participant => String(participant.address)));
     const phase = phaseAt(feast, snapshot.now);
     const statements = snapshot.statements.filter(statement => statement.feast_id === id && targets.some(target => target.id === dbHex(statement.target_id)));
+    const ballots = snapshot.ballots.filter(ballot => ballot.feast_id === id);
     return { ...feast, phase, serverNow: snapshot.now,
       statements: statements.filter(statement => ['scattering', 'feast'].includes(phase) || sameAddress(String(statement.author_address), actor))
         .map(statement => ({ targetId: dbHex(statement.target_id), authorAddress: getAddress(String(statement.author_address)), body: statement.body, updatedAt: milliseconds(statement.updated_at) })),
-      participation: { written: statements.filter(statement => String(statement.body).length > 0).map(statement => dbHex(statement.target_id)), scattered: [] }, ownBallotUids: [] };
+      participation: { written: statements.filter(statement => String(statement.body).length > 0).map(statement => dbHex(statement.target_id)), scattered: [...new Set(ballots.map(ballot => String(ballot.attester)))].sort().map(address => getAddress(address)) }, ownBallotUids: ballots.filter(ballot => ballot.attester === actor).map(ballot => dbHex(ballot.uid)) };
   }
   async function location(id: string) {
     const [row] = await db.query('select burrow_id from feasts where id=$1', [id]);

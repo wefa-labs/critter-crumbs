@@ -5,3 +5,5 @@ export * from './account/injected.js';
 export * from './timelock/index.js';
 export * from './target-id.js';
 export * from './tally/index.js';
+export * from './eas/index.js';
+export * from './publication.js';

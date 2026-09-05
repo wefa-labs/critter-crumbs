@@ -17,6 +17,13 @@ export function feastFromRow(row: Row, targets: Target[], participants: string[]
     aggregatePublic: Boolean(row.aggregate_public), individualOpen: Boolean(row.individual_open), gatheringExtended: Boolean(row.gathering_extended),
     openedAt: row.opened_at === null ? null : milliseconds(row.opened_at), cancelledAt: row.cancelled_at === null ? null : milliseconds(row.cancelled_at),
     participantsFrozenAt: row.participants_frozen_at === null ? null : milliseconds(row.participants_frozen_at),
-    targets, participants: participants.map(address => getAddress(address)), closeRecord: row.close_record as Feast['closeRecord'],
+    targets, participants: participants.map(address => getAddress(address)), closeRecord: closeRecordFromRow(row),
     registration: row.shutter_identity && row.shutter_eon_key ? { identityPrefix: dbHex(row.shutter_identity_prefix), identity: dbHex(row.shutter_identity), eon: Number(row.shutter_eon), eonKey: dbHex(row.shutter_eon_key), txHash: row.shutter_tx_hash as Hex | null } : null };
+}
+
+export function closeRecordFromRow(row: Row): Feast['closeRecord'] {
+  const record = row.close_record as Feast['closeRecord'];
+  if (!record) return null;
+  const checksum = (entry: NonNullable<Feast['closeRecord']>['published'][number]) => ({ ...entry, attester: getAddress(entry.attester) });
+  return { ...record, published: record.published.map(checksum), counted: record.counted.map(checksum) };
 }

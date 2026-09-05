@@ -35,3 +35,14 @@ export interface TallyResult {
   totals: { targetId: Hex; crumbs: number; share: [number, number] }[];
   totalScattered: number; ties: Hex[][]; resultHash: Hex;
 }
+export interface OffchainMessage {
+  version: 2; schema: Hex; recipient: Address; time: string; expirationTime: string;
+  revocable: boolean; refUID: Hex; data: Hex; salt: Hex;
+}
+export interface SignedOffchainAttestation {
+  version: 2; uid: Hex;
+  domain: { name: string; version: string; chainId: number; verifyingContract: Address };
+  primaryType: 'Attest';
+  types: { Attest: { name: string; type: 'uint16' | 'bytes32' | 'address' | 'uint64' | 'bool' | 'bytes' }[] };
+  message: OffchainMessage; signature: { v: 27 | 28; r: Hex; s: Hex };
+}

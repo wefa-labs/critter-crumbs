@@ -1,5 +1,5 @@
 import {
-  canonicalJSON, hex, integer, parseUuid, parseAddress, parseAllocationPayload,
+  canonicalJSON, hex, integer, parseUuid, parseSequence, parseAddress, parseAllocationPayload,
   type Address, type Hex, type TallyInput, type TallyCandidate, type TallyResult,
 } from '@critter-crumbs/shared';
 import { keccak256, stringToHex } from 'viem';
@@ -13,17 +13,13 @@ function orderedParticipants(participants: readonly Address[]): Address[] {
 function unique(values: readonly (string | number)[]): void {
   if (new Set(values).size !== values.length) throw new TypeError('Ambiguous tally input');
 }
-function sequence(value: string): string {
-  if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value) || value.length > 19 || BigInt(value) > 9223372036854775807n) throw new TypeError('Invalid sequence');
-  return value;
-}
 function normalize(raw: TallyInput): TallyInput {
   const input: TallyInput = {
     feastId: parseUuid(raw.feastId), publishedSetHash: hex(raw.publishedSetHash, 32), crumbsIssued: integer(raw.crumbsIssued, 10, 1000),
     participants: orderedParticipants(raw.participants),
     targets: raw.targets.map(target => ({ id: hex(target.id, 32), position: integer(target.position, 0, Number.MAX_SAFE_INTEGER),
       ownerAddress: target.ownerAddress === null ? null : parseAddress(target.ownerAddress) })).sort((a, b) => a.position - b.position),
-    ballots: raw.ballots.map(ballot => ({ ...ballot, seq: sequence(ballot.seq), attester: parseAddress(ballot.attester), uid: hex(ballot.uid, 32) }))
+    ballots: raw.ballots.map(ballot => ({ ...ballot, seq: parseSequence(ballot.seq), attester: parseAddress(ballot.attester), uid: hex(ballot.uid, 32) }))
       .sort((a, b) => BigInt(a.seq) < BigInt(b.seq) ? -1 : BigInt(a.seq) > BigInt(b.seq) ? 1 : 0),
   };
   unique(input.targets.map(target => target.id)); unique(input.targets.map(target => target.position)); unique(input.ballots.map(ballot => ballot.seq));

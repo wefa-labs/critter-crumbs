@@ -71,3 +71,7 @@ export function parseAllocationPayload(value: unknown): import('./types.js').All
   });
   return { v: 1, feast: parseUuid(input.feast), scatterer: parseAddress(input.scatterer), participants: hex(input.participants, 32), allocation, nonce: input.nonce.toLowerCase() };
 }
+export function parseSequence(value: unknown): string {
+  if (typeof value !== 'string' || !/^[1-9][0-9]*$/.test(value) || value.length > 19 || BigInt(value) > 9223372036854775807n) throw new ValidationError();
+  return value;
+}
