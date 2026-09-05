@@ -1,21 +1,23 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { verifySignInMessage } from '@critter-crumbs/core';
+import { verifySignInMessage, type Timelock } from '@critter-crumbs/core';
 import { hex, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError } from '@critter-crumbs/shared';
 import type { Database } from './database.js';
 import { createStore } from './store.js';
 import { sessionCookies } from './session.js';
 import { createProfiles } from './profiles.js';
 import type { EnsResolver } from './ens.js';
+import { createFeasts } from './feasts.js';
 import { createBurrows } from './burrows.js';
 import { HttpError } from './errors.js';
 import { responseHeaders } from './http.js';
 export interface ApiRequest { method: string; path: string; headers?: Record<string, string | undefined>; body?: unknown }
 export interface ApiReply { status: number; headers: Record<string, string>; body: Record<string, unknown> }
-export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver }
+export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock }
 export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promise<ApiReply> {
   const store = createStore(deps.db), cookies = sessionCookies(deps.sessionSecret);
   const profiles = createProfiles(deps.db, deps.clock, deps.ens);
   const burrows = createBurrows(deps.db, deps.clock, deps.ens);
+  const feasts = createFeasts(deps.db, deps.clock, deps.timelock);
   return async request => {
     const now = deps.clock();
     const headers = responseHeaders(deps.connectOrigins);
@@ -38,6 +40,8 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
         return reply(200, { ...await profiles.read(address) });
       }
       const address = cookies.read(incoming.cookie, now);
+      const feastMatch = /^\/api\/feasts\/([^/]+)$/.exec(path);
+      if (feastMatch && request.method === 'GET') return reply(200, await feasts.read(parseUuid(feastMatch[1]), address));
       if (!address) throw new HttpError(401, 'err.generic');
       if (path === '/api/session' && request.method === 'DELETE') {
         headers['Set-Cookie'] = cookies.clear(); headers['Clear-Site-Data'] = '"cookies"'; return reply(200, {});
@@ -68,6 +72,14 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
           : await burrows.add(id, address, text(record(request.body).address, 1, 255, 'burrow.add.label', true));
         return reply(200, result);
       }
+      const draftMatch = /^\/api\/burrows\/([^/]+)\/feasts$/.exec(path);
+      if (draftMatch && request.method === 'POST') return reply(201, await feasts.create(parseUuid(draftMatch[1]), address, request.body));
+      const feastAction = /^\/api\/feasts\/([^/]+)\/(open|cancel)$/.exec(path);
+      if (feastAction && request.method === 'POST') return reply(200, await feasts[feastAction[2] as 'open' | 'cancel'](parseUuid(feastAction[1]), address));
+      const extensionMatch = /^\/api\/feasts\/([^/]+)\/extend$/.exec(path);
+      if (extensionMatch && request.method === 'POST') return reply(200, await feasts.extend(parseUuid(extensionMatch[1]), address, record(request.body).gatheringEndsAt));
+      const statementMatch = /^\/api\/feasts\/([^/]+)\/statements\/([^/]+)$/.exec(path);
+      if (statementMatch && request.method === 'PUT') return reply(200, await feasts.statement(parseUuid(statementMatch[1]), hex(statementMatch[2], 32), address, record(request.body).body));
       throw new HttpError(404, 'err.generic');
     } catch (error) {
       if (error instanceof HttpError) return reply(error.status, { error: error.copyId, ...(error.detail ? { detail: error.detail } : {}) });

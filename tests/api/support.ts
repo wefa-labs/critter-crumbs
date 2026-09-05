@@ -7,12 +7,12 @@ export async function openTestDatabase() {
   return db;
 }
 
-import { buildSignInMessage, createLocalAccount, type SignInChallenge } from '@critter-crumbs/core';
+import { buildSignInMessage, createLocalAccount, createMockTimelock, type SignInChallenge } from '@critter-crumbs/core';
 import { createApi, type ApiDependencies } from '../../api/_lib/api.js';
 export const testAccount = (n: number) => createLocalAccount(`0x${n.toString(16).padStart(64, '0')}`);
 export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> = {}) {
-  const db = await openTestDatabase(); let now = 1800000000123;
-  const api = createApi({ db, clock: () => now, sessionSecret: 'local-session-secret-for-tests-only', origin: 'http://localhost:5173', ...options });
+  const db = await openTestDatabase(); const sessions = new Map<string, { cookie: string }>(); let now = 1800000000123;
+  const api = createApi({ db, clock: () => now, sessionSecret: 'local-session-secret-for-tests-only', origin: 'http://localhost:5173', timelock: createMockTimelock({ secret: 'mock-secret-for-local-tests-only-32', clock: options.clock ?? (() => now) }), ...options });
   async function signedRequest(n = 1) {
     const account = testAccount(n), challenge = (await api({ method: 'GET', path: '/api/session/nonce' })).body;
     const signature = await account.signMessage(buildSignInMessage(account.address, challenge as unknown as SignInChallenge));
@@ -22,14 +22,42 @@ export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> =
     const request = await signedRequest(n), account = testAccount(n);
     const response = await api(request);
     if (response.status !== 200) throw new Error(`Sign-in failed: ${JSON.stringify(response.body)}`);
-    return { account, request, connected: response, headers: { cookie: response.headers['Set-Cookie']!.split(';')[0]! } };
+    const headers = { cookie: response.headers['Set-Cookie']!.split(';')[0]! }; sessions.set(account.address.toLowerCase(), headers);
+    return { account, request, connected: response, headers };
   }
-  // Arrange an external database state until the feast-creation route arrives in ticket 05.
   async function openFeastFixture(burrowId: string, creator: string, status = 'open') {
-    const id = '10000000-0000-4000-8000-000000000001';
-    await db.batch([{ text: `insert into feasts (id,burrow_id,created_by,kind,title,crumbs_per_critter,gathering_ends_at,scattering_ends_at,aggregate_public,individual_open,status,opened_at)
-      values ($1,$2,$3,'people','Fixture',100,$4,$5,false,false,$7,$6)`, values: [id,burrowId,creator.toLowerCase(),new Date(now+1000).toISOString(),new Date(now+2000).toISOString(),status === 'open' ? new Date(now).toISOString() : null,status] }]);
+    const headers = sessions.get(creator.toLowerCase())!;
+    const burrow = await api({ method: 'GET', path: `/api/burrows/${burrowId}`, headers });
+    const kind = (burrow.body.members as unknown[]).length >= 3 ? 'people' : 'options';
+    const created = await api({ method: 'POST', path: `/api/burrows/${burrowId}/feasts`, headers, body: {
+      title: 'Fixture', kind, crumbsPerCritter: 100, gatheringEndsAt: now+1000, scatteringEndsAt: now+2000,
+      aggregatePublic: false, individualOpen: false, options: [{ name: 'Garden', statement: '' }],
+    } });
+    if (created.status !== 201) throw new Error(`Draft creation failed: ${JSON.stringify(created.body)}`);
+    const id = String(created.body.id);
+    if (status === 'open') {
+      const opened = await api({ method: 'POST', path: `/api/feasts/${id}/open`, headers });
+      if (opened.status !== 200) throw new Error(`Opening failed: ${JSON.stringify(opened.body)}`);
+    }
     return id;
   }
-  return { api, connect, signedRequest, openFeastFixture, clock: () => now, advance: (ms: number) => { now += ms; }, close: () => db.close() };
+  async function createFeast(options: { kind?: 'people' | 'options'; open?: boolean; aggregatePublic?: boolean } = {}) {
+    const owner = await connect(), members = [await connect(2), await connect(3)];
+    const burrow = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
+    const burrowId = String(burrow.body.id);
+    for (const member of members) await api({ method: 'POST', path: `/api/burrows/${burrowId}/members`, headers: owner.headers, body: { address: member.account.address } });
+    const created = await api({ method: 'POST', path: `/api/burrows/${burrowId}/feasts`, headers: owner.headers, body: {
+      title: 'Fixture', kind: options.kind ?? 'people', crumbsPerCritter: 100, gatheringEndsAt: now+1000, scatteringEndsAt: now+2000,
+      aggregatePublic: options.aggregatePublic ?? false, individualOpen: false, options: [{ name: 'Garden', statement: 'Plant trees.' }, { name: 'Library', statement: 'Buy books.' }],
+    } });
+    if (created.status !== 201) throw new Error(`Draft creation failed: ${JSON.stringify(created.body)}`);
+    const feastId = String(created.body.id), path = `/api/feasts/${feastId}`;
+    if (options.open) {
+      const opened = await api({ method: 'POST', path: `${path}/open`, headers: owner.headers });
+      if (opened.status !== 200) throw new Error(`Opening failed: ${JSON.stringify(opened.body)}`);
+    }
+    return { owner, members, burrowId, feastId, path, created };
+  }
+
+  return { api, connect, signedRequest, openFeastFixture, createFeast, clock: () => now, advance: (ms: number) => { now += ms; }, close: () => db.close() };
 }

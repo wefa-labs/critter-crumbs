@@ -5,18 +5,20 @@ import { pendingFreezes } from './freeze.js';
 import { profileFromRow, timestamp } from './store.js';
 import type { Database, Row } from './database.js';
 import { HttpError } from './errors.js';
-export interface BurrowSnapshot { burrow: Row; members: Row[]; feasts: Row[]; participants: Row[]; now: number }
+export interface BurrowSnapshot { burrow: Row; members: Row[]; feasts: Row[]; participants: Row[]; targets: Row[]; statements: Row[]; now: number }
 /** One consistent snapshot, followed by a single revision-guarded SQL statement. */
 export function createBurrowTransactions(db: Database, clock: () => number) {
   async function readSnapshot(id: string): Promise<Omit<BurrowSnapshot, 'now'>> {
-    const [burrows, members, feasts, participants] = await db.batch([
+    const [burrows, members, feasts, participants, targets, statements] = await db.batch([
       { text: 'select * from burrows where id=$1', values: [id] },
       { text: `select p.*,m.joined_at,m.left_at,m.added_by from burrow_members m join profiles p on p.address=m.address where m.burrow_id=$1 order by m.address`, values: [id] },
       { text: 'select * from feasts where burrow_id=$1 order by id', values: [id] },
       { text: 'select p.* from feast_participants p join feasts f on f.id=p.feast_id where f.burrow_id=$1 order by p.address', values: [id] },
+      { text: 'select t.* from targets t join feasts f on f.id=t.feast_id where f.burrow_id=$1 order by t.position', values: [id] },
+      { text: 'select s.* from statements s join feasts f on f.id=s.feast_id where f.burrow_id=$1 order by s.target_id', values: [id] },
     ], { readOnly: true, isolationLevel: 'RepeatableRead' });
     if (!burrows?.[0]) throw new HttpError(404, 'burrow.unknown.title');
-    return { burrow: burrows[0], members: members!, feasts: feasts!, participants: participants! };
+    return { burrow: burrows[0], members: members!, feasts: feasts!, participants: participants!, targets: targets!, statements: statements! };
   }
   type Choose<T> = (snapshot: BurrowSnapshot, now: number, bind: (value: unknown) => string) => { sql: string[]; result: T };
   async function run<T>(id: string, choose?: Choose<T>): Promise<T | BurrowSnapshot> {

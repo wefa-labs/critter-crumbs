@@ -1,5 +1,5 @@
 import { phaseAt } from '@critter-crumbs/core';
-import { getAddress, keccak256, stringToHex } from 'viem';
+import { freezePeopleTargets } from './targets.js';
 import { feastClock } from './feast-rows.js';
 import { timestamp } from './store.js';
 import type { BurrowSnapshot } from './burrow-transactions.js';
@@ -14,13 +14,7 @@ export function pendingFreezes(snapshot: BurrowSnapshot, now: number, bind: (val
     const addresses = bind(JSON.stringify(members.map(member => member.address)));
     sql.push(`insert into feast_participants (feast_id,address) select ${id},member.address from gate cross join jsonb_array_elements_text(${addresses}::jsonb) member(address) on conflict do nothing`);
     if (feast.kind !== 'people') continue;
-    sql.push(`delete from targets where feast_id=${id} and owner_address not in (select jsonb_array_elements_text(${addresses}::jsonb)) and exists(select 1 from gate)`);
-    for (const [position, member] of members.entries()) {
-      const address = String(member.address), targetId = Buffer.from(keccak256(stringToHex(address)).slice(2), 'hex');
-      sql.push(`insert into targets (feast_id,target_id,kind,owner_address,name,position)
-        select ${id},${bind(targetId)}::bytea,'person',${bind(address)},${bind(member.ens_name ?? member.display_name ?? getAddress(address))},${bind(position)} from gate
-        on conflict (feast_id,target_id) do update set name=excluded.name,position=excluded.position`);
-    }
+    sql.push(...freezePeopleTargets(members, String(feast.id), bind));
   }
   return sql;
 }
