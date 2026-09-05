@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "noEmit": true,
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "allowJs": true,
+    "checkJs": false
+  },
+  "include": [
+    "api/**/*.ts",
+    "scripts/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "packages/app/vite.config.ts",
+    "vitest.config.ts",
+    "playwright.config.ts",
+    "tests/e2e/**/*.ts"
+  ]
+}

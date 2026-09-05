@@ -1,0 +1,26 @@
+{
+  "name": "@critter-crumbs/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsc -b && vitest run --root ../.. --project core"
+  },
+  "dependencies": {
+    "@critter-crumbs/shared": "0.0.0",
+    "@neondatabase/serverless": "1.1.0",
+    "@shutter-network/shutter-sdk": "0.0.2",
+    "viem": "2.56.0"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "@critter-crumbs/app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "test": "tsc -b && vitest run --root ../.. --project app"
+  },
+  "dependencies": {
+    "@critter-crumbs/core": "0.0.0",
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
+    "koota": "0.6.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "0.185.1",
+    "@critter-crumbs/shared": "0.0.0"
+  }
+}
