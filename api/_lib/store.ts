@@ -2,7 +2,7 @@ import { getAddress } from 'viem';
 import type { Address, Profile } from '@critter-crumbs/shared';
 import type { Database, Row } from './database.js';
 export const timestamp = (now: number) => new Date(now).toISOString();
-const milliseconds = (value: unknown) => value === null || value === undefined ? null : (value instanceof Date ? value.getTime() : new Date(String(value)).getTime());
+const milliseconds = (value: unknown) => value === null || value === undefined ? null : new Date(value as string | number).getTime();
 export function profileFromRow(row: Row): Profile {
   return { address: getAddress(String(row.address)), variant: Number(row.variant), rerollsUsed: Number(row.rerolls_used),
     displayName: row.display_name as string | null, ensName: row.ens_name as string | null,
