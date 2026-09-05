@@ -1,0 +1,66 @@
+{
+  "name": "critter-crumbs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.22.1 <23",
+    "npm": "11.19.1"
+  },
+  "packageManager": "npm@11.19.1",
+  "workspaces": [
+    "packages/shared",
+    "packages/core",
+    "packages/app"
+  ],
+  "scripts": {
+    "dev": "npm run compile && node scripts/dev.mjs",
+    "dev:app": "vite --config packages/app/vite.config.ts",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc -b && tsc -p tsconfig.tools.json",
+    "test": "npm run compile && vitest run && node --test scripts/*.test.mjs",
+    "compile": "tsc -b",
+    "check:licenses": "node scripts/check-dependencies.mjs",
+    "check:audit": "npm audit --audit-level=high && npm audit signatures",
+    "check": "npm run lint && npm run typecheck && npm test && npm run check:workspaces && npm run check:licenses && npm run check:audit",
+    "build": "npm run compile && vite build --config packages/app/vite.config.ts",
+    "vercel-build": "npm run build",
+    "e2e": "playwright test",
+    "e2e:install": "playwright install chromium",
+    "migrate": "node scripts/phase-2-required.mjs migrate",
+    "seed": "node scripts/phase-2-required.mjs seed",
+    "check:workspaces": "node scripts/probe-workspaces.mjs"
+  },
+  "devDependencies": {
+    "vite": "7.3.6",
+    "@vitejs/plugin-react": "5.2.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@types/three": "0.185.4",
+    "eslint": "9.39.5",
+    "@typescript-eslint/parser": "8.68.0",
+    "@typescript-eslint/eslint-plugin": "8.68.0",
+    "@ethereum-attestation-service/eas-sdk": "2.10.0",
+    "playwright": "1.62.1",
+    "vercel": "59.9.1"
+  },
+  "overrides": {
+    "path-to-regexp@6.1.0": "6.3.0",
+    "path-to-regexp@>=8.0.0 <8.4.2": "8.4.2",
+    "undici@5": "6.28.0",
+    "tar@7.5.7": "7.5.22",
+    "adm-zip@0.4.16": "0.6.0",
+    "serialize-javascript@6.0.2": "7.1.0",
+    "tmp@0.0.33": "0.2.7",
+    "minimatch@10.1.1": "10.2.6",
+    "js-yaml@4.1.1": "4.3.2"
+  },
+  "dependencies": {
+    "@critter-crumbs/core": "0.0.0",
+    "@critter-crumbs/shared": "0.0.0"
+  }
+}

@@ -18,7 +18,7 @@ A private way for a group (a **burrow**) to decide how something is shared out. 
 | Crumbs | What you have to give. The same handful for everyone. |
 | Scatter | The act of giving crumbs to a critter. |
 
-**Never in user-facing copy:** seal, round, cache, vote, ballot, wallet. Say "connect", never "connect your wallet". `ballot` is allowed as a code identifier only. All copy lives in `src/shared/copy.ts` with the IDs from `02-design-system.md` §10 — never inline a string in a component.
+**Never in user-facing copy:** seal, round, cache, vote, ballot, wallet. Say "connect", never "connect your wallet". `ballot` is allowed as a code identifier only. All copy lives in `packages/shared/src/copy.ts` with the IDs from `02-design-system.md` §10 — never inline a string in a component.
 
 ## Rules the code must enforce (PRD §5)
 
@@ -39,9 +39,9 @@ Equal crumbs for everyone · you must scatter all of them · you cannot scatter 
 
 ## Workstreams
 
-- **A (core):** `src/core`, `api`, `db`, `scripts` — account, timelock, EAS, tally, API, data.
-- **B (app):** `src/app`, `public` — screens, components, Koota world, 3D, audio, portraits.
-- **Shared:** `src/shared` — types, copy, constants (`feel.ts`), validators. Small reviewed changes only.
+- **A (core):** `packages/core`, `api`, `db`, `scripts` — account, timelock, EAS, tally, API, data.
+- **B (app):** `packages/app/src`, `packages/app/public` — screens, components, Koota world, 3D, audio, portraits.
+- **Shared:** `packages/shared/src` — types, copy, constants (`feel.ts`), validators. Small reviewed changes only.
 
 ## Skills (any agent)
 
@@ -64,6 +64,6 @@ Ten skills from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, 
 
 ## Commands
 
-`npm run dev` (Vite + `vercel dev`, mock timelock, Neon dev branch) · `npm test` · `npm run e2e` (mock-mode lifecycle) · `npm run migrate` · `npm run seed` · `npm run build` (fails on chunk budgets).
+Use Node 22.22.1 and npm 11.19.1. `npm ci` · `npm run check` (lint, typecheck, tests, licences, vulnerability and signature audits) · `npm run build` (compiles workspaces, builds the app, enforces chunk budgets) · `npm test` · `npm run dev:app` (Vite only) · `npm run dev` (Vite + `vercel dev`, mock by default; human project setup required) · `npm run e2e:install` (explicit Chromium install) · `npm run e2e` (phase 3 lifecycle) · `npm run migrate` and `npm run seed` (phase 2 implementations required). See `docs/foundation/README.md`.
 
 Environment variables and modes: `04-technical-spec.md` §13. `SHUTTER_MODE=mock` is the default locally and must never be set in production.

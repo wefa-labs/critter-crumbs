@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import path from 'node:path';
+import { ESLint } from 'eslint';
+
+const eslint = new ESLint();
+const check = async (code, file) => (await eslint.lintText(code, { filePath: path.resolve(file) }))[0].messages;
+const has = async (code, file, rule) => (await check(code, file)).some((message) => message.ruleId === `critter-crumbs/${rule}`);
+
+test('HTML injection forms fail lint, while textContent is allowed', async () => {
+  for (const code of ['element.innerHTML = text;', 'element["outerHTML"] = text;', 'element.insertAdjacentHTML("beforeend", text);', 'const { innerHTML } = element;', 'const view = <div dangerouslySetInnerHTML={data} />;']) {
+    assert.equal(await has(code, 'packages/app/src/probe.tsx', 'no-html'), true, code);
+  }
+  assert.equal(await has('element.textContent = text;', 'packages/app/src/probe.ts', 'no-html'), false);
+});
+
+test('clock reads and aliases fail outside the exact adapter allow-list', async () => {
+  for (const code of ['Date.now();', 'Date["now"]();', 'new Date();', 'performance.now();', 'const clock = Date;', 'const clock = Date as typeof Date;', 'const { now } = Date;', 'globalThis.Date.now();']) {
+    assert.equal(await has(code, 'packages/core/src/probe.ts', 'time-as-input'), true, code);
+    assert.equal(await has(code, 'packages/core/src/api-client/clock-offset.ts', 'time-as-input'), false, code);
+  }
+  assert.equal(await has('new Date(timestamp); Date.parse(value);', 'packages/core/src/probe.ts', 'time-as-input'), false);
+  assert.equal(await has('Date.now();', 'api/_lib/not-clock.ts', 'time-as-input'), true);
+});
+
+test('workspace imports reject reverse and private paths across each syntax', async () => {
+  for (const code of ['import "@critter-crumbs/app";', 'export * from "@critter-crumbs/app";', 'import("@critter-crumbs/app");', 'require("@critter-crumbs/app");', 'import "@critter-crumbs/shared/src/index.js";', 'import "../../shared/src/index.js";']) {
+    assert.equal(await has(code, 'packages/core/src/probe.ts', 'imports'), true, code);
+  }
+  assert.equal(await has('import "@critter-crumbs/core";', 'packages/shared/src/probe.ts', 'imports'), true);
+  assert.equal(await has('import "@critter-crumbs/app";', 'api/probe.ts', 'imports'), true);
+  for (const file of ['packages/core/src/probe.ts', 'packages/app/src/probe.ts', 'api/probe.ts']) {
+    assert.equal(await has('import "@critter-crumbs/shared";', file, 'imports'), false);
+  }
+});
+
+test('visible JSX wording and indirect literals require copy IDs', async () => {
+  for (const code of ['const view = <p>Hello</p>;', 'const label = "Hello" as const;', 'const view = <p>{"Hello"}</p>;', 'const view = <input placeholder="Hello" />;', 'const label = "Hello"; const view = <p>{label}</p>;', 'const view = <p>{`Hello ${name}`}</p>;']) {
+    assert.equal(await has(code, 'packages/app/src/probe.tsx', 'copy-ids'), true, code);
+  }
+  assert.equal(await has('import { copy } from "@critter-crumbs/shared"; const view = <p className="statement" aria-label={copy["gathering.title"]}>{copy["gathering.title"]}</p>;', 'packages/app/src/probe.tsx', 'copy-ids'), false);
+});
