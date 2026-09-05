@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import type { Feast } from '@critter-crumbs/shared';
-import { apiHarness } from './support.js';
+import { apiHarness, apiTestTimeout } from './support.js';
 import { resultFixture } from './result-fixture.js';
 
 test('API result record verifies Base provenance and exposes public numbers only after recording', async () => {
@@ -17,12 +17,14 @@ test('API result record verifies Base provenance and exposes public numbers only
     expect(publicRead.body.aggregate).toMatchObject({ scatterers: 0, crumbs: [0, 0, 0] });
     expect(publicRead.body).not.toHaveProperty('closeRecord'); expect(publicRead.body).not.toHaveProperty('statements');
   } finally { await close(); }
-}, 30000);
+}, apiTestTimeout);
 
-test.each(['draft', 'gathering', 'scattering', 'private', 'nonmember', 'anonymous'] as const)('API result record gates %s before requesting Base', async state => {
+test.each(['draft', 'gathering', 'scattering', 'cancelled', 'void', 'private', 'nonmember', 'anonymous'] as const)('API result record gates %s before requesting Base', async state => {
   const fixture = resultFixture(); const h = await apiHarness({ resultReader: fixture.reader });
   try {
-    const { path, owner } = await h.createFeast({ open: state !== 'draft', aggregatePublic: state !== 'private' });
+    const { path, owner, members, burrowId } = await h.createFeast({ open: state !== 'draft', aggregatePublic: state !== 'private' });
+    if (state === 'cancelled') await h.api({ method: 'POST', path: `${path}/cancel`, headers: owner.headers });
+    if (state === 'void') { await h.api({ method: 'POST', path: `/api/burrows/${burrowId}/leave`, headers: members[0]!.headers }); h.advance(2000); }
     if (state === 'scattering') h.advance(1000);
     if (['private', 'nonmember', 'anonymous'].includes(state)) h.advance(2000);
     const headers = state === 'anonymous' ? {} : state === 'nonmember' ? (await h.connect(4)).headers : owner.headers;
@@ -30,7 +32,7 @@ test.each(['draft', 'gathering', 'scattering', 'private', 'nonmember', 'anonymou
     expect(result.status).toBe(state === 'anonymous' ? 401 : ['private', 'nonmember'].includes(state) ? 403 : 400);
     expect(fixture.calls).toBe(0);
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);
 
 test.each(['feast', 'close hash', 'issued crumbs', 'target order', 'owners', 'scatterers', 'total'] as const)('API result record rejects mismatched %s without publishing numbers', async change => {
   const fixture = resultFixture(); const h = await apiHarness({ resultReader: fixture.reader });
@@ -45,7 +47,7 @@ test.each(['feast', 'close hash', 'issued crumbs', 'target order', 'owners', 'sc
     expect(saved.status).toBe(400); expect(saved.body.error).toBe('err.generic');
     expect((await h.api({ method: 'GET', path })).body.aggregate).toBeNull();
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);
 
 test('API result record commits the first concurrent post once and returns it on retries', async () => {
   const fixture = resultFixture(); const h = await apiHarness({ resultReader: fixture.reader });
@@ -60,7 +62,7 @@ test('API result record commits the first concurrent post once and returns it on
     const retry = await h.api({ method: 'POST', path: `${path}/result-attestation`, headers: owner.headers, body: {} });
     expect(retry.body.resultAttestation).toEqual(responses[0]!.body.resultAttestation); expect(fixture.calls).toBe(calls);
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);
 
 test.each(['recipient', 'expirationTime', 'revocationTime', 'revocable', 'refUID', 'time'] as const)('API result record rejects invalid stored %s', async field => {
   const fixture = resultFixture();
@@ -76,7 +78,7 @@ test.each(['recipient', 'expirationTime', 'revocationTime', 'revocable', 'refUID
     const saved = await h.api({ method: 'POST', path: `${path}/result-attestation`, headers: owner.headers, body: { txHash, attester: owner.account.address } });
     expect(saved.status).toBe(400);
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);
 
 test.each(['claimed', 'onchain'] as const)('API result record rejects another %s attester', async mismatch => {
   const fixture = resultFixture(); const h = await apiHarness({ resultReader: fixture.reader });
@@ -87,7 +89,7 @@ test.each(['claimed', 'onchain'] as const)('API result record rejects another %s
     const saved = await h.api({ method: 'POST', path: `${path}/result-attestation`, headers: owner.headers, body: { txHash, attester: mismatch === 'claimed' ? members[0]!.account.address : owner.account.address } });
     expect(saved.status).toBe(403);
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);
 
 test('API result record rechecks membership after Base verification', async () => {
   const fixture = resultFixture(); let leave = async () => {};
@@ -100,7 +102,7 @@ test('API result record rechecks membership after Base verification', async () =
     expect((await h.api({ method: 'POST', path: `${path}/result-attestation`, headers: owner.headers, body: { txHash, attester: owner.account.address } })).status).toBe(403);
     expect((await h.api({ method: 'GET', path })).body.aggregate).toBeNull();
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);
 
 test('API result record leaves optional recording retryable when Base is unavailable', async () => {
   const h = await apiHarness({ resultReader: { async read() { throw new Error('RPC unavailable'); } } });
@@ -110,4 +112,4 @@ test('API result record leaves optional recording retryable when Base is unavail
     expect(saved.status).toBe(503); expect(saved.body.error).toBe('err.storeUnreachable');
     expect((await h.api({ method: 'GET', path, headers: owner.headers })).body.phase).toBe('feast');
   } finally { await h.close(); }
-}, 30000);
+}, apiTestTimeout);

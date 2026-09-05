@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { serverTimelock } from '../../api/_lib/timelock.js';
 import { registrationFixture } from '../../packages/core/test/shutter-registration-support.js';
-import { apiHarness } from './support.js';
+import { apiHarness, apiTestTimeout } from './support.js';
 
 test('API real timelock retains a pending registration across handler restart and opens only after confirmation', async () => {
   const fixture = registrationFixture({ dynamic: true, pending: true });
@@ -19,7 +19,7 @@ test('API real timelock retains a pending registration across handler restart an
     expect(opened.body.registration).toMatchObject({ eon: 16, eonKey: fixture.expected.eonKey, txHash: fixture.expected.txHash });
     expect(fixture.posts).toHaveLength(1);
   } finally { await close(); }
-}, 30_000);
+}, apiTestTimeout);
 
 test('API real key retrieval preserves rate-limit retry guidance', async () => {
   const fixture = registrationFixture({ dynamic: true });

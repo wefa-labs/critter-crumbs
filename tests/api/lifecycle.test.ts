@@ -2,7 +2,7 @@ import { buildSignInMessage, createApiClient, createLocalAccount, createMockTime
 import { canonicalJSON, type CloseRecord, type Feast, type Hex } from '@critter-crumbs/shared';
 import { bytesToHex, hexToBytes } from 'viem';
 import { expect, test } from 'vitest';
-import { apiHarness } from './support.js';
+import { apiHarness, apiTestTimeout } from './support.js';
 import { testEas } from './scatter-support.js';
 
 test('API lifecycle: seed → N sign-ins → statements → advance time → scatter and resubmit → advance → release key → two independent tallies produce the same resultHash', async () => {
@@ -58,4 +58,4 @@ test('API lifecycle: seed → N sign-ins → statements → advance time → sca
     expect(results[0]!.resultHash).toBe(results[1]!.resultHash); expect(results[0]).toEqual(results[1]);
     expect(results[0]!.totalScattered).toBe(800); expect(results[0]!.counted).toHaveLength(8); expect(results[0]!.rejected).toEqual([]);
   } finally { await close(); }
-}, 30000);
+}, apiTestTimeout);

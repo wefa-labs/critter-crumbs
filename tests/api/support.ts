@@ -1,17 +1,21 @@
+import { isolatedTestDatabase } from '../../db/test-database.js';
+import { createNeonDatabase, type Database } from '../../api/_lib/database.js';
 import { fileURLToPath } from 'node:url';
 import { createPGliteDatabase } from '../../db/pglite.js';
 import { migrateDatabase } from '../../db/migrate.js';
-export async function openTestDatabase() {
-  const db = await createPGliteDatabase();
-  await migrateDatabase(db, fileURLToPath(new URL('../../db/migrations', import.meta.url)));
-  return db;
+export async function openTestDatabase(factory?: () => Promise<Database>) {
+  if (!factory && process.env.CC_API_DATABASE === 'neon' && !process.env.DATABASE_URL) throw new Error('Set DATABASE_URL for opt-in Neon tests');
+  const db = factory ? await factory() : process.env.CC_API_DATABASE === 'neon' ? await isolatedTestDatabase(createNeonDatabase(process.env.DATABASE_URL!)) : await createPGliteDatabase();
+  try { await migrateDatabase(db, fileURLToPath(new URL('../../db/migrations', import.meta.url))); return db; }
+  catch (error) { await db.close(); throw error; }
 }
 
 import { buildSignInMessage, createLocalAccount, createMockTimelock, type SignInChallenge, type Timelock } from '@critter-crumbs/core';
 import { createApi, type ApiDependencies } from '../../api/_lib/api.js';
+export const apiTestTimeout = process.env.CC_API_DATABASE === 'neon' ? 180000 : 30000;
 export const testAccount = (n: number) => createLocalAccount(`0x${n.toString(16).padStart(64, '0')}`);
-export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> & { timelockFactory?: (db: ApiDependencies['db'], clock: () => number) => Timelock } = {}) {
-  const db = await openTestDatabase(); const sessions = new Map<string, { cookie: string }>(); let now = 1800000000123;
+export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> & { databaseFactory?: () => Promise<Database>; timelockFactory?: (db: ApiDependencies['db'], clock: () => number) => Timelock } = {}) {
+  const db = await openTestDatabase(options.databaseFactory); const sessions = new Map<string, { cookie: string }>(); let now = 1800000000123;
   const dependencies = { db, clock: () => now, sessionSecret: 'local-session-secret-for-tests-only', origin: 'http://localhost:5173', timelock: options.timelockFactory?.(db, options.clock ?? (() => now)) ?? createMockTimelock({ secret: 'mock-secret-for-local-tests-only-32', clock: options.clock ?? (() => now) }), ...options };
   const api = createApi(dependencies);
   async function signedRequest(n = 1) {
