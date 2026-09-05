@@ -14,4 +14,4 @@ No other documented-standard violation or relevant baseline smell was found. Dec
 
 No actionable findings. Research covers V2/V3/V4/V6 with explicit limits; the plan names agreed seams, revised M0–M4 dates, tickets and blocking edges. Human questions remain unanswered, with reconstructable drafts. No implementation, live-chain work or phase 2 completion is claimed.
 
-Initial findings: Standards 1 (worst P2); Spec 0. The Standards correction is recorded above; a follow-up review checks its resolution.
+Initial findings: Standards 1 (worst P2); Spec 0. The Standards agent rechecked `80f8251`, confirmed the retry correction, and found no introduced issue in the timestamp clarification or review report. Remaining findings: Standards 0; Spec 0.
