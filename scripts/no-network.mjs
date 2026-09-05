@@ -1,0 +1,14 @@
+import http from 'node:http';
+import https from 'node:https';
+import net from 'node:net';
+import tls from 'node:tls';
+import dns from 'node:dns';
+import { syncBuiltinESMExports } from 'node:module';
+const blocked = () => { throw new Error('Network requests are disabled in the offline test suite'); };
+globalThis.fetch = blocked;
+if ('WebSocket' in globalThis) globalThis.WebSocket = class { constructor() { blocked(); } };
+http.request = http.get = https.request = https.get = blocked;
+net.connect = net.createConnection = net.Socket.prototype.connect = tls.connect = blocked;
+dns.lookup = dns.resolve = blocked;
+dns.promises.lookup = dns.promises.resolve = blocked;
+syncBuiltinESMExports();

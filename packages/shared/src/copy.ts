@@ -1,5 +1,6 @@
 /** Design System §10. IDs and interpolation names are the shared contract. */
 export const copy = {
+  "session.message": "Critter Crumbs\n\nConnect as {address}\n\nNonce: {nonce}\nIssued: {issued}\nExpires: {expires}",
   "app.name": "Critter Crumbs",
   "app.tagline": "Everyone gets a handful of crumbs to share.",
   "action.connect": "Connect",
