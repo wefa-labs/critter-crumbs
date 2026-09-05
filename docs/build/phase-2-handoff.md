@@ -91,7 +91,7 @@ The body units are integer milliseconds and bytes32 identity. Every response car
 
 ## Validation and remaining human work
 
-Final ticket 11 validation and reviews are in progress; replace this line with the completed evidence before publishing the handoff PR.
+Final validation passed on 2026-09-05: `bun run check`, verbose tests and `bun run build`. The suite has **313 hermetic tests across 34 files, plus 9 Node tooling tests**. Both final review axes report **0 findings** at implementation commit `7236ece`. The [filtered verbose evidence](phase-2-test-evidence.txt) preserves every required tally name and the lifecycle. A separate HTTP smoke test passed all six seeded phases, both feast kinds where applicable, time advance and mock key release. The default runner also passed with a Neon selector present in its parent environment, proving it still selects PGlite. No API process is left running.
 
 The exact proof commands are `bun run check`, `bun run test -- --reporter=verbose`, and `bun run build`. The [coverage map](core-tests.md) identifies each contract's tests and the explicit `bun run test:api:neon` command. Required verbose names include all eleven §8 tally cases and the seed/sign-in/statements/time/scatter/resubmit/release/two-independent-tallies lifecycle. [Result tooling](result-records.md) documents `bun run register-schemas --chain 84532` and `--chain 8453`; both only prepare requests.
 
