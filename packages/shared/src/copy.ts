@@ -206,9 +206,18 @@ export type CopyId = keyof typeof copy;
 type Slots<Text extends string> = Text extends `${string}{${infer Slot}}${infer Rest}` ? Slot | Slots<Rest> : never;
 type NumericSlot = 'n' | 'max' | 'remaining' | 'written' | 'total' | 'crumbs' | 'i' | 'done' | 'scatterers' | 'totalCrumbs';
 export type CopyParams<Id extends CopyId> = { [Slot in Slots<(typeof copy)[Id]>]: Slot extends NumericSlot ? number : string };
+const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
+  'arrive.burrow': { slot: 'n', one: '{burrowName} · {n} critter' },
+  'critter.reroll.announce': { slot: 'remaining', one: 'New critter. {remaining} re-roll left.' },
+  'gathering.participation': { slot: 'total', one: '{written} of {total} statement written' },
+  'reveal.body': { slot: 'crumbs', one: 'Read them first, then scatter your {crumbs} crumb.' },
+  'reveal.announce': { slot: 'n', one: 'Statements are open. {n} statement to read.' },
+  'scatter.participation': { slot: 'done', one: '{done} of {total} has scattered' },
+  'pile.remaining': { slot: 'n', one: '1 to go' },
+};
 export function formatCopy<Id extends CopyId>(id: Id, ...args: keyof CopyParams<Id> extends never ? [] : [CopyParams<Id>]): string {
   const params = (args[0] ?? {}) as Record<string, string | number>;
-  const template = id === 'pile.remaining' && new Intl.PluralRules('en').select(Number(params.n)) === 'one'
-    ? '1 to go' : copy[id];
+  const plural = plurals[id];
+  const template = plural && new Intl.PluralRules('en').select(Number(params[plural.slot])) === 'one' ? plural.one : copy[id];
   return template.replace(/\{([^}]+)\}/g, (_, key: string) => String(params[key]));
 }

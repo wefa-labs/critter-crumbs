@@ -14,10 +14,13 @@ export function canonicalJSON(value: unknown): string {
     ancestors.add(item);
     try {
       if (array) {
+        if (Object.getOwnPropertyNames(item).length !== item.length + 1) throw new TypeError('Canonical JSON cannot discard array properties');
         const entries: string[] = [];
         for (let i = 0; i < item.length; i++) {
           if (!Object.hasOwn(item, i)) throw new TypeError('Canonical JSON cannot contain holes');
-          entries.push(encode(item[i]));
+          const descriptor = Object.getOwnPropertyDescriptor(item, i);
+          if (!descriptor || !('value' in descriptor)) throw new TypeError('Canonical JSON cannot contain accessors');
+          entries.push(encode(descriptor.value));
         }
         return `[${entries.join(',')}]`;
       }

@@ -14,3 +14,14 @@ test('canonical JSON rejects ambiguous values instead of silently losing data', 
   expect(() => canonicalJSON(cycle)).toThrow(TypeError);
   expect(canonicalJSON({ '2': 2, '10': 10 })).toBe('{"10":10,"2":2}');
 });
+
+test('canonical JSON rejects array accessors without evaluating them', () => {
+  let reads = 0;
+  const input = Object.defineProperty([], '0', { get: () => ++reads, enumerable: true });
+  expect(() => canonicalJSON(input)).toThrow(TypeError);
+  expect(reads).toBe(0);
+});
+
+test('canonical JSON rejects custom array properties instead of discarding them', () => {
+  expect(() => canonicalJSON(Object.assign([1], { note: 'must not disappear' }))).toThrow(TypeError);
+});
