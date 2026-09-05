@@ -2,7 +2,7 @@
 
 Checked 2026-09-04 for Phase 1 verification items 3 and 4; updated after the npm 10 installation failure.
 
-**Selected toolchain:** Node 22.22.1 with npm 11.19.1. The bundled npm 10.9.4 crashed while resolving the required development dependencies. npm 11.19.1 contains a relevant peer-resolution fix, supports a seven-day release delay, and verifies installed signatures without applying that delay again. Keep `ignore-scripts=true`. Final clean-install and complete build proof remain pending.
+**Selected toolchain:** Node 22.22.1 with npm 11.19.1. The bundled npm 10.9.4 crashed while resolving the required development dependencies. npm 11.19.1 contains a relevant peer-resolution fix, supports a seven-day release delay, and verifies installed signatures without applying that delay again. Keep `ignore-scripts=true`. The clean install, complete check, build, and explicit Playwright browser launch passed; see [validation evidence](../foundation/evidence.md).
 
 ## Why npm changed
 
@@ -56,13 +56,13 @@ Use plain `npm audit signatures`. Issue #9277 reported that older npm versions w
 
 The implementation agent reports that signature verification passed with `min-release-age=7`: 853 registry signatures and 167 attestations. These counts describe the tree before the final clean-install remediation; repeat the check if that tree changes and use the final evidence for the pull request.
 
-## Install scripts and remaining proof
+## Install scripts
 
 `ignore-scripts=true` suppresses lifecycle scripts during installation. Explicit `npm test` and `npm run build` commands still run their named scripts; automatic pre/post hooks remain suppressed. Required build steps must therefore appear within the named commands. [npm 11 script configuration](https://docs.npmjs.com/cli/v11/using-npm/config/#ignore-scripts)
 
 npm 11.19.1 also offers `allowScripts` policy and `strict-allow-scripts`. With strict mode enabled, unreviewed install scripts cause failure; without it, npm 11 warns and runs them. `ignore-scripts` overrides this policy, so retain it while verifying that the toolchain works without lifecycle scripts. No package-specific script exception has been established. [npm 11.19.1 script-policy definitions](https://raw.githubusercontent.com/npm/cli/v11.19.1/workspaces/config/lib/definitions/definitions.js)
 
-At this update, the implementation agent is preparing the final clean dependency tree. `npm ci`, `npm run check`, `npm run build`, and the explicit Playwright browser installation must still establish toolchain compatibility. The npm 10 crash, npm 11 source inspection, and signature results above must not be reported as passing those separate checks.
+The final clean tree passed `npm ci`, `npm run check`, `npm run build`, and an explicit Playwright browser installation and launch. These checks establish toolchain compatibility separately from the npm 10 crash diagnosis and npm 11 source inspection.
 
 The clean install enforced the seven-day delay and rejected recent direct pins. Older eligible versions were selected for React DOM types, the TypeScript ESLint tools, Playwright, Vercel, and viem; exact final pins are in the manifests. No release-age exception was added.
 

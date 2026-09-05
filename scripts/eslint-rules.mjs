@@ -83,19 +83,18 @@ export default {
         const to = owner(target);
         if (to !== from) context.report({ node, messageId: 'forbidden' });
       }
+      function checkStaticTarget(node, target) {
+        const value = staticString(target);
+        if (value === undefined) context.report({ node, messageId: 'forbidden' });
+        else check(node, value);
+      }
       return {
         ImportDeclaration: (node) => check(node, node.source.value),
         ExportNamedDeclaration: (node) => { if (node.source) check(node, node.source.value); },
         ExportAllDeclaration: (node) => check(node, node.source.value),
-        ImportExpression: (node) => {
-          const value = staticString(node.source);
-          if (value === undefined) context.report({ node, messageId: 'forbidden' });
-          else check(node, value);
-        },
+        ImportExpression: (node) => checkStaticTarget(node, node.source),
         CallExpression: (node) => { if (node.callee.name === 'require') {
-          const value = staticString(node.arguments[0]);
-          if (value === undefined) context.report({ node, messageId: 'forbidden' });
-          else check(node, value);
+          checkStaticTarget(node, node.arguments[0]);
         } },
         TSImportType: (node) => check(node, node.argument?.value ?? node.argument?.literal?.value),
         TSImportEqualsDeclaration: (node) => {

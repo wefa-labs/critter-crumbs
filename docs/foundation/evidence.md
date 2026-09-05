@@ -72,68 +72,68 @@ Run `npm audit` for details.
 
  Test Files  3 passed (3)
       Tests  3 passed (3)
-   Start at  23:07:09
-   Duration  94ms (transform 45ms, setup 0ms, import 63ms, tests 3ms, environment 0ms)
+   Start at  23:14:41
+   Duration  104ms (transform 53ms, setup 0ms, import 71ms, tests 4ms, environment 0ms)
 
 TAP version 13
 # Subtest: budgets count static imports and reject an oversized app shell
 ok 1 - budgets count static imports and reject an oversized app shell
   ---
-  duration_ms: 6.226
+  duration_ms: 6.792583
   type: 'test'
   ...
 # Subtest: the three budget rejects an oversized lazy chunk
 ok 2 - the three budget rejects an oversized lazy chunk
   ---
-  duration_ms: 9.149125
+  duration_ms: 12.929917
   type: 'test'
   ...
 # Subtest: named lazy chunks cannot become static app imports
 ok 3 - named lazy chunks cannot become static app imports
   ---
-  duration_ms: 0.189834
+  duration_ms: 0.196541
   type: 'test'
   ...
 # Subtest: empty chunks pass and crypto is measured without inventing a spec cap
 ok 4 - empty chunks pass and crypto is measured without inventing a spec cap
   ---
-  duration_ms: 0.509209
+  duration_ms: 0.517792
   type: 'test'
   ...
 # Subtest: development serves the published BLST files with browser content types
 ok 5 - development serves the published BLST files with browser content types
   ---
-  duration_ms: 47.884625
+  duration_ms: 50.593167
   type: 'test'
   ...
 # Subtest: the EAS development cross-check entry loads with Node
 ok 6 - the EAS development cross-check entry loads with Node
   ---
-  duration_ms: 140.974083
+  duration_ms: 150.607958
   type: 'test'
   ...
 # Subtest: HTML injection forms fail lint, while textContent is allowed
 ok 7 - HTML injection forms fail lint, while textContent is allowed
   ---
-  duration_ms: 250.9065
+  duration_ms: 262.017417
   type: 'test'
   ...
 # Subtest: clock reads and aliases fail outside the exact adapter allow-list
 ok 8 - clock reads and aliases fail outside the exact adapter allow-list
   ---
-  duration_ms: 10.964584
+  duration_ms: 11.659292
   type: 'test'
   ...
 # Subtest: workspace imports reject reverse and private paths across each syntax
 ok 9 - workspace imports reject reverse and private paths across each syntax
   ---
-  duration_ms: 4.6615
+  duration_ms: 6.177625
   type: 'test'
   ...
 # Subtest: visible JSX wording and indirect literals require copy IDs
 ok 10 - visible JSX wording and indirect literals require copy IDs
   ---
-  duration_ms: 5.043333
+  duration_ms: 5.825083
   type: 'test'
   ...
 1..10
@@ -144,7 +144,7 @@ ok 10 - visible JSX wording and indirect literals require copy IDs
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 376.63625
+# duration_ms 407.420125
 
 > critter-crumbs@0.0.0 check:workspaces
 > node scripts/probe-workspaces.mjs
@@ -152,7 +152,7 @@ ok 10 - visible JSX wording and indirect literals require copy IDs
 Node v22.22.1; npm 11.19.1; @vercel/node 9.0.1; build-utils 14.6.1; nft 1.10.0
 Skipping "install" command...
 Using built-in TypeScript 5.9.3 since "typescript" is missing from "devDependencies"
-source: emitted function exit=1, output=Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-E1nNjF/source/output/node_modules/@critter-crumbs/core/src/index.ts' imported from /private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-E1nNjF/source/output/api/probe.js
+source: emitted function exit=1, output=Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-bEExrU/source/output/node_modules/@critter-crumbs/core/src/index.ts' imported from /private/var/folders/f6/qmrlnln151nbsqrc8v3d_4cc0000gn/T/critter-crumbs-vercel-workspaces-bEExrU/source/output/api/probe.js
 Skipping "install" command...
 Using built-in TypeScript 5.9.3 since "typescript" is missing from "devDependencies"
 dist: emitted function exit=0, output=core:shared

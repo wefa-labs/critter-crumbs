@@ -16,6 +16,14 @@ Initial Standards findings: 0.
 
 No unrequested scope found. GitHub Issues being disabled remains a documented external constraint.
 
-Initial Spec findings: 3, all P2. Corrections add a supervised TypeScript watcher to both dev modes, explicit Vite asset middleware with an HTTP regression, and static import-target handling with regressions for templates, unresolved targets, and TypeScript import-equals. Manual development proof confirmed two source edits rebuilt and both BLST assets matched the published bytes. Final re-review follows the correction commit.
+Initial Spec findings: 3, all P2. Corrections add a supervised TypeScript watcher to both dev modes, explicit Vite asset middleware with an HTTP regression, and static import-target handling with regressions for templates, unresolved targets, and TypeScript import-equals. Manual development proof confirmed two source edits rebuilt and both BLST assets matched the published bytes.
 
 Initial totals: Standards 0 (no issue); Spec 3 (worst P2). Reports remain separate.
+
+## Re-review at `3b48939`
+
+Standards: 0 documented violations. One low-priority baseline smell identified duplicated import-target validation. The shared `checkStaticTarget` helper now handles both dynamic import and require targets; the existing guardrail regressions cover both forms.
+
+Spec: all three P2 findings resolved. The Spec agent reran the four guardrail tests and the HTTP asset regression successfully. Remaining behavior gaps: 0. Introduced unrequested scope: 0. GitHub Issues remains disabled, with the human setup request saved as a draft.
+
+Remaining findings after corrections: Standards 0; Spec 0.

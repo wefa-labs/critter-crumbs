@@ -16,7 +16,7 @@ Targeted overrides select patched published packages. Most retain the same major
 | `minimatch@10.1.1` | `10.2.6` | [Nested extglobs](https://github.com/advisories/GHSA-23c5-xmqv-rm74) |
 | `js-yaml@4.1.1` | `4.3.2` | [Quadratic processing](https://github.com/advisories/GHSA-5p4m-2wfm-xmqj) |
 
-Versions, engine ranges, and licence metadata were checked through the packages' own npm registry records before changing the overrides. These are transitive development packages, not additions to the nine direct runtime dependencies. Tar and minimatch use BlueOak-1.0.0; the runtime licence allow-list remains unchanged. All overrides are exact in `package.json` and mirrored in `scripts/dev-overrides.json` for review enforcement. A fresh full audit and tool proof are still required; no advisory is suppressed.
+Versions, engine ranges, and licence metadata were checked through the packages' own npm registry records before changing the overrides. These are transitive development packages, not additions to the nine direct runtime dependencies. Tar and minimatch use BlueOak-1.0.0; the runtime licence allow-list remains unchanged. All overrides are exact in `package.json` and mirrored in `scripts/dev-overrides.json` for review enforcement. The fresh full audit and tool proof passed as recorded below; no advisory is suppressed.
 
 The EAS 2.10.0 native ESM entry fails in Node 22 because it requests `isEqual` as a named export from CommonJS lodash. Its public `require` entry loads `EAS`, `Offchain`, and `SchemaEncoder` successfully. Use `createRequire(import.meta.url)` for the dev-only EAS cross-check tests; `scripts/development-tools.test.mjs` verifies that entry without implementing feast logic. This packaging issue is separate from the audit patches.
 
