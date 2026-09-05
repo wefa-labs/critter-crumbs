@@ -28,6 +28,14 @@ export function createStore(db: Database) {
       const [row] = await db.query('select * from profiles where address=$1', [address]);
       return row ? profileFromRow(row) : null;
     },
+    async updateProfile(address: Address, update: { displayName?: string; variant?: number }) {
+      const [rows] = await db.batch([{ text: `update profiles set
+        display_name=coalesce($2,display_name), variant=coalesce($3,variant),
+        rerolls_used=rerolls_used+case when $3::int>variant then 1 else 0 end
+        where address=$1 and ($3::int is null or $3=variant or ($3=variant+1 and rerolls_used<4)) returning *`,
+        values: [address, update.displayName ?? null, update.variant ?? null] }]);
+      return rows?.[0] ? profileFromRow(rows[0]) : null;
+    },
     async burrows(address: Address) {
       return db.query(`select b.id,b.name from burrows b join burrow_members m on m.burrow_id=b.id where m.address=$1 and m.left_at is null order by b.created_at,b.id`, [address]);
     },
