@@ -1,8 +1,8 @@
 # Phase 2 core contract plan
 
-Prepared 2026-09-05 against `1f64379` on `main`. Status: proposed ticket breakdown, awaiting the build flow's approval checkpoint. This is a plan, not evidence that phase 2 is implemented.
+Prepared 2026-09-05 against `1f64379` on `main`. Status: eleven-ticket breakdown approved by the user on 2026-09-05; implementation tracked in the [phase 2 handoff](phase-2-handoff.md). This document preserves the approved plan; the handoff and PRs carry completion evidence.
 
-The [phase 2 brief](phase-2-core.md) and Technical Spec §16 column A define the work. The [phase 1 PR](https://github.com/wefa-labs/critter-crumbs/pull/1) is merged; its linked foundation guide and review were read. Public shared/core entries and root functions are still empty. Use Bun 1.4.2 and Node 22.22.1, as the later decisions require. Do not add UI, browser automation, production configuration, or chain writes.
+The [phase 2 brief](phase-2-core.md) and Technical Spec §16 column A define the work. The [phase 1 PR](https://github.com/wefa-labs/critter-crumbs/pull/1) is merged; its linked foundation guide and review were read. At plan preparation, public shared/core entries and root functions were empty. Use Bun 1.4.2 and Node 22.22.1, as the later decisions require. Do not add UI, browser automation, production configuration, or chain writes.
 
 ## Agreed seams
 
@@ -35,7 +35,7 @@ The server owns account/session verification, membership, deadline gates, signed
 
 Network calls belong to adapters. The default test command must make no network requests, including loopback requests: move the existing foundation asset HTTP proof into a separate required check, keep its coverage, and install a deny-by-default network guard for the hermetic suites. Neon tests and asset HTTP verification remain explicit commands outside the offline test command.
 
-## Proposed tickets
+## Approved tickets
 
 Each ticket uses its own `phase-2/<slug>` branch and draft PR. Dependent tickets may stack on a completed, validated predecessor branch; record the predecessor as the PR base. No merge is authorized. Readiness is determined by the blocking edges, not label alone. Until GitHub Issues is enabled, keep one reviewable issue body per ticket in `.scratch/phase-2/issues/` and preserve this committed index for reconstruction.
 

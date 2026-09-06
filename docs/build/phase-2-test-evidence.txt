@@ -1,0 +1,152 @@
+Phase 2 final core proof, 2026-09-05
+Implementation under test: 7236ece1d5844e1947b757d0ab3ac19a47b0a9e9
+Command: bun run test -- --reporter=verbose
+Filtered by: tally|phaseAt|generator|canonical|timelock|eas|close record|lifecycle
+
+ ✓ |api| tests/api/results.test.ts > API result record rejects mismatched feast without publishing numbers 1577ms
+ ✓ |api| tests/api/gathering.test.ts > API a departed creator cannot cancel a gathering feast 1443ms
+ ✓ |api| tests/api/gathering.test.ts > API a departed creator cannot extend a gathering feast 1305ms
+ ✓ |api| tests/api/dev.test.ts > API dev time sets the shared injected clock and release-key uses only the mock adapter 1927ms
+ ✓ |api| tests/api/ballot-verification.test.ts > API ballot verification rejects wrong feast even with a valid signature 1374ms
+ ✓ |api| tests/api/dev.test.ts > API dev seed creates eight deterministic critters, both gathering feasts and fixture statements 1776ms
+ ✓ |api| tests/api/dev.test.ts > API dev seed reaches feast through ordinary phase rules 1748ms
+ ✓ |api| tests/api/dev.test.ts > API dev seed accepts one feast type and rejects coerced phase or kind values 1674ms
+ ✓ |api| tests/api/ballots.test.ts > API close record is produced once under concurrent first requests and keeps latest ciphertexts only 1403ms
+ ✓ |api| tests/api/membership.test.ts > API voids a people feast when pre-deadline membership falls below three 1279ms
+ ✓ |api| tests/api/ballots.test.ts > API scatter, ciphertext and key routes enforce the feast phase 1321ms
+ ✓ |api| tests/api/session.test.ts > API lifecycle signs in locally, creates a burrow, and reads it with the session cookie 1894ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /burrows/00000000-0000-4000-8000-000000000001/feasts reaches the store 1ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/open reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/cancel reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/extend reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/ballots reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/result-attestation reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before PUT /feasts/00000000-0000-4000-8000-000000000001/statements/0x1111111111111111111111111111111111111111111111111111111111111111 reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before GET /feasts/00000000-0000-4000-8000-000000000001/ballots reaches the store 0ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before GET /feasts/00000000-0000-4000-8000-000000000001/key reaches the store 0ms
+ ✓ |api| tests/api/key.test.ts > API timelock key is phase gated, retries after release, and persists across handler instances 1967ms
+ ✓ |api| tests/api/key.test.ts > API timelock key reservation permits one fetch across concurrent server instances 1434ms
+ ✓ |api| tests/api/key.test.ts > API timelock key reservation recovers after an interrupted instance and cannot overwrite the winning key 1485ms
+ ✓ |api| tests/api/shutter.test.ts > API real timelock retains a pending registration across handler restart and opens only after confirmation 1894ms
+ ✓ |api| tests/api/scatter-tally.test.ts > API encrypted scatter is decrypted and tallied independently with no fallback from an invalid latest submission 2073ms
+ ✓ |api| tests/api/scatter-tally.test.ts > API public arrival metadata never grants ciphertext or key access to outsiders 1471ms
+ ✓ |api| tests/api/lifecycle.test.ts > API lifecycle: seed → N sign-ins → statements → advance time → scatter and resubmit → advance → release key → two independent tallies produce the same resultHash 2601ms
+ ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock SDK encryption matches a pinned 32-byte time identity and survives concurrent cold starts 434ms
+ ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock decrypt matches the independent upstream SDK ciphertext and key vector 43ms
+ ✓ |core| packages/core/test/eas.test.ts > eas SDK cross-check matches ballot encoding, v2 UID and signatures on chain 8453 109ms
+ ✓ |core| packages/core/test/eas.test.ts > eas SDK cross-check matches ballot encoding, v2 UID and signatures on chain 84532 21ms
+ ✓ |core| packages/core/test/eas.test.ts > eas UID is stable across signer and chain while signatures bind both 8ms
+ ✓ |core| packages/core/test/eas.test.ts > eas enforces the pinned domain even when the SDK compatibility verifier accepts another version 21ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration opens only with finalized registry, original eon key and matching publication evidence 29ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration recovers a lost POST response after restart without repeating the registration 8ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects changed deadline when resuming a saved attempt 4ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects changed prefix when resuming a saved attempt 3ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration bounds log recovery to ten-thousand-block pages 3ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration never repeats an uncertain request while the identity remains absent 2ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects a submitted key that disagrees with the finalized original eon key 4ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration requires the configured RPC chain before any registration POST 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration resumes against its persisted deployment after configuration changes 6ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock server key reads use the configured bearer key without browser credentials 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock mainnet fails closed on the recorded deployment-key mismatch 2ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration retries a completed empty log search when historical evidence becomes available 3ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration uses supplied randomness when creating an identity prefix 8ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader replays a recorded finalized Base receipt and SDK-matching stored attestation 35ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched chain in recorded RPC evidence 2ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched receipt status in recorded RPC evidence 1ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched contract in recorded RPC evidence 4ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched schema in recorded RPC evidence 3ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched event attester in recorded RPC evidence 3ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched block hash in recorded RPC evidence 1ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched finality in recorded RPC evidence 1ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched missing event in recorded RPC evidence 2ms
+ ✓ |core| packages/core/test/eas-reader.test.ts > eas reader rejects a mismatched duplicate event in recorded RPC evidence 2ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: must-scatter-all rejected 4ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: self-scatter rejected 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: proportions of scattered not issued (one of four never scatters) 2ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: latest `seq` wins over an earlier valid one 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: an invalid latest does not fall back 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: a non-participant is rejected 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: nobody scatters 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: exactly one scatters 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: a three-way tie 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: an option feast has no self-rule 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: `resultHash` is stable across input orderings that the spec normalises 3ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid version before counting any crumbs 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid feast before counting any crumbs 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid scatterer before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid participant hash before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid missing target before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid duplicate target before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid target order before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid unknown target before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid fractional amount before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid negative amount before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid overspend before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid extra field before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid noncanonical address before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects malformed JSON in the latest candidate without fallback 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects whitespace in the latest candidate without fallback 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects duplicate JSON keys in the latest candidate without fallback 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects failed decryption in the latest candidate without fallback 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate participant metadata 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate target ID metadata 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate position metadata 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate sequence metadata 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 0 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence -1 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 1.5 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 01 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 1e3 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 9223372036854775808 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid issued crumbs 10.5 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid issued crumbs 9 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid issued crumbs 1001 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally orders sequences above the JavaScript safe-integer range without rounding 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally participant hash matches the independent sorted-address vector 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects numeric sequence metadata that would collide with its string spelling 0ms
+ ✓ |core| packages/core/test/eas-result.test.ts > eas result schema encoding cross-checks the SDK including position-ordered arrays 12ms
+ ✓ |core| packages/core/test/eas-result.test.ts > eas prepares a nonrevocable zero-value result transaction without sending it 14ms
+ ✓ |core| packages/core/test/eas-result.test.ts > eas schema registration uses the SDK UID and nonrevocable resolver-free calldata 3ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock chiado waits only for the documented not-yet-released response 6ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock mainnet waits only for the documented not-yet-released response 2ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock chiado returns a released key only for the requested identity 2ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock mainnet returns a released key only for the requested identity 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 429 as rate_limited without hiding failures as waiting 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 500 as upstream without hiding failures as waiting 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 400 as upstream without hiding failures as waiting 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock rejects malformed successful key data 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock reports transport failure 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock browser adapters cannot register identities without server configuration 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock honors the configured API origin while keeping browser key reads anonymous 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock fetches the key directly and anonymously when the store is unreachable 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock treats only the documented missing released key as waiting 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 400 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 401 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 403 0ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock round-trip releases at the injected deadline 7ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock rejects tampered ciphertext 2ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock restores the same key after restart from persisted metadata 2ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock dev release overrides the deadline only for the named identity 2ms
+ ✓ |core| packages/core/test/publication.test.ts > close record publication matches an independently encoded hash and retains identical UID retries 5ms
+ ✓ |core| packages/core/test/publication.test.ts > close record rejects duplicate or coercible sequences 1ms
+ ✓ |core| packages/core/test/generator.test.ts > generator version 1 matches independent fixed-seed parameters and layout 3ms
+ ✓ |core| packages/core/test/phase.test.ts > phaseAt uses injected time at exact deadlines and honors terminal status 2ms
+ ✓ |core| packages/core/test/phase.test.ts > phaseAt rejects an invalid clock instead of claiming the feast has opened 0ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON sorts nested keys without changing array order 2ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects ambiguous values instead of silently losing data 1ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects array accessors without evaluating them 0ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects custom array properties instead of discarding them 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators apply feast defaults 2ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":9} 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":1001} 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":10.1} 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"gatheringEndsAt":2000} 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"individualOpen":true} 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"kind":"options","options":[]} 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"title":" "} 0ms
+ Test Files  34 passed (34)
+      Tests  313 passed (313)
+
+The separate 9 Node tooling tests also passed.
+bun run check: passed (lint, typecheck, tests, local asset proof, workspace exports, licenses, audit).
+bun run build: passed (app shell and lazy chunk budgets).

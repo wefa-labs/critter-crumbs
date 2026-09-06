@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.tools.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowJs": false,
+    "rootDir": ".",
+    "outDir": ".scratch/server",
+    "incremental": true,
+    "tsBuildInfoFile": ".scratch/server.tsbuildinfo"
+  },
+  "include": [
+    "api/**/*.ts",
+    "db/**/*.ts",
+    "scripts/**/*.ts"
+  ]
+}

@@ -16,11 +16,14 @@
   },
   "include": [
     "api/**/*.ts",
+    "db/**/*.ts",
     "scripts/**/*.ts",
     "packages/*/test/**/*.ts",
     "packages/app/vite.config.ts",
     "vitest.config.ts",
+    "vitest.neon.config.ts",
     "playwright.config.ts",
-    "tests/e2e/**/*.ts"
+    "tests/e2e/**/*.ts",
+    "tests/api/**/*.ts"
   ]
 }

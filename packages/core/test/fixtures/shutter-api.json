@@ -1,0 +1,29 @@
+{
+  "provenance": "docs/research/shutter-api-v2-v3.md; observed 2026-09-05. Waiting/429/500 cases follow the pinned handler contract; not live quota probes.",
+  "chiado": {
+    "message": {
+      "eon": 16,
+      "identity": "0x21ce629a6d93c0a596ca7673449d8b1657141a5ae78979b880a953d871c84e25",
+      "identity_prefix": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "eon_key": "0x8675347b53e2b1f0941b7ea6f0f89f6d3118deaf7452fd90a9d17fa6b4469d80895ba035420c2e19b7c5a95788ed23670dda180842f56c49690e8114a3bfd56d2b0d5e9e89568442902464fb2e44176629c0abea9d18d3142913ba607b0c6b7c",
+      "epoch_id": "0xab25439ea0b7221bd7e3da9855c35e8a22e2ba80c293be3dd633f6b36f2fd0796a0fbf66e8c51838500dfc17a6d7228f"
+    }
+  },
+  "mainnet": {
+    "message": {
+      "eon": 1,
+      "identity": "0xad39b2987fd19875ceb20a43198cc41a1dcc3c9f36e693746dd44e60c5980ea1",
+      "identity_prefix": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "eon_key": "0xa4ce51d427803fa4744c3ca8bfa9576083537ba7a22311ea58c8762b362a022a5ff0b0e3b5daf61584bfede16cedc7c80a4c422da7e5ac3179e280a3277ac5c20138d94ef3cbfbdb713c8ee235242e802f6363b93c0932a8127598f03279fc4b",
+      "epoch_id": "0xb684d0f3308e22aa52ae048b9850d97a165dc3273c9d1c269901a44ad495b8ae9adfec03c7777436c6c8af3d13f24dc8"
+    }
+  },
+  "unregistered": {
+    "description": "identity has not been registerd yet",
+    "statusCode": 400
+  },
+  "waiting": {
+    "description": "timestamp not reached yet, decryption key requested too early",
+    "statusCode": 400
+  }
+}
