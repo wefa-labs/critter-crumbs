@@ -16,9 +16,11 @@ The [full prompt](review-phase-2.md) pins the original core head and requires th
 
 ## 2. Create Neon databases
 
-Create an empty Neon project/database for nonproduction first. Choose its region before creation; all its branches share that region. AWS N. Virginia (`aws-us-east-1`) pairs with Vercel `iad1` if that geography suits the group. Keep the normal local tests on PGlite. [Neon regions](https://neon.com/docs/introduction/regions), [Vercel regions](https://vercel.com/docs/functions/configuring-functions/region)
+For the first rehearsal, one empty Neon project/database and its initial branch are enough. Use the default branch name or call it `staging`; the application reads its connection string and does not depend on the name. This does not require a Vercel custom Staging environment: use a stable Preview deployment. Keep future real production data separate from this rehearsal database.
 
-Use this layout:
+Choose Neon's region before creation; all its branches share that region. AWS N. Virginia (`aws-us-east-1`) pairs with Vercel `iad1` if that geography suits the group. Keep the normal local tests on PGlite. [Neon regions](https://neon.com/docs/introduction/regions), [Vercel regions](https://vercel.com/docs/functions/configuring-functions/region)
+
+The following is an optional expanded layout when PR previews and live database tests are needed:
 
 | Branch/database | Use |
 |---|---|
@@ -28,7 +30,7 @@ Use this layout:
 | `test/<run-id>` from `fixtures` | Disposable branch for `bun run test:api:neon` |
 | `production` in a separate production project | Persistent real data; initialize empty when production is ready |
 
-These are Neon branch names, not automatic Git mappings. For the first rehearsal, only `fixtures` and `staging` are necessary. Do not create a fresh database for every redeploy of staging. Ordinary Neon branches include parent rows; deriving previews from production would expose real group data. Schema-only cloning also drops the migration ledger rows, which the current migration runner cannot safely bootstrap over existing tables. Use an empty database plus migrations. [Neon branching](https://neon.com/blog/practical-guide-to-database-branching)
+These are suggested Neon branch names, not automatic Git mappings. A separate `fixtures` parent can wait until isolated preview/test branches are useful. Do not create a fresh database for every redeploy of staging. Ordinary Neon branches include parent rows; deriving previews from production would expose real group data. Schema-only cloning also drops the migration ledger rows, which the current migration runner cannot safely bootstrap over existing tables. Use an empty database plus migrations. [Neon branching](https://neon.com/blog/practical-guide-to-database-branching)
 
 In Neon, select the intended branch → **Connect** → database and role → pooled connection string. Store it as server-only `DATABASE_URL`. The existing server uses the Neon driver. Run these commands with the environment scoped to the intended nonproduction branch:
 
@@ -43,7 +45,11 @@ Automatic Neon/Vercel preview branching can come later. Verify which Neon projec
 
 ## 3. Create the Vercel project
 
-Import `wefa-labs/critter-crumbs`; keep the repository root. Configure:
+Import `wefa-labs/critter-crumbs`; keep the repository root. Most of the values below are already declared in `vercel.json`: let Vercel read that file instead of entering duplicate dashboard overrides. Check the root and Node major, then choose the project-specific region and environment variables.
+
+The root is the deployment boundary for both `api/` and the workspaces under `packages/`. Source remains in `packages/app`, `packages/core` and `packages/shared`. Choosing `packages/app` would change that boundary and leave the current top-level function routes outside it. A workspace layout does not require each package to be a separate Vercel project.
+
+The custom install command pins and verifies Bun 1.4.2 and disables dependency install scripts. The custom build compiles the shared/core workspaces before building Vite; `dist` is the resulting static output. These are repository build requirements that a generic framework default does not capture. The Other preset avoids selecting an independent framework build at the root. Node 22 follows the current toolchain contract; region alignment reduces API/database latency.
 
 | Setting | Value |
 |---|---|
@@ -83,13 +89,20 @@ Set the following variables in **Preview**, scoped to the rehearsal Git branch. 
 | `VITE_BASE_RPC_URL` | Browser-safe Base Sepolia RPC; any embedded token is public |
 | `MAINNET_RPC_URL` | Ethereum mainnet RPC for ENS, optional if ENS is not being exercised |
 
-Do not set `MOCK_SECRET`, `DEPLOYER_PRIVATE_KEY`, or local dev overrides on Vercel. Hosted previews run with production-style runtime checks and cannot use mock mode. Use `bun run dev:local` for mock work.
+Do not set `MOCK_SECRET`, Foundry account/password settings, or local dev overrides on Vercel. Hosted previews run with production-style runtime checks and cannot use mock mode. Use `bun run dev:local` for mock work.
 
 Production changes the database, session secret, origin, Base RPCs and EAS chain to `8453`, and uses operator-confirmed mainnet Shutter settings. Schema UIDs are deterministic but registration must exist on each selected chain. Production Shutter metadata is currently unresolved.
 
 ## 4. EAS and Shutter setup commands
 
-Use the pinned local toolchain and an ignored local environment. Do not paste secrets into chat, shell history or tracked files.
+Use the pinned local toolchain and an ignored local environment. Contract writes use Foundry `cast` and a named encrypted keystore account; the script never requests or reads a raw private key. Foundry 1.7.1 is the locally verified CLI version, with no added JavaScript dependency. Use an existing account under `~/.foundry/keystores`, or import one yourself through Foundry's hidden interactive prompt. Do not paste secrets into chat, shell history or tracked files.
+
+```sh
+# Only if you do not already have the desired Foundry account:
+cast wallet import critter-deployer --interactive
+```
+
+The import is a separate local operation performed by you. During transaction execution, Foundry prompts for the keystore password through the controlling terminal. Use your interactive terminal, not a headless job. `--account critter-deployer` selects the alias; `FOUNDRY_ACCOUNT=critter-deployer` is an optional local default. No password environment variable or password file is needed.
 
 ```sh
 # Offline: prints the two exact schemas, deterministic UIDs and prepared requests.
@@ -99,14 +112,14 @@ bun run register-schemas --chain 84532
 bun run register-schemas --chain 84532 --check
 
 # Explicit chain write, to run only after review and funding a dedicated signer.
-# Requires BASE_RPC_URL and local-only DEPLOYER_PRIVATE_KEY.
-bun run register-schemas --chain 84532 --execute
+# Requires BASE_RPC_URL and your named Foundry keystore account.
+bun run register-schemas --chain 84532 --account critter-deployer --execute
 
 # Read-only Shutter API/RPC consistency check; needs no signing key.
 bun run check:shutter
 ```
 
-EAS already has contracts on Base/Base Sepolia. The schema command registers only missing schemas on the existing registry, waits for two confirmations, then reads them back. It prints each submitted transaction hash before waiting. If submission or confirmation fails, inspect that transaction and signer nonce before retrying; a lost response is not proof that nothing was sent. No automatic send retry is performed. A schema is skipped when already registered with the exact expected fields.
+EAS already has contracts on Base/Base Sepolia, so this uses Foundry `cast send`; no new Solidity contracts need deploying. The schema command registers only missing schemas on the existing registry, waits for two confirmations, then reads them back. It prints each submitted transaction hash before waiting. If submission or confirmation fails, inspect that transaction and signer nonce before retrying; a lost response is not proof that nothing was sent. The wrapper never automatically reruns a failed Cast invocation; Foundry's own RPC transport can retry requests. A schema is skipped when already registered with the exact expected fields. The existing viem client performs read-only schema/receipt verification; all signing and broadcasting is delegated to Foundry. [Foundry keystore and send behavior](../research/foundry-keystore.md)
 
 Shutter also already has its service/contracts. `check:shutter` validates the configured origin, chain, finalized contract code, optional mainnet authentication, identity derivation, eon key and registry getter. It never registers a feast. Its success does not prove the API's current signer or a new key-release lifecycle. Opening a real feast belongs to the existing authenticated creator workflow, which persists and recovers one registration attempt.
 
