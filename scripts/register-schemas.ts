@@ -1,5 +1,5 @@
 import { ballotSchema, prepareSchemaRegistration, resultSchema } from '@critter-crumbs/core';
-import { createLocalAccount } from '@critter-crumbs/core';
+import type { Account } from '@critter-crumbs/core';
 import { createPublicClient, createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base, baseSepolia } from 'viem/chains';
@@ -17,7 +17,7 @@ else {
   try {
     const rpcUrl = process.env.BASE_RPC_URL;
     if (!rpcUrl) throw new Error('Missing BASE_RPC_URL');
-    let account;
+    let account: Pick<Account, 'sendTransaction'> | undefined;
     if (mode === '--execute') {
       const key = hex(process.env.DEPLOYER_PRIVATE_KEY, 32);
       const signer = privateKeyToAccount(key);
@@ -25,14 +25,13 @@ else {
       const transport = http(rpcUrl, { retryCount: 0 });
       const client = createPublicClient({ chain, transport });
       const wallet = createWalletClient({ account: signer, chain, transport });
-      account = createLocalAccount(key);
-      account.sendTransaction = async tx => {
+      account = { sendTransaction: async tx => {
         const hash = await wallet.sendTransaction(tx);
         console.log(JSON.stringify({ chainId, transactionHash: hash, status: 'submitted' }));
         const receipt = await client.waitForTransactionReceipt({ hash, confirmations: 2, timeout: 180000 });
         if (receipt.status !== 'success') throw new Error('Schema transaction reverted');
         return hash;
-      };
+      } };
     }
     const result = await schemaSetup({ chainId, rpcUrl, ...(account ? { account } : {}) });
     console.log(JSON.stringify({ chainId, schemas: result }, null, 2));

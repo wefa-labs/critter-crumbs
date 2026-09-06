@@ -16,7 +16,7 @@ test('deployment EAS setup skips existing schemas and confirms a newly registere
     } else throw new Error('Unexpected RPC method');
     return Response.json({ jsonrpc: '2.0', id: request.id, result });
   };
-  const account: Account = { address: zeroAddress, kind: 'injected', signMessage: async () => zeroHash, signTypedData: async () => zeroHash, disconnect: async () => {},
+  const account: Pick<Account, 'sendTransaction'> = {
     async sendTransaction(tx) { expect(tx.to).toBe('0x4200000000000000000000000000000000000020'); sends++; known.add(schemaUID(resultSchema)); return `0x${'11'.repeat(32)}`; } };
   const result = await schemaSetup({ chainId: 84532, rpcUrl: 'https://rpc.fixture.invalid', fetch, account });
   expect(result.map(s => s.status)).toEqual(['registered', 'registered']); expect(sends).toBe(1);

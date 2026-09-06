@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
+import { ballotSchema, resultSchema, schemaUID } from '@critter-crumbs/core';
 
 const args = process.argv.slice(2);
 const execute = args.includes('--execute');
@@ -15,6 +16,11 @@ else {
   if (origin.protocol !== 'https:' || origin.origin !== process.env.APP_ORIGIN) throw new Error('APP_ORIGIN must be an exact HTTPS origin without a trailing slash.');
   if (process.env.SHUTTER_MODE !== (target === 'production' ? 'mainnet' : 'chiado')) throw new Error('Use Chiado for preview and verified mainnet settings for production.');
   if (process.env.EAS_CHAIN_ID !== (target === 'production' ? '8453' : '84532')) throw new Error('EAS_CHAIN_ID does not match the deployment target.');
+  for (const [name, expected] of Object.entries({ EAS_ADDRESS: '0x4200000000000000000000000000000000000021', EAS_BALLOT_SCHEMA_UID: schemaUID(ballotSchema), EAS_RESULT_SCHEMA_UID: schemaUID(resultSchema) })) {
+    if (required(name).toLowerCase() !== expected) throw new Error(`${name} does not match the runtime contract.`);
+  }
+  const branch = execFileSync('git', ['branch', '--show-current'], { encoding: 'utf8' }).trim();
+  if (!branch || branch !== required('VERCEL_DEPLOY_BRANCH')) throw new Error('Checked-out Git branch must match VERCEL_DEPLOY_BRANCH and its scoped Vercel variables.');
   if (!['0', 'false'].includes(required('DEV_ENDPOINTS_ENABLED'))) throw new Error('Hosted dev endpoints must be disabled.');
   if (required('VERCEL_PLAN') !== 'pro') throw new Error('The current API exceeds Hobby function limits. A reviewed packaging change is required for Hobby.');
   const region = required('VERCEL_REGION');
@@ -26,7 +32,7 @@ else {
   };
   const shutterOrigin = publicOrigin('SHUTTER_API_BASE'), baseOrigin = publicOrigin('VITE_BASE_RPC_URL');
   const run = (command, parameters) => {
-    const result = spawnSync(command, parameters, { stdio: 'inherit', env: process.env });
+    const result = spawnSync(command, parameters, { stdio: 'inherit', env: { ...process.env, VERCEL_TELEMETRY_DISABLED: '1' } });
     if (result.error || result.status !== 0) throw new Error('Deployment step failed; no subsequent step was run.');
   };
   run('bun', ['run', 'register-schemas', '--check']);

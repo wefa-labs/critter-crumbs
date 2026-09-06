@@ -4,7 +4,7 @@ import { ballotSchema, prepareSchemaRegistration, resultSchema, type Account } f
 const abi = parseAbi(['function getSchema(bytes32 uid) view returns ((bytes32 uid,address resolver,bool revocable,string schema))']);
 
 /** An executing account must wait for a successful receipt before returning. */
-export async function schemaSetup(input: { chainId: number; rpcUrl: string; fetch?: typeof fetch; account?: Account }) {
+export async function schemaSetup(input: { chainId: number; rpcUrl: string; fetch?: typeof fetch; account?: Pick<Account, 'sendTransaction'> }) {
   if (input.chainId !== 8453 && input.chainId !== 84532) throw new Error('Choose Base 8453 or Base Sepolia 84532.');
   const client = createPublicClient({ transport: http(input.rpcUrl, { retryCount: 0, fetchFn: input.fetch }) });
   if (await client.getChainId() !== input.chainId) throw new Error('EAS RPC chain does not match EAS_CHAIN_ID.');
