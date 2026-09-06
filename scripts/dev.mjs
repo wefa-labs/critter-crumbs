@@ -1,11 +1,13 @@
 import { spawn } from 'node:child_process';
 
-const env = { ...process.env, SHUTTER_MODE: process.env.SHUTTER_MODE ?? 'mock', VERCEL_TELEMETRY_DISABLED: '1' };
+const local = process.argv.includes('--local');
+const env = { ...process.env, SHUTTER_MODE: process.env.SHUTTER_MODE ?? 'mock', VERCEL_TELEMETRY_DISABLED: '1', ...(local ? { DEV_ENDPOINTS_ENABLED: process.env.DEV_ENDPOINTS_ENABLED ?? '1' } : {}) };
 const commands = [
   ['tsc', ['-b', '--watch', '--preserveWatchOutput']],
-  ['vite', ['--config', 'packages/app/vite.config.ts']],
+  local ? ['node', ['scripts/vite-local.mjs']] : ['vite', ['--config', 'packages/app/vite.config.ts']],
 ];
-if (!process.argv.includes('--app-only')) commands.push(['vercel', ['dev', '--listen', '3000']]);
+if (local) commands.push(['tsc', ['-p', 'tsconfig.server.json', '--watch', '--preserveWatchOutput']], ['node', ['--env-file-if-exists=.env', '--watch', '.scratch/server/scripts/local-api.js']]);
+else if (!process.argv.includes('--app-only')) commands.push(['vercel', ['dev', '--listen', '3000']]);
 const children = commands.map(([command, args]) => spawn(command, args, { stdio: 'inherit', env }));
 const stop = () => { for (const child of children) child.kill(); };
 process.on('SIGINT', stop);
