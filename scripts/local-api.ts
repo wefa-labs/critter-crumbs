@@ -1,10 +1,10 @@
 import { parseDevEndpointsEnabled } from '@critter-crumbs/shared';
 import { createServer } from 'node:http';
 import { schemaUID, ballotSchema, type EasConfig } from '@critter-crumbs/core';
-import { createApi } from '../api/_lib/api.js';
-import { nodeHandler } from '../api/_lib/http.js';
-import { createServerClock } from '../api/_lib/clock.js';
-import { mockServerTimelock } from '../api/_lib/timelock.js';
+import { createApi } from '@critter-crumbs/api';
+import { nodeHandler } from '@critter-crumbs/api';
+import { createServerClock } from '@critter-crumbs/api';
+import { mockServerTimelock } from '@critter-crumbs/api';
 import { localData } from './local-data.js';
 const data = await localData(), clock = createServerClock(data.offset, data.saveOffset);
 const timelock = mockServerTimelock(data.db, clock.now, data.mockSecret);

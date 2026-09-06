@@ -259,6 +259,8 @@ Checked against the Shutter API docs (2026-09-02). Base URLs: mainnet `https://s
 ```
 Every target in the feast appears once, in `targets.position` order, with a whole number ≥ 0; the sum equals `crumbs_per_critter` (R2). `participants` binds the ballot to the frozen set so it cannot be replayed into a re-run. Size: under 1 KB for ten critters; ciphertext limit enforced at 4 KB.
 
+**Capacity.** A feast supports at most **49 targets**, for both people and options. This fits every valid complete allocation at 10–1,000 crumbs in both mock and Shutter encryption. The largest valid 49-target plaintext is 3,868 bytes and its Shutter ciphertext is 4,001 bytes; a valid 50-target scatter can require 4,097 bytes. The [capacity proof](research/scatter-capacity.md) supersedes the earlier uint8-derived 256-option decision. Validate options at setup, people targets at creation, and both kinds at opening. Under the burrow revision guard, reject admissions and re-admissions that would exceed 49 active members while any people feast is draft or gathering; an already active member consumes no new place. Materialize due freezes first, so frozen feasts do not limit later burrow growth. Options feasts limit targets, not participants. Rejections use `err.feastCapacity`; never shorten the complete allocation or raise the ciphertext cap.
+
 **Modes.** One interface, three implementations, selected by `SHUTTER_MODE`:
 
 ```ts
@@ -393,16 +395,14 @@ critter-crumbs/
 ├── AGENTS.md                 vocabulary, rules, workstreams, how to run and test
 ├── LICENSE                   all rights reserved (PRD P12; holder per Q9)
 ├── docs/                     01–04, explorations/, decisions.md
-├── api/                      Vercel Functions, one file per route; api/_lib/ shared server code
-│   ├── _lib/{db,session,phase,shutter,eas,validate}.ts
-│   ├── session/…  me.ts  burrows/…  feasts/…  dev/…
+├── api/                      one-line Vercel route exports from @critter-crumbs/api
+│   └── session/…  me.ts  burrows/…  feasts/…  dev/…
 ├── db/migrations/0001_init.sql …
-├── public/                   fonts/, audio/, images/
-├── src/
-│   ├── shared/               types, copy IDs, constants (feel.ts from GD), validate.ts — written first, owned by both agents
-│   ├── core/                 workstream A: account/, eas/, timelock/, tally/, api-client/, phase.ts, generator/ (identity, shared with app)
-│   ├── app/                  workstream B: screens/, components/, sim/ (Koota world), three/ (lazy), portrait/, audio/, design/ (tokens.css, tokens.ts)
-│   └── main.tsx
+├── packages/
+│   ├── shared/src/           types, copy IDs, constants, validators — owned by both agents
+│   ├── core/src/             account/, eas/, timelock/, tally/, api-client/, phase.ts, generator/
+│   ├── api/src/              server handlers, database/session/timelock adapters, HTTP runtime
+│   └── app/                  src/: screens, components, sim, three, portrait, audio, design; public/: assets
 ├── scripts/                  seed.ts, migrate.ts, register-schemas.ts
 ├── tests/                    unit/ sim/ api/ e2e/
 ├── vercel.json  vite.config.ts  tsconfig.json  package.json
@@ -478,7 +478,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E27 | Statement over 2,000 characters pasted | Truncated at the cap client-side; `gathering.limit`; the server rejects longer | — | Yes |
 | E28 | Reveal opened before Shutter's timestamp on a fast clock | `feast.keyNotYet`; nothing decrypts | Wait | Yes |
 
-New copy IDs introduced here (to be added to the Design System §10): `results.unreadable`, `err.notParticipant`.
+New copy IDs introduced here (to be added to the Design System §10): `results.unreadable`, `err.notParticipant`, `err.feastCapacity` (“A feast can include at most 49 critters.”).
 
 ## 16. Build order to the rehearsal
 

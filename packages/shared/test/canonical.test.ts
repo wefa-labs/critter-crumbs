@@ -25,3 +25,11 @@ test('canonical JSON rejects array accessors without evaluating them', () => {
 test('canonical JSON rejects custom array properties instead of discarding them', () => {
   expect(() => canonicalJSON(Object.assign([1], { note: 'must not disappear' }))).toThrow(TypeError);
 });
+
+test('canonical JSON rejects hidden object properties without evaluating getters', () => {
+  let reads = 0;
+  for (const descriptor of [{ value: undefined }, { value: 42 }, { get: () => ++reads }]) {
+    expect(() => canonicalJSON(Object.defineProperty({}, 'hidden', descriptor))).toThrow(TypeError);
+  }
+  expect(reads).toBe(0);
+});

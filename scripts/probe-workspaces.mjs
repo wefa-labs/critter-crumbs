@@ -50,18 +50,18 @@ async function probe(shape) {
   const extension = shape === 'source' ? 'src/index.ts' : 'dist/index.js';
   await put(join(workPath, 'package.json'), JSON.stringify({
     name: 'critter-crumbs-resolution-probe', private: true, type: 'module',
-    engines: { node: '22.x' }, workspaces: ['packages/shared', 'packages/core'],
+    engines: { node: '22.x' }, workspaces: ['packages/shared', 'packages/core', 'packages/api'],
   }, null, 2));
   await put(join(workPath, 'bunfig.toml'), '[install]\nignoreScripts = true\nlinker = "hoisted"\n');
   await put(join(workPath, 'tsconfig.json'), JSON.stringify({ compilerOptions: {
     target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true,
     skipLibCheck: true, types: [], declaration: true,
   } }, null, 2));
-  for (const name of ['shared', 'core']) {
+  for (const name of ['shared', 'core', 'api']) {
     await put(join(workPath, 'packages', name, 'package.json'), JSON.stringify({
       name: `@critter-crumbs/${name}`, version: '0.0.0', private: true, type: 'module',
       exports: { '.': { types: shape === 'source' ? './src/index.ts' : './dist/index.d.ts', default: `./${extension}` } },
-      ...(name === 'core' ? { dependencies: { '@critter-crumbs/shared': '0.0.0' } } : {}),
+      ...(name === 'core' ? { dependencies: { '@critter-crumbs/shared': '0.0.0' } } : name === 'api' ? { dependencies: { '@critter-crumbs/core': '0.0.0' } } : {}),
     }, null, 2));
     await put(join(workPath, 'packages', name, 'tsconfig.json'), JSON.stringify({
       extends: '../../tsconfig.json', compilerOptions: { rootDir: 'src', outDir: 'dist' }, include: ['src'],
@@ -69,19 +69,20 @@ async function probe(shape) {
   }
   await put(join(workPath, 'packages/shared/src/index.ts'), 'export const marker: string = "shared";\n');
   await put(join(workPath, 'packages/core/src/index.ts'), 'import { marker as shared } from "@critter-crumbs/shared";\nexport const marker: string = `core:${shared}`;\n');
-  await put(join(workPath, 'api/probe.ts'), 'import { marker } from "@critter-crumbs/core";\nexport default function probe(): string { return marker; }\n');
+  await put(join(workPath, 'packages/api/src/index.ts'), 'import { marker } from "@critter-crumbs/core";\nexport default function probe(): string { return `api:${marker}`; }\n');
+  await put(join(workPath, 'api/probe.ts'), 'export { default } from "@critter-crumbs/api";\n');
 
   const installation = spawnSync(bunCli, ['install', '--offline', '--ignore-scripts'], { cwd: workPath, encoding: 'utf8', env: process.env });
   assert.equal(installation.status, 0, installation.stderr);
   const bunOutput = installation.stdout.trim();
   const inputLinks = {};
-  for (const name of ['shared', 'core']) {
+  for (const name of ['shared', 'core', 'api']) {
     const path = join(workPath, 'node_modules/@critter-crumbs', name);
     assert((await lstat(path)).isSymbolicLink());
     inputLinks[name] = await readlink(path);
   }
   if (shape === 'dist') {
-    for (const name of ['shared', 'core']) runNode([tsc, '-p', `packages/${name}/tsconfig.json`], workPath);
+    for (const name of ['shared', 'core', 'api']) runNode([tsc, '-p', `packages/${name}/tsconfig.json`], workPath);
   }
   await put(join(workPath, 'tsconfig.base.json'), await readFile(join(toolRoot, 'tsconfig.base.json'), 'utf8'));
   await put(join(workPath, 'api/tsconfig.json'), await readFile(join(toolRoot, 'api/tsconfig.json'), 'utf8'));
@@ -95,7 +96,7 @@ async function probe(shape) {
   assert.equal(output.type, 'Lambda');
   await download(output.files, outputPath);
   const outputLinks = {};
-  for (const name of ['shared', 'core']) {
+  for (const name of ['shared', 'core', 'api']) {
     const path = join(outputPath, 'node_modules/@critter-crumbs', name);
     outputLinks[name] = await readlink(path);
     assert((await realpath(path)).startsWith(outputPath + '/'));
@@ -113,7 +114,7 @@ async function probe(shape) {
   };
   if (shape === 'dist') {
     assert.equal(invocation.status, 0, invocation.stderr);
-    assert.equal(invocation.stdout.trim(), 'core:shared');
+    assert.equal(invocation.stdout.trim(), 'api:core:shared');
   }
   console.log(`${shape}: emitted function exit=${invocation.status}, output=${invocation.stdout.trim() || summary.invocation.error}`);
   return summary;

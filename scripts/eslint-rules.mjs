@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const htmlNames = new Set(['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'dangerouslySetInnerHTML']);
 export const clockAdapters = new Set([
-  'api/_lib/clock.ts',
+  'packages/api/src/clock.ts',
   'packages/app/src/sim/ticker-host.ts',
   'packages/core/src/api-client/clock-offset.ts',
 ]);
@@ -20,7 +20,7 @@ const staticString = (node) => {
 };
 const propertyName = (node) => node.computed ? staticString(node.property) : node.property.name;
 const relativeFile = (context) => path.relative(root, context.filename).split(path.sep).join('/');
-const owner = (file) => /^(?:packages\/(shared|core|app)|(?:api)(?=\/))/.exec(file)?.[1] ?? (file.startsWith('api/') ? 'api' : null);
+const owner = (file) => /^packages\/(shared|core|app|api)(?=\/)/.exec(file)?.[1] ?? (file.startsWith('api/') ? 'functions' : null);
 const definition = (message, create) => ({ meta: { type: 'problem', schema: [], messages: { forbidden: message } }, create });
 
 export default {
@@ -70,10 +70,10 @@ export default {
     'imports': definition('Use public package entries in the direction app → core → shared; api may import core and shared.', (context) => {
       const from = owner(relativeFile(context));
       if (!from) return {};
-      const allowed = { shared: ['shared'], core: ['core', 'shared'], app: ['app', 'core', 'shared'], api: ['api', 'core', 'shared'] };
+      const allowed = { shared: ['shared'], core: ['core', 'shared'], app: ['app', 'core', 'shared'], api: ['api', 'core', 'shared'], functions: ['api', 'core', 'shared'] };
       function check(node, value) {
         if (typeof value !== 'string') return;
-        const match = /^@critter-crumbs\/(shared|core|app)(.*)$/.exec(value);
+        const match = /^@critter-crumbs\/(shared|core|app|api)(.*)$/.exec(value);
         if (match) {
           if (match[2] || !allowed[from].includes(match[1])) context.report({ node, messageId: 'forbidden' });
           return;

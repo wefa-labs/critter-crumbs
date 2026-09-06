@@ -1,5 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
-import type { Database } from '../api/_lib/database.js';
+import type { Database } from '@critter-crumbs/api';
 /** Migrations contain ordinary SQL statements, not procedural function bodies. */
 export async function migrateDatabase(db: Database, directory: string): Promise<void> {
   await db.batch([{ text: 'create table if not exists schema_migrations (name text primary key)' }]);

@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { serverTimelock } from '../../api/_lib/timelock.js';
+import { serverTimelock } from '@critter-crumbs/api';
 import { registrationFixture } from '../../packages/core/test/shutter-registration-support.js';
 import { apiHarness, apiTestTimeout } from './support.js';
 

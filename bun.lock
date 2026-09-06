@@ -5,6 +5,7 @@
     "": {
       "name": "critter-crumbs",
       "dependencies": {
+        "@critter-crumbs/api": "0.0.0",
         "@critter-crumbs/core": "0.0.0",
         "@critter-crumbs/shared": "0.0.0",
       },
@@ -26,6 +27,16 @@
         "vitest": "4.1.11",
       },
     },
+    "packages/api": {
+      "name": "@critter-crumbs/api",
+      "version": "0.0.0",
+      "dependencies": {
+        "@critter-crumbs/core": "0.0.0",
+        "@critter-crumbs/shared": "0.0.0",
+        "@neondatabase/serverless": "1.1.0",
+        "viem": "2.56.0",
+      },
+    },
     "packages/app": {
       "name": "@critter-crumbs/app",
       "version": "0.0.0",
@@ -45,7 +56,6 @@
       "version": "0.0.0",
       "dependencies": {
         "@critter-crumbs/shared": "0.0.0",
-        "@neondatabase/serverless": "1.1.0",
         "@shutter-network/shutter-sdk": "0.0.2",
         "viem": "2.56.0",
       },
@@ -128,6 +138,8 @@
     "@babel/types": ["@babel/types@7.29.8", "", { "dependencies": { "@babel/helper-string-parser": "^7.29.7", "@babel/helper-validator-identifier": "^7.29.7" } }, "sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg=="],
 
     "@bytecodealliance/preview2-shim": ["@bytecodealliance/preview2-shim@0.17.6", "", {}, "sha512-n3cM88gTen5980UOBAD6xDcNNL3ocTK8keab21bpx1ONdA+ARj7uD1qoFxOWCyKlkpSi195FH+GeAut7Oc6zZw=="],
+
+    "@critter-crumbs/api": ["@critter-crumbs/api@workspace:packages/api"],
 
     "@critter-crumbs/app": ["@critter-crumbs/app@workspace:packages/app"],
 
