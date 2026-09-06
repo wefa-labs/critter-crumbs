@@ -1,8 +1,8 @@
-import { createApi } from '../api/_lib/api.js';
-import { serverNow } from '../api/_lib/clock.js';
-import { createNeonDatabase } from '../api/_lib/database.js';
-import { seedFixtures } from '../api/_lib/seed.js';
-import { serverTimelock } from '../api/_lib/timelock.js';
+import { createApi } from '@critter-crumbs/api';
+import { serverNow } from '@critter-crumbs/api';
+import { createNeonDatabase } from '@critter-crumbs/api';
+import { seedFixtures } from '@critter-crumbs/api';
+import { serverTimelock } from '@critter-crumbs/api';
 const args = process.argv.slice(2);
 function option(name: string, fallback: string) { const index = args.indexOf(name); return index < 0 ? fallback : args[index + 1] ?? ''; }
 const direct = args.includes('--database'), phase = option('--phase', direct ? 'draft' : 'gathering'), kind = option('--kind', 'both');

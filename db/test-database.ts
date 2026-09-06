@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { Database } from '../api/_lib/database.js';
+import type { Database } from '@critter-crumbs/api';
 /** Dev-only schema isolation for the opt-in Neon suite; never alters application tables. */
 export async function isolatedTestDatabase(base: Database): Promise<Database> {
   const schema = `cc_test_${randomUUID().replaceAll('-', '')}`;

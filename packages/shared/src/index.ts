@@ -1,4 +1,5 @@
 export { canonicalJSON } from './canonical.js';
+export { MAX_FEAST_TARGETS, MAX_CIPHERTEXT_BYTES } from './limits.js';
 export type * from './types.js';
 export { copy, formatCopy, type CopyId, type CopyParams } from './copy.js';
 export * from './feel.js';

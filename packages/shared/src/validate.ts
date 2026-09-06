@@ -1,4 +1,5 @@
 import type { CopyId } from './copy.js';
+import { MAX_FEAST_TARGETS } from './limits.js';
 import type { FeastSetup, Hex } from './types.js';
 
 export class ValidationError extends Error {
@@ -37,7 +38,8 @@ export function parseFeastSetup(value: unknown): FeastSetup {
   if (!aggregatePublic && individualOpen) throw new ValidationError('setup.privacy.individual.locked');
   const options: FeastSetup['options'] = [];
   if (kind === 'options') {
-    if (!Array.isArray(input.options) || input.options.length === 0 || input.options.length > 256) throw new ValidationError('setup.options.title');
+    if (!Array.isArray(input.options) || input.options.length === 0) throw new ValidationError('setup.options.title');
+    if (input.options.length > MAX_FEAST_TARGETS) throw new ValidationError('err.feastCapacity');
     for (const option of input.options) {
       const item = record(option), name = text(item.name, 1, 80, 'setup.option.name', true);
       if (options.some(existing => existing.name.toLowerCase() === name.toLowerCase())) throw new ValidationError('setup.option.name');

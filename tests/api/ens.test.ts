@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { custom, type Hex } from 'viem';
 import { expect, test } from 'vitest';
-import { createEnsResolver } from '../../api/_lib/ens.js';
+import { createEnsResolver } from '@critter-crumbs/api';
 const fixture: { address: Hex; name: string; exchanges: { method: string; params: unknown[]; result: Hex }[] } = JSON.parse(readFileSync(new URL('./fixtures/ens-mainnet.json', import.meta.url), 'utf8'));
 function recordedResolver(mismatch = false) {
   return createEnsResolver(custom({ async request({ method, params }) {

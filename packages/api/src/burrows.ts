@@ -1,8 +1,10 @@
-import { parseAddress, type Address } from '@critter-crumbs/shared';
+import { MAX_FEAST_TARGETS, parseAddress, type Address } from '@critter-crumbs/shared';
+import { phaseAt } from '@critter-crumbs/core';
+import { feastClock } from './feast-rows.js';
 import type { Database } from './database.js';
 import type { EnsResolver } from './ens.js';
 import { HttpError } from './errors.js';
-import { burrowView, createBurrowTransactions, requireMember, timestamp } from './burrow-transactions.js';
+import { activeMember, burrowView, createBurrowTransactions, requireMember, timestamp } from './burrow-transactions.js';
 export function createBurrows(db: Database, clock: () => number, ens?: EnsResolver) {
   const transactions = createBurrowTransactions(db, clock);
   return {
@@ -19,6 +21,10 @@ export function createBurrows(db: Database, clock: () => number, ens?: EnsResolv
       }
       await transactions.write(id, (snapshot, now, bind) => {
         requireMember(snapshot, actor);
+        if (!activeMember(snapshot, address) && snapshot.members.filter(member => member.left_at === null).length >= MAX_FEAST_TARGETS
+          && snapshot.feasts.some(feast => feast.kind === 'people' && ['draft', 'gathering'].includes(phaseAt(feastClock(feast), now)))) {
+          throw new HttpError(400, 'err.feastCapacity');
+        }
         const member = bind(address), actorParam = bind(actor), at = bind(timestamp(now));
         return { result: undefined, sql: [
           `insert into profiles (address,created_at) select ${member},${at}::timestamptz from gate on conflict (address) do nothing`,
