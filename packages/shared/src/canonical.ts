@@ -24,9 +24,10 @@ export function canonicalJSON(value: unknown): string {
         }
         return `[${entries.join(',')}]`;
       }
-      return `{${Object.keys(item).sort().map((key) => {
+      return `{${Object.getOwnPropertyNames(item).sort().map((key) => {
         const descriptor = Object.getOwnPropertyDescriptor(item, key);
         if (!descriptor || !('value' in descriptor)) throw new TypeError('Canonical JSON cannot contain accessors');
+        if (!descriptor.enumerable) throw new TypeError('Canonical JSON cannot discard hidden properties');
         return `${JSON.stringify(key)}:${encode(descriptor.value)}`;
       }).join(',')}}`;
     } finally { ancestors.delete(item); }

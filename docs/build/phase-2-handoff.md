@@ -1,12 +1,14 @@
 # Phase 2 core handoff
 
-The eleven approved core tickets implement Technical Spec §16 column A through the fixture-backed M4 scope. The app remains at its phase 1 baseline. All work is on stacked draft PRs; none is merged. Live chain execution, production setup and browser proof remain separate human/phase 3 work.
+The eleven approved core tickets implement Technical Spec §16 column A through the fixture-backed M4 scope. The app remains at its phase 1 baseline. All work is on stacked PRs; none is merged. Live chain execution, production setup and browser proof remain separate human/phase 3 work.
+
+**Review correction, 2026-09-05:** [issue #24](https://github.com/wefa-labs/critter-crumbs/issues/24) addresses SPEC-1 and STD-1 from the independent review of the original #14 head. The correction is stacked after deployment support #21 and API workspace #23; include it before accepting the complete core. It limits feasts to 49 targets at setup/open and on member additions before people-feast freeze, while retaining every allocation entry and the 4 KB cap. [The sizing proof](../research/scatter-capacity.md) covers mock, Chiado and mainnet formats. Canonical JSON now rejects hidden own properties without evaluating getters. The original evidence below describes the earlier head; the correction PR contains fresh validation and two-axis review evidence. Live Neon/Shutter/Base and removal implementation remain separate follow-ups.
 
 ## Review stack
 
 Review in dependency order. Each implementation PR records its full check, verbose test output, build and separate Standards/Spec reviews.
 
-| Ticket | Branch | Draft PR |
+| Ticket | Branch | PR |
 |---|---|---|
 | Preflight | `phase-2/core-contract-plan` | [#3](https://github.com/wefa-labs/critter-crumbs/pull/3) |
 | 01 shared contract | `phase-2/shared-contract` | [#4](https://github.com/wefa-labs/critter-crumbs/pull/4) |
@@ -57,10 +59,12 @@ Use Bun 1.4.2 and Node 22.22.1. From the repository root:
 
 ```sh
 bun install --frozen-lockfile --ignore-scripts
-LOCAL_API_PORT=4300 bun run dev:local
+DEV_ENDPOINTS_ENABLED=1 LOCAL_API_PORT=4300 bun run dev:local
 ```
 
 This starts the app shell on 5173 and mock API on 4300, applies migrations and enables dev controls. It needs no Vercel link or credentials. In a second terminal:
+
+The explicit dev flag also works when `.env` was copied from `.env.example` with an empty value. Keep it unset in production.
 
 ```sh
 LOCAL_API_PORT=4300 bun run seed --phase gathering > /tmp/critter-seed.json

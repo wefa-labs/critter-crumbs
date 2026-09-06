@@ -259,6 +259,8 @@ Checked against the Shutter API docs (2026-09-02). Base URLs: mainnet `https://s
 ```
 Every target in the feast appears once, in `targets.position` order, with a whole number ≥ 0; the sum equals `crumbs_per_critter` (R2). `participants` binds the ballot to the frozen set so it cannot be replayed into a re-run. Size: under 1 KB for ten critters; ciphertext limit enforced at 4 KB.
 
+**Capacity.** A feast supports at most **49 targets**, for both people and options. This fits every valid complete allocation at 10–1,000 crumbs in both mock and Shutter encryption. The largest valid 49-target plaintext is 3,868 bytes and its Shutter ciphertext is 4,001 bytes; a valid 50-target scatter can require 4,097 bytes. The [capacity proof](research/scatter-capacity.md) supersedes the earlier uint8-derived 256-option decision. Validate options at setup, people targets at creation, and both kinds at opening. Under the burrow revision guard, reject admissions and re-admissions that would exceed 49 active members while any people feast is draft or gathering; an already active member consumes no new place. Materialize due freezes first, so frozen feasts do not limit later burrow growth. Options feasts limit targets, not participants. Rejections use `err.feastCapacity`; never shorten the complete allocation or raise the ciphertext cap.
+
 **Modes.** One interface, three implementations, selected by `SHUTTER_MODE`:
 
 ```ts
@@ -476,7 +478,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E27 | Statement over 2,000 characters pasted | Truncated at the cap client-side; `gathering.limit`; the server rejects longer | — | Yes |
 | E28 | Reveal opened before Shutter's timestamp on a fast clock | `feast.keyNotYet`; nothing decrypts | Wait | Yes |
 
-New copy IDs introduced here (to be added to the Design System §10): `results.unreadable`, `err.notParticipant`.
+New copy IDs introduced here (to be added to the Design System §10): `results.unreadable`, `err.notParticipant`, `err.feastCapacity` (“A feast can include at most 49 critters.”).
 
 ## 16. Build order to the rehearsal
 

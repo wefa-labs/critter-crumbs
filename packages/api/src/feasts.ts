@@ -1,7 +1,7 @@
 import { resultView } from './results.js';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { optionTargetId, phaseAt, type Timelock } from '@critter-crumbs/core';
-import { hex, integer, parseFeastSetup, parseStatement, type Address, type Registration, type Target } from '@critter-crumbs/shared';
+import { MAX_FEAST_TARGETS, hex, integer, parseFeastSetup, parseStatement, type Address, type Registration, type Target } from '@critter-crumbs/shared';
 import { bytesToHex, concatHex, getAddress, keccak256, stringToHex } from 'viem';
 import type { Database, Row } from './database.js';
 import { HttpError } from './errors.js';
@@ -56,6 +56,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
         const row = requireCreator(snapshot, id, actor), phase = phaseAt(feastClock(row), now);
         if (row.status === 'open') return { sql: [], result: null };
         if (phase !== 'draft' || milliseconds(row.gathering_ends_at) <= now) throw new HttpError(400, 'setup.deadline.order');
+        integer(visibleTargets(snapshot, row).length, 1, MAX_FEAST_TARGETS, 'err.feastCapacity');
         if (row.kind === 'people' && snapshot.members.filter(member => member.left_at === null).length < 3) throw new HttpError(400, 'setup.min.people');
         if (row.shutter_registration_started_at !== null && now - milliseconds(row.shutter_registration_started_at) < 60000) throw new HttpError(503, 'err.storeUnreachable');
         const prefix = row.shutter_identity_prefix ? dbHex(row.shutter_identity_prefix) : keccak256(concatHex([stringToHex(`critter-crumbs${id}`), bytesToHex(randomBytes(32))]));
@@ -69,6 +70,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
         await transactions.write(burrowId, (snapshot, now, bind) => {
           const row = requireCreator(snapshot, id, actor);
           if (row.shutter_registration_token !== token || phaseAt(feastClock(row), now) !== 'draft' || milliseconds(row.gathering_ends_at) <= now) throw new HttpError(400, 'setup.deadline.order');
+          if (visibleTargets(snapshot, row).length > MAX_FEAST_TARGETS) throw new HttpError(400, 'err.feastCapacity');
           return { sql: [`update feasts set status='open',opened_at=${bind(timestamp(now))}::timestamptz,
             shutter_identity=${bind(Buffer.from(registration.identity.slice(2), 'hex'))}::bytea,shutter_eon=${bind(registration.eon)}::int,shutter_eon_key=${bind(Buffer.from(registration.eonKey.slice(2), 'hex'))}::bytea,shutter_tx_hash=${bind(registration.txHash)},shutter_registration_started_at=null,shutter_registration_token=null
             where id=${bind(id)}::uuid and shutter_registration_token=${bind(token)}::uuid and exists(select 1 from gate)`], result: undefined };
@@ -121,6 +123,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
       if (setup.gatheringEndsAt <= now) throw new HttpError(400, 'setup.deadline.order');
       if (setup.kind === 'people' && snapshot.members.filter(member => member.left_at === null).length < 3) throw new HttpError(400, 'setup.min.people');
       const targets: Target[] = setup.kind === 'people' ? peopleTargets(snapshot.members) : setup.options.map((option, position) => ({ id: optionTargetId(id, position), name: option.name, position, ownerAddress: null, kind: 'option' }));
+      integer(targets.length, 1, MAX_FEAST_TARGETS, 'err.feastCapacity');
       const sql = [`insert into feasts (id,burrow_id,created_by,kind,title,context,crumbs_per_critter,gathering_ends_at,scattering_ends_at,aggregate_public,individual_open)
         select ${bind(id)}::uuid,id,${bind(actor)},${bind(setup.kind)}::feast_kind,${bind(setup.title)},${bind(setup.context)},${bind(setup.crumbsPerCritter)}::int,${bind(timestamp(setup.gatheringEndsAt))}::timestamptz,${bind(timestamp(setup.scatteringEndsAt))}::timestamptz,${bind(setup.aggregatePublic)}::boolean,${bind(setup.individualOpen)}::boolean from gate`];
       for (const target of targets) {
