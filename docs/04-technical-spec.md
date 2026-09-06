@@ -393,16 +393,14 @@ critter-crumbs/
 ├── AGENTS.md                 vocabulary, rules, workstreams, how to run and test
 ├── LICENSE                   all rights reserved (PRD P12; holder per Q9)
 ├── docs/                     01–04, explorations/, decisions.md
-├── api/                      Vercel Functions, one file per route; api/_lib/ shared server code
-│   ├── _lib/{db,session,phase,shutter,eas,validate}.ts
-│   ├── session/…  me.ts  burrows/…  feasts/…  dev/…
+├── api/                      one-line Vercel route exports from @critter-crumbs/api
+│   └── session/…  me.ts  burrows/…  feasts/…  dev/…
 ├── db/migrations/0001_init.sql …
-├── public/                   fonts/, audio/, images/
-├── src/
-│   ├── shared/               types, copy IDs, constants (feel.ts from GD), validate.ts — written first, owned by both agents
-│   ├── core/                 workstream A: account/, eas/, timelock/, tally/, api-client/, phase.ts, generator/ (identity, shared with app)
-│   ├── app/                  workstream B: screens/, components/, sim/ (Koota world), three/ (lazy), portrait/, audio/, design/ (tokens.css, tokens.ts)
-│   └── main.tsx
+├── packages/
+│   ├── shared/src/           types, copy IDs, constants, validators — owned by both agents
+│   ├── core/src/             account/, eas/, timelock/, tally/, api-client/, phase.ts, generator/
+│   ├── api/src/              server handlers, database/session/timelock adapters, HTTP runtime
+│   └── app/                  src/: screens, components, sim, three, portrait, audio, design; public/: assets
 ├── scripts/                  seed.ts, migrate.ts, register-schemas.ts
 ├── tests/                    unit/ sim/ api/ e2e/
 ├── vercel.json  vite.config.ts  tsconfig.json  package.json

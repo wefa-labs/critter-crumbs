@@ -47,7 +47,7 @@ Automatic Neon/Vercel preview branching can come later. Verify which Neon projec
 
 Import `wefa-labs/critter-crumbs`; keep the repository root. Most of the values below are already declared in `vercel.json`: let Vercel read that file instead of entering duplicate dashboard overrides. Check the root and Node major, then choose the project-specific region and environment variables.
 
-The root is the deployment boundary for both `api/` and the workspaces under `packages/`. Source remains in `packages/app`, `packages/core` and `packages/shared`. Choosing `packages/app` would change that boundary and leave the current top-level function routes outside it. A workspace layout does not require each package to be a separate Vercel project.
+The root is the deployment boundary for both the Vercel route exports in `api/` and the workspaces under `packages/`. All server implementation now lives in `packages/api/src`, exposed through `@critter-crumbs/api`; root routes only re-export its default handler. The app, core and shared code remain sibling workspaces. Choosing `packages/app` would change that boundary and leave the current top-level function routes outside it. A workspace layout does not require each package to be a separate Vercel project.
 
 The custom install command pins and verifies Bun 1.4.2 and disables dependency install scripts. The custom build compiles the shared/core workspaces before building Vite; `dist` is the resulting static output. These are repository build requirements that a generic framework default does not capture. The Other preset avoids selecting an independent framework build at the root. Node 22 follows the current toolchain contract; region alignment reduces API/database latency.
 
@@ -95,14 +95,14 @@ Production changes the database, session secret, origin, Base RPCs and EAS chain
 
 ## 4. EAS and Shutter setup commands
 
-Use the pinned local toolchain and an ignored local environment. Contract writes use Foundry `cast` and a named encrypted keystore account; the script never requests or reads a raw private key. Foundry 1.7.1 is the locally verified CLI version, with no added JavaScript dependency. Use an existing account under `~/.foundry/keystores`, or import one yourself through Foundry's hidden interactive prompt. Do not paste secrets into chat, shell history or tracked files.
+Use the pinned local toolchain and an ignored local environment. Contract writes use Foundry `cast` and an encrypted keystore account; the script never requests or reads a raw private key. Foundry 1.7.1 is the locally verified CLI version, with no added JavaScript dependency. Use an existing account under `~/.foundry/keystores`, or create a fresh one with Foundry's hidden password prompt. Do not paste secrets into chat, shell history or tracked files.
 
 ```sh
-# Only if you do not already have the desired Foundry account:
-cast wallet import critter-deployer --interactive
+# Creates the default keystore directory and a new encrypted account:
+cast wallet new --password
 ```
 
-The import is a separate local operation performed by you. During transaction execution, Foundry prompts for the keystore password through the controlling terminal. Use your interactive terminal, not a headless job. `--account critter-deployer` selects the alias; `FOUNDRY_ACCOUNT=critter-deployer` is an optional local default. No password environment variable or password file is needed.
+Creation is a separate local operation performed by you. This command prints the encrypted keystore path and public address; use its generated filename as the account name. Replace `ACCOUNT_FILENAME` below with that filename. The explicit `--password` flag selects encrypted output in the default directory; plain `cast wallet new` prints a raw private key. During transaction execution, Foundry prompts for the keystore password through the controlling terminal. Use your interactive terminal. `FOUNDRY_ACCOUNT` is an optional local default instead of `--account`. No password environment variable or password file is needed.
 
 ```sh
 # Offline: prints the two exact schemas, deterministic UIDs and prepared requests.
@@ -113,7 +113,7 @@ bun run register-schemas --chain 84532 --check
 
 # Explicit chain write, to run only after review and funding a dedicated signer.
 # Requires BASE_RPC_URL and your named Foundry keystore account.
-bun run register-schemas --chain 84532 --account critter-deployer --execute
+bun run register-schemas --chain 84532 --account ACCOUNT_FILENAME --execute
 
 # Read-only Shutter API/RPC consistency check; needs no signing key.
 bun run check:shutter

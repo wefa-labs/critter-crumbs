@@ -1,5 +1,5 @@
 import { resolve } from 'node:path';
-import { createNeonDatabase } from '../api/_lib/database.js';
+import { createNeonDatabase } from '@critter-crumbs/api';
 import { migrateDatabase } from '../db/migrate.js';
 import { localData } from './local-data.js';
 if (process.argv.includes('--local')) {

@@ -12,7 +12,8 @@
   "workspaces": [
     "packages/shared",
     "packages/core",
-    "packages/app"
+    "packages/app",
+    "packages/api"
   ],
   "scripts": {
     "dev": "bun run compile && node scripts/dev.mjs",
@@ -70,7 +71,8 @@
   },
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",
-    "@critter-crumbs/shared": "0.0.0"
+    "@critter-crumbs/shared": "0.0.0",
+    "@critter-crumbs/api": "0.0.0"
   },
   "trustedDependencies": []
 }

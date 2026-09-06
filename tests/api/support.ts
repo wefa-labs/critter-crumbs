@@ -1,5 +1,5 @@
 import { isolatedTestDatabase } from '../../db/test-database.js';
-import { createNeonDatabase, type Database } from '../../api/_lib/database.js';
+import { createNeonDatabase, type Database } from '@critter-crumbs/api';
 import { fileURLToPath } from 'node:url';
 import { createPGliteDatabase } from '../../db/pglite.js';
 import { migrateDatabase } from '../../db/migrate.js';
@@ -11,7 +11,7 @@ export async function openTestDatabase(factory?: () => Promise<Database>) {
 }
 
 import { buildSignInMessage, createLocalAccount, createMockTimelock, type SignInChallenge, type Timelock } from '@critter-crumbs/core';
-import { createApi, type ApiDependencies } from '../../api/_lib/api.js';
+import { createApi, type ApiDependencies } from '@critter-crumbs/api';
 export const apiTestTimeout = process.env.CC_API_DATABASE === 'neon' ? 180000 : 30000;
 export const testAccount = (n: number) => createLocalAccount(`0x${n.toString(16).padStart(64, '0')}`);
 export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> & { databaseFactory?: () => Promise<Database>; timelockFactory?: (db: ApiDependencies['db'], clock: () => number) => Timelock } = {}) {

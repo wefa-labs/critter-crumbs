@@ -4,6 +4,8 @@ Verified 2026-09-06 from installed `cast 1.7.1`, commit `4072e48705af9d93e3c0f6e
 
 ## Invocation and prompt
 
+For fresh-account setup, `cast wallet new --password` recursively creates the default keystore directory and writes an encrypted account with a generated filename. It prints the public address and keystore path. Use the filename with `--account`. An explicit path plus account name requires the directory to exist; that form does not create it. The explicit password flag is needed to select default-directory encrypted output when no path is supplied. No account was generated during verification. [Pinned new-account implementation](https://github.com/foundry-rs/foundry/blob/4072e48705af9d93e3c0f6e29e93b5e9a40caed8/crates/cast/src/cmd/wallet/mod.rs#L318-L429)
+
 The supported invocation shape is:
 
 ```text

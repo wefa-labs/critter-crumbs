@@ -21,6 +21,9 @@ test('clock reads and aliases fail outside the exact adapter allow-list', async 
   }
   assert.equal(await has('new Date(timestamp); Date.parse(value);', 'packages/core/src/probe.ts', 'time-as-input'), false);
   assert.equal(await has('Date.now();', 'api/_lib/not-clock.ts', 'time-as-input'), true);
+  assert.equal(await has('Date.now();', 'packages/api/src/clock.ts', 'time-as-input'), false);
+  assert.equal(await has('Date.now();', 'packages/api/src/api.ts', 'time-as-input'), true);
+  assert.equal(await has('Date.now();', 'api/_lib/clock.ts', 'time-as-input'), true);
 });
 
 test('workspace imports reject reverse and private paths across each syntax', async () => {
@@ -29,6 +32,13 @@ test('workspace imports reject reverse and private paths across each syntax', as
   }
   assert.equal(await has('import "@critter-crumbs/core";', 'packages/shared/src/probe.ts', 'imports'), true);
   assert.equal(await has('import "@critter-crumbs/app";', 'api/probe.ts', 'imports'), true);
+  for (const file of ['packages/shared/src/probe.ts', 'packages/core/src/probe.ts', 'packages/app/src/probe.ts']) {
+    assert.equal(await has('import "@critter-crumbs/api";', file, 'imports'), true);
+  }
+  assert.equal(await has('import "@critter-crumbs/api";', 'api/probe.ts', 'imports'), false);
+  assert.equal(await has('import "../packages/api/src/index.js";', 'api/probe.ts', 'imports'), true);
+  assert.equal(await has('import "@critter-crumbs/api/src/api.js";', 'api/probe.ts', 'imports'), true);
+  assert.equal(await has('import "@critter-crumbs/app";', 'packages/api/src/probe.ts', 'imports'), true);
   for (const file of ['packages/core/src/probe.ts', 'packages/app/src/probe.ts', 'api/probe.ts']) {
     assert.equal(await has('import "@critter-crumbs/shared";', file, 'imports'), false);
   }
