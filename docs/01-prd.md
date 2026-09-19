@@ -182,7 +182,7 @@ Any member can leave a burrow (R16). Whether one member can remove another is **
 | Gathering deadline | Required; before the scattering deadline |
 | Scattering deadline | Required |
 | Aggregate result | Public, or burrow only (§8) |
-| Individual scatters | Closed, or open to the burrow; forced closed while the aggregate is burrow only (§8) |
+| Individual scatters | Closed, or open to the burrow; independent of the aggregate setting (§8, P14) |
 
 Opening the feast starts gathering. A people feast requires three critters in the burrow at creation (R6).
 
@@ -191,6 +191,10 @@ Opening the feast starts gathering. A people feast requires three critters in th
 Each member writes their own statement (R10) with a live character counter and a prompt encouraging them to draw on notes and other records rather than starting from a blank page. Editable until scattering opens; invisible to everyone else until then (R11).
 
 **Proposal P3 — participation during gathering.** The burrow sees who has written a statement (participation is never private, §8 — this mirrors R5's rule for scattering). Content stays hidden.
+
+**Proposal P15 — a statement prompt you can take to your own assistant.** F5 already promises a prompt that encourages drawing on notes rather than starting from a blank page. Extend it: when a feast opens, the client composes a block of prompt text carrying the feast's title, its context line, both deadlines, the feast type and the 2,000-character cap, followed by instructions for pulling contributions out of a person's own notes and drafting a statement in the first person. The member copies it and pastes it, with their own notes, into whatever assistant they already use.
+
+The block is composed in the browser from feast data the client already holds. Nothing is sent anywhere, so R15 is untouched and the dependency list does not move. An assistant built into Critter Crumbs would have to send a member's notes to a third party, which R15's request list forbids and which would undercut the product's premise; that stays out of v0 and is a v1 question if it is ever wanted.
 
 ### F6 — Scattering: read pass, then scatter pass
 
@@ -237,14 +241,16 @@ Home lists every burrow the member belongs to. A burrow's home shows its critter
 
 ## 8. Privacy and trust
 
-Two independent switches, three valid states. The invalid fourth is never offered:
+Two independent switches, four valid states (**P14**):
 
 | Aggregate result | Individual scatters | Valid | Meaning |
 |---|---|---|---|
 | Burrow only | Closed | ✓ | The burrow sees totals; nobody sees who gave what |
 | Public | Closed | ✓ | Anyone with the link sees totals; nobody sees who gave what |
 | Public | Open to the burrow | ✓ | Anyone sees totals; the burrow additionally sees who gave what |
-| Burrow only | Open | ✗ | Not a valid combination. The UI forces individual scatters closed while the aggregate is burrow only |
+| Burrow only | Open to the burrow | ✓ | The burrow sees totals and who gave what; nothing is public |
+
+**Proposal P14 — the fourth combination is allowed.** Earlier revisions refused burrow-only totals with individual scatters open, forcing individual closed whenever the aggregate was burrow only. No reason was recorded, and there is not a good one: a burrow that can see who gave what can add the columns up itself, so the totals are burrow-visible either way. The refusal only removed the setting a private group is most likely to want, which is full transparency inside the burrow with nothing public at all. All four combinations are now offered and the forcing rule is gone.
 
 - **Participation is never private. Allocation always is, until the feast.** Who has written, who has scattered: visible to the burrow. Where crumbs went: encrypted until the feast — and "open to the burrow" takes effect only at the feast, never before. (Ballots are signed, so the store necessarily knows *who* scattered before it can know *what* — that is how live participation counts work.)
 - Results are attested on-chain only when the aggregate is public, so a public budget decision is independently verifiable. Any member may post the attestation; the creator is prompted first (F9). Ballots stay off-chain, always.
@@ -363,6 +369,8 @@ Preconditions: the rehearsal feast has completed, in September (§10). Measureme
 | P11 | A people feast that falls below three critters before scattering opens ends without scattering; the burrow is told; anyone can start a new one | §6 |
 | P12 | License form: an explicit `LICENSE` file — "Copyright © 2026 {holder}. All rights reserved." — plus a short notice that the source is published for review only and no rights to use, copy, modify or distribute are granted. This is the most protective option and can be relaxed to an open license later; the reverse is hard | §13 |
 | P13 | The problem statement: four ways a group's split goes wrong, and the one thing Critter Crumbs changes | §1 |
+| P14 | All four privacy combinations are valid; burrow-only totals may be paired with individual scatters open to the burrow, and the forcing rule is removed | §8 |
+| P15 | A copyable statement prompt composed in the browser when a feast opens, for the member to take to their own assistant; no model is called from the product | F5 |
 
 ### Resolved in review, 2026-09-01
 
