@@ -1,3 +1,8 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Critter Crumbs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5,8 +10,10 @@
 
 <style>
 /* ===========================================================================
-   Critter Crumbs, product overview. A deck, not a page: 16 slides drawn on one
-   fixed 1280x720 canvas that scales to fit whatever it is opened on.
+   Critter Crumbs, product overview. A deck, not a page: 18 slides drawn on one
+   fixed 1280x720 canvas that scales to fit whatever it is opened on. With
+   ?print in the address, or when the browser prints, the same slides are
+   laid out one per page instead; that is how the PDF is made.
 
    Colour tokens are lifted verbatim from docs/02-design-system.md §3.
 
@@ -61,9 +68,9 @@
      It steps through the three presets as the deck moves. */
   --cc-glow: #FBF4E6;
 }
-:root[data-light="dusk"]  { --cc-glow: #E6E0F0; }
-:root[data-light="day"]   { --cc-glow: #FBF4E6; }
-:root[data-light="feast"] { --cc-glow: #FDE9C4; }
+:root[data-light="dusk"],  .page[data-light="dusk"]  { --cc-glow: #E6E0F0; }
+:root[data-light="day"],   .page[data-light="day"]   { --cc-glow: #FBF4E6; }
+:root[data-light="feast"], .page[data-light="feast"] { --cc-glow: #FDE9C4; }
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -76,7 +83,10 @@ body {
   overflow: hidden;
 }
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  *, *::before, *::after {
+    transition-duration: .01ms !important; transition-delay: 0s !important;
+    animation-duration: .01ms !important; animation-delay: 0s !important;
+  }
 }
 
 /* ===== the deck: one fixed canvas, scaled to fit ========================== */
@@ -90,7 +100,7 @@ body {
   background:
     radial-gradient(130% 62% at 14% -12%, var(--cc-glow) 0%, transparent 62%),
     var(--cc-oat);
-  transition: background 600ms cubic-bezier(.6,0,.2,1);
+  transition: background var(--cc-dur-4) var(--cc-ease-in-out);
   box-shadow: 0 24px 80px rgb(0 0 0 / .45);
 }
 
@@ -101,53 +111,42 @@ body {
      position is worth more than optically centring each slide's mass. */
   padding: 92px 72px 26px;
   display: flex; flex-direction: column; justify-content: flex-start; gap: 24px;
+  /* hidden, never display:none: a slide that leaves the render tree drops its
+     decoded images and comes back as a blank frame. The flip to hidden waits
+     for the outgoing fade below to finish. */
   visibility: hidden;
+  transition: visibility 0s linear var(--cc-dur-3);
 }
-.slide.is-on { visibility: visible; }
+.slide.is-on { visibility: visible; transition-delay: 0s; }
 
 /* Motion stays inside §1's budget: small amplitudes, nothing blinks.
 
-   The fade is sequential, not overlapping: the outgoing content goes fully to
-   zero before the incoming starts. Two text layers crossfading in the same
-   position ghost against each other, which reads as doubled text rather than
-   as a transition.
+   One slide dissolves into the ground, then the next rises out of it. The two
+   never overlap: two text layers crossfading in the same place ghost against
+   each other and read as doubled text rather than as a transition. Out takes
+   --cc-dur-3 and in takes --cc-dur-4, both on --cc-ease-in-out, so nothing
+   starts or stops with a jolt. These are transitions rather than keyframes so
+   that a click in the middle of a fade carries on from wherever the fade has
+   got to instead of snapping back to the start.
 
-   Every animation runs on the slide's CHILDREN, never on the slide itself,
-   because animating the element whose visibility flips is what leaves a stale
-   compositor layer. */
-.slide.is-out { visibility: visible; }
-
-/* Longhand, not the shorthand: an undefined custom property inside an
-   animation shorthand invalidates the whole declaration and silently turns
-   animation-name into none. In longhand a bad var costs one property. */
-.slide.is-out > * {
-  animation-name: fade-out;
-  animation-duration: var(--cc-dur-2);          /* 200ms: clear quickly */
-  animation-timing-function: var(--cc-ease-in-out);
-  animation-fill-mode: both;
+   Everything runs on the slide's CHILDREN, never on the slide itself, because
+   animating the element whose visibility flips is what leaves a stale
+   compositor layer behind. */
+.slide > * {
+  opacity: 0; transform: translateY(10px);
+  /* leaving: a dissolve in place. The offset for the next arrival is put back
+     only after the fade, by which time the slide is hidden. */
+  transition: opacity var(--cc-dur-3) var(--cc-ease-in-out),
+              transform 0s linear var(--cc-dur-3);
 }
 .slide.is-on > * {
-  animation-name: fade-up;
-  animation-duration: var(--cc-dur-4);          /* 600ms: arrive slowly */
-  animation-timing-function: var(--cc-ease-out);
-  animation-delay: var(--cc-dur-2);             /* exactly when the old has gone */
-  animation-fill-mode: both;
+  opacity: 1; transform: none;
+  /* arriving: begins the moment the old slide has gone, and takes its time */
+  transition: opacity var(--cc-dur-4) var(--cc-ease-in-out) var(--cc-dur-3),
+              transform var(--cc-dur-4) var(--cc-ease-in-out) var(--cc-dur-3);
 }
 /* a painting is a ground, not content: it fades but never drifts */
-.slide.is-on > .scene { animation-name: fade-in; }
-@keyframes fade-out { from { opacity: 1; } to { opacity: 0; } }
-@keyframes fade-in  { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fade-up  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-
-/* the rail joins quietly rather than snapping in */
-.rail.is-on {
-  animation-name: rail-in;
-  animation-duration: var(--cc-dur-3);
-  animation-timing-function: var(--cc-ease-out);
-  animation-delay: var(--cc-dur-2);
-  animation-fill-mode: both;
-}
-@keyframes rail-in { from { opacity: 0; } to { opacity: 1; } }
+.slide > .scene { transform: none; }
 
 /* §7.4's hop, performed by the deck: a crumb leaving the heap travels an arc
    and fades rather than vanishing. */
@@ -158,8 +157,7 @@ body {
   100% { opacity: 0; transform: translate(34px, 10px) rotate(30deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .slide.is-on > *, .slide.is-out > *, .rail.is-on { animation: none; }
-  .slide.is-out { visibility: hidden; }
+  .slide > * { transform: none; }
   .heap-go { animation: none; opacity: 0; }
 }
 /* content clears the pile rail wherever the rail is showing */
@@ -171,22 +169,31 @@ body {
 /* ===== footer: the deck's identity and position ========================== */
 
 .footer {
-  position: absolute; inset: auto 0 0 0; z-index: 30; block-size: 36px;
-  display: grid; align-content: center; padding: 0 72px;
+  position: absolute; inset: auto 0 0 0; z-index: 30; block-size: 64px;
+  display: grid; align-content: end; padding: 0 72px 12px;
   font-size: 12px; color: var(--cc-text-3);
 }
 .footer__row { display: flex; align-items: baseline; gap: 9px; }
 .footer__sep { color: var(--cc-line-strong); }
 .footer__name { font-family: var(--cc-display); font-weight: 700; font-size: 13px; color: var(--cc-text-2); }
 .footer__pos { margin-inline-start: auto; font-variant-numeric: tabular-nums; letter-spacing: .06em; }
-/* over a painting the footer needs its own ground to read against */
-.stage.at-scene .footer {
-  block-size: 64px; align-content: end; padding-block-end: 12px;
+/* over a painting the footer needs its own ground to read against. The ground
+   and the colours change on the slides' own beat: out with the old slide, in
+   with the new one. */
+.footer::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0;
   background: linear-gradient(to top, rgb(42 33 26 / .78), rgb(42 33 26 / 0));
-  color: #CFC2AC;
 }
-.stage.at-scene .footer__name { color: #E7DCC9; }
-.stage.at-scene .footer__sep { color: #9A8D79; }
+.footer, .footer::before, .footer__name, .footer__sep {
+  transition: opacity var(--cc-dur-3) var(--cc-ease-in-out), color var(--cc-dur-3) var(--cc-ease-in-out);
+}
+.at-scene .footer, .at-scene .footer::before, .at-scene .footer__name, .at-scene .footer__sep {
+  transition-duration: var(--cc-dur-4); transition-delay: var(--cc-dur-3);
+}
+.at-scene .footer::before { opacity: 1; }
+.at-scene .footer { color: #CFC2AC; }
+.at-scene .footer__name { color: #E7DCC9; }
+.at-scene .footer__sep { color: #9A8D79; }
 
 /* ===== type ============================================================== */
 
@@ -292,6 +299,55 @@ td.num, th.num { text-align: end; font-variant-numeric: tabular-nums; }
 .setting dd { margin: 0; font-size: 15px; line-height: 1.35; color: var(--cc-text); }
 .setting dd.muted { color: var(--cc-text-3); }
 
+/* ===== the whole feast in one row (slide 4) ============================== */
+
+.flow {
+  list-style: none; margin: 0; padding: 0; counter-reset: step;
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 0 20px;
+}
+.flow > li {
+  position: relative; display: flex; flex-direction: column; gap: 8px;
+  padding-block-start: 54px; counter-increment: step;
+}
+/* the step: a numbered stone on the ground line */
+.flow > li::before {
+  content: counter(step);
+  position: absolute; inset-block-start: 0; inset-inline-start: 0;
+  inline-size: 38px; block-size: 38px; border-radius: var(--cc-radius-pill);
+  display: grid; place-items: center;
+  font-family: var(--cc-display); font-weight: 700; font-size: 17px; line-height: 1;
+  color: var(--cc-burrow); background: var(--cc-surface);
+  border: 1.5px solid var(--cc-line-strong);
+}
+/* the line from one stone to the next, across the gap */
+.flow > li::after {
+  content: ""; position: absolute; inset-block-start: 18px;
+  inset-inline-start: 38px; inset-inline-end: -20px; block-size: 2px;
+  background: var(--cc-ground-line);
+}
+.flow > li:last-child::after { display: none; }
+/* the moment everything opens is the one filled stone. Moss: alive. */
+.flow > li.flow--feast::before { color: var(--cc-oat); background: var(--cc-moss-ink); border-color: var(--cc-moss-ink); }
+.flow__name { font-family: var(--cc-display); font-weight: 500; font-size: 22px; line-height: 1.2; }
+.flow__body { font-size: 15px; line-height: 1.5; color: var(--cc-text-2); text-wrap: pretty; }
+/* a deadline stands in the gap after the step it closes, crossing the line */
+.flow__deadline {
+  position: absolute; inset-block-start: -20px; inset-inline-end: -10px; transform: translateX(50%);
+  block-size: 47px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  font-size: 12px; letter-spacing: .04em; color: var(--cc-text-3); white-space: nowrap;
+}
+.flow__deadline::after { content: ""; inline-size: 2px; block-size: 16px; background: var(--cc-line-strong); border-radius: 1px; }
+/* under the steps, the same six columns answer the question the whole deck
+   turns on: who can see what, at each step */
+.seen { display: flex; flex-direction: column; gap: 10px; }
+.seen__label { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--cc-text-3); }
+.seen__row { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0 20px; }
+.seen__row > li {
+  padding-block-start: 12px; border-block-start: 2px solid var(--cc-ground-line);
+  font-size: 14px; line-height: 1.45; color: var(--cc-text-2); text-wrap: pretty;
+}
+.seen__row > li.seen--feast { border-block-start-color: var(--cc-moss); }
+
 /* ===== panels and rows =================================================== */
 
 .limit { background: var(--cc-sunken); border-radius: var(--cc-radius-lg); padding: 17px 24px; display: flex; flex-direction: column; gap: 6px; }
@@ -382,12 +438,18 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   transform: translateY(-50%); z-index: 20;
   /* both sizes fixed: the rail must not move or resize between slides */
   inline-size: 152px; block-size: 152px;
-  display: none; flex-direction: column; align-items: center; gap: 1px;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
   padding: 16px 14px 18px;
   background: var(--cc-sunken); border-radius: var(--cc-radius-lg);
   box-shadow: var(--cc-shadow-1);
+  /* it leaves with the slide it belonged to, and arrives with the next one */
+  visibility: hidden; opacity: 0;
+  transition: opacity var(--cc-dur-3) var(--cc-ease-in-out), visibility 0s linear var(--cc-dur-3);
 }
-.rail.is-on { display: flex; }
+.rail.is-on {
+  visibility: visible; opacity: 1;
+  transition: opacity var(--cc-dur-4) var(--cc-ease-in-out) var(--cc-dur-3), visibility 0s linear 0s;
+}
 .rail svg { display: block; inline-size: 122px; block-size: 67px; overflow: visible; }
 .rail__n { font-family: var(--cc-display); font-weight: 700; font-size: 26px; line-height: 1.15; font-variant-numeric: tabular-nums; inline-size: 100%; text-align: center; }
 .rail__label { font-size: 12px; color: var(--cc-text-3); }
@@ -407,15 +469,36 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
 :focus-visible { outline: 2px solid #F1E7D6; outline-offset: 3px; }
 .stage :focus-visible { outline-color: var(--cc-burrow); }
 
+/* ===== print: every slide on its own page ================================ */
+
+/* The script moves each slide into a .page, with its own footer and pile,
+   when ?print is in the address or the browser is about to print. */
+html[data-print] body { overflow: auto; block-size: auto; background: #fff; }
+html[data-print] .deck, html[data-print] .stage {
+  position: static; inline-size: auto; block-size: auto; overflow: visible;
+  transform: none; background: none; box-shadow: none; transition: none;
+}
+.page {
+  position: relative; inline-size: 1280px; block-size: 720px; overflow: hidden;
+  background:
+    radial-gradient(130% 62% at 14% -12%, var(--cc-glow) 0%, transparent 62%),
+    var(--cc-oat);
+  break-after: page;
+}
+.page:last-child { break-after: auto; }
+html[data-print] .slide, html[data-print] .rail { visibility: visible; opacity: 1; transition: none; }
+html[data-print] .slide > * { opacity: 1; transform: none; transition: none; }
+html[data-print] .footer, html[data-print] .footer::before,
+html[data-print] .footer__name, html[data-print] .footer__sep { transition: none; }
+html[data-print] .nav { display: none; }
 @media print {
-  body { background: #fff; overflow: visible; }
-  .deck { position: static; display: block; }
-  .nav { display: none !important; }
-  .stage { transform: none; box-shadow: none; }
-  .slide { visibility: visible !important; }
   @page { size: 1280px 720px; margin: 0; }
+  html, body { margin: 0; padding: 0; }
+  body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 }
 </style>
+</head>
+<body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -450,7 +533,7 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
       <span class="footer__name">Critter Crumbs</span>
       <span class="footer__sep" aria-hidden="true">&middot;</span>
       <span>WEFA</span>
-      <span class="footer__pos"><span id="pos">1</span> / 17</span>
+      <span class="footer__pos"><span id="pos">1</span> / <span id="total">18</span></span>
     </span>
   </footer>
 
@@ -462,7 +545,7 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   <div class="scene-type">
     <p class="eyebrow">September 2026</p>
     <h1>Everyone gets a handful of <span class="crumbs">crumbs</span> to share.</h1>
-    <p>A private way for a group to decide how something gets shared out. Everyone is given the same handful. Where yours go stays yours until the feast, and then it all opens at once.</p>
+    <p>A private way for a group to decide how money gets shared out. Everyone is given the same handful. Where yours go stays yours until the feast, and then it all opens at once.</p>
   </div>
 </section>
 
@@ -488,10 +571,57 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
     <li>Nobody can see what you gave, so there is nothing to trade back.</li>
     <li>Nobody can read the room, because there is no room to read.</li>
   </ul>
+  <p class="small">Built first for one council of 6&ndash;10 people. It fits any group that shares out money or credit: a co-op, a grant programme, a project team.</p>
 </section>
 
-<!-- 4 ══════════════════════════════════════════════ equal handfuls, day -->
-<section class="slide slide--scene" id="s4" data-light="day" data-eyebrow="How it works &middot; <b>1 of 6</b>" data-pile="24">
+<!-- 4 ═══════════════════════════════════════════════════ the whole feast -->
+<section class="slide" id="s4" data-light="day" data-eyebrow="How it works &middot; <b>1 of 7</b>" data-pile="off">
+  <p class="eyebrow"></p>
+  <h2>A feast, start to finish.</h2>
+  <p class="lead">Six steps, two deadlines, and one moment when every scatter opens at once.</p>
+  <ol class="flow" role="list">
+    <li>
+      <b class="flow__name">Start a burrow</b>
+      <span class="flow__body">Make the group once and add the people. It is kept, and used again for the next feast.</span>
+    </li>
+    <li>
+      <b class="flow__name">Open a feast</b>
+      <span class="flow__body">Name what is being shared out, set two deadlines, and give everyone the same handful of crumbs.</span>
+    </li>
+    <li>
+      <span class="flow__deadline">Gathering closes</span>
+      <b class="flow__name">Gathering</b>
+      <span class="flow__body">Everyone writes down what they did. Nobody can read anyone else&rsquo;s yet.</span>
+    </li>
+    <li>
+      <span class="flow__deadline">Scattering closes</span>
+      <b class="flow__name">Scattering</b>
+      <span class="flow__body">The statements open. Everyone reads them, then scatters their crumbs in private.</span>
+    </li>
+    <li class="flow--feast">
+      <b class="flow__name">The feast</b>
+      <span class="flow__body">Every scatter opens at once, on every device, to the same numbers. Nobody has to press anything.</span>
+    </li>
+    <li>
+      <b class="flow__name">The result</b>
+      <span class="flow__body">Each critter&rsquo;s share of the pot, ready to act on. Who else sees it is the burrow&rsquo;s choice.</span>
+    </li>
+  </ol>
+  <div class="seen">
+    <p class="seen__label">Who can see what, at each step</p>
+    <ul class="seen__row" role="list">
+      <li>Everyone in the burrow sees who is in it.</li>
+      <li>The burrow sees what is being shared out, and by when.</li>
+      <li>Only you can see your statement.</li>
+      <li>Everyone sees every statement. Nobody sees any scatter, not even us.</li>
+      <li class="seen--feast">Everyone sees the same numbers, at the same moment.</li>
+      <li>The burrow sees the totals, or anyone with the link. Who gave what: as the burrow chose.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 5 ══════════════════════════════════════════════ equal handfuls, day -->
+<section class="slide slide--scene" id="s5" data-light="day" data-eyebrow="How it works &middot; <b>2 of 7</b>" data-pile="24">
   <div class="scene">
     <img src="__IMG_SCENE_DAY__" alt="Inside a burrow by day. Rust-coloured roots frame teal stone, a table holds a bowl, and a round window opens onto flat blue sky.">
   </div>
@@ -504,8 +634,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </div>
 </section>
 
-<!-- 5 ═══════════════════════════════════════════════════════ you feed -->
-<section class="slide has-rail" id="s5" data-light="day" data-eyebrow="How it works &middot; <b>2 of 6</b>" data-pile="21">
+<!-- 6 ═══════════════════════════════════════════════════════ you feed -->
+<section class="slide has-rail" id="s6" data-light="day" data-eyebrow="How it works &middot; <b>3 of 7</b>" data-pile="21">
   <p class="eyebrow"></p>
   <h2>You do not fill in a form. You feed.</h2>
   <div class="cols">
@@ -531,11 +661,11 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </div>
 </section>
 
-<!-- 6 ══════════════════════════════════════════════════════ the critters -->
-<section class="slide has-rail" id="s6" data-light="day" data-eyebrow="How it works &middot; <b>3 of 6</b>" data-pile="18">
+<!-- 7 ══════════════════════════════════════════════════════ the critters -->
+<section class="slide has-rail" id="s7" data-light="day" data-eyebrow="How it works &middot; <b>4 of 7</b>" data-pile="18">
   <p class="eyebrow"></p>
-  <h2>Every target is a critter, person or not.</h2>
-  <p class="lead">A critter comes from an address, so it is the same critter in every burrow you belong to. You meet it once and you keep it. A budget line gets one too, and it grows when it is fed.</p>
+  <h2>People are critters. So are budget lines.</h2>
+  <p class="lead">Your critter is made from your account, so it is the same critter in every burrow you belong to. You meet it once and you keep it. A budget line gets one too, and it grows when it is fed.</p>
   <div class="critters">
     <figure class="critter">
       <img src="__IMG_WATER__" alt="A water critter: teal, with fin-shaped ears and a glowing throat, holding a crumb.">
@@ -556,8 +686,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </div>
 </section>
 
-<!-- 7 ═══════════════════════════════════════════════ nothing opens early -->
-<section class="slide has-rail" id="s7" data-light="day" data-eyebrow="How it works &middot; <b>4 of 6</b>" data-pile="14">
+<!-- 8 ═══════════════════════════════════════════════ nothing opens early -->
+<section class="slide has-rail" id="s8" data-light="day" data-eyebrow="How it works &middot; <b>5 of 7</b>" data-pile="14">
   <p class="eyebrow"></p>
   <h2>Nothing opens early.</h2>
   <figure class="fig">
@@ -622,8 +752,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </table>
 </section>
 
-<!-- 8 ══════════════════════════════════════════════════════════ phases -->
-<section class="slide has-rail" id="s8" data-light="day" data-eyebrow="How it works &middot; <b>5 of 6</b>" data-pile="11">
+<!-- 9 ══════════════════════════════════════════════════════════ phases -->
+<section class="slide has-rail" id="s9" data-light="day" data-eyebrow="How it works &middot; <b>6 of 7</b>" data-pile="11">
   <p class="eyebrow"></p>
   <h2>Three phases, two deadlines.</h2>
   <div class="deadlines">
@@ -638,10 +768,10 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   <p class="small">Both deadlines stay on screen, in your own time zone. The clock is the server&rsquo;s, not your phone&rsquo;s. Nobody starts the feast. It arrives.</p>
 </section>
 
-<!-- 9 ═══════════════════════════════════════════════════════════ rules -->
-<section class="slide has-rail" id="s9" data-light="day" data-eyebrow="How it works &middot; <b>6 of 6</b>" data-pile="8">
+<!-- 10 ═══════════════════════════════════════════════════════════ rules -->
+<section class="slide has-rail" id="s10" data-light="day" data-eyebrow="How it works &middot; <b>7 of 7</b>" data-pile="8">
   <p class="eyebrow"></p>
-  <h2>Five rules, and the count enforces every one.</h2>
+  <h2>Five rules, and the app holds everyone to them.</h2>
   <ul class="ground ground--split">
     <li><span class="ground__name">Equal crumbs</span><span class="ground__body">Everyone in a feast gets the same number. The creator picks it once, and 100 is the usual answer.</span></li>
     <li><span class="ground__name">Give all of them</span><span class="ground__body">You cannot submit with crumbs left in your hand.</span></li>
@@ -651,23 +781,23 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </ul>
 </section>
 
-<!-- 10 ═══════════════════════════════════════════════════════ the feast -->
-<section class="slide slide--scene" id="s10" data-light="feast" data-eyebrow="The feast" data-pile="0">
+<!-- 11 ═══════════════════════════════════════════════════════ the feast -->
+<section class="slide slide--scene" id="s11" data-light="feast" data-eyebrow="The feast" data-pile="0">
   <div class="scene">
     <img src="__IMG_SCENE_FEAST__" alt="Inside a burrow in warm afternoon light. A low table is laid with bowls and food, and an opening leads out to blue sky.">
   </div>
   <div class="scene-type">
     <p class="eyebrow"></p>
     <h2>Then, once, the feast.</h2>
-    <p>Everyone wakes together, before anyone is fed. The first thing it says is that we are all here.</p>
+    <p>Every critter wakes together, before any of them is fed. The first thing the feast says is that we are all here.</p>
     <p>Crumbs fly. Critters chew and grow. The light turns golden.</p>
     <p>One small hop together, and the numbers are simply there.</p>
     <p class="small">No confetti. No leaderboard. No spotlight on whoever came first. A critter that got few crumbs is calm, not sad.</p>
   </div>
 </section>
 
-<!-- 11 ════════════════════════════════════════════════════════ promises -->
-<section class="slide" id="s11" data-light="day" data-eyebrow="Trust &middot; <b>1 of 4</b>" data-pile="off">
+<!-- 12 ════════════════════════════════════════════════════════ promises -->
+<section class="slide" id="s12" data-light="day" data-eyebrow="Trust &middot; <b>1 of 4</b>" data-pile="off">
   <p class="eyebrow"></p>
   <h2>What you are promised.</h2>
   <ul class="ground ground--split">
@@ -679,8 +809,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </ul>
 </section>
 
-<!-- 12 ══════════════════════════════════════════════ what a burrow picks -->
-<section class="slide" id="s12" data-light="day" data-eyebrow="Trust &middot; <b>2 of 4</b>" data-pile="off">
+<!-- 13 ══════════════════════════════════════════════ what a burrow picks -->
+<section class="slide" id="s13" data-light="day" data-eyebrow="Trust &middot; <b>2 of 4</b>" data-pile="off">
   <p class="eyebrow"></p>
   <h2>What a burrow can choose.</h2>
   <div class="settings">
@@ -720,8 +850,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   <p class="small">The two switches are independent, so every pairing is available. Two things never change: whether you took part is visible to your burrow from the start, and where your crumbs went is hidden from everyone until the feast.</p>
 </section>
 
-<!-- 13 ══════════════════════════════════════════════════════ the store -->
-<section class="slide" id="s13" data-light="day" data-eyebrow="Trust &middot; <b>3 of 4</b>" data-pile="off">
+<!-- 14 ══════════════════════════════════════════════════════ the store -->
+<section class="slide" id="s14" data-light="day" data-eyebrow="Trust &middot; <b>3 of 4</b>" data-pile="off">
   <p class="eyebrow"></p>
   <h2>We hold your scatter. We cannot open it.</h2>
   <figure class="fig">
@@ -767,10 +897,10 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </div>
 </section>
 
-<!-- 14 ═════════════════════════════════════════════════════ the chains -->
-<section class="slide" id="s14" data-light="day" data-eyebrow="Trust &middot; <b>4 of 4</b>" data-pile="off">
+<!-- 15 ═════════════════════════════════════════════════════ the chains -->
+<section class="slide" id="s15" data-light="day" data-eyebrow="Trust &middot; <b>4 of 4</b>" data-pile="off">
   <p class="eyebrow"></p>
-  <h2>Three chains, three jobs, no transaction.</h2>
+  <h2>Three chains underneath, and nobody has to notice.</h2>
   <figure class="fig">
     <svg viewBox="0 0 1000 314" role="img" aria-label="You connect, write, read and scatter without ever making a transaction. Critter Crumbs locks and signs in your browser and stores what it cannot read. Underneath, Gnosis Chain carries Shutter's keypers and the key release, Base carries EAS for your signature and the public result, and Ethereum mainnet is read for ENS names.">
       <rect x="330" y="12" width="340" height="62" rx="14" fill="var(--cc-surface)" stroke="var(--cc-line-strong)" stroke-width="1.5"/>
@@ -811,11 +941,11 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
       <text x="700" y="292" font-size="12" fill="var(--cc-moss-ink)" font-family="var(--cc-body)">Read only, and looked up once.</text>
     </svg>
   </figure>
-  <p class="small">Scatters are signed and held off-chain, never posted. Only a public result is written down, and that is the one time anyone pays a fee. The key is split across Shutter&rsquo;s holders, so none of them can open a feast alone.</p>
+  <p class="small">Scatters are signed and held by us, never written to a chain. Only a public result is written down, and that is the one time anyone pays a fee. The key is split across Shutter&rsquo;s holders, so none of them can open a feast alone.</p>
 </section>
 
-<!-- 15 ════════════════════════════════════════════════════════ status -->
-<section class="slide" id="s15" data-light="day" data-eyebrow="Where it stands &middot; <b>1 of 2</b>" data-pile="off">
+<!-- 16 ════════════════════════════════════════════════════════ status -->
+<section class="slide" id="s16" data-light="day" data-eyebrow="Where it stands &middot; <b>1 of 2</b>" data-pile="off">
   <p class="eyebrow"></p>
   <h2>Where it is now.</h2>
   <div class="three">
@@ -825,9 +955,9 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
       <span class="step__note">The encryption, the signatures and the count are built and tested. The half where a mistake would be unrecoverable is behind us.</span>
     </div>
     <div>
-      <span class="step__when">Through September</span>
+      <span class="step__when">Now</span>
       <span class="step__what">The game and the interface</span>
-      <span class="step__note">Feeding, the heap, the feast sequence, the critters, then the polish pass over every screen.</span>
+      <span class="step__note">The critters&rsquo; world is being built first, then every screen, then a polish pass over all of them. Before any real money, a full rehearsal with the real people.</span>
     </div>
     <div>
       <span class="step__when">October</span>
@@ -844,8 +974,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </ul>
 </section>
 
-<!-- 16 ════════════════════════════════════════════════════ what is next -->
-<section class="slide" id="s16" data-light="day" data-eyebrow="Where it stands &middot; <b>2 of 2</b>" data-pile="off">
+<!-- 17 ════════════════════════════════════════════════════ what is next -->
+<section class="slide" id="s17" data-light="day" data-eyebrow="Where it stands &middot; <b>2 of 2</b>" data-pile="off">
   <p class="eyebrow"></p>
   <h2>Where it goes next.</h2>
   <ul class="ground ground--split">
@@ -871,8 +1001,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   </div>
 </section>
 
-<!-- 17 ═════════════════════════════════════════════════════════ close -->
-<section class="slide slide--scene slide--centred slide--close" id="s17" data-light="dusk" data-eyebrow="" data-pile="off">
+<!-- 18 ═════════════════════════════════════════════════════════ close -->
+<section class="slide slide--scene slide--centred slide--close" id="s18" data-light="dusk" data-eyebrow="" data-pile="off">
   <div class="scene">
     <img src="__IMG_SCENE_DUSK__" alt="Inside a burrow at night. A lantern stands on a low table strewn with crumbs, and a round window opens onto a golden moon.">
   </div>
@@ -904,6 +1034,8 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
   var pileN = document.getElementById("pile-n");
   var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var current = -1;
+  /* the outgoing fade's length, read from the stylesheet so the two agree */
+  var OUT_MS = parseFloat(getComputedStyle(root).getPropertyValue("--cc-dur-3")) || 320;
 
   /* the eyebrow markup lives on the slide so the copy stays in one place */
   slides.forEach(function (s) {
@@ -911,6 +1043,7 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
     var text = s.getAttribute("data-eyebrow");
     if (slot && text && !slot.innerHTML.trim()) slot.innerHTML = text;
   });
+  document.getElementById("total").textContent = String(slides.length);
 
   /* ---- fit the canvas ---------------------------------------------------
      Everything is drawn at 1280 x 720 and scaled as one piece, so a slide is
@@ -975,6 +1108,18 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
 
   var shownNow = null;   // how many glyphs the heap is currently drawing
 
+  /* the heap at a given size: the glyphs still there, or three faint outlines
+     where the last ones sat once the pile is empty */
+  function heapGlyphs(visible) {
+    var frag = document.createDocumentFragment();
+    if (visible <= 0) {
+      [62, 88, 114].forEach(function (x) { frag.appendChild(glyph("crumb-hollow", x, 72, 24, 0)); });
+    } else {
+      pile.slice(pile.length - visible).forEach(function (c) { frag.appendChild(glyph("crumb", c.x, c.y, c.size, c.rot)); });
+    }
+    return frag;
+  }
+
   function drawHeap(visible, animate) {
     // clear anything still leaving from the previous advance, so a fast
     // click-through cannot stack departing glyphs on top of each other
@@ -984,19 +1129,11 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
       // the glyphs about to leave, top row first, so they can hop away
       outgoing = Array.prototype.slice.call(heapSvg.querySelectorAll("use"), 0, shownNow - visible);
     }
-    var keep = visible <= 0 ? [] : pile.slice(pile.length - visible);
-
     // draw the new state behind the departing glyphs
     Array.prototype.forEach.call(heapSvg.querySelectorAll("use:not(.heap-go)"), function (n) {
       if (outgoing.indexOf(n) === -1) n.remove();
     });
-    var frag = document.createDocumentFragment();
-    if (!keep.length) {
-      [62, 88, 114].forEach(function (x) { frag.appendChild(glyph("crumb-hollow", x, 72, 24, 0)); });
-    } else {
-      keep.forEach(function (c) { frag.appendChild(glyph("crumb", c.x, c.y, c.size, c.rot)); });
-    }
-    heapSvg.insertBefore(frag, heapSvg.firstChild);
+    heapSvg.insertBefore(heapGlyphs(visible), heapSvg.firstChild);
 
     outgoing.forEach(function (n, i) {
       n.classList.add("heap-go");
@@ -1050,27 +1187,30 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
     countTo(Math.round(n / 24 * 100));
   }
 
+  /* The pile changes as the new slide arrives, not as the old one leaves: the
+     rail is the one thing that stays put between slides, so its crumbs hop
+     away on the same beat the next slide rises. Leaving the pile slides
+     altogether, the rail fades with the slide it belonged to. */
+  var pileTimer = 0;
+  function schedulePile(spec) {
+    clearTimeout(pileTimer);
+    if (spec === "off" || !rail.classList.contains("is-on") || reduced) { setPile(spec); return; }
+    pileTimer = setTimeout(function () { setPile(spec); }, OUT_MS);
+  }
+
   function show(i) {
     i = Math.max(0, Math.min(slides.length - 1, i));
     if (i === current) return;
-    // clear anything still leaving, so a fast click-through cannot strand a
-    // slide in the visible-but-fading state
-    slides.forEach(function (x) { x.classList.remove("is-out"); });
-    if (current >= 0) {
-      var prev = slides[current];
-      prev.classList.remove("is-on");
-      if (!reduced) {
-        prev.classList.add("is-out");
-        setTimeout(function () { prev.classList.remove("is-out"); }, 210);
-      }
-    }
+    // the stylesheet does the rest: the old slide's children dissolve, then
+    // the new slide's rise, and visibility flips once the dissolve is done
+    if (current >= 0) slides[current].classList.remove("is-on");
     current = i;
     var s = slides[i];
     s.classList.add("is-on");
     pos.textContent = String(i + 1);
     root.setAttribute("data-light", s.getAttribute("data-light"));
     stage.classList.toggle("at-scene", s.classList.contains("slide--scene"));
-    setPile(s.getAttribute("data-pile"));
+    schedulePile(s.getAttribute("data-pile"));
     if (history.replaceState) history.replaceState(null, "", "#" + (i + 1));
   }
 
@@ -1099,7 +1239,60 @@ figure.fig svg { display: block; inline-size: 100%; block-size: auto; }
     x0 = null;
   }, { passive: true });
 
+  /* ---- print: every slide on its own page --------------------------------
+     The deck is one canvas that swaps what it shows. To print, and to make the
+     PDF, the slides are laid out in order instead, one per 1280 x 720 page,
+     each with its own copy of the footer and, where it has one, of the pile.
+     Reached with ?print in the address, or by printing from the browser. */
+  var printed = false;
+  function layOutForPrint() {
+    if (printed) return;
+    printed = true;
+    clearTimeout(pileTimer);
+    root.setAttribute("data-print", "");
+    stage.classList.remove("at-scene");
+    var footer = document.querySelector(".footer");
+    slides.forEach(function (s, i) {
+      var page = document.createElement("div");
+      page.className = "page" + (s.classList.contains("slide--scene") ? " at-scene" : "");
+      page.setAttribute("data-light", s.getAttribute("data-light"));
+      page.appendChild(s);
+      s.classList.add("is-on");
+
+      var f = footer.cloneNode(true);
+      f.querySelector("#pos").textContent = String(i + 1);
+      Array.prototype.forEach.call(f.querySelectorAll("[id]"), function (n) { n.removeAttribute("id"); });
+      page.appendChild(f);
+
+      var spec = s.getAttribute("data-pile");
+      if (spec !== "off") {
+        var n = parseInt(spec, 10);
+        var r = rail.cloneNode(true);
+        r.removeAttribute("id");
+        Array.prototype.forEach.call(r.querySelectorAll("[id]"), function (x) { x.removeAttribute("id"); });
+        r.classList.add("is-on");
+        var svg = r.querySelector("svg");
+        while (svg.firstChild) svg.removeChild(svg.firstChild);
+        svg.appendChild(heapGlyphs(n));
+        r.querySelector(".rail__n").textContent = String(Math.round(n / 24 * 100));
+        page.appendChild(r);
+      }
+      stage.appendChild(page);
+    });
+    footer.remove();
+    rail.remove();
+    document.querySelector(".nav").remove();
+  }
+
   var start = parseInt((location.hash || "").slice(1), 10);
   show(isNaN(start) || start < 1 ? 0 : start - 1);
+
+  var wantsPrint = /[?&]print\b/.test(location.search);
+  if (wantsPrint) layOutForPrint();
+  window.addEventListener("beforeprint", layOutForPrint);
+  // after printing from the browser, come back as a deck
+  window.addEventListener("afterprint", function () { if (!wantsPrint) location.reload(); });
 }());
 </script>
+</body>
+</html>

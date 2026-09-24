@@ -3,7 +3,7 @@
 #
 # The published artifact runs under a CSP that blocks external images, so the
 # four portraits ship as base64 data: URIs. Edit critter-crumbs.src.html, run
-# this, publish critter-crumbs.html.
+# this, publish critter-crumbs.html. For the PDF, follow with: node pdf.js
 set -euo pipefail
 cd "$(dirname "$0")"
 
