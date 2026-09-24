@@ -21,8 +21,8 @@ export function App() {
     return { api, session: createSession(api), preferences, audio: createAudio(preferences.settings) };
   });
   const { api, session, audio } = services, state = useSyncExternalStore(session.subscribe, session.snapshot);
-  const [path, setPath] = useState(location.pathname), [busy, setBusy] = useState(false), running = useRef(false);
-  const [connecting, setConnecting] = useState(false), [choices, setChoices] = useState<Choice[]>([]), [discovering, setDiscovering] = useState(false);
+  const [path, setPath] = useState(location.pathname), [busy, setBusy] = useState(false), running = useRef(false), resumeAfterConnect = useRef(false);
+  const [connecting, setConnecting] = useState(false), [choices, setChoices] = useState<Choice[]>([]), [discovering, setDiscovering] = useState(false), [connectReason, setConnectReason] = useState('');
   const [settingsOpen, setSettingsOpen] = useState(false), [settings, setSettings] = useState(services.preferences.settings);
   const [onboardingDismissed, dismissOnboarding] = useState(false);
   const [name, setName] = useState(''), [online, setOnline] = useState(navigator.onLine);
@@ -31,7 +31,7 @@ export function App() {
   async function run(action: () => Promise<void>) {
     if (running.current) return;
     running.current = true; setBusy(true); setAlert('');
-    try { await action(); } catch (error) { if (error instanceof ApiClientError && error.status === 401) { void connect(); } else { setAlert(message(error)); audio.play('error'); } }
+    try { await action(); } catch (error) { if (error instanceof ApiClientError && error.status === 401) { resumeAfterConnect.current = true; setConnectReason(error.copyId === 'err.generic' ? '' : message(error)); void connect(); } else { setAlert(message(error)); audio.play('error'); } }
     finally { running.current = false; setBusy(false); }
   }
   useEffect(() => { void session.restore().catch(error => setAlert(message(error))); }, [session]);
@@ -90,8 +90,9 @@ export function App() {
     </nav><div id="feast-header" /></header>
     {!online ? <p className="notice">{copy['err.offline']}</p> : null}
     <main id="content" tabIndex={-1}>{content}</main>
-    {connecting ? <Dialog title={copy['connect.title']} onClose={() => setConnecting(false)} busy={working}><div className="stack">
-      {discovering ? <p>{copy['app.loading']}</p> : choices.length ? choices.map(({ provider, option }) => <button key={option.id} className="secondary" disabled={working} onClick={() => void run(async () => { try { await session.connect(provider, option); audio.play('connect'); dismissOnboarding(false); setConnecting(false); } catch (error) { setAlert(message(error, 'connect.rejected')); } })}>{option.name}</button>) : <p>{copy['connect.empty']}</p>}
+    {connecting ? <Dialog title={copy['connect.title']} onClose={() => { resumeAfterConnect.current = false; setConnectReason(''); setConnecting(false); }} busy={working}><div className="stack">
+      {connectReason ? <p>{connectReason}</p> : null}
+      {discovering ? <p>{copy['app.loading']}</p> : choices.length ? choices.map(({ provider, option }) => <button key={option.id} className="secondary" disabled={working} onClick={() => void run(async () => { try { await session.connect(provider, option); audio.play('connect'); dismissOnboarding(false); setConnecting(false); setConnectReason(''); if (resumeAfterConnect.current) { resumeAfterConnect.current = false; setAlert(copy['connect.resumed']); } } catch (error) { setAlert(message(error, 'connect.rejected')); } })}>{option.name}</button>) : <p>{copy['connect.empty']}</p>}
     </div></Dialog> : null}
     {nameNeeded && !connecting && !onboardingDismissed ? <Dialog title={copy['name.title']} onClose={() => dismissOnboarding(true)} busy={working}><p>{copy['name.help']}</p><form onSubmit={event => { event.preventDefault(); void run(async () => { await session.updateProfile({ displayName: name }); setName(''); }); }}><Field label="name.label"><input autoFocus required maxLength={40} value={name} onChange={event => setName(event.target.value)} /></Field><button disabled={working || !name.trim()}>{copy['name.save']}</button></form></Dialog> : null}
     {meetNeeded && !connecting && !onboardingDismissed ? <Dialog title={copy['critter.meet.title']} onClose={() => dismissOnboarding(true)} busy={working}><div className="meet-portrait"><PortraitImage address={me!.address} variant={me!.variant} name={displayName(me!)} size="stage" decorative={false} /></div><p>{formatCopy('critter.meet.body', { max: 4 })}</p><div className="actions"><button className="secondary" disabled={working || me!.rerollsUsed >= 4} onClick={() => void run(async () => { await session.updateProfile({ variant: me!.variant + 1 }); audio.play('reroll'); announce(formatCopy('critter.reroll.announce', { remaining: 4 - session.snapshot().me!.rerollsUsed })); })}>{me!.rerollsUsed === 3 ? copy['critter.reroll.last'] : formatCopy('critter.reroll', { remaining: 4 - me!.rerollsUsed })}</button><button disabled={working} onClick={() => void run(() => session.updateProfile({ keepCritter: true }))}>{copy['critter.keep']}</button></div></Dialog> : null}
