@@ -112,7 +112,6 @@ test.each([false, true])('API arrival metadata excludes statements and encryptio
 test.each([
   ['whole crumbs', { crumbsPerCritter: 100.5 }], ['crumb bounds', { crumbsPerCritter: 9 }],
   ['deadline order', { gatheringEndsAt: 1800000002123, scatteringEndsAt: 1800000001123 }],
-  ['privacy combination', { aggregatePublic: false, individualOpen: true }],
   ['empty options', { kind: 'options', options: [] }],
   ['duplicate option names', { kind: 'options', options: [{ name: 'Oak' }, { name: 'oak' }] }],
 ])('API draft rejects invalid %s', async (_, change) => {
@@ -134,4 +133,13 @@ test.each(['cancel', 'extend'])('API a departed creator cannot %s a gathering fe
   const { owner, path, burrowId } = await createFeast({ open: true });
   await api({ method: 'POST', path: `/api/burrows/${burrowId}/leave`, headers: owner.headers });
   expect((await api({ method: 'POST', path: `${path}/${action}`, headers: owner.headers, body: { gatheringEndsAt: clock()+1500 } })).status).toBe(403);
+});
+
+test('a private feast can open individual scatters inside the burrow without making its results public',async()=>{
+ const {api,connect,close,clock}=await apiHarness();disposals.push(close);const owner=await connect();
+ const burrow=await api({method:'POST',path:'/api/burrows',headers:owner.headers,body:{name:'Private group'}});
+ const created=await api({method:'POST',path:`/api/burrows/${burrow.body.id}/feasts`,headers:owner.headers,body:{title:'Private transparency',kind:'options',options:[{name:'Garden',statement:''}],gatheringEndsAt:clock()+1000,scatteringEndsAt:clock()+2000,aggregatePublic:false,individualOpen:true}});
+ expect(created.status).toBe(201);
+ const member=await api({method:'GET',path:`/api/feasts/${created.body.id}`,headers:owner.headers});expect(member.body).toMatchObject({aggregatePublic:false,individualOpen:true});
+ const stranger=await api({method:'GET',path:`/api/feasts/${created.body.id}`});expect(stranger.body).not.toHaveProperty('statements');expect(stranger.body).not.toHaveProperty('publicAggregate');
 });

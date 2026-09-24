@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { verifySignInMessage, type Timelock, type EasConfig, type EasReader } from '@critter-crumbs/core';
-import { hex, integer, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError, type Hex } from '@critter-crumbs/shared';
+import { hex, integer, parseAddress, parseProfileUpdate, parseUuid, record, text, ValidationError, type Hex, type Address } from '@critter-crumbs/shared';
 import type { Database } from './database.js';
 import { createStore } from './store.js';
 import { sessionCookies } from './session.js';
@@ -16,7 +16,7 @@ import { responseHeaders } from './http.js';
 import { seedFixtures } from './seed.js';
 export interface ApiRequest { method: string; path: string; headers?: Record<string, string | undefined>; body?: unknown }
 export interface ApiReply { status: number; headers: Record<string, string>; body: Record<string, unknown> }
-export interface DevControls { enabled: boolean; production: boolean; mode: string; setTime: (now: number) => void | Promise<void>; releaseKey: (identity: Hex) => void | Promise<void> }
+export interface DevControls { recordTransaction?: (actor: Address, input: unknown) => Promise<{txHash:Hex}>; enabled: boolean; production: boolean; mode: string; setTime: (now: number) => void | Promise<void>; releaseKey: (identity: Hex) => void | Promise<void> }
 export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock; eas?: EasConfig; dev?: DevControls; resultReader?: EasReader }
 export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promise<ApiReply> {
   const store = createStore(deps.db), cookies = sessionCookies(deps.sessionSecret);
@@ -36,7 +36,10 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
       const path = request.path.split('?')[0]!;
       if (path.startsWith('/api/dev/')) {
         const dev = deps.dev;
-        if (!dev?.enabled || dev.production || dev.mode !== 'mock' || request.method !== 'POST') throw new HttpError(404, 'err.generic');
+        if (!dev?.enabled || dev.production || dev.mode !== 'mock') throw new HttpError(404, 'err.generic');
+        if (path === '/api/dev/config' && request.method === 'GET') return reply(200, { enabled: true, mode: 'mock', production: false });
+        if (request.method !== 'POST') throw new HttpError(404, 'err.generic');
+        if (path === '/api/dev/result-transaction' && dev.recordTransaction) { const actor=cookies.read(incoming.cookie,now); if(!actor)throw new HttpError(401,'err.generic'); try { return reply(200,await dev.recordTransaction(actor,request.body)); } catch(error) { if(error instanceof TypeError)throw new HttpError(400,'err.generic'); throw error; } }
         if (path === '/api/dev/seed') return reply(201, await seedFixtures(handle, deps.clock, request.body, dev.setTime));
         if (path === '/api/dev/time') { await dev.setTime(integer(record(request.body).now, 0, 8640000000000000)); return reply(200, {}); }
         if (path === '/api/dev/release-key') { await dev.releaseKey(hex(record(request.body).identity, 32)); return reply(200, {}); }
@@ -81,6 +84,8 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
         if (!burrow) throw new HttpError(403, 'burrow.unknown.title');
         return reply(200, burrow);
       }
+      const removalMatch = /^\/api\/burrows\/([^/]+)\/removals$/.exec(path);
+      if (removalMatch && request.method === 'POST') return reply(200, await burrows.remove(parseUuid(removalMatch[1]), address, request.body));
       const memberMatch = /^\/api\/burrows\/([^/]+)\/(members|join|leave)$/.exec(path);
       if (memberMatch && request.method === 'POST') {
         const id = parseUuid(memberMatch[1]);

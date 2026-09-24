@@ -1,0 +1,17 @@
+.portrait { display:block; overflow:visible; width:100%; height:auto; --scale-x:1; --scale-y:1; --head-tilt:0deg; --lean-z:0deg; --lift-y:0px; --lids:1; --cheeks:0; --mouth:0; --ear-l:0deg; --ear-r:0deg; --pupil-x:0px; --pupil-y:0px; }
+.portrait[data-size="40"] { width:40px; }
+.portrait[data-size="64"] { width:64px; }
+.portrait[data-size="96"] { width:96px; }
+.portrait__figure { transform-origin:60px 140px; transform:translateY(calc(-1 * var(--lift-y))) rotate(var(--lean-z)) scale(var(--scale-x),var(--scale-y)); }
+.portrait__shadow { transform-origin:60px 141px; transform:scaleX(var(--scale-x)); }
+.portrait__head { transform:rotate(var(--head-tilt)); }
+.portrait__ear { transform:rotate(var(--ear-base)); }
+.portrait__ear--l { transform:rotate(calc(var(--ear-base) + var(--ear-l))); }
+.portrait__ear--r { transform:rotate(calc(var(--ear-base) - var(--ear-r))); }
+.portrait__eye { scale:1 var(--lids); }
+.portrait__pupil { transform:translate(var(--pupil-x),var(--pupil-y)); }
+.portrait__sleep-eye { opacity:0; }
+.portrait[data-asleep="true"] .portrait__eye { opacity:0; }
+.portrait[data-asleep="true"] .portrait__sleep-eye { opacity:1; }
+.portrait__cheek { scale:var(--cheeks); }
+.portrait-fade { pointer-events:none; }

@@ -1,7 +1,10 @@
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const copyIds = new Set([...readFileSync(path.join(root, 'packages/shared/src/copy.ts'), 'utf8').matchAll(/^\s*["']([^"']+)["']:/gm)].map(match => match[1]));
+const programStates = new Set(['person', 'option', 'people', 'options', 'draft', 'gathering', 'scattering', 'feast', 'cancelled', 'void', 'open', 'extend', 'cancel']);
 const htmlNames = new Set(['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'dangerouslySetInnerHTML']);
 export const clockAdapters = new Set([
   'packages/api/src/clock.ts',
@@ -10,8 +13,8 @@ export const clockAdapters = new Set([
 ]);
 const structuralAttributes = new Set([
   'id', 'className', 'type', 'name', 'role', 'href', 'src', 'target', 'rel',
-  'htmlFor', 'autoComplete', 'inputMode', 'method', 'action', 'loading',
-  'width', 'height', 'viewBox', 'fill', 'stroke', 'd', 'tabIndex',
+  'scope', 'htmlFor', 'autoComplete', 'autoCapitalize', 'inputMode', 'method', 'action', 'loading',
+  'width', 'height', 'size', 'pattern', 'phase', 'viewBox', 'fill', 'stroke', 'd', 'tabIndex',
 ]);
 const staticString = (node) => {
   if (typeof node?.value === 'string') return node.value;
@@ -103,12 +106,37 @@ export default {
       };
     }),
     'copy-ids': definition('Keep visible wording in packages/shared/src/copy.ts and use its copy IDs.', (context) => {
+
       function permitted(node) {
+        const value = staticString(node);
+        if (value !== undefined && (copyIds.has(value) || !/[\p{L}\p{N}]/u.test(value))) return true;
+        if (node.type === 'TemplateLiteral' && node.quasis.every(part => !/[\p{L}\p{N}]/u.test(part.value.raw))) return true;
         let current = node;
         while (current.parent) {
           const parent = current.parent;
+          if (parent.type === 'MemberExpression' && propertyName(parent) === 'includes' && parent.object === current && programStates.has(value)) return true;
+          if (parent.type === 'BinaryExpression' && ['===', '!=='].includes(parent.operator)) return true;
+          if (parent.type === 'BinaryExpression' && [parent.left, parent.right].some(side => side.type === 'MemberExpression' && propertyName(side) === 'key') && ['Enter', 'Escape', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(value)) return true;
           if (['ImportDeclaration', 'ExportNamedDeclaration', 'ExportAllDeclaration'].includes(parent.type) && parent.source === current) return true;
           if (['TSLiteralType', 'TSImportType'].includes(parent.type)) return true;
+          if (parent.type === 'ImportExpression' && parent.source === current) return true;
+          if (parent.type === 'BinaryExpression' && ['===', '!=='].includes(parent.operator) && value?.startsWith('/')) return true;
+          if (['CallExpression', 'NewExpression'].includes(parent.type)) {
+            const callee = parent.callee.name ?? (parent.callee.type === 'MemberExpression' ? propertyName(parent.callee) : undefined);
+            const argument = parent.arguments.indexOf(current);
+            if (argument === 0 && programStates.has(value) && ['setAction', 'setKind'].includes(callee)) return true;
+            if (argument === 0 && callee === 'useState' && ['people', 'options'].includes(value) && parent.typeArguments?.params?.[0]?.typeName?.name === 'FeastKind') return true;
+            if (callee === 'includes' && programStates.has(value) && parent.callee.object === current) return true;
+            if (callee === 'play' && argument === 0 && ['connect', 'reroll', 'ui.tap', 'crumb.add', 'crumb.remove', 'pour.hold', 'pour.reverse', 'pile.wall', 'pile.empty', 'statement.open', 'scatter.confirm', 'statements.reveal', 'feast.open', 'feast.feed', 'feast.settle', 'error'].includes(value)) return true;
+            if (callee === 'scrollIntoView' && argument === 0) return true;
+            if (callee === 'createPortrait' && argument === 2 && node.parent.type === 'Property' && node.parent.key.name === 'size' && value === 'stage') return true;
+            if (callee === 'formatCopy' && argument === 0 && copyIds.has(value)) return true;
+            if (['addEventListener', 'removeEventListener', 'PopStateEvent', 'getElementById', 'closest', 'querySelector', 'querySelectorAll', 'matchMedia', 'setProperty'].includes(callee) && argument === 0) return true;
+            if (['get', 'write', 'navigate', 'endsWith'].includes(callee) && argument === 0 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
+            if (callee === 'useResource' && argument === 1 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
+            if (callee === 'write' && argument === 1 && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(value)) return true;
+            if (callee === 'writeText' && argument === 0 && node.type === 'TemplateLiteral' && node.expressions[0]?.type === 'MemberExpression' && node.expressions[0].object.name === 'location' && node.expressions[0].property.name === 'origin') return true;
+          }
           if (parent.type === 'Property' && parent.key === current && !parent.computed) return true;
           if (parent.type === 'MemberExpression' && parent.object.name === 'copy' && parent.property === current) return true;
           if (parent.type === 'CallExpression' && parent.callee.name === 'copy') return true;

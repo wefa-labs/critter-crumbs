@@ -32,11 +32,16 @@ export const EXPRESSION = [
   { mood: 1, squint: 0.45, earLift: 15, mouth: 1, cheekScale: 1.1, tiltFactor: 0, posture: -3 },
 ] as const;
 export const DELIGHTED = { wiggleDegrees: 3, wiggleEveryMs: 4000 } as const;
-export const REDUCED_MOTION = { countPulseMs: 120, growthCrossfadeMs: 320, wakeCrossfadeMs: 200, dampingDb: -6 } as const;
+export const REDUCED_MOTION = { countPulseMs: 120, growthCrossfadeMs: 320, wakeCrossfadeMs: 200, dampingDb: -6, maxTicksPerSecond: 8 } as const;
 
 /** §4. A single ordered sequence drives DOM and both later renderers. */
+export const STATEMENTS_FOCUS_MS = 1200;
 export const STATEMENTS_REVEAL = { lightMs: 600, wakeStartMs: 200, staggerMs: 80, reducedMs: 200 } as const;
 export const FEAST = { glyphs: 24, fillMs: 400, glyphStaggerMs: 20, openSoundMs: 1200, wakeStartMs: 400, wakeEndMs: 1200, wakeStaggerMs: 40, waveStartMs: 1200, waveStaggerMs: 450, feedMs: 900, growOvershoot: 0.06, growPeakMs: 600, hops: [12, 24], minHops: 4, hopStreamMs: 600, settleDelayMs: 200, settleScale: [1.05, 0.96], settleHopMs: 300, settleLightMs: 800, maxMs: 8000, reducedMs: 320, skipMs: 200, skipSoundMs: 100 } as const;
+/** §6 and §7.3: the 3D flight lifetime and hard live-particle budget. */
+export const FLIGHT = { ms: 380, maxAlive: 64 } as const;
+/** §6 and §8: DOM hop geometry and the live-node budget shared by both views. */
+export const DOM_HOP = { maxAlive: 60, apexPx: 70, turnDegrees: 200, fadeAt: 0.8 } as const;
 /** §5.6. Persistence values are strings, as required by localStorage. */
 export const SETTINGS = {
   effects: { key: 'cc.sound.effects', default: '1' },
@@ -44,3 +49,6 @@ export const SETTINGS = {
   still: { key: 'cc.motion.still', default: '0' },
   simple: { key: 'cc.view.simple', default: '0' },
 } as const;
+
+/** §6: unchanged rendering limits and session degradation timings. */
+export const RENDER_BUDGET = { slowFrameMs: 33, verySlowFrameMs: 50, degradeMs: [2000, 3000, 5000], restoreMs: 2000, desktopDpr: 2, phoneDpr: 1.5, trianglesPerCritter: 3000, sceneTriangles: 30000, callsPerCritter: 4, sceneCalls: 40, degradedCrumbs: 8, blobSize: 128 } as const;

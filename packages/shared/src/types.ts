@@ -49,3 +49,8 @@ export interface SignedOffchainAttestation {
 export interface ResultAggregate { feastId: Hex; publishedSetHash: Hex; crumbsIssued: number; scatterers: number; targetIds: Hex[]; owners: Address[]; crumbs: number[] }
 export interface ResultAttestation { chainId: 8453 | 84532; txHash: Hex; uid: Hex; attester: Address; postedAt: number; aggregate: ResultAggregate }
 export interface ResultView { resultAttestation: ResultAttestation | null; aggregate: ResultAggregate | null }
+/** A durable removal receipt; historical names describe the event, not today's profile. */
+export interface MemberRemoval {
+  id: string; sequence: string; operationId: string; action: 'remove'; actorAddress: Address; address: Address;
+  membershipVersion: number; actorName: string; memberName: string; removedAt: number;
+}

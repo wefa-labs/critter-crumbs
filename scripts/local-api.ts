@@ -5,12 +5,19 @@ import { createApi } from '@critter-crumbs/api';
 import { nodeHandler } from '@critter-crumbs/api';
 import { createServerClock } from '@critter-crumbs/api';
 import { mockServerTimelock } from '@critter-crumbs/api';
+import { readFile, writeFile, rename } from 'node:fs/promises';
+import { join } from 'node:path';
+import { createLocalResultChain, type LocalResultTransaction } from './local-result-chain.js';
 import { localData } from './local-data.js';
 const data = await localData(), clock = createServerClock(data.offset, data.saveOffset);
 const timelock = mockServerTimelock(data.db, clock.now, data.mockSecret);
 const eas: EasConfig = { chainId: 84532, address: '0x4200000000000000000000000000000000000021', ballotSchemaUid: schemaUID(ballotSchema) };
-const api = createApi({ db: data.db, clock: clock.now, sessionSecret: data.sessionSecret, timelock, eas, origin: process.env.APP_ORIGIN || 'http://127.0.0.1:5173',
-  dev: { enabled: parseDevEndpointsEnabled(process.env.DEV_ENDPOINTS_ENABLED), production: false, mode: 'mock', setTime: clock.setTime, releaseKey: timelock.release } });
+const resultPath=join(data.directory,'result-transactions.json');
+let records:LocalResultTransaction[]=[];
+try { records=JSON.parse(await readFile(resultPath,'utf8')) as LocalResultTransaction[]; } catch(error) { if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error; }
+const localChain=createLocalResultChain({clock:clock.now,records,save:async value=>{const temporary=resultPath+'.pending';await writeFile(temporary,JSON.stringify(value),{mode:0o600});await rename(temporary,resultPath);}});
+const api = createApi({ db: data.db, clock: clock.now, sessionSecret: data.sessionSecret, timelock, eas, resultReader:localChain.reader, origin: process.env.APP_ORIGIN || 'http://127.0.0.1:5173',
+  dev: { recordTransaction:localChain.send, enabled: parseDevEndpointsEnabled(process.env.DEV_ENDPOINTS_ENABLED), production: false, mode: 'mock', setTime: clock.setTime, releaseKey: timelock.release } });
 const port = Number(process.env.LOCAL_API_PORT || '3000');
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('LOCAL_API_PORT must be between 1024 and 65535');
 const server = createServer(nodeHandler(api, clock.now));

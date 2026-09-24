@@ -21,7 +21,20 @@ Scatters are threshold-encrypted until the deadline (Shutter), signed by each me
 
 ## Status
 
-Documentation phase, September 2026. First real use: a council of 6–10 people in October 2026, with a rehearsal feast in September. The four documents in `docs/` are the specification: [product requirements](docs/01-prd.md), [design system](docs/02-design-system.md), [game design](docs/03-game-design.md), [technical spec](docs/04-technical-spec.md). Coding agents read [AGENTS.md](AGENTS.md) first (any agent: Claude Code, Codex, others), use the glossary in [CONTEXT.md](CONTEXT.md) and the skills vendored in `.agents/skills/`; decisions are logged in [docs/decisions.md](docs/decisions.md) and [docs/adr/](docs/adr/).
+Phase 3 game and browser UI implemented for local mock rehearsal, September 2026. Integration and remaining validation gates are tracked in the [Phase 3 handoff](docs/build/phase-3-handoff.md). First real use: a council of 6–10 people in October 2026, with a rehearsal feast in September. The four documents in `docs/` are the specification: [product requirements](docs/01-prd.md), [design system](docs/02-design-system.md), [game design](docs/03-game-design.md), [technical spec](docs/04-technical-spec.md). Coding agents read [AGENTS.md](AGENTS.md) first (any agent: Claude Code, Codex, others), use the glossary in [CONTEXT.md](CONTEXT.md) and the skills vendored in `.agents/skills/`; decisions are logged in [docs/decisions.md](docs/decisions.md) and [docs/adr/](docs/adr/).
+
+## Local rehearsal
+
+Use Bun 1.4.2 and Node 22.22.1. From the repository root:
+
+```sh
+bun install --frozen-lockfile --ignore-scripts
+SHUTTER_MODE=mock DEV_ENDPOINTS_ENABLED=1 LOCAL_API_PORT=4300 bun run dev:local
+```
+
+Then run `LOCAL_API_PORT=4300 bun run seed --phase gathering` in another terminal and open the printed feast at `http://127.0.0.1:5173`. The Connect dialog exposes eight local rehearsal accounts only in development with the server's mock controls enabled. Use the API clock and key-release controls from [local core](docs/build/local-core.md) to move through the feast. Local result recording uses a recorded transaction fixture; it sends no real transaction.
+
+`bun run check`, `bun run build`, and `bun run e2e` are the validation commands. E2E requires Chromium (`bun run e2e:install`) and the running mock app/API. See [validation evidence and remaining gates](docs/build/phase-3-validation.md).
 
 ## Stack
 

@@ -139,7 +139,7 @@ scale = 1 + 0.35 × fed             // never above 1.35, never below 1
 mood  = received > 0 ? max(0.25, fed) : 0   // G4: a crumb received means at least "content"
 ```
 
-Worked values: everyone equal → `fed` 0.50 for all, scale 1.17, all pleased and the same size. An option with 60 % of a four-way split → `fed` 0.98, scale 1.34; the others at ~13 % → `fed` 0.32, scale 1.11. One person with 5 % in a group of ten → `fed` 0.32, still content. Nobody is ever tiny next to a giant; the difference between 1.11 and 1.34 is read, not shouted.
+Worked values (rounded here; tests retain the full precision of the formula): everyone equal → `fed` 0.502973, scale 1.176041, all pleased and the same size. An option with 60 % of a four-way split → `fed` 0.969847, scale 1.339447. One person with 5 % in a group of ten → `fed` 0.299070, scale 1.104674, still content. Nobody is ever tiny next to a giant. The formula and frozen GROWTH constants are unchanged.
 
 | `mood` | Name | Eyes | Ears | Mouth | Cheeks | Posture | Idle |
 |---|---|---|---|---|---|---|---|
@@ -181,10 +181,12 @@ The one big moment. It plays the first time anyone opens the feast after the sca
 | Beat | Time | Canvas | DOM | Sound |
 |---|---|---|---|---|
 | **Laid out** | 0.0 s | Critters asleep, `dusk` | The feast heap fills in over 400 ms (glyphs pop in, 20 ms apart); the total counts up beside it | `feast.open` begins (1.2 s swell) |
-| **Everyone wakes** | 0.4 – 1.2 s | All critters wake together (§3.3), one stagger of 40 ms in grid order — a ripple, not a queue | — | — |
+| **Everyone wakes** | 0.4 – 1.2 s | All critters wake together (§3.3), up to 40 ms stagger in grid order, compressed to fit every 600 ms wake inside this window — a ripple, not a queue | — | — |
 | **The wave** | 1.2 s + 0.45 s × index | Critter *i* chews (§3.2) for 900 ms as its crumbs arrive, then grows to its `fed` scale with one overshoot (+6 % at 600 ms, settled at 900 ms) and lands its expression (§3.4). Lights ease `dusk` → `feast` across the wave | 12–24 hops fly from the feast heap to stage *i* over 600 ms, count ∝ share (min 4 for anyone with crumbs, 0 for none); the cell's count rolls up to its total | `feast.feed` for critter *i*, pitch by share; feeds overlap by half, so the sound layers into a rising texture |
 | **Settle** | wave end + 0.2 s | Every critter gives one small hop together (`scale` 1.05/0.96 → 1, 300 ms); lights ease `feast` → `day` over 800 ms; idle resumes | The feast heap empties to its outlines; the results heading receives focus; *Replay the feast* appears | `feast.settle` |
-| **Readable** | settle + 0 s | Static | Totals and shares visible in the table; nothing else moves | Silence, then the bed if it was on |
+| **Readable** | settle + 0.8 s (lighting finishes) | Settled pose; idle resumes | Totals and shares visible in the table; nothing else moves | Silence, then the bed if it was on |
+
+The results and heading focus are available at Settle; Readable marks completion of its 800 ms lighting transition. This preserves the independent 6.0–6.6 second headless acceptance window. Hop counts scale to the largest received amount: `max(4, round(24 × received / largestReceived))`, with no hops for zero. Equal shares therefore receive equal 24-hop streams; the existing 4/24 bounds and 600 ms stream remain unchanged.
 
 Duration: 8 critters ≈ 1.2 + 7 × 0.45 + 0.9 + 0.2 + 0.8 ≈ **6.3 s**; 4 options ≈ 4.5 s. Cap the whole sequence at 8 s by tightening the stagger for larger feasts. The result is readable at the settle, which satisfies the PRD's three-second rule with margin.
 
@@ -344,7 +346,7 @@ Schema traits are Koota's structure-of-arrays kind; callback traits hold objects
 |---|---|---|
 | **Critter** (one per critter in the feast) | `Identity` (address, variant, seed, generated parameters), `Name` `{ display }`, `Owner` `{ address }` (absent for an option), `IsOwn` (tag), `Asleep` (tag), `Count` `{ given }`, `Received` `{ crumbs, share, fed, mood }`, `Rig` (§3 channels: `scaleX/Y/Z, leanZ, postureX, headTilt, earL, earR, lids, mouth, cheeks, pupilX, pupilY`), `Bump` `{ t }` (transient), `Chewing` `{ rate }` (while pouring), `Mesh` (callback trait holding the Three.js `Group`; present only while the 3D module is active), `Portrait` (callback trait holding the SVG element; present while the 2D renderer is active) | `Rig` holds the *current* pose; targets are computed each tick by the expression system, never stored |
 | **Heap** (one; the viewer's pile) | `Pile` `{ issued, remaining }`, `Pouring` `{ direction, startedAt, acc }` (transient, while a pour runs) + relation `PouringInto(critter)` (`exclusive: true`) | The heap is an entity rather than a world trait so the DOM can subscribe with `useTrait(heap, Pile)` |
-| **Crumb** (3D flight only) | `Flight` `{ t, x, y, z }` + relation `FlyingTo(critter)` (`autoDestroy: 'target'`) | Never more than 64 alive (§6); the instanced mesh reads these |
+| **Crumb** (3D flight only) | `Flight` `{ t, x, y, z }` + relation `FlyingTo(critter)` (`autoDestroy: 'source'`) | Never more than 64 alive (§6); the instanced mesh reads these |
 | **FeastRun** (one, while the feast plays) | `Feast` `{ beat, startedAt, index, skipped }` | The director's only state |
 | **Event** (transient) | `SoundEvent` `{ token, pitchStep, level }` or `Hop` `{ from, to, reverse }` | Spawned by systems, consumed and destroyed by the sound system or the DOM subscriber in the same tick; a sweep at the end of the tick destroys any that were not consumed |
 | **World traits** (singletons) | `Clock` `{ now, dt }`, `Phase` `{ name, gatheringEndsAt, scatteringEndsAt }`, `Settings` `{ effects, ambience, still, simple, reducedMotion }`, `Viewer` `{ address }` | Written by the ticker and by the app; read by systems. The Technical Spec verifies whether `useTrait` accepts the world for these; if not, they move to a dedicated `App` entity |
