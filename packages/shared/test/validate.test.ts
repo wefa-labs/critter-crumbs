@@ -7,7 +7,7 @@ const payload = { v: 1, feast: '00000000-0000-4000-8000-000000000001', scatterer
 test('validators apply feast defaults', () => {
   expect(parseFeastSetup(input)).toEqual({ ...input, context: '', crumbsPerCritter: 100, options: [] });
 });
-test.each([{ crumbsPerCritter: 9 }, { crumbsPerCritter: 1001 }, { crumbsPerCritter: 10.1 }, { gatheringEndsAt: 2000 }, { individualOpen: true }, { kind: 'options', options: [] }, { title: ' ' }])('validators reject invalid feast setup %j', change => {
+test.each([{ crumbsPerCritter: 9 }, { crumbsPerCritter: 1001 }, { crumbsPerCritter: 10.1 }, { gatheringEndsAt: 2000 }, { kind: 'options', options: [] }, { title: ' ' }])('validators reject invalid feast setup %j', change => {
   expect(() => parseFeastSetup({ ...input, ...change })).toThrow(ValidationError);
 });
 test('validators reject duplicate option names', () => {
@@ -37,3 +37,5 @@ test('validators retain statement whitespace and count Unicode code points', () 
   expect(parseStatement(` ${'🌱'.repeat(1998)}\n`)).toBe(` ${'🌱'.repeat(1998)}\n`);
   expect(() => parseStatement('🌱'.repeat(2001))).toThrow(ValidationError);
 });
+
+test.each([false,true])("privacy switches remain independent when public=%s",aggregatePublic=>{ expect(parseFeastSetup({...input,aggregatePublic,individualOpen:true})).toMatchObject({aggregatePublic,individualOpen:true}); });

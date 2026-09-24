@@ -50,3 +50,30 @@ test('visible JSX wording and indirect literals require copy IDs', async () => {
   }
   assert.equal(await has('import { copy } from "@critter-crumbs/shared"; const view = <p className="statement" aria-label={copy["gathering.title"]}>{copy["gathering.title"]}</p>;', 'packages/app/src/probe.tsx', 'copy-ids'), false);
 });
+
+test('copy guard permits protocol syntax and real copy IDs, not wording hidden in callbacks', async () => {
+  for (const code of [
+    'const view = <p>{formatCopy("home.title")}</p>;',
+    'const view = <Field label="burrow.name.label" />;',
+    'const message: CopyId = "err.generic";',
+    'const view = <input autoCapitalize="none" />;',
+    'addEventListener("popstate", changed); document.getElementById("main"); matchMedia("(prefers-reduced-motion: reduce)");',
+    'const view = <button onClick={() => api.write(`/api/burrows/${id}`, "POST", { name })}>{copy["action.connect"]}</button>;',
+    'const resource = useResource(api, `/api/burrows/${id}`); navigate(`/burrows/${id}`); const isHome = path === "/";',
+    'const provider = await import("../dev/account-provider.js");',
+  ]) assert.equal(await has(code, 'packages/app/src/probe.tsx', 'copy-ids'), false, code);
+  for (const code of [
+    'const view = <button onClick={() => alert("Hello")}>{copy["action.connect"]}</button>;',
+    'const view = <p>{formatCopy("home.title", { name: "Hello" })}</p>;',
+    'const view = <Field label="Hello" />;',
+    'const label = "Hello"; const view = <p>{label}</p>;',
+  ]) assert.equal(await has(code, 'packages/app/src/probe.tsx', 'copy-ids'), true, code);
+});
+
+test('copy guard permits domain transitions but rejects literal-union inline wording', async () => {
+  assert.equal(await has('const [phase, setPhase] = useState<"read" | "scatter">("read"); setPhase("scatter");', 'packages/app/src/probe.tsx', 'copy-ids'), true);
+  assert.equal(await has('const [kind, setKind] = useState<FeastKind>("people"); setKind("options");', 'packages/app/src/probe.tsx', 'copy-ids'), false);
+  assert.equal(await has('type Label = "Hello" | "Goodbye"; const label: Label = "Hello"; const view = <p>{label}</p>;', 'packages/app/src/probe.tsx', 'copy-ids'), true);
+  assert.equal(await has('setLabel("Hello");', 'packages/app/src/probe.tsx', 'copy-ids'), true);
+  assert.equal(await has('const view = <p>{"people"}</p>;', 'packages/app/src/probe.tsx', 'copy-ids'), true);
+});

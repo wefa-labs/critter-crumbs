@@ -159,7 +159,7 @@ The DOM ground carries one light: a soft radial glow at the top-left of the page
 | `--cc-ease-in-out` | `cubic-bezier(.6, 0, .2, 1)` | Layout changes |
 | `--cc-ease-hop` | `cubic-bezier(.3, 1.4, .5, 1)` | The crumb's hop only |
 
-Under `prefers-reduced-motion: reduce` and the **Still critters** setting (§12.7): every duration above becomes 0 ms except opacity crossfades, which cap at `--cc-dur-1`. Critter motion in the canvas is governed by the Game Design document's reduced-motion rules, which must be at least this strict.
+Under `prefers-reduced-motion: reduce` and the **Still critters** setting (§12.7): every duration above becomes 0 ms except opacity crossfades, which cap at `--cc-dur-1`. The specific critter wake and growth transitions in Game Design §3.5 use 200 ms and 320 ms opacity crossfades in both SVG and 3D. Those exceptions preserve the frozen feel constants; they introduce no spatial motion. Other DOM opacity transitions retain the 120 ms cap.
 
 ### 3.7 Layers
 
@@ -975,3 +975,7 @@ The Game Design document owns every sound token. This document fixes what is sha
 |---|---|
 | **03 Game Design** | Use the §2 words for every sound; give every sound token the DOM state it pairs with (§12.6); define the tap/hold curve, the `fed` compression curve, `bump`, `mood`, the wake moment, the feast sequence from `dusk` to `feast` to `day`, reduced-motion rules at least as strict as §3.6, and the whole-scene performance budget that §5.3's per-critter budget rolls up into |
 | **04 Technical Spec** | Generate `tokens.css` and `tokens.ts` from one source; satisfy the stage contract (§6.3) and confirm the render mechanism (D7); lazy-load the 3D module behind portraits (§11); ship the generator (§5) as a pure, versioned, dependency-free module shared by 3D, 2D, and tests; self-host the display font; wire the two announcers and focus management (§12); reference §10 string IDs from the edge-state table and add `err.*` strings here rather than inline |
+
+### Phase 3 additions to §10
+
+The shared copy table adds screen/burrow document titles, burrow card counts and next deadlines, visible saved-draft guidance, creator-removal/history wording, scatter receipt/unsaved-edit explanations, and accessible names for the heap and symbol buttons. The exact strings remain in `packages/shared/src/copy.ts`. A saved scatter in another tab is identified as the latest; the current screen's in-memory edits are kept, and the next save replaces the accepted scatter. No plaintext allocation is restored from the server before the feast.

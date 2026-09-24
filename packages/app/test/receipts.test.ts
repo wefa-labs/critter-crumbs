@@ -1,0 +1,5 @@
+import {expect,test} from 'vitest';
+import {createReceiptBook} from '../src/app/receipts.js';
+const feast='00000000-0000-4000-8000-000000000001',address='0x0000000000000000000000000000000000000001',uid=`0x${'a'.repeat(64)}`;
+test('accepted receipt persistence contains only identifiers and survives a new client',()=>{const data=new Map<string,string>(),storage={getItem:(key:string)=>data.get(key)??null,setItem:(key:string,value:string)=>{data.set(key,value);}};const book=createReceiptBook(storage);book.remember(feast,address,uid);book.remember(feast,address,uid);expect(createReceiptBook(storage).read(feast,address)).toEqual([uid]);expect([...data.values()]).toEqual([JSON.stringify([uid])]);});
+test('unavailable or corrupt browser storage keeps an in-memory accepted receipt',()=>{const book=createReceiptBook({getItem:()=>'{bad',setItem:()=>{throw new Error('unavailable');}});book.remember(feast,address,uid);expect(book.read(feast,address)).toEqual([uid]);expect(book.read(feast,'0x0000000000000000000000000000000000000002')).toEqual([]);});

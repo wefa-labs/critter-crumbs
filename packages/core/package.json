@@ -21,5 +21,6 @@
     "@critter-crumbs/shared": "0.0.0",
     "@shutter-network/shutter-sdk": "0.0.2",
     "viem": "2.56.0"
-  }
+  },
+  "sideEffects": false
 }

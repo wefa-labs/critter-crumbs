@@ -51,6 +51,7 @@ export default defineConfig(({ command }) => ({
     target: ['safari15.4', 'chrome100', 'firefox100'],
     rollupOptions: {
       output: {
+        onlyExplicitManualChunks: true,
         manualChunks(id) {
           const file = id.replaceAll('\\', '/');
           if (/\/src\/three\//.test(file) || /\/node_modules\/(?:three\/|@react-three\/)/.test(file)) return 'three';

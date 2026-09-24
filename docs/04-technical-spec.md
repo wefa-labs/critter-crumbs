@@ -128,7 +128,7 @@ create table feasts (
   scattering_ends_at   timestamptz not null,
   gathering_extended   boolean not null default false,        -- R13: once
   aggregate_public     boolean not null,
-  individual_open      boolean not null,                       -- must be false when aggregate_public is false
+  individual_open      boolean not null,                       -- independent member-only visibility choice (P14)
   status               feast_status not null default 'draft',
   opened_at            timestamptz,
   cancelled_at         timestamptz,
@@ -137,8 +137,7 @@ create table feasts (
   shutter_tx_hash      text, shutter_decryption_key bytea,     -- key cached after release
   -- close record (set once, by the first request after scattering_ends_at)
   closed_at            timestamptz, published_set_hash bytea,
-  check (gathering_ends_at < scattering_ends_at),
-  check (aggregate_public or not individual_open)
+  check (gathering_ends_at < scattering_ends_at)
 );
 
 -- A critter is a target that may or may not have an owner.

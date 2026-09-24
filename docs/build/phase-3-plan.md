@@ -1,5 +1,7 @@
 # Phase 3 preflight and proposed tickets
 
+Current implementation and validation status: [Phase 3 handoff](phase-3-handoff.md). The approved plan below is preserved; ticket 15's automated browser proof ran green on the integration branch on 2026-09-23, and its remaining rows are listed in the validation record.
+
 Prepared and **approved by Afolabi on 2026-09-06**, including the numbered breakdown and named test seams. Implementation has started against verified merged main. GitHub publication is pending task write access.
 
 The scope is a complete people/options feast in a local mock browser: connect, gather, read, scatter, open locally, export, and review the result. Creator-authorized removal with visible history is included. The reviewed core, GEN_VERSION 1, and the 49-target limit remain fixed inputs.
@@ -12,7 +14,7 @@ The original checkout remains unchanged at 6108ca2 because its Git metadata is r
 
 The 15 approved tickets are retained individually in the configured local fallback at .scratch/phase-3/issues/. Current bodies and comments of issues #16–#20 were read; #16 remains the creator-removal requirement, while #17–#20 concern separate human/live-service work. No parent issue was modified.
 
-Bun 1.4.2 and Node 22.22.1 are verified. The unchanged baseline passed 336 tests in 39 files, nine tooling tests and the development-assets test. The workspace packaging probe passes with a task-local Bun cache. The first two implementation slices currently add 21 passing headless world tests; their review and full checks are in progress.
+Bun 1.4.2 and Node 22.22.1 are verified. The unchanged baseline passed 336 tests in 39 files, nine tooling tests and the development-assets test. The workspace packaging probe passes with a task-local Bun cache. Tickets 01–02 add 31 passing headless world tests and have completed Standards and Spec review, including regression fixes. Local checks pass through tests, workspace packaging, archive integrity and licences; the final npm vulnerability-audit POST is blocked by limited network mode. Ticket 03 portraits/tokens/ticker are implemented and undergoing browser verification/review. The standalone Chromium runner cannot launch under the macOS process policy even after escalation; supported in-app browser checks are recorded separately from unrun Playwright tests.
 
 ## Game Studio routing and research
 

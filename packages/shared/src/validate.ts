@@ -35,7 +35,6 @@ export function parseFeastSetup(value: unknown): FeastSetup {
   const scatteringEndsAt = integer(input.scatteringEndsAt, 0, 8640000000000000, 'setup.deadline.order');
   if (gatheringEndsAt >= scatteringEndsAt) throw new ValidationError('setup.deadline.order');
   const aggregatePublic = boolean(input.aggregatePublic), individualOpen = boolean(input.individualOpen);
-  if (!aggregatePublic && individualOpen) throw new ValidationError('setup.privacy.individual.locked');
   const options: FeastSetup['options'] = [];
   if (kind === 'options') {
     if (!Array.isArray(input.options) || input.options.length === 0) throw new ValidationError('setup.options.title');

@@ -68,3 +68,16 @@ test.each([['1', 200], ['true', 200], ['0', 404], ['false', 404], [undefined, 40
   const response = await api({ method: 'POST', path: '/api/dev/time', body: { now: 1800000001000 } });
   expect(response.status).toBe(status);
 });
+
+test.each([
+  [{ enabled: true, production: false, mode: 'mock' }, 200],
+  [{ enabled: false, production: false, mode: 'mock' }, 404],
+  [{ enabled: true, production: true, mode: 'mock' }, 404],
+  [{ enabled: true, production: false, mode: 'chiado' }, 404],
+] as const)('browser development capability uses the same three gates: %j', async (config, status) => {
+  const { api, close } = await apiHarness({ dev: { ...config, setTime() {}, releaseKey() {} } }); disposals.push(close);
+  const reply = await api({ method: 'GET', path: '/api/dev/config' });
+  expect(reply.status).toBe(status);
+  if (status === 200) expect(reply.body).toEqual({ enabled: true, mode: 'mock', production: false, serverNow: 1800000000123 });
+  expect((await api({ method: 'GET', path: '/api/dev/time' })).status).toBe(404);
+});

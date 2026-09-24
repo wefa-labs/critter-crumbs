@@ -21,10 +21,10 @@
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc -b && tsc -p tsconfig.tools.json",
     "test": "node scripts/test.mjs",
-    "compile": "tsc -b",
+    "compile": "node scripts/generate-tokens.mjs && tsc -b",
     "check:licenses": "bun scripts/check-dependencies.mjs",
     "check:audit": "bun audit --audit-level=high",
-    "check": "bun run check:toolchain && bun run lint && bun run typecheck && bun run test && bun run check:development-assets && bun run check:workspaces && bun run check:licenses && bun run check:audit",
+    "check": "bun run check:toolchain && bun run check:tokens && bun run lint && bun run typecheck && bun run test && bun run check:development-assets && bun run check:workspaces && bun run check:licenses && bun run check:audit",
     "build": "bun run compile && vite build --config packages/app/vite.config.ts",
     "vercel-build": "PATH=\"$PWD/.vercel/bun/bin:$PATH\" .vercel/bun/bin/bun run build",
     "e2e": "playwright test",
@@ -39,7 +39,8 @@
     "register-schemas": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/register-schemas.js",
     "test:api:neon": "node --env-file-if-exists=.env scripts/test-neon.mjs",
     "check:shutter": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/check-shutter.js",
-    "deploy": "node --env-file-if-exists=.env scripts/deploy.mjs"
+    "deploy": "node --env-file-if-exists=.env scripts/deploy.mjs",
+    "check:tokens": "node scripts/generate-tokens.mjs --check"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
