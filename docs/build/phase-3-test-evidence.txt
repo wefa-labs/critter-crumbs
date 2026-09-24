@@ -1,197 +1,199 @@
-Phase 3 integration proof, 2026-09-23
-Implementation under test: c90f134a51adfadda2e9ef676578e4bbcdf61311
-Command: bun run test -- --reporter=verbose
-Filtered by: pour|wall|feast|sound|growth|portrait|removal|tally|lifecycle|phaseAt|generator|canonical|timelock|close record
+Phase 3 integration proof, 2026-09-24
+Implementation under test: 60af269
+Command: bun run test -- --reporter=verbose (10-core host, otherwise idle)
+Filtered by: pour|wall|feast|sound|token|envelope|peak|growth|mood|portrait|hop|removal|tally|lifecycle|phaseAt|generator|canonical|timelock|close record|render-policy|ladder
 
- × |api| tests/api/removal.test.ts > only an active burrow creator can remove another member, with visible durable history 17872ms
- ✓ |api| tests/api/removal.test.ts > removal retries are scoped to the original membership, even after re-admission 11885ms
- ✓ |api| tests/api/removal.test.ts > removal at +999 preserves phase boundaries, statements and close records 6292ms
- ✓ |api| tests/api/removal.test.ts > removal at +1000 preserves phase boundaries, statements and close records 5447ms
- ✓ |api| tests/api/removal.test.ts > removal at +1001 preserves phase boundaries, statements and close records 6990ms
- ✓ |api| tests/api/removal.test.ts > removal at +2000 preserves phase boundaries, statements and close records 7101ms
- ✓ |api| tests/api/removal.test.ts > removal at +2001 preserves phase boundaries, statements and close records 4099ms
- ✓ |api| tests/api/removal.test.ts > membership cannot change when its history transaction fails 5349ms
- ✓ |api| tests/api/removal.test.ts > removal preserves accepted sequences and a closed feast while a later feast still gathers 5189ms
- ✓ |api| tests/api/removal.test.ts > a revision retry crossing +999 reads fresh time before removing 5239ms
- ✓ |api| tests/api/removal.test.ts > a revision retry crossing +1999 reads fresh time before removing 8561ms
- ✓ |api| tests/api/removal.test.ts > a concurrent leave wins before the removal revision commits 5443ms
- ✓ |api| tests/api/removal.test.ts > a concurrent re-admit wins before the removal revision commits 4477ms
- ✓ |api| tests/api/removal.test.ts > a concurrent remove wins before the removal revision commits 3833ms
- ✓ |api| tests/api/membership.test.ts > API voids a people feast when pre-deadline membership falls below three 3075ms
- ✓ |api| tests/api/gathering.test.ts > API a departed creator cannot cancel a gathering feast 2915ms
- ✓ |api| tests/api/gathering.test.ts > API a departed creator cannot extend a gathering feast 3053ms
- ✓ |api| tests/api/gathering.test.ts > a private feast can open individual scatters inside the burrow without making its results public 2741ms
- ✓ |api| tests/api/results.test.ts > API result record rejects mismatched feast without publishing numbers 10741ms
- ✓ |api| tests/api/ballots.test.ts > API close record is produced once under concurrent first requests and keeps latest ciphertexts only 8220ms
- ✓ |api| tests/api/ballots.test.ts > API scatter, ciphertext and key routes enforce the feast phase 8169ms
- ✓ |api| tests/api/browser-feast.test.ts > two independent browser clients open real encrypted latest scatters, yield per candidate and produce identical core hashes 10447ms
- ✓ |api| tests/api/browser-feast.test.ts > unreadable latest ciphertext never revives the previous scatter; missing accepted UIDs stay visible 3368ms
- ✓ |api| tests/api/browser-feast.test.ts > no browser decryption before trusted close; empty publication returns the core zero result 3256ms
- ✓ |api| tests/api/ballot-verification.test.ts > API ballot verification rejects wrong feast even with a valid signature 3350ms
- ✓ |api| tests/api/browser-feast.test.ts > publication omissions and changed close records fail closed instead of silently changing a result 4268ms
- ✓ |api| tests/api/browser-feast.test.ts > the actual browser signer produces the reviewed payload shape and a readable complete scatter 3281ms
- ✓ |api| tests/api/browser-feast.test.ts > key outages use the injected local fallback, while authorization errors never reach it 4787ms
- ✓ |api| tests/api/dev.test.ts > API dev seed creates eight deterministic critters, both gathering feasts and fixture statements 9395ms
- ✓ |api| tests/api/dev.test.ts > API dev seed reaches feast through ordinary phase rules 4037ms
- ✓ |api| tests/api/dev.test.ts > API dev seed accepts one feast type and rejects coerced phase or kind values 4247ms
- ✓ |api| tests/api/capacity.test.ts > API capacity rejects a people draft above 49 active critters without limiting an options feast 9594ms
- ✓ |api| tests/api/lifecycle.test.ts > API lifecycle: seed → N sign-ins → statements → advance time → scatter and resubmit → advance → release key → two independent tallies produce the same resultHash 8187ms
- ✓ |api| tests/api/key.test.ts > API timelock key is phase gated, retries after release, and persists across handler instances 9391ms
- ✓ |api| tests/api/key.test.ts > API timelock key reservation permits one fetch across concurrent server instances 5449ms
- ✓ |api| tests/api/key.test.ts > API timelock key reservation recovers after an interrupted instance and cannot overwrite the winning key 4084ms
- ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /burrows/00000000-0000-4000-8000-000000000001/feasts reaches the store 2ms
+ ✓ |api| tests/api/removal.test.ts > only an active burrow creator can remove another member, with visible durable history 1124ms
+ ✓ |api| tests/api/removal.test.ts > removal retries are scoped to the original membership, even after re-admission 654ms
+ ✓ |api| tests/api/removal.test.ts > removal at +999 preserves phase boundaries, statements and close records 678ms
+ ✓ |api| tests/api/removal.test.ts > removal at +1000 preserves phase boundaries, statements and close records 615ms
+ ✓ |api| tests/api/removal.test.ts > removal at +1001 preserves phase boundaries, statements and close records 605ms
+ ✓ |api| tests/api/removal.test.ts > removal at +2000 preserves phase boundaries, statements and close records 592ms
+ ✓ |api| tests/api/removal.test.ts > removal at +2001 preserves phase boundaries, statements and close records 611ms
+ ✓ |api| tests/api/removal.test.ts > membership cannot change when its history transaction fails 581ms
+ ✓ |api| tests/api/removal.test.ts > removal preserves accepted sequences and a closed feast while a later feast still gathers 590ms
+ ✓ |api| tests/api/removal.test.ts > a revision retry crossing +999 reads fresh time before removing 645ms
+ ✓ |api| tests/api/removal.test.ts > a revision retry crossing +1999 reads fresh time before removing 597ms
+ ✓ |api| tests/api/removal.test.ts > a concurrent leave wins before the removal revision commits 588ms
+ ✓ |api| tests/api/removal.test.ts > a concurrent re-admit wins before the removal revision commits 575ms
+ ✓ |api| tests/api/removal.test.ts > a concurrent remove wins before the removal revision commits 562ms
+ ✓ |api| tests/api/ballots.test.ts > API close record is produced once under concurrent first requests and keeps latest ciphertexts only 628ms
+ ✓ |api| tests/api/ballots.test.ts > API scatter, ciphertext and key routes enforce the feast phase 601ms
+ ✓ |api| tests/api/gathering.test.ts > API a departed creator cannot cancel a gathering feast 599ms
+ ✓ |api| tests/api/gathering.test.ts > API a departed creator cannot extend a gathering feast 572ms
+ ✓ |api| tests/api/gathering.test.ts > a private feast can open individual scatters inside the burrow without making its results public 548ms
+ ✓ |api| tests/api/ballot-verification.test.ts > API ballot verification rejects wrong feast even with a valid signature 623ms
+ ✓ |api| tests/api/results.test.ts > API result record rejects mismatched feast without publishing numbers 619ms
+ ✓ |api| tests/api/capacity.test.ts > API capacity rejects a people draft above 49 active critters without limiting an options feast 1357ms
+ ✓ |api| tests/api/dev.test.ts > API dev seed creates eight deterministic critters, both gathering feasts and fixture statements 797ms
+ ✓ |api| tests/api/dev.test.ts > API dev seed reaches feast through ordinary phase rules 778ms
+ ✓ |api| tests/api/dev.test.ts > API dev seed accepts one feast type and rejects coerced phase or kind values 757ms
+ ✓ |api| tests/api/membership.test.ts > API voids a people feast when pre-deadline membership falls below three 648ms
+ ✓ |api| tests/api/session.test.ts > API lifecycle signs in locally, creates a burrow, and reads it with the session cookie 944ms
+ ✓ |api| tests/api/browser-feast.test.ts > two independent browser clients open real encrypted latest scatters, yield per candidate and produce identical core hashes 1178ms
+ ✓ |api| tests/api/browser-feast.test.ts > unreadable latest ciphertext never revives the previous scatter; missing accepted UIDs stay visible 708ms
+ ✓ |api| tests/api/browser-feast.test.ts > no browser decryption before trusted close; empty publication returns the core zero result 683ms
+ ✓ |api| tests/api/browser-feast.test.ts > publication omissions and changed close records fail closed instead of silently changing a result 667ms
+ ✓ |api| tests/api/browser-feast.test.ts > the actual browser signer produces the reviewed payload shape and a readable complete scatter 679ms
+ ✓ |api| tests/api/browser-feast.test.ts > key outages use the injected local fallback, while authorization errors never reach it 812ms
+ ✓ |api| tests/api/key.test.ts > API timelock key is phase gated, retries after release, and persists across handler instances 1075ms
+ ✓ |api| tests/api/key.test.ts > API timelock key reservation permits one fetch across concurrent server instances 713ms
+ ✓ |api| tests/api/key.test.ts > API timelock key reservation recovers after an interrupted instance and cannot overwrite the winning key 713ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /burrows/00000000-0000-4000-8000-000000000001/feasts reaches the store 1ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/open reaches the store 0ms
- ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/cancel reaches the store 1ms
+ ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/cancel reaches the store 0ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/extend reaches the store 0ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/ballots reaches the store 0ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before POST /feasts/00000000-0000-4000-8000-000000000001/result-attestation reaches the store 0ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before PUT /feasts/00000000-0000-4000-8000-000000000001/statements/0x1111111111111111111111111111111111111111111111111111111111111111 reaches the store 0ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before GET /feasts/00000000-0000-4000-8000-000000000001/ballots reaches the store 0ms
  ✓ |api| tests/api/contract.test.ts > API contract requires a session before GET /feasts/00000000-0000-4000-8000-000000000001/key reaches the store 0ms
- ✓ |api| tests/api/session.test.ts > API lifecycle signs in locally, creates a burrow, and reads it with the session cookie 3917ms
- ✓ |api| tests/api/scatter-tally.test.ts > API encrypted scatter is decrypted and tallied independently with no fallback from an invalid latest submission 5910ms
- ✓ |api| tests/api/scatter-tally.test.ts > API public arrival metadata never grants ciphertext or key access to outsiders 3321ms
- ✓ |api| tests/api/shutter.test.ts > API real timelock retains a pending registration across handler restart and opens only after confirmation 9650ms
- ✓ |api| tests/api/portrait-view.test.ts > feast portraits reuse current identities without leaking hidden statements or changing targets 5612ms
- ✓ |app| packages/app/test/world.test.ts > the wall stops the pour, emits once per press, and leaves no sound events behind 35ms
- ✓ |app| packages/app/test/world.test.ts > pouring chews, release decays in 260 ms, and Still critters removes spatial motion 34ms
- ✓ |app| packages/app/test/world.test.ts > flight capacity stays at 64 and reduced motion uses at most eight soft pour ticks per second without hops 18ms
- ✓ |app| packages/app/test/world.test.ts > a short held pour still lands with one final reply without giving another crumb 4ms
- ✓ |app| packages/app/test/world.test.ts > changing effects ends an already playing pour 2ms
- ✓ |app| packages/app/test/world.test.ts > changing still ends an already playing pour 3ms
- ✓ |app| packages/app/test/world.test.ts > changing reducedMotion ends an already playing pour 2ms
- ✓ |app| packages/app/test/world.test.ts > destroying a held target stops the continuous pour and clears its hold 10ms
- ✓ |app| packages/app/test/world.test.ts > wall feedback survives muted effects while quiet motion remains an adapter choice 1ms
- ✓ |app| packages/app/test/feast-world.test.ts > eight critters reach Readable in 6.0–6.6 seconds, feed in grid order and retain equal growth 189ms
- ✓ |app| packages/app/test/feast-world.test.ts > reducedMotion makes the feast one 320 ms crossfade with only a damped settle cue 20ms
- ✓ |app| packages/app/test/feast-world.test.ts > still makes the feast one 320 ms crossfade with only a damped settle cue 4ms
- ✓ |app| packages/app/test/render-policy.test.ts > initial load failure retains portraits and does not announce a mid-session loss 1ms
- ✓ |app| packages/app/test/feast-world.test.ts > skip reaches Readable within 200 ms, stops sound within 100 ms, and replay retains the result 176ms
- ✓ |app| packages/app/test/feast-world.test.ts > nobody scattered skips the wave and all 49 targets fit an eight-second feast 510ms
- ✓ |app| packages/app/test/feast-world.test.ts > growth uses fair share and never makes small shares sad 4ms
- ✓ |app| packages/app/test/feast-world.test.ts > growth uses fair share and never makes small shares sad 3ms
- ✓ |app| packages/app/test/feast-world.test.ts > the delighted pose follows the expression table and an unfed critter stays calm 3ms
- ✓ |app| packages/app/test/feast-world.test.ts > feeding grows through the six-percent overshoot and the shared settle is one small hop 44ms
- ✓ |app| packages/app/test/feast-world.test.ts > all 49 critters wake before feeding, including an empty feast (0 each) 55ms
- ✓ |app| packages/app/test/feast-world.test.ts > all 49 critters wake before feeding, including an empty feast (10 each) 40ms
- ✓ |app| packages/app/test/feast-world.test.ts > a removed visual target does not corrupt the retained core result order 2ms
- ✓ |app| packages/app/test/feast-world.test.ts > feast presentation fills in400ms, rolls counts in grid order, exposes Settle before Readable and restarts on replay 4ms
- ✓ |app| packages/app/test/feast-world.test.ts > skipping or choosing Still critters blends from the current feast light 2ms
- ✓ |app| packages/app/test/ticker-renderer.test.ts > offscreen suspension stops a held sound before the final frame is cancelled 22ms
- ✓ |app| packages/app/test/audio.test.ts > pour schedules bounded lookahead grains, changes rate and stops after release 1ms
- ✓ |app| packages/app/test/portrait-colour.test.ts > sRGB conversion matches independent neutral and red Oklab vectors 3ms
- ✓ |app| packages/app/test/portrait-colour.test.ts > generated identities keep a deterministic in-gamut palette 120ms
- ✓ |core| packages/core/test/tally.test.ts > tally: must-scatter-all rejected 5ms
- ✓ |core| packages/core/test/tally.test.ts > tally: self-scatter rejected 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally: proportions of scattered not issued (one of four never scatters) 16ms
- ✓ |core| packages/core/test/tally.test.ts > tally: latest `seq` wins over an earlier valid one 6ms
- ✓ |core| packages/core/test/tally.test.ts > tally: an invalid latest does not fall back 1ms
+ ✓ |api| tests/api/shutter.test.ts > API real timelock retains a pending registration across handler restart and opens only after confirmation 1361ms
+ ✓ |api| tests/api/scatter-tally.test.ts > API encrypted scatter is decrypted and tallied independently with no fallback from an invalid latest submission 1160ms
+ ✓ |api| tests/api/scatter-tally.test.ts > API public arrival metadata never grants ciphertext or key access to outsiders 679ms
+ ✓ |api| tests/api/lifecycle.test.ts > API lifecycle: seed → N sign-ins → statements → advance time → scatter and resubmit → advance → release key → two independent tallies produce the same resultHash 1369ms
+ ✓ |api| tests/api/portrait-view.test.ts > feast portraits reuse current identities without leaking hidden statements or changing targets 946ms
+ ✓ |app| packages/app/test/feast-world.test.ts > eight critters reach Readable in 6.0–6.6 seconds, feed in grid order and retain equal growth 36ms
+ ✓ |app| packages/app/test/feast-world.test.ts > reducedMotion makes the feast one 320 ms crossfade with only a damped settle cue 2ms
+ ✓ |app| packages/app/test/feast-world.test.ts > still makes the feast one 320 ms crossfade with only a damped settle cue 1ms
+ ✓ |app| packages/app/test/feast-world.test.ts > skip reaches Readable within 200 ms, stops sound within 100 ms, and replay retains the result 22ms
+ ✓ |app| packages/app/test/feast-world.test.ts > nobody scattered skips the wave and all 49 targets fit an eight-second feast 109ms
+ ✓ |app| packages/app/test/feast-world.test.ts > growth uses fair share and never makes small shares sad 1ms
+ ✓ |app| packages/app/test/feast-world.test.ts > growth uses fair share and never makes small shares sad 1ms
+ ✓ |app| packages/app/test/feast-world.test.ts > the delighted pose follows the expression table and an unfed critter stays calm 1ms
+ ✓ |app| packages/app/test/feast-world.test.ts > feeding grows through the six-percent overshoot and the shared settle is one small hop 10ms
+ ✓ |app| packages/app/test/feast-world.test.ts > all 49 critters wake before feeding, including an empty feast (0 each) 15ms
+ ✓ |app| packages/app/test/feast-world.test.ts > all 49 critters wake before feeding, including an empty feast (10 each) 15ms
+ ✓ |app| packages/app/test/feast-world.test.ts > a removed visual target does not corrupt the retained core result order 1ms
+ ✓ |app| packages/app/test/feast-world.test.ts > feast presentation fills in400ms, rolls counts in grid order, exposes Settle before Readable and restarts on replay 1ms
+ ✓ |app| packages/app/test/feast-world.test.ts > skipping or choosing Still critters blends from the current feast light 1ms
+ ✓ |app| packages/app/test/world.test.ts > the wall stops the pour, emits once per press, and leaves no sound events behind 7ms
+ ✓ |app| packages/app/test/world.test.ts > crumb pitch follows count, a hold crosses after three ticks, and release pairs with its final hop 2ms
+ ✓ |app| packages/app/test/world.test.ts > pouring chews, release decays in 260 ms, and Still critters removes spatial motion 2ms
+ ✓ |app| packages/app/test/world.test.ts > flight capacity stays at 64 and reduced motion uses at most eight soft pour ticks per second without hops 3ms
+ ✓ |app| packages/app/test/world.test.ts > a short held pour still lands with one final reply without giving another crumb 1ms
+ ✓ |app| packages/app/test/world.test.ts > changing effects ends an already playing pour 1ms
+ ✓ |app| packages/app/test/world.test.ts > changing still ends an already playing pour 1ms
+ ✓ |app| packages/app/test/world.test.ts > changing reducedMotion ends an already playing pour 1ms
+ ✓ |app| packages/app/test/world.test.ts > destroying a held target stops the continuous pour and clears its hold 1ms
+ ✓ |app| packages/app/test/world.test.ts > wall feedback survives muted effects while quiet motion remains an adapter choice 0ms
+ ✓ |app| packages/app/test/portrait-colour.test.ts > sRGB conversion matches independent neutral and red Oklab vectors 1ms
+ ✓ |app| packages/app/test/portrait-colour.test.ts > generated identities keep a deterministic in-gamut palette 12ms
+ ✓ |app| packages/app/test/hop.test.ts > hop reaches70px above the higher endpoint even across a tall grid, forwards and backwards 6ms
+ ✓ |app| packages/app/test/audio.test.ts > all finite tokens stay inside their declared envelope and peak with bounded microvariation 2ms
+ ✓ |app| packages/app/test/audio.test.ts > pour schedules bounded lookahead grains, changes rate and stops after release 0ms
+ ✓ |app| packages/app/test/ticker-renderer.test.ts > offscreen suspension stops a held sound before the final frame is cancelled 7ms
+ ✓ |app| packages/app/test/render-policy.test.ts > sustained slow rendering steps down at 2, then 3, then 5 seconds without loosening the scene budget 1ms
+ ✓ |app| packages/app/test/render-policy.test.ts > good frames and a paused interval reset only the current sustained window 0ms
+ ✓ |app| packages/app/test/render-policy.test.ts > context restore has a two-second deadline and a failed retry is offered only once in the session 0ms
+ ✓ |app| packages/app/test/render-policy.test.ts > initial load failure retains portraits and does not announce a mid-session loss 0ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration opens only with finalized registry, original eon key and matching publication evidence 11ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration recovers a lost POST response after restart without repeating the registration 3ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects changed deadline when resuming a saved attempt 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects changed prefix when resuming a saved attempt 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration bounds log recovery to ten-thousand-block pages 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration never repeats an uncertain request while the identity remains absent 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects a submitted key that disagrees with the finalized original eon key 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration requires the configured RPC chain before any registration POST 0ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration resumes against its persisted deployment after configuration changes 2ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock server key reads use the configured bearer key without browser credentials 0ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock mainnet fails closed on the recorded deployment-key mismatch 1ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration retries a completed empty log search when historical evidence becomes available 2ms
+ ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration uses supplied randomness when creating an identity prefix 2ms
+ ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock SDK encryption matches a pinned 32-byte time identity and survives concurrent cold starts 253ms
+ ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock decrypt matches the independent upstream SDK ciphertext and key vector 22ms
+ ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock capacity fits every supported target at the largest valid payload and exposes the next-target overflow 220ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: must-scatter-all rejected 2ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: self-scatter rejected 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: proportions of scattered not issued (one of four never scatters) 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: latest `seq` wins over an earlier valid one 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: an invalid latest does not fall back 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally: a non-participant is rejected 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally: nobody scatters 2ms
- ✓ |core| packages/core/test/tally.test.ts > tally: exactly one scatters 2ms
- ✓ |core| packages/core/test/tally.test.ts > tally: a three-way tie 17ms
- ✓ |core| packages/core/test/tally.test.ts > tally: an option feast has no self-rule 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally: `resultHash` is stable across input orderings that the spec normalises 15ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid version before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid feast before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid scatterer before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid participant hash before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid missing target before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid duplicate target before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid target order before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid unknown target before counting any crumbs 3ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid fractional amount before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid negative amount before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid overspend before counting any crumbs 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid extra field before counting any crumbs 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: nobody scatters 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: exactly one scatters 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: a three-way tie 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: an option feast has no self-rule 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally: `resultHash` is stable across input orderings that the spec normalises 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid version before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid feast before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid scatterer before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid participant hash before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid missing target before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid duplicate target before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid target order before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid unknown target before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid fractional amount before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid negative amount before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid overspend before counting any crumbs 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid extra field before counting any crumbs 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid noncanonical address before counting any crumbs 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects malformed JSON in the latest candidate without fallback 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects whitespace in the latest candidate without fallback 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects duplicate JSON keys in the latest candidate without fallback 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects failed decryption in the latest candidate without fallback 0ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate participant metadata 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate target ID metadata 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate participant metadata 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate target ID metadata 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate position metadata 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects ambiguous duplicate sequence metadata 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 0 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence -1 0ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 1.5 3ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 1.5 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 01 0ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 1e3 1ms
- ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 9223372036854775808 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 1e3 0ms
+ ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid sequence 9223372036854775808 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid issued crumbs 10.5 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid issued crumbs 9 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects invalid issued crumbs 1001 0ms
- ✓ |core| packages/core/test/tally.test.ts > tally orders sequences above the JavaScript safe-integer range without rounding 1ms
+ ✓ |core| packages/core/test/tally.test.ts > tally orders sequences above the JavaScript safe-integer range without rounding 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally participant hash matches the independent sorted-address vector 0ms
  ✓ |core| packages/core/test/tally.test.ts > tally rejects numeric sequence metadata that would collide with its string spelling 0ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration opens only with finalized registry, original eon key and matching publication evidence 123ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration recovers a lost POST response after restart without repeating the registration 16ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects changed deadline when resuming a saved attempt 45ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects changed prefix when resuming a saved attempt 31ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration bounds log recovery to ten-thousand-block pages 17ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration never repeats an uncertain request while the identity remains absent 26ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration rejects a submitted key that disagrees with the finalized original eon key 7ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration requires the configured RPC chain before any registration POST 4ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration resumes against its persisted deployment after configuration changes 43ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock server key reads use the configured bearer key without browser credentials 2ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock mainnet fails closed on the recorded deployment-key mismatch 10ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration retries a completed empty log search when historical evidence becomes available 8ms
- ✓ |core| packages/core/test/shutter-registration.test.ts > timelock registration uses supplied randomness when creating an identity prefix 31ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock chiado waits only for the documented not-yet-released response 10ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock mainnet waits only for the documented not-yet-released response 2ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock chiado returns a released key only for the requested identity 3ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock mainnet returns a released key only for the requested identity 3ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 429 as rate_limited without hiding failures as waiting 2ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 500 as upstream without hiding failures as waiting 1ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 400 as upstream without hiding failures as waiting 1ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock rejects malformed successful key data 1ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock reports transport failure 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock chiado waits only for the documented not-yet-released response 3ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock mainnet waits only for the documented not-yet-released response 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock chiado returns a released key only for the requested identity 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock mainnet returns a released key only for the requested identity 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 429 as rate_limited without hiding failures as waiting 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 500 as upstream without hiding failures as waiting 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock classifies HTTP 400 as upstream without hiding failures as waiting 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock rejects malformed successful key data 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock reports transport failure 0ms
  ✓ |core| packages/core/test/shutter.test.ts > timelock browser adapters cannot register identities without server configuration 0ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock honors the configured API origin while keeping browser key reads anonymous 1ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock fetches the key directly and anonymously when the store is unreachable 6ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock treats only the documented missing released key as waiting 1ms
- ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 400 1ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock honors the configured API origin while keeping browser key reads anonymous 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock fetches the key directly and anonymously when the store is unreachable 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock treats only the documented missing released key as waiting 0ms
+ ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 400 0ms
  ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 401 0ms
  ✓ |core| packages/core/test/shutter.test.ts > timelock fallback preserves an explicit store status 403 0ms
- ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock SDK encryption matches a pinned 32-byte time identity and survives concurrent cold starts 2019ms
- ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock decrypt matches the independent upstream SDK ciphertext and key vector 136ms
- ✓ |core| packages/core/test/shutter-crypto.test.ts > timelock capacity fits every supported target at the largest valid payload and exposes the next-target overflow 2481ms
- ✓ |core| packages/core/test/timelock.test.ts > timelock mock round-trip releases at the injected deadline 14ms
- ✓ |core| packages/core/test/timelock.test.ts > timelock mock rejects tampered ciphertext 4ms
- ✓ |core| packages/core/test/timelock.test.ts > timelock mock restores the same key after restart from persisted metadata 3ms
- ✓ |core| packages/core/test/timelock.test.ts > timelock mock dev release overrides the deadline only for the named identity 4ms
- ✓ |core| packages/core/test/publication.test.ts > close record publication matches an independently encoded hash and retains identical UID retries 6ms
- ✓ |core| packages/core/test/publication.test.ts > close record rejects duplicate or coercible sequences 1ms
- ✓ |core| packages/core/test/phase.test.ts > phaseAt uses injected time at exact deadlines and honors terminal status 3ms
- ✓ |core| packages/core/test/phase.test.ts > phaseAt rejects an invalid clock instead of claiming the feast has opened 1ms
- ✓ |core| packages/core/test/generator.test.ts > generator version 1 matches independent fixed-seed parameters and layout 5ms
- ✓ |deployment| tests/deployment/shutter.test.ts > deployment timelock preflight matches Chiado at a finalized block without registration 41ms
- ✓ |deployment| tests/deployment/shutter.test.ts > deployment timelock preflight rejects a mismatching on-chain eon key 9ms
- ✓ |deployment| tests/deployment/shutter.test.ts > deployment timelock preflight rejects an unauthenticated HTTP 200 1ms
- ✓ |shared| packages/shared/test/validate.test.ts > validators apply feast defaults 3ms
- ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":9} 1ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock round-trip releases at the injected deadline 3ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock rejects tampered ciphertext 1ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock restores the same key after restart from persisted metadata 1ms
+ ✓ |core| packages/core/test/timelock.test.ts > timelock mock dev release overrides the deadline only for the named identity 0ms
+ ✓ |core| packages/core/test/publication.test.ts > close record publication matches an independently encoded hash and retains identical UID retries 2ms
+ ✓ |core| packages/core/test/publication.test.ts > close record rejects duplicate or coercible sequences 0ms
+ ✓ |core| packages/core/test/phase.test.ts > phaseAt uses injected time at exact deadlines and honors terminal status 1ms
+ ✓ |core| packages/core/test/phase.test.ts > phaseAt rejects an invalid clock instead of claiming the feast has opened 0ms
+ ✓ |core| packages/core/test/generator.test.ts > generator version 1 matches independent fixed-seed parameters and layout 2ms
+ ✓ |deployment| tests/deployment/shutter.test.ts > deployment timelock preflight matches Chiado at a finalized block without registration 9ms
+ ✓ |deployment| tests/deployment/shutter.test.ts > deployment timelock preflight rejects a mismatching on-chain eon key 3ms
+ ✓ |deployment| tests/deployment/shutter.test.ts > deployment timelock preflight rejects an unauthenticated HTTP 200 0ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators apply feast defaults 1ms
+ ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":9} 0ms
  ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":1001} 0ms
  ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"crumbsPerCritter":10.1} 0ms
  ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"gatheringEndsAt":2000} 0ms
  ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"kind":"options","options":[]} 0ms
  ✓ |shared| packages/shared/test/validate.test.ts > validators reject invalid feast setup {"title":" "} 0ms
- ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON sorts nested keys without changing array order 6ms
- ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects ambiguous values instead of silently losing data 2ms
- ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects array accessors without evaluating them 6ms
- ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects custom array properties instead of discarding them 1ms
- ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects hidden object properties without evaluating getters 3ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON sorts nested keys without changing array order 1ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects ambiguous values instead of silently losing data 0ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects array accessors without evaluating them 0ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects custom array properties instead of discarding them 0ms
+ ✓ |shared| packages/shared/test/canonical.test.ts > canonical JSON rejects hidden object properties without evaluating getters 0ms
 
- Test Files  4 failed | 53 passed (57)
-      Tests  5 failed | 432 passed (437)
+ Test Files  57 passed (57)
+      Tests  437 passed (437)
+   Duration  78.13s (transform 747ms, setup 693ms, import 12.19s, tests 139.55s, environment 3ms)
 
-Host state for the run above: a 10-core machine shared with other sessions' test runs and browsers (load average 40-90 during the run; 650 s total). The five failures are all "Test timed out in 15000ms" in PGlite-backed API tests; no assertion failed. Rerun in isolation (vitest run on the four files), those five passed:
- ✓ |api| tests/api/removal.test.ts > only an active burrow creator can remove another member, with visible durable history 12190ms
- ✓ |api| tests/api/gathering.test.ts > API gathering creates a people draft with deterministic targets visible only to its creator 12139ms
- ✓ |api| tests/api/ballots.test.ts > API scatter, ciphertext and key routes enforce the scattering phase 9062ms
- ✓ |api| tests/api/browser-scatter.test.ts > a successful acceptance is retained for close-record audit even when its verification read fails 6748ms
- ✓ |api| tests/api/browser-scatter.test.ts > acknowledged UID survives failed verification and restart, exposing a consistent close-record omission 6991ms
-while nineteen other tests in those files timed out at load 80-90. Every failure in both local runs is the same environmental timeout.
+The separate 11 Node tooling tests also passed.
+An earlier run on 2026-09-23, while the host was shared with other sessions' test runs and browsers (load average 40-90), had five "Test timed out in 15000ms" failures in PGlite-backed API tests and no assertion failures; those five passed in isolation and the whole suite passed on the idle host above.
 
 Clean-machine run: GitHub Actions run 35952646393 on this branch (ubuntu-latest), `bun run check`:
  Test Files  57 passed (57)
@@ -199,8 +201,7 @@ Clean-machine run: GitHub Actions run 35952646393 on this branch (ubuntu-latest)
    Duration  421.01s
  Node tooling tests: 11 passed. Development assets: 1 passed. check:audit then failed on the two pre-existing advisories below.
 
-The separate 11 Node tooling tests also passed locally.
 bun run check:toolchain, check:tokens, lint, typecheck, check:development-assets, check:workspaces, check:licenses: passed locally.
 bun run check:audit: failed on adm-zip 0.6.0 and smol-toml 1.5.2 (development-only, identical on main; the lockfile is unchanged by phase 3). Resolved separately in pull request #28.
 bun run build: passed. Gzip bytes: shell=114863/120000; three=249233/250000; crypto=53955 (no numeric cap in §17).
-bun run e2e (Playwright 1.62.1, Chromium 151, mock stack on 127.0.0.1:5173 and 4300, fresh LOCAL_DATA_DIR): 13 passed (1.6m) at c90f134, after tests/e2e/session.ts was corrected to read authenticated state through the page. Covered: people and options feasts in Simple view and 3D with matching result hashes and CSV download; statement privacy, cap and reveal; portraits; 49-target context loss and renderer switching; creator removal with visible history.
+bun run e2e (Playwright 1.62.1, Chromium 151, mock stack on 127.0.0.1:5173 and 4300, fresh LOCAL_DATA_DIR): 13 passed (1.6m) at c90f134, after tests/e2e/session.ts was corrected to read authenticated state through the page. Covered: people and options feasts in Simple view and 3D with matching result hashes and CSV download; statement privacy, cap and reveal; portraits; 49-target context loss and renderer switching; creator removal with visible history. The shell spec was extended on 2026-09-24 for the named removal control, the §5.5 short form in the history line and the unchanged 375 px scroll width, and passed.

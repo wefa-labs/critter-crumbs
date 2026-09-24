@@ -23,7 +23,7 @@ The delivery patch (sha256 `f384d51e…`, 131 files) was applied on 2026-09-23 t
 | 12 | Persistent settings, degradation thresholds, context recovery and one retry; implemented, unit-tested and browser exercised |
 | 13 | Desktop View measurements and representation decision complete; phone/GPU/load measurements remain open |
 | 14 | Lazy decorative canvas, frozen-generator meshes, shared Rig, lighting, flights, crossfades, visibility and teardown; implemented and reviewed |
-| 15 | Lifecycle and renderer E2E scripts written; substantial manual browser proof recorded; automated execution, complete keyboard/accessibility matrix and integration still blocked/open |
+| 15 | Lifecycle and renderer E2E scripts pass (13 specs on the integration branch, 2026-09-23); the keyboard and accessibility rows still marked open in the validation record remain rehearsal-time checks |
 
 Creator removal is the implementation for issue #16: active creator authority, separate self-leave, atomic revision-guarded removal/history, preserved frozen feasts, retries, re-admission and address-based history. Do not close the parent until this implementation has reached main.
 
@@ -54,6 +54,12 @@ SHUTTER_MODE=mock DEV_ENDPOINTS_ENABLED=1 LOCAL_API_PORT=4300 bun run dev:local
 From another terminal, `LOCAL_API_PORT=4300 bun run seed --phase gathering --kind both`. Open the printed feast ID at `http://127.0.0.1:5173/feasts/<id>` and connect a rehearsal account. [Local core](local-core.md) documents API time/key commands. Set `LOCAL_DATA_DIR` to a fresh task-local directory for a fresh rehearsal; the task's existing data is `.scratch/local-data-phase3` and must not be packaged or shared.
 
 On a host permitting Git writes and Chromium launch, apply the delivery patch to a clean branch based on `b6602318d987aff7068e5a7394e1a37229496bc5`, run `bun run check`, `bun run test -- --reporter=verbose`, `bun run build`, and `bun run e2e` with the mock stack running. Publish a draft PR with explicit base `main` and labels `automated/codex` and `draft`. Review and merge remain human actions. No credentials, local database or generated test output belongs in the commit.
+
+## Review on the integration branch
+
+On 2026-09-24 the repository `code-review` skill ran both axes against `origin/main`. The Spec axis found nothing blocking: every PRD §5 rule, the #16 acceptance list, the 49-target limit, the encrypted-only submission path, equal local hashes, the CSV columns and the degradation thresholds trace to code and tests; its gaps are the open ticket 15 rows above. The Standards axis found three hard violations, all fixed in `9633929`: a mid-flow action rename in `setup.saved`, a glued " minutes" fragment instead of interpolated plural copy, and error copy used as a page title on two routes. Its judgement calls that were taken: the rehearsal-only signer and opener now raise `err.rehearsalOnly` instead of "store unreachable", `err.publicationChanged` says what was kept, and the assistant prompt says "saving". Browser QA on the same day fixed the unnamed row-level removal controls and the raw address that widened the burrow page at 375 px (`0b73f0f`).
+
+Recorded follow-ups, not changed before merge: `settings.still || settings.reducedMotion` repeated at about twenty sites (one `isQuiet(settings)` helper); case-insensitive address comparisons repeated across ten app modules while the API already has `sameAddress`; the Base Sepolia EAS chain and address literal repeated in six modules; two share formatters (`time.ts` float percent and `csv.ts` exact decimal); the `fed` formula duplicated between `public-results.tsx` and `world/director.ts`; light presets as positional tuples in `three/runtime.ts`; `feast-session.ts` gating on the stale feast prop after a fresh response; and a transient 5xx on `/api/me` during a server restart is treated as signed out rather than as a store outage.
 
 ## Suggested skills
 

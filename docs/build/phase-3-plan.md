@@ -1,6 +1,6 @@
 # Phase 3 preflight and proposed tickets
 
-Current implementation and validation status: [Phase 3 handoff](phase-3-handoff.md). The approved plan below is preserved; ticket15 remains open for blocked automated browser proof and integration.
+Current implementation and validation status: [Phase 3 handoff](phase-3-handoff.md). The approved plan below is preserved; ticket 15's automated browser proof ran green on the integration branch on 2026-09-23, and its remaining rows are listed in the validation record.
 
 Prepared and **approved by Afolabi on 2026-09-06**, including the numbered breakdown and named test seams. Implementation has started against verified merged main. GitHub publication is pending task write access.
 
