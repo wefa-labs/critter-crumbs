@@ -62,7 +62,7 @@ Do not create an aggregate hierarchy or a second rule registry merely to adopt D
 
 ## Workstreams
 
-- **A (core):** `packages/core`, `api`, `db`, `scripts` — account, timelock, EAS, tally, API, data.
+- **A (core):** `packages/core`, `packages/api`, `db`, `scripts` — account, timelock, EAS, tally, API, data. Root `api/` contains only Vercel route exports; server implementation belongs in `packages/api/src`.
 - **B (app):** `packages/app/src`, `packages/app/public` — screens, components, Koota world, 3D, audio, portraits.
 - **Shared:** `packages/shared/src` — types, copy, constants (`feel.ts`), validators. Small reviewed changes only.
 

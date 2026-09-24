@@ -13,6 +13,11 @@ test.each([{ crumbsPerCritter: 9 }, { crumbsPerCritter: 1001 }, { crumbsPerCritt
 test('validators reject duplicate option names', () => {
   expect(() => parseFeastSetup({ ...input, kind: 'options', options: [{ name: 'A' }, { name: 'a' }] })).toThrow(ValidationError);
 });
+test('validators reject a 50-target setup that cannot fit every complete scatter in 4 KB', () => {
+  const options = Array.from({ length: 50 }, (_, i) => ({ name: `Option ${i}` }));
+  expect(() => parseFeastSetup({ ...input, kind: 'options', options })).toThrow('err.feastCapacity');
+  expect(parseFeastSetup({ ...input, kind: 'options', options: options.slice(0, 49) }).options).toHaveLength(49);
+});
 test('validators parse the complete allocation payload', () => {
   expect(parseAllocationPayload(payload)).toEqual(payload);
 });

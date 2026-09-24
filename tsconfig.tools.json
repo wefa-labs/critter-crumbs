@@ -24,6 +24,7 @@
     "vitest.neon.config.ts",
     "playwright.config.ts",
     "tests/e2e/**/*.ts",
-    "tests/api/**/*.ts"
+    "tests/api/**/*.ts",
+    "tests/deployment/**/*.ts"
   ]
 }

@@ -1,0 +1,15 @@
+.env
+.env.*
+.scratch
+.git
+.vercel
+.claude
+.codex
+node_modules
+**/node_modules
+dist
+**/dist
+*.log
+**/*.tsbuildinfo
+playwright-report
+test-results

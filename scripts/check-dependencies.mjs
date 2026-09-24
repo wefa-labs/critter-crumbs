@@ -9,7 +9,7 @@ const runtime = json('scripts/runtime-dependencies.json');
 const dev = json('scripts/dev-dependencies.json');
 const lock = Bun.JSONC.parse(readFileSync(path.resolve(root, 'bun.lock'), 'utf8'));
 const overrides = json('scripts/dev-overrides.json');
-const manifests = ['package.json', ...['shared', 'core', 'app'].map((name) => `packages/${name}/package.json`)];
+const manifests = ['package.json', ...['shared', 'core', 'app', 'api'].map((name) => `packages/${name}/package.json`)];
 const found = new Map();
 const fail = (message) => { throw new Error(message); };
 const permissive = new Set(['MIT', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'OFL-1.1']);
@@ -18,7 +18,7 @@ for (const file of manifests) {
   for (const [name, version] of Object.entries(manifest.dependencies ?? {})) {
     if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)) fail(`${file}: ${name} must use an exact version.`);
     if (name.startsWith('@critter-crumbs/')) continue;
-    if (found.has(name)) fail(`${name} has multiple runtime owners.`);
+    if (found.has(name) && found.get(name) !== version) fail(`${name} has conflicting runtime versions.`);
     found.set(name, version);
   }
   for (const [name, version] of Object.entries(manifest.devDependencies ?? {})) {

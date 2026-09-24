@@ -200,6 +200,7 @@ export const copy = {
   "err.keyUnreachable": "Can't fetch the key right now. Nothing is lost — try again in a few minutes.",
   "err.generic": "Something went wrong. Nothing you did was lost.",
   "err.notParticipant": "This feast started before you joined the burrow. You'll be in the next one.",
+  "err.feastCapacity": "A feast can include at most 49 critters.",
   "results.unreadable": "{names} scattered, but their crumbs couldn't be read, so they count as not having scattered."
 } as const;
 

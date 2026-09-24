@@ -40,6 +40,14 @@ _Avoid_: bio, contribution, epoch statement
 A burrow member in a feast's frozen set: they scatter and, in a people feast, are also a critter.
 _Avoid_: voter, user, member (when the feast context matters)
 
+**Burrow creator**:
+The person who created a burrow. May remove another member, with the removal visible to the remaining members.
+_Avoid_: owner, admin (when naming this role)
+
+**Removal**:
+A burrow creator ending another person's membership. Distinct from a person choosing to leave.
+_Avoid_: deletion (membership history remains)
+
 **Creator**:
 The member who set up a feast. May cancel before scattering and extend gathering once. Not an owner or admin.
 _Avoid_: owner, admin, host, organiser

@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
-import type { Database, Row } from '../api/_lib/database.js';
+import type { Database, Row } from '@critter-crumbs/api';
 /** Dev-only adapter: expose the same noninteractive batches as Neon HTTP. */
 export async function createPGliteDatabase(directory?: string): Promise<Database> {
   const engine = new PGlite(directory);

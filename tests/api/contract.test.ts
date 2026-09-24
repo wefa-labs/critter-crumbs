@@ -1,8 +1,7 @@
 import { Readable } from 'node:stream';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { expect, test } from 'vitest';
-import { createApi, type ApiReply } from '../../api/_lib/api.js';
-import { nodeHandler } from '../../api/_lib/http.js';
+import { createApi, nodeHandler, type ApiReply } from '@critter-crumbs/api';
 import { apiHarness, apiTestTimeout } from './support.js';
 const id = '00000000-0000-4000-8000-000000000001';
 const protectedRoutes = [

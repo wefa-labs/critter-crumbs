@@ -1,0 +1,26 @@
+{
+  "name": "@critter-crumbs/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsc -b && vitest run --root ../.. --project api"
+  },
+  "dependencies": {
+    "@critter-crumbs/core": "0.0.0",
+    "@critter-crumbs/shared": "0.0.0",
+    "@neondatabase/serverless": "1.1.0",
+    "viem": "2.56.0"
+  }
+}

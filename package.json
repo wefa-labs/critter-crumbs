@@ -12,7 +12,8 @@
   "workspaces": [
     "packages/shared",
     "packages/core",
-    "packages/app"
+    "packages/app",
+    "packages/api"
   ],
   "scripts": {
     "dev": "bun run compile && node scripts/dev.mjs",
@@ -36,7 +37,9 @@
     "compile:server": "tsc -p tsconfig.server.json",
     "dev:local": "bun run compile && bun run compile:server && node --env-file-if-exists=.env scripts/dev.mjs --local",
     "register-schemas": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/register-schemas.js",
-    "test:api:neon": "node --env-file-if-exists=.env scripts/test-neon.mjs"
+    "test:api:neon": "node --env-file-if-exists=.env scripts/test-neon.mjs",
+    "check:shutter": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/check-shutter.js",
+    "deploy": "node --env-file-if-exists=.env scripts/deploy.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
@@ -68,7 +71,8 @@
   },
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",
-    "@critter-crumbs/shared": "0.0.0"
+    "@critter-crumbs/shared": "0.0.0",
+    "@critter-crumbs/api": "0.0.0"
   },
   "trustedDependencies": []
 }
