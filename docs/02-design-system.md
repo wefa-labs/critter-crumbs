@@ -17,7 +17,7 @@ Upstream: `01-prd.md` (vocabulary §3, rules §5, flows §7). Downstream: `03-ga
 
 **The world.** A burrow: warm earth, sunlight coming in from the entrance, small soft creatures, bread crumbs. Everything visual and audible should be describable with the same six words (§2). This is a tool adults use to move real money, so the charm is in materials and motion, never in cuteness of copy or cartoon UI.
 
-**Palette.** Six named colours carry the identity: **Oat** ground, **Burrow** ink, **Honey** crumbs, **Moss** for done and alive, **Clay** only for errors, **Dusk** only for sleep. Honey is reserved for crumbs — it is never a button colour — so a crumb is recognisable anywhere by colour alone before you read anything.
+**Palette.** Seven named colours carry the identity: **Oat** ground, **Burrow** ink, **Honey** crumbs, **Moss** for done and alive, **Clay** only for errors, **Dusk** only for sleep, **Sky** only through the round window. Their values are the world of the three settled scenes (explorations §12–§16): stone-cream walls, sunlit sand where the light falls, ochre grass and crumbs, rust and oxblood bark, teal shadow and deep teal in the entrance, and ink for every line. Honey is reserved for crumbs — it is never a button colour — so a crumb is recognisable anywhere by colour alone before you read anything.
 
 **Type.** One display face with a carved, low-contrast, slightly chunky character (Young Serif) for names, titles, and the big numbers at the feast; the device's own sans for everything else. One font file in the whole app.
 
@@ -50,25 +50,28 @@ All values are sRGB hex. Contrast ratios are against Oat unless stated; see §12
 
 | Token | Value | Use | Contrast on Oat |
 |---|---|---|---|
-| `--cc-oat` | `#F1E7D6` | Page ground. The DOM background behind the transparent canvas | — |
-| `--cc-surface` | `#FBF6EC` | Cards, sheets, statement panels | — |
-| `--cc-sunken` | `#E6D9C3` | Recessed areas: the pile bar, number fields, table header | — |
-| `--cc-burrow` | `#2A211A` | Primary text; primary button fill; focus ring | 12.9 : 1 |
-| `--cc-soil` | `#5A4B3C` | Secondary text; labels | 6.8 : 1 |
-| `--cc-bark` | `#6F6055` | Tertiary text: captions, counters, timestamps. Never on `--cc-sunken` (4.3 : 1 there) | 4.9 : 1 |
-| `--cc-line` | `#D6C7AD` | Hairlines and dividers (decorative only) | 1.4 : 1 |
-| `--cc-line-strong` | `#857463` | Input borders, switch tracks, anything whose edge carries meaning | 3.7 : 1 |
-| `--cc-honey` | `#D89A2E` | Crumbs, the heap, crumb glyphs. Decorative fill only; never text, never a button | 2.0 : 1 |
-| `--cc-crust` | `#A86B14` | Crumb outlines; the heap's stroke; any honey element whose edge must read | 3.6 : 1 (non-text) |
-| `--cc-honey-tint` | `#F5E6C4` | Highlight background behind a crumb count while pouring | — |
-| `--cc-moss` | `#6B7F4A` | "Scattered" and "alive" fills; switch on-state | 3.6 : 1 (non-text) |
-| `--cc-moss-ink` | `#43552B` | Text on `--cc-moss-tint`; success text on Oat | 6.7 : 1 |
-| `--cc-moss-tint` | `#DDE5CC` | Success chip background | — |
-| `--cc-clay` | `#C2563C` | Error fills and icons | 3.9 : 1 (non-text) |
-| `--cc-clay-ink` | `#973A26` | Error text | 5.8 : 1 |
-| `--cc-clay-tint` | `#F3D9D0` | Error banner background | — |
-| `--cc-dusk` | `#7C7A94` | Asleep badge, the "z" glyphs, dusk lighting tint. Decorative | — |
-| `--cc-focus` | `var(--cc-burrow)` | Focus ring colour (§12.5) | 12.9 : 1 |
+| `--cc-oat` | `#E8DCC4` | Page ground: the burrow's stone-cream wall and floor. The DOM background behind the transparent canvas | — |
+| `--cc-surface` | `#F1E2B8` | Cards, sheets, statement panels: the sunlit sand where the light falls | — |
+| `--cc-sunken` | `#DCCFB0` ★ | Recessed areas: the pile bar, number fields, table header | — |
+| `--cc-burrow` | `#2B2622` | Primary text; primary button fill; focus ring. The ink of every line in the scenes | 11.0 : 1 |
+| `--cc-soil` | `#2E4F5C` | Secondary text; labels. Deep teal, the entrance's dark | 6.5 : 1 |
+| `--cc-bark` | `#3F5D6C` ★ | Tertiary text: captions, counters, timestamps. Teal shadow deepened until it holds 4.5 : 1 on Sunken as well, so the old "never on Sunken" rule is gone | 5.2 : 1 |
+| `--cc-line` | `#CDBFA3` ★ | Hairlines and dividers (decorative only) | 1.3 : 1 |
+| `--cc-line-strong` | `#4A6B7C` | Input borders, switch tracks, anything whose edge carries meaning. Teal shadow | 4.2 : 1 |
+| `--cc-honey` | `#D9A441` | Crumbs, the heap, crumb glyphs. Ochre grass. Decorative fill only; never text, never a button | 1.7 : 1 |
+| `--cc-crust` | `#8F5F10` ★ | Crumb outlines; the heap's stroke; any honey element whose edge must read | 4.1 : 1 (non-text) |
+| `--cc-honey-tint` | `#F6E9C8` ★ | Highlight background behind a crumb count while pouring | — |
+| `--cc-moss` | `#5F7A55` ★ | "Scattered" and "alive" fills; switch on-state. The moss on the entrance stones | 3.5 : 1 (non-text) |
+| `--cc-moss-ink` | `#3E5637` ★ | Text on `--cc-moss-tint`; success text on Oat | 6.0 : 1 |
+| `--cc-moss-tint` | `#D9E0C9` ★ | Success chip background | — |
+| `--cc-clay` | `#B85520` ★ | Error fills and icons. Rust deepened until it holds 3 : 1 | 3.5 : 1 (non-text) |
+| `--cc-clay-ink` | `#7A3B3A` | Error text. Oxblood, the bark in shadow | 6.2 : 1 |
+| `--cc-clay-tint` | `#F0D6C7` ★ | Error banner background | — |
+| `--cc-dusk` | `#4A6B7C` | Asleep badge, the "z" glyphs, dusk lighting tint. Teal shadow; decorative | — |
+| `--cc-sky` | `#8FC6D8` | The sky through the round window on arrival and the dusk preset's key light. Decorative only, never text | — |
+| `--cc-focus` | `var(--cc-burrow)` | Focus ring colour (§12.5) | 11.0 : 1 |
+
+The nine unmarked values are the explorations §12 world palette, read off the three settled scenes. The scenes contain no green, no tints and no hairline, so the tokens marked ★ are derived from that palette: darkened or lightened until they meet the contrast in the last column (**D14**).
 
 Semantic aliases (components use these, not the raw names):
 
@@ -85,6 +88,7 @@ Rules:
 
 - Text is always Burrow, Soil, Bark, Moss-ink, or Clay-ink. Nothing else is ever text.
 - Honey and Crust appear only on crumbs and the heap (**D5**). The "crumb" is the only thing in the app that is gold.
+- Sky appears only in the arrival illustration (§9.1) and the lighting presets (§4.2). It is never a background for text.
 - `@media (prefers-contrast: more)`: `--cc-line` → `--cc-line-strong`, `--cc-bark` → `--cc-soil`, and the heap's stroke width doubles.
 - `color-scheme: light` is declared on `:root` so native controls and scrollbars match (**D1**).
 
@@ -96,7 +100,7 @@ Rules:
 | Body / UI | `system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif` | 400 / 600 | Everything else, including statements |
 | Data | `ui-monospace, "SF Mono", Menlo, Consolas, monospace` | 400 | Addresses, attestation UIDs, the CSV preview |
 
-**D2** — one self-hosted font file (Young Serif, Latin subset, WOFF2, ~30 KB), `font-display: swap`, with `font-size-adjust: from-font` on display elements so the serif fallback occupies the same space while it loads (no layout shift). The body face is the device's own: zero payload, best hinting on every phone, and it keeps the chrome quiet under the display face. Young Serif is chosen for its soft, carved, low-contrast letterforms — the "wooden" word made into type. It is swappable through one token (`--cc-font-display`); confirm the choice, **DQ1**.
+**D2** — one self-hosted font file (Young Serif, Latin subset, WOFF2, ~30 KB), `font-display: swap`, with `font-size-adjust: from-font` on display elements so the serif fallback occupies the same space while it loads (no layout shift). The body face is the device's own: zero payload, best hinting on every phone, and it keeps the chrome quiet under the display face. Young Serif is chosen for its soft, carved, low-contrast letterforms — the "wooden" word made into type. It is swappable through one token (`--cc-font-display`). The pitch deck pairs Shippori Mincho with Atkinson Hyperlegible; that pairing was weighed at the settle and not taken: it reads well on a slide, but it costs four font files (two families, two weights each) against the one 27 KB Latin subset that ships today, and the body face would no longer be the device's own. **DQ1** is resolved in favour of Young Serif (**D18**; **D2** stands).
 
 Scale (rem; base 16 px; `cqi` is the content container's inline size):
 
@@ -138,14 +142,14 @@ Shadows are tinted with Burrow, never black.
 
 | Token | Value | Use |
 |---|---|---|
-| `--cc-shadow-1` | `0 1px 2px rgb(42 33 26 / .10), 0 2px 6px rgb(42 33 26 / .06)` | Cards at rest |
-| `--cc-shadow-2` | `0 6px 16px rgb(42 33 26 / .14)` | Raised: an expanded statement, a hovered card on desktop |
-| `--cc-shadow-3` | `0 16px 40px rgb(42 33 26 / .22)` | Sheets and dialogs |
-| `--cc-shadow-up` | `0 -4px 16px rgb(42 33 26 / .10)` | The sticky pile bar |
+| `--cc-shadow-1` | `0 1px 2px rgb(43 38 34 / .10), 0 2px 6px rgb(43 38 34 / .06)` | Cards at rest |
+| `--cc-shadow-2` | `0 6px 16px rgb(43 38 34 / .14)` | Raised: an expanded statement, a hovered card on desktop |
+| `--cc-shadow-3` | `0 16px 40px rgb(43 38 34 / .22)` | Sheets and dialogs |
+| `--cc-shadow-up` | `0 -4px 16px rgb(43 38 34 / .10)` | The sticky pile bar |
 | `--cc-border` | `1px solid var(--cc-line)` | Decorative separation |
 | `--cc-border-strong` | `1.5px solid var(--cc-line-strong)` | Inputs, anything that must meet 3 : 1 |
 
-The DOM ground carries one light: a soft radial glow at the top-left of the page (`--cc-ground-glow: radial-gradient(120% 60% at 15% -10%, #FBF4E6 0%, transparent 60%)`) over Oat. The 3D key light comes from the same direction (§4.2), and DOM shadows fall bottom-right. One light source for the whole page.
+The DOM ground carries one light: a soft radial glow at the top-left of the page (`--cc-ground-glow: radial-gradient(120% 60% at 15% -10%, #F7EBCD 0%, transparent 60%)`) over Oat. The 3D key light comes from the same direction (§4.2), and DOM shadows fall bottom-right. One light source for the whole page.
 
 ### 3.6 Motion tokens (DOM)
 
@@ -187,16 +191,30 @@ Only critters live in the canvas. The canvas is transparent (`alpha: true`), fix
 
 ### 4.1 Materials
 
-| Element | Material | Roughness | Metalness | Colour |
-|---|---|---|---|---|
-| Body, head, ears, limbs, tail | `MeshStandardMaterial` | 0.92 | 0 | Critter base colour (§5.4) |
-| Belly patch, ear inner, cheeks | same | 0.92 | 0 | Critter accent colour (§5.4) |
-| Eye white | same | 0.55 | 0 | `#FBF6EC` (Surface) |
-| Pupil | same | 0.35 | 0 | `#2A211A` (Burrow) — the only glossy point on a critter, so it reads as alive |
-| Crumb (flying, and in the mouth) | same | 0.8 | 0 | Honey `#D89A2E` with vertex-colour variation ±6 % lightness |
-| Ground blob shadow | Sprite, radial gradient | — | — | Burrow at 0.22 → 0 alpha; scales with the critter's footprint |
+The render style is the settled surface of explorations §16: flat matte colour blocked in, one hard cel shadow, no gloss and no highlights on the body. In Three.js that is a toon ramp, not a physically based rough surface (**D15**).
 
-No environment maps, no bloom, no SSAO, no post-processing of any kind (performance budget: Game Design). `dithering: true` on body materials to avoid banding on the soft gradients. Colour management on; colours are authored in sRGB and converted by Three.js.
+| Element | Material | Ramp and finish | Colour |
+|---|---|---|---|
+| Body, head, ears, crest, limbs, tail | `MeshToonMaterial` | Two-step gradient map: lit at the base colour, shadow at 78 % of its lightness, hard edge between them | Critter base colour (§4.4) |
+| Belly patch, ear inner, cheeks, markings, the glow point | same, one material for the group | Same ramp; the glow primitive carries an `emissive` in the element's glow colour at 0.35 intensity, no bloom and no sprite | Critter accent colour and glow (§4.4) |
+| Eye white | `MeshToonMaterial` | Flat | `--cc-surface` |
+| Pupil | `MeshStandardMaterial`, roughness 0.35 | The only glossy point on a critter, so it reads as alive | `--cc-burrow` |
+| Crumb (flying, and in the mouth) | `MeshToonMaterial` | Same ramp; vertex-colour variation ±6 % lightness | Honey `#D9A441` |
+| Ground blob shadow | Sprite, radial gradient | — | Burrow at 0.22 → 0 alpha; scales with the critter's footprint |
+
+No environment maps, no bloom, no SSAO, no outline pass, no post-processing of any kind (performance budget: Game Design §6). The pencil hatching of the reference surface lives only in DOM illustrations (§9.1): a hatch texture would break the one-texture rule and the flat blocking. `dithering: true` stays on body materials. Colour management on; colours are authored in sRGB and converted by Three.js.
+
+The cost of each element of the settled surface against Game Design §6:
+
+| Element of the §16 surface | Cost in the scene | Within §6 | Decision |
+|---|---|---|---|
+| Flat matte colour with a two-step toon ramp | The same draw calls and triangles as the rough material; one 2 × 1 ramp texture beside the 128 × 128 blob | Yes | Taken |
+| One hard cel shadow | Self-shading comes from the ramp; the ground shadow stays a blob sprite, no shadow maps | Yes | Taken |
+| Outline pass as an inverted hull | One extra mesh per material group: 8 draw calls and about twice the triangles per critter (the 2,450-triangle sweep peak becomes about 4,900) | No: 4 calls and 3,000 triangles per critter | Not taken. The 2D portrait keeps its stroke; the DOM cell edge does the line's work |
+| Outline pass as a screen-space post-process | A full-screen pass over the scene | No: §6 forbids post-processing | Not taken |
+| One soft glow point as an emissive primitive inside the accent group | No extra draw call; ≤ 40 triangles | Yes | Taken |
+| Glow as an additive sprite | One extra draw call per critter (5 against 4) and a second texture | No | Not taken |
+| Pencil hatching inside shadows | A hatch texture per material; breaks the one-texture rule | No | DOM illustrations only |
 
 ### 4.2 Lighting presets
 
@@ -204,11 +222,11 @@ Three presets, three lights each. The Game Design document sequences transitions
 
 | Preset | Hemisphere (sky / ground / intensity) | Directional (colour / intensity / position) | Ambient (colour / intensity) | When |
 |---|---|---|---|---|
-| `day` | `#FFF4E3` / `#C7A67C` / 0.9 | `#FFE2B8` / 1.5 / `[3, 6, 4]` | `#F1E7D6` / 0.2 | Scattering, results, the burrow home |
-| `dusk` | `#E9E2F0` / `#8C7C90` / 0.6 | `#C8BFE0` / 0.7 / `[-2, 5, 3]` | `#D9D2E3` / 0.25 | Arrival (critters asleep), gathering, waiting for the feast |
-| `feast` | `#FFF1D6` / `#D9A860` / 1.1 | `#FFD590` / 2.0 / `[2, 7, 3]` | `#F1E7D6` / 0.25 | The feast sequence, then easing back to `day` |
+| `day` | `#F7EBCD` / `#C7A67C` / 0.9 | `#FFE2B8` / 1.5 / `[3, 6, 4]` | `#E8DCC4` / 0.2 | Scattering, results, the burrow home |
+| `dusk` | `#BCD3DD` / `#4A6B7C` / 0.6 | `#8FC6D8` / 0.7 / `[-2, 5, 3]` | `#DCE4E8` / 0.25 | Arrival (critters asleep), gathering, waiting for the feast |
+| `feast` | `#F7EBCD` / `#D9A441` / 1.1 | `#FFD590` / 2.0 / `[2, 7, 3]` | `#E8DCC4` / 0.25 | The feast sequence, then easing back to `day` |
 
-The directional light is the page's one light (§3.5): it comes from the upper left, matching the DOM glow. No shadow maps on any device — blob sprites only. Tone mapping `ACESFilmic`, exposure 1.0, sRGB output.
+Intensities, positions and the sequence between presets are unchanged; only the colours moved to the settled palette: day and feast take the sunlit sand and Oat, dusk takes the teal shadow and the sky through the window. With a two-step ramp each preset reads as two bands per critter, which is the intended flatness. The directional light is the page's one light (§3.5): it comes from the upper left, matching the DOM glow. No shadow maps on any device — blob sprites only. Tone mapping `ACESFilmic`, exposure 1.0, sRGB output.
 
 ### 4.3 Camera and staging
 
@@ -222,10 +240,12 @@ Critter colours are drawn in OKLCH so every hue sits at the same perceptual weig
 |---|---|---|
 | Lightness (L) | 0.58 – 0.76 | Never lighter, or the critter melts into Oat; never darker, or it reads as a silhouette |
 | Chroma (C) | 0.06 – 0.13 | Muted: felt and clay, not plastic |
-| Hue (H) | 0 – 360 | Uniform; every hue is allowed, the L/C box keeps them in the same world |
+| Hue (H) | The element's band (§5.2): earth jade 130 – 160° or ochre 60 – 80°; water teal 180 – 210°; fire rust 20 – 40° or ember 40 – 55°; air sky 200 – 220° | One band per element, drawn uniformly inside it; the L/C box keeps all four in the same world |
 | Accent | H + 15° … + 45°, L + 0.12 | Belly, ear inner, cheeks |
 
 Converted to sRGB at generation time; clipped in-gamut by reducing C.
+
+Each element also fixes the colour of its one glow point (§5.3), used nowhere else: earth pale gold `#E9C46A`, water pale aqua `#9FE1DC`, fire ember `#F28C38`, air pale blue `#BFE3F5`. Air's cream (70 – 90°, L 0.80 – 0.86) is an accent band for its belly and markings, never the body: a cream body would melt into Oat, so the air critter's body sits in the sky band and the cream is what it carries.
 
 ### 4.5 Crumbs in 3D
 
@@ -243,7 +263,7 @@ params    = draw(rng)                  // fixed draw order below
 
 - `address` — the owner's address for a person; the derived identifier for an option (Technical Spec).
 - `variant` — 0 by default; incremented by re-rolls, up to 4 (PRD F2); stored per address (PRD P10).
-- `GEN_VERSION` — `"1"`. Any change to the draw order, ranges, or composition rules that alters output for an existing seed requires a new version and a migration decision; the generator is frozen before the September rehearsal (**D8**).
+- `GEN_VERSION` — `"1"` today, `"2"` when the element draw below ships (**D16**). Any change to the draw order, ranges, or composition rules that alters output for an existing seed requires a new version and a migration decision (**D8**). Version 1 is frozen for the September rehearsal; when version 2 lands relative to the rehearsal and the October feast is the checkpoint question **DQ5** (§14).
 - No dependencies: cyrb53 and mulberry32 are ~15 lines each, public-domain, and shared by the 3D and 2D renderers so a critter is the same critter everywhere.
 
 ### 5.2 Parameter space
@@ -252,34 +272,36 @@ Drawn in this order. "choice" draws use the listed weights; "uniform" draws are 
 
 | # | Parameter | Draw | Range / options (weights) | Affects |
 |---|---|---|---|---|
-| 1 | `bodyShape` | choice | egg 35, bean 25, capsule 25, round 15 | Body primitive |
-| 2 | `bodyHeight` | uniform | 0.85 – 1.25 | Body scale Y (units) |
-| 3 | `bodyWidth` | uniform | 0.75 – 1.15 | Body scale X/Z |
-| 4 | `belly` | uniform | 0 – 0.30 | Forward bulge of the lower body |
-| 5 | `headShape` | choice | round 45, egg 30, squarish 25 | Head primitive |
-| 6 | `headSize` | uniform | 0.50 – 0.72 × bodyHeight | Head diameter |
-| 7 | `headTilt` | uniform | −8° – +8° | Resting head roll |
-| 8 | `earType` | choice | round, pointed, long, floppy, tufts, none (equal) | Ear geometry |
-| 9 | `earSize` | uniform | 0.18 – 0.50 × headSize | Ear length |
-| 10 | `earSpread` | uniform | 35° – 75° | Angle from vertical |
-| 11 | `eyeStyle` | choice | round 50, oval 30, half-lid 20 | Eye shape |
-| 12 | `eyeSize` | uniform | 0.10 – 0.20 × head diameter | Eye diameter (tuned up from 0.06–0.13 after rendering: smaller eyes read as beads at grid size) |
-| 13 | `eyeSpacing` | uniform | 0.32 – 0.62 × head width | Distance between eyes |
-| 14 | `eyeHeight` | uniform | 0.45 – 0.62 × head height | Vertical placement (from the chin) |
-| 15 | `pupilSize` | uniform | 0.45 – 0.70 × eyeSize | Pupil diameter |
-| 16 | `snout` | choice | none 40, button 35, muzzle 25 | Small nose/muzzle primitive |
-| 17 | `cheeks` | boolean | 30 % true | Two accent discs |
-| 18 | `armType` | choice | stubs 50, paws 30, none 20 | Arm primitives |
-| 19 | `legLength` | uniform | 0.15 – 0.35 × bodyHeight | Stubby legs, always present |
-| 20 | `tailType` | choice | none 30, puff 25, curl 25, stub 20 | Tail primitive |
-| 21 | `markings` | choice | none 55, belly patch 25, spots 20 | Accent-colour regions |
-| 22 | `hue` | uniform | 0 – 360 | Base colour H |
-| 23 | `chroma` | uniform | 0.06 – 0.13 | Base colour C |
-| 24 | `lightness` | uniform | 0.58 – 0.76 | Base colour L |
-| 25 | `accentShift` | uniform | +15° – +45° | Accent hue offset |
-| 26 | `idlePhase` | uniform | 0 – 1 | Phase offset for the idle wobble; not part of identity |
+| 1 | `element` | choice | earth, water, fire, air (equal) | The hue band (§4.4), the ear, crest and tail sets, the markings and the glow colour. Drawn first, so every later draw shifts: this is what makes version 2 a new identity for every seed |
+| 2 | `bodyShape` | choice | egg 35, bean 25, capsule 25, round 15 | Body primitive |
+| 3 | `bodyHeight` | uniform | 0.85 – 1.25 | Body scale Y (units) |
+| 4 | `bodyWidth` | uniform | 0.75 – 1.15 | Body scale X/Z |
+| 5 | `belly` | uniform | 0 – 0.30 | Forward bulge of the lower body |
+| 6 | `headShape` | choice | round 45, egg 30, squarish 25 | Head primitive |
+| 7 | `headSize` | uniform | 0.50 – 0.72 × bodyHeight | Head diameter |
+| 8 | `headTilt` | uniform | −8° – +8° | Resting head roll |
+| 9 | `earType` | choice | From the element's set (equal): earth leaf or round · water fin or round · fire flame tuft or pointed · air cloud puff or fern frond | Ear geometry |
+| 10 | `earSize` | uniform | 0.18 – 0.50 × headSize | Ear length |
+| 11 | `earSpread` | uniform | 35° – 75° | Angle from vertical |
+| 12 | `crest` | choice | From the element's set: earth sapling 60, none 40 · water droplet 50, reed 50 · fire ember flick 50, seed-pod crown 50 · air none | The crest primitive on the crown |
+| 13 | `eyeStyle` | choice | round 50, oval 30, half-lid 20 | Eye shape |
+| 14 | `eyeSize` | uniform | 0.10 – 0.20 × head diameter | Eye diameter (tuned up from 0.06–0.13 after rendering: smaller eyes read as beads at grid size) |
+| 15 | `eyeSpacing` | uniform | 0.32 – 0.62 × head width | Distance between eyes |
+| 16 | `eyeHeight` | uniform | 0.45 – 0.62 × head height | Vertical placement (from the chin) |
+| 17 | `pupilSize` | uniform | 0.45 – 0.70 × eyeSize | Pupil diameter |
+| 18 | `snout` | choice | none 40, button 35, muzzle 25 | Small nose/muzzle primitive |
+| 19 | `cheeks` | boolean | 30 % true | Two accent discs |
+| 20 | `armType` | choice | stubs 50, paws 30, none 20 | Arm primitives |
+| 21 | `legLength` | uniform | 0.15 – 0.35 × bodyHeight | Stubby legs, always present |
+| 22 | `tailType` | choice | From the element's set (equal): earth branch spray or puff · water tadpole wisp or stub · fire spark trail or ember wisp · air cloud wisp or long wisp | Tail primitive |
+| 23 | `markings` | choice | none 40, then the element's marking 60: earth moss patches · water dew spots · fire a warm belly gradient · air faint sky dashes | Accent-colour regions |
+| 24 | `hue` | uniform | Inside the element's band (§4.4) | Base colour H |
+| 25 | `chroma` | uniform | 0.06 – 0.13 | Base colour C |
+| 26 | `lightness` | uniform | 0.58 – 0.76 | Base colour L |
+| 27 | `accentShift` | uniform | +15° – +45° | Accent hue offset |
+| 28 | `idlePhase` | uniform | 0 – 1 | Phase offset for the idle wobble; not part of identity |
 
-Silhouette diversity is guaranteed by discrete draws alone: 4 bodies × 3 heads × 6 ears × 3 snouts × 3 arms × 4 tails = 2,592 distinct silhouettes before any continuous parameter or colour. Colour is never the only difference between two critters in a burrow of ten; if a collision on the discrete draws does occur, the continuous parameters still separate them. No uniqueness check is performed (a re-roll is the user's tool).
+Silhouette diversity is guaranteed by discrete draws alone: 4 elements × 4 bodies × 3 heads × 2 ears × up to 2 crests × 3 snouts × 3 arms × 2 tails = up to 3,456 distinct silhouettes before any continuous parameter or colour, and the element reads first because it fixes the hue band and the three most visible parts. Colour is never the only difference between two critters in a burrow of ten; if a collision on the discrete draws does occur, the continuous parameters still separate them. No uniqueness check is performed (a re-roll is the user's tool).
 
 ### 5.3 Composition rules (3D)
 
@@ -289,11 +311,13 @@ Primitives only, low segment counts, no subdivision:
 |---|---|---|---|
 | Body | Sphere / capsule (`CapsuleGeometry`) scaled to shape | 16 × 12 | `bean` = sphere with a slight forward shear; `egg` = sphere scaled 1 : 1.25 : 1 |
 | Head | Sphere / rounded box (drei `RoundedBox`) | 16 × 12 / 4 | Sits on the body with 12 % overlap so the join is hidden |
-| Ears | Cone, flattened sphere, or capsule per type | 8 – 12 | `tufts` = three tiny cones; `floppy` = capsule rotated outward and down |
+| Ears | Per element: leaf and fin = flattened cone; round = flattened sphere; flame tuft = three tiny cones; pointed = cone; cloud puff = two overlapping spheres; fern frond = tapered capsule with a curl | 8 – 12 | Mirrored; `earSpread` still sets the angle |
+| Crest | Sapling = capsule with two flattened spheres; droplet = sphere scaled 1 : 1.4 : 1; reed = thin capsule; ember flick = cone; seed-pod crown = three tiny spheres | 6 – 8 | ≤ 60 triangles; sits on the crown and tilts with the head |
 | Eyes | Sphere (white) + sphere (pupil) | 10 × 8 | Pupils offset toward the camera by 30 % of eye radius; `half-lid` adds a body-colour cap |
 | Snout | Small sphere / capsule | 8 | Accent colour for `button`; body colour for `muzzle` |
 | Arms, legs | Capsules | 8 | Legs half-sunk in the ground plane so feet are implied, not modelled |
-| Tail | Sphere (puff), torus segment (curl), capsule (stub) | 8 – 12 | Behind and slightly to the camera's right |
+| Tail | Per element: branch spray = three tapered capsules; puff = sphere; tadpole wisp = tapered capsule; stub = capsule; spark trail = three small spheres on a curve; ember wisp = tapered capsule with an emissive tip; cloud wisp = two spheres; long wisp = a three-segment capsule chain | 8 – 12 | Behind and slightly to the camera's right |
+| Glow point | Small sphere, sunk 60 % into the chest (earth, fire), the throat (water) or the brow (air) | 8 | Emissive in the element's glow colour (§4.4); part of the accent material group, so it costs no draw call |
 | Cheeks, spots, belly patch | Flattened spheres, sunk 70 % into the body | 8 | Accent colour |
 | Mouth | Torus segment, ≤ 40 triangles, Burrow at 60 % opacity | 8 × 6 | Added by Game Design G5; hidden below mood 0.35; curvature follows mood (Game Design §3.4). In 2D, a stroked arc |
 
@@ -344,9 +368,11 @@ The 2D portrait maps units to pixels at **46 px per unit**, feet on the line y =
 | Legs | Two rounded rects, 0.2 units wide, from the feet to `leg`, drawn before the body |
 | Body | Ellipse at (60, 140 − bodyC·46), rx = bw·46, ry = bh·46; `bean` skews the ellipse 5°; `belly` adds a lower ellipse |
 | Head | Circle r = hr·46 at (60, 140 − headC·46); `egg` stretches 1.15 vertically; `squarish` is a rounded rect 1.1 × 0.92; tilted by `headTilt` |
-| Ears | Paths per type at the head rim, mirrored, rotated by `earSpread` (+70° for `floppy`, +25° when asleep); inner accent shape |
+| Ears | Paths per element type at the head rim, mirrored, rotated by `earSpread` (+25° when asleep); inner accent shape |
+| Crest | A path per type on the crown, tilted with the head; accent colour |
 | Eyes | White circle r = eyeSize·hr·46 (oval 0.85 × 1.15; half-lid adds a body-colour cap); pupil r = pupilSize × eye radius, offset 15 % of the radius toward the viewer's right (the 12° turn); one Surface catchlight; asleep = a stroked arc |
-| Snout, cheeks, markings, tail, arms | Simple shapes in accent colour; the tail is drawn behind the body |
+| Snout, cheeks, markings, tail, arms | Simple shapes in accent colour; the tail is drawn behind the body; the markings are the element's (moss patches, dew spots, a warm belly gradient, faint sky dashes) |
+| Glow point | A circle in the element's glow colour with a soft radial edge at the chest, throat or brow; 0.6 opacity awake, 0.2 asleep |
 | Shadow | Ellipse under the feet, Burrow at 0.18 alpha, scaling with `fed` |
 | Growth | The whole figure scales about the feet by 1 + 0.35·fed |
 | Sizes | 40 px (lists), 64 px (read pass), 96 px (dialogs), fills the stage in Simple view |
@@ -539,6 +565,12 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
 
 First-run guidance is in-place copy, never a tour: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
+
+### 9.1 The arrival illustration
+
+The arrival screen's picture is the burrow interior looking out (**D17**; explorations §15, "Scene: interior, looking out"): the round stone window onto a bright sky in `--cc-sky`, dark blue-teal roots overhead, wooden shelves with clay pots, a low table with an orange cloth and a heap of crumbs, stone steps up to the window, and the sunlit floor with a little green grass. The four element spots of the settled scenery (a pale root, a puddle in the floor, a sun-warmed stone, a root tip by the window) sit in that composition, so the four element critters can later stand in it without a new picture. The surface is the reference painting's: a visible pencil underdrawing, flat matte colour blocked over it, one hard cel shadow with a little hatching inside it, no gloss. No text in the image, and it stays decorative (`alt=""`): the explainer beside it carries the meaning.
+
+Format: one WebP, at least 750 px wide (2 × the 375 px column; the shipped file is 960 × 720), under 120 KB. Until the interior is produced, the shipped `arrival.webp` (the entrance seen from outside through the trees) stands in; it is the placeholder, not the decision.
 
 ## 10. UX copy
 
@@ -838,17 +870,21 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 
 | Pair | Ratio | Passes |
 |---|---|---|
-| Burrow text on Oat / Surface / Sunken | 12.9 / 14.7 / 11.3 | AA, AAA |
-| Soil text on Oat / Surface / Sunken | 6.8 / 7.8 / 6.0 | AA, AAA |
-| Bark text on Oat / Surface | 4.9 / 5.6 | AA — never on Sunken (4.3) |
-| Moss-ink on Oat / Moss-tint | 6.7 / 6.3 | AA, AAA |
-| Clay-ink on Oat / Clay-tint | 5.8 / 5.3 | AA, AAA |
-| Oat text on Burrow (primary button) | 12.9 | AA, AAA |
-| Line-strong on Oat / Surface (input edges, switch track) | 3.7 / 4.2 | 1.4.11 |
-| Crust on Oat (crumb edges, heap stroke) | 3.6 | 1.4.11 |
-| Moss on Oat (switch on-state) | 3.6 | 1.4.11 |
-| Focus ring (Burrow) on any surface | ≥ 11 | 1.4.11 |
-| Honey on Oat (decorative crumb fill) | 2.0 | not required — decorative, edged in Crust |
+| Burrow text on Oat / Surface / Sunken | 11.0 / 11.6 / 9.7 | AA, AAA |
+| Soil text on Oat / Surface / Sunken | 6.5 / 6.8 / 5.7 | AA, AAA |
+| Bark text on Oat / Surface / Sunken | 5.2 / 5.4 / 4.5 | AA on every ground |
+| Moss-ink on Oat / Moss-tint | 6.0 / 6.0 | AA, AAA |
+| Clay-ink on Oat / Clay-tint | 6.2 / 6.0 | AA, AAA |
+| Oat text on Burrow (primary button) | 11.0 | AA, AAA |
+| Line-strong on Oat / Surface (input edges, switch track) | 4.2 / 4.4 | 1.4.11 |
+| Crust on Oat (crumb edges, heap stroke) | 4.1 | 1.4.11 |
+| Moss on Oat (switch on-state) | 3.5 | 1.4.11 |
+| Clay on Oat (error icons) | 3.5 | 1.4.11 |
+| Focus ring (Burrow) on any surface | ≥ 9.7 | 1.4.11 |
+| Honey on Oat (decorative crumb fill) | 1.7 | not required — decorative, edged in Crust |
+| Sky on Oat (arrival window, decorative) | 1.4 | not required — decorative |
+
+Ratios are WCAG 2.2 relative-luminance contrast, computed from the sRGB values in §3.1 (the script is in the settle page under `docs/explorations/`).
 
 ### 12.3 Targets and spacing
 
@@ -959,15 +995,19 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D11 | `xs` breakpoint (< 360 px) collapses the grid to one column | 200 % zoom on small phones must reflow without horizontal scroll |
 | D12 | Statement links open in the same tab with `rel="noopener nofollow ugc"` | Predictable; user-generated links are never endorsed |
 | D13 | Auto-link only `http(s)://` URLs; visible text truncated at 48 characters | No sanitisation surface beyond one regex; long URLs don't break cells |
+| D14 | The palette is the explorations §12 world palette, mapped onto the existing token names; Bark, Crust, Clay, Moss and the tints are derived from it for contrast; Sky is added, decorative only | The three settled scenes fix the world; every text pair now clears 4.5 : 1 on every ground, which the provisional Bark did not on Sunken |
+| D15 | Critters render flat matte with a two-step toon ramp and one hard cel shadow; no outline pass; one emissive glow point inside the accent material group; pencil hatching only in DOM illustrations | The settled surface within Game Design §6: an outline doubles draw calls and triangles, a glow sprite adds a call, a hatch texture breaks the one-texture rule (cost table, §4.1) |
+| D16 | Every critter has an element (earth, water, fire, air) drawn first from its seed, fixing its hue band, ear, crest and tail sets, markings and glow colour; this is `GEN_VERSION "2"` | The four element creatures of explorations §16 as identity, never as a mechanic; drawing the element first changes every existing seed, which D8 requires to be a version |
+| D17 | The arrival illustration is the burrow interior looking out through the round stone window | Explorations §15; the four element spots sit in one picture |
+| D18 | DQ1: Young Serif stays as the display face; D2 stands | One 27 KB file against four; the body face stays the device's own |
+| D19 | DQ3: the signing step's wording stands; DQ4: the heap stays a scaled mound at every issue size | The phase 3 browser pass read "Confirm your scatter … You'll be asked to sign" without confusion, and the council confirms it at the rehearsal; the number carries the count, crumbs carry the feeling (§4.5) |
 
 ### Open — confirm before implementation
 
 | # | Question |
 |---|---|
-| DQ1 | Young Serif as the display face (swappable through one token). The alternative that keeps the brief's "soft, matte" reading is Fraunces at its soft setting; it is more widely used and less distinctive |
 | DQ2 | Dark theme deferred to v1 (D1). If it must be v0, budget roughly two days for a second token set and a lighting preset |
-| DQ3 | The signing step's wording avoids "wallet" entirely (`scatter.sign.body`). Confirm this reads clearly to the October council, who all use wallets |
-| DQ4 | Whether the heap should show exact crumbs (one glyph per crumb) when a feast issues 24 crumbs or fewer, instead of the scaled mound |
+| DQ5 | When `GEN_VERSION "2"` lands: (a) before the rehearsal, so the rehearsal critters are the October critters; (b) between the rehearsal and the October feast, with a second, shorter feel pass on phones; (c) after October, so v0 runs on version 1. Half two cannot start the generator work until this is answered |
 
 ## 15. What the other documents own
 
