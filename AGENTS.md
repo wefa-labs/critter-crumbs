@@ -37,6 +37,29 @@ Equal crumbs for everyone · you must scatter all of them · you cannot scatter 
 - **Copy IDs, not strings.** Errors from the API are copy IDs.
 - **Generator is frozen** at `GEN_VERSION 1` before the rehearsal; changing its output needs a version bump and a decision.
 
+## Shared engineering guidance
+
+Use the personal `pragmatic-programming` skill for coding work and
+`domain-driven-design` when changing domain meaning, behavior, identity, lifecycle,
+consistency, or integration contracts. If not discovered, read the relevant
+`~/.agents/skills/<skill-name>/SKILL.md` when available. On an environment without
+these personal skills, follow this repository's guidance and report the missing
+shared guidance; do not install or duplicate it automatically. Load only relevant
+references. Existing repository rules and explicit user decisions govern the work.
+
+Use `.agents/skills/domain-modeling/SKILL.md` for resolved terminology and ADRs;
+`CONTEXT.md` remains a glossary. The four specs and `docs/decisions.md` own behavior
+and existing decisions. For a behavior change, identify its workstream owner and
+verify the affected rule through its public seam, using the existing `tdd` workflow
+where applicable. Preserve pure tallying, explicit time, encrypted allocations,
+and the server/client responsibility boundary.
+
+For lifecycle work, check the relevant participant freeze, scatter replacement,
+and closing boundary against the spec before implementation. Use meaningful
+regression examples and the applicable Commands checks. Update the owning spec or
+decision when behavior changes; finish with the outcome and actual verification.
+Do not create an aggregate hierarchy or a second rule registry merely to adopt DDD.
+
 ## Workstreams
 
 - **A (core):** `packages/core`, `packages/api`, `db`, `scripts` — account, timelock, EAS, tally, API, data. Root `api/` contains only Vercel route exports; server implementation belongs in `packages/api/src`.
