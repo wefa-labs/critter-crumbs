@@ -72,3 +72,15 @@ Only offer to create an ADR when all three are true:
 3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
 
 If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
+
+<!-- shared-engineering:begin -->
+## Behavior behind the vocabulary
+
+When a term change affects rules, identity, lifecycle, or consistency, use the
+shared `domain-driven-design` skill through root `AGENTS.md`. Check the relevant
+scenario in the existing specs and implementation. Preserve the distinction
+between burrow membership and a feast's frozen participants, and between a scatter
+and its stored encrypted representation. Keep behavior in the owning specification
+and tests; `CONTEXT.md` stays glossary-only. Do not change the pure tally, explicit
+time, or server/client boundary just to introduce a DDD pattern.
+<!-- shared-engineering:end -->
