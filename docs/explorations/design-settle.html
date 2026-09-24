@@ -79,7 +79,6 @@ code, .data { font-family: var(--cc-font-data); font-size: .875rem; }
 .heap .count { font-family: var(--cc-font-data); font-size: 1.25rem; }
 .legend { font-size: .8rem; color: var(--cc-bark); }
 .portrait { overflow: visible; }
-.portrait .outline { fill: none; stroke: var(--cc-burrow); stroke-opacity: .55; stroke-width: 1.2; }
 @media (max-width: 359px) { .critters, .components { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -221,7 +220,7 @@ function portrait(p, size) {
   const bodyCy = FOOT - L.bodyC * U, bodyRx = L.bw * U, bodyRy = L.bh * U, headCy = FOOT - L.headC * U, hr = L.hr * U;
   el('ellipse', { cx: CX, cy: FOOT + 2, rx: bodyRx * 1.1, ry: 5, fill: '#2B2622', opacity: .18 }, svg, SVG);
   const legW = 0.2 * U, legH = Math.max(6, L.leg * U + 6);
-  for (const dx of [-bodyRx * 0.45, bodyRx * 0.45]) el('rect', { x: CX + dx - legW / 2, y: FOOT - legH, width: legW, height: legH, rx: legW / 2, fill: body, class: 'outline-fill' }, svg, SVG);
+  for (const dx of [-bodyRx * 0.45, bodyRx * 0.45]) el('rect', { x: CX + dx - legW / 2, y: FOOT - legH, width: legW, height: legH, rx: legW / 2, fill: body }, svg, SVG);
   // tail behind the body
   const tailX = CX + bodyRx * 0.9, tailY = bodyCy + bodyRy * 0.35;
   const tail = { branch: () => { for (const [dx, dy, r] of [[8, -6, 7], [15, -14, 6], [20, -22, 5]]) el('ellipse', { cx: tailX + dx, cy: tailY + dy, rx: r, ry: r * 0.7, fill: accent, transform: `rotate(-30 ${tailX + dx} ${tailY + dy})` }, svg, SVG); },
@@ -273,8 +272,6 @@ function portrait(p, size) {
   el('path', { d: `M${CX - hr * 0.16} ${eyeY + eyeR * 2.3} q ${hr * 0.16} ${hr * 0.12} ${hr * 0.32} 0`, fill: 'none', stroke: '#2B2622', 'stroke-opacity': .6, 'stroke-width': 1.2, 'stroke-linecap': 'round' }, g, SVG);
   if (p.cheeks) for (const s of [-1, 1]) el('circle', { cx: CX + s * hr * 0.7, cy: eyeY + eyeR * 1.4, r: hr * 0.14, fill: accent, opacity: .8 }, g, SVG);
   el('circle', { cx: CX, cy: spotY, r: 6, fill: `url(#${glow.id})`, opacity: .6 }, svg, SVG);
-  el('ellipse', { cx: CX, cy: bodyCy, rx: bodyRx, ry: bodyRy, class: 'outline', transform: p.bodyShape === 'bean' ? `skewX(-5)` : '' }, svg, SVG);
-  el(headAttrs[0], Object.assign({}, headAttrs[1], { fill: 'none', class: 'outline' }), g, SVG);
   return svg;
 }
 {

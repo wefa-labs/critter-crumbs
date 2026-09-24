@@ -33,10 +33,10 @@ The Game Design document must use exactly these words when describing sound. The
 
 | Word | In materials and light | In sound |
 |---|---|---|
-| **Warm** | Oat, honey, and clay hues; key light at ~3200 K (`#FFE2B8`); no cool tints except Dusk for sleep | Low-mids emphasised; nothing bright above ~6 kHz; no metallic partials |
+| **Warm** | Oat, honey, and clay hues in the light; key light at ~3200 K (`#FFE2B8`). Cool appears only where the settled scenes put shadow and distance: teal shadow for secondary text, edges and sleep, and Sky through the window (D14) | Low-mids emphasised; nothing bright above ~6 kHz; no metallic partials |
 | **Soft** | Roughness ≥ 0.9 on every body surface; only the eyes carry a catchlight; blob shadows, no hard-edged shadows | Attacks of 5–20 ms, no clicks; rounded envelopes; nothing digital |
 | **Matte** | No environment reflections, no bloom, no post-processing; key-to-fill ratio around 3:1 | Dry — a short, small room; no shimmer reverb, no long tails |
-| **Wooden** | Ground and props in Burrow and Bark tones; every radius rounded, nothing sharp | Marimba and woodblock-like tones; plucked strings; soft thumps |
+| **Wooden** | Ground and props in Burrow ink and the rust and oxblood of the tree bark; every radius rounded, nothing sharp | Marimba and woodblock-like tones; plucked strings; soft thumps |
 | **Organic** | Hash-driven asymmetry in every critter; a slow idle wobble; nothing perfectly still or perfectly regular | Micro-variation on every trigger (the Game Design document sets the amounts: ± 25 cents on ticks, ± 10 cents on plucks, ± 8 % gain, ± 10 ms timing); no two crumbs identical |
 | **Quiet** | Small motion amplitudes; nothing blinks; the feast is the only big movement | Everything except the feast under 200 ms and low in the mix; restraint is what makes the feast land |
 
@@ -210,7 +210,7 @@ The cost of each element of the settled surface against Game Design §6:
 |---|---|---|---|
 | Flat matte colour with a two-step toon ramp | The same draw calls and triangles as the rough material; one 2 × 1 ramp texture beside the 128 × 128 blob | Yes | Taken |
 | One hard cel shadow | Self-shading comes from the ramp; the ground shadow stays a blob sprite, no shadow maps | Yes | Taken |
-| Outline pass as an inverted hull | One extra mesh per material group: 8 draw calls and about twice the triangles per critter (the 2,450-triangle sweep peak becomes about 4,900) | No: 4 calls and 3,000 triangles per critter | Not taken. The 2D portrait keeps its stroke; the DOM cell edge does the line's work |
+| Outline pass as an inverted hull | One extra mesh per material group: 8 draw calls and about twice the triangles per critter (the 2,450-triangle sweep peak becomes about 4,900) | No: 4 calls and 3,000 triangles per critter | Not taken, in either renderer. The shipped portrait has no outline either, so the crossfade from portrait to mesh changes nothing (Game Design F12); the cel shadow and the DOM cell edge carry the form |
 | Outline pass as a screen-space post-process | A full-screen pass over the scene | No: §6 forbids post-processing | Not taken |
 | One soft glow point as an emissive primitive inside the accent group | No extra draw call; ≤ 40 triangles | Yes | Taken |
 | Glow as an additive sprite | One extra draw call per critter (5 against 4) and a second texture | No | Not taken |
