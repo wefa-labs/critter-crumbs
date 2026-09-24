@@ -1,6 +1,6 @@
 # Phase 3 implementation handoff
 
-The mock game system and browser UI are implemented, including creator-authorized removal with durable visible history. The code is in the isolated source checkout at `/Users/afo/Code/wefa/critter-crumbs/.scratch/phase-3-work`. It is not yet integrated into main or accepted as merge-ready: automated browser verification and the remaining acceptance checks are open.
+The mock game system and browser UI are implemented, including creator-authorized removal with durable visible history. On 2026-09-23 the delivery patch was applied to the branch `phase-3/integration` and opened as [PR #29](https://github.com/wefa-labs/critter-crumbs/pull/29), and the Playwright lifecycle ran green there for the first time. Merge review and the acceptance checks listed under Validation remain open.
 
 ## Integration
 
@@ -10,7 +10,7 @@ The approved September 17 P14/P15 changes are included: all four privacy combina
 
 The reviewed core source is byte-identical to merged main. Its only package metadata change is `sideEffects: false` for bundling. GEN_VERSION 1, the 49-target limit, the 4,096-byte ciphertext limit, signing, timelock, canonical encoding and deterministic tally contracts remain intact.
 
-A binary-capable patch and changed-file manifest are prepared under `.scratch/delivery/` against that exact base. Apply them in a clean checkout of the base, preserving the user's existing checkout. The delivery verification report checks every resulting file against the implementation. A fresh GitHub branch-creation POST returned HTTP 403, “Method not allowed in limited mode.” No branch, commit or Phase 3 integration PR was created; issue #16 remains open on GitHub.
+The delivery patch (sha256 `f384d51e…`, 131 files) was applied on 2026-09-23 to a branch from that base as one commit, `39232fe`, with every resulting file checked against the delivery manifest. The branch also merges local `main`'s two docs commits (PRD P14/P15, the Sep 17 decisions and the shared engineering guidance). One test-only correction followed, `c90f134`: the Playwright helper now reads authenticated state through the page, because Playwright's request context withholds the `Secure` session cookie from `http://127.0.0.1`. [PR #29](https://github.com/wefa-labs/critter-crumbs/pull/29) is the draft integration pull request with `Closes #16`; the reviewer merges it with a merge commit. The dependency audit's two development-only advisories, present on `main` before this work, are fixed separately in [PR #28](https://github.com/wefa-labs/critter-crumbs/pull/28).
 
 ## Delivered scope
 
@@ -36,11 +36,11 @@ The initial assets and licences are documented in [asset provenance](../research
 - Targeted policy/runtime/world/director regressions passed; the final lighting suite passed 14 tests. P14/API regressions passed 52 tests across their targeted files before the host became heavily loaded.
 - The final full offline suite passes: **437 tests in 57 files, plus 11 tooling tests**, exit 0 in 364.47 s for Vitest. Earlier runs timed out while host load exceeded 130; the successful rerun used the normal two-worker configuration after stopping task-owned browser/server work. No timeout or assertion was loosened. Earlier diagnostic logs remain available; the precise cause of those timeouts was not isolated.
 - The separate final core/shared/app suite passes 207 tests in 30 files; the critical API subset also passes 23 tests in three files. The final build passes: shell 114,863/120,000 gzip bytes; 3D 249,233/250,000; crypto 53,955 (no numeric cap). The machine-readable summary and full logs are in `.scratch/delivery/`.
-- Playwright could not launch Chromium: macOS rejected MachPortRendezvous bootstrap with EPERM, before assertions ran. The new people/options × Simple/3D script checks independent contexts, replacement, equal hashes, screenshots and downloaded CSV; it remains unrun here.
+- Playwright could not launch Chromium in the Codex sandbox (MachPortRendezvous EPERM). On 2026-09-23 the suite ran on the integration branch against the mock stack: 13 specs passed in 1.6 minutes, including people and options feasts in Simple view and 3D with equal hashes, replacement, screenshots and the downloaded CSV. The branch's CI run passed all 437 offline tests on a clean runner. See [the evidence](phase-3-test-evidence.txt).
 - Supported browser proof: two participants computed the same people-feast hash, with latest allocations yielding 160/40 from 200 crumbs; Simple and 3D controls worked at 375 px; 320 px had no page overflow; Skip reached Readable and focused Results; context loss preserved target 49 through retry. Earlier options proof covered a tie, Unicode/quoted names, local recording and public aggregate visibility.
 - Lighthouse 13.4.1 mobile snapshot accessibility: 100 for arrival and 100 for public results. Complete member-screen audits, actual 200% zoom, VoiceOver/TalkBack, and the slowest phone remain open.
 
-The browser download itself was not observed successfully in the in-app browser. CSV content/escaping/precision tests pass; its E2E download assertion must run before accepting that browser proof. No real transaction, live Shutter rehearsal or production-readiness claim is made.
+The CSV download assertion has now run in Playwright and passed for both feast kinds; the earlier in-app browser could not observe the download. No real transaction, live Shutter rehearsal or production-readiness claim is made.
 
 ## Run and finish integration
 

@@ -18,6 +18,8 @@ Four phases, three models, one rehearsal deadline. Each phase is a prompt in thi
 | 3 | Technical Spec §16 column B (app) through M5: Koota world, portraits, every screen, the heap and hop, sound, the feast in Simple view, then the 3D layer behind portraits; the lifecycle playable end to end in mock mode | `npm run e2e` green; Game Design §7.5 headless tests green by name; a keyboard-only lifecycle pass |
 | 4 | Design System revised to the direction that converged in `docs/explorations/`, `GEN_VERSION` bumped by decision, every screen aligned to tokens, components and copy; accessibility and budgets proven | axe clean; Lighthouse accessibility ≥ 95; `npm run build` inside §17 budgets; the Game Design §10 checklist ready for phones |
 
+Phase 3 reached its integration branch on 2026-09-23 as [PR #29](https://github.com/wefa-labs/critter-crumbs/pull/29); its status, evidence and open gates are in `phase-3-handoff.md`, `phase-3-validation.md` and `phase-3-test-evidence.txt`.
+
 Phase 4 has a human checkpoint in the middle: the design settle needs the reviewer's approval before code is re-skinned. Its first half touches only `docs/`, so it can run any time after phase 1, in parallel with phases 2 and 3. That is the single biggest schedule saver in this plan.
 
 ## What each phase hands over

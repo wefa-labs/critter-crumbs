@@ -187,3 +187,5 @@ The entries below record the individual decisions and attribution for the ticket
 
 ### 2026-09-19 — Reserve the shared crumb draw
 The production renderer reserves one of the 40 scene draw calls for the shared instanced crumb pass. At four calls per mesh this admits nine visible meshes in DOM order (37 calls including crumbs); all other visible targets keep their portraits and controls. The earlier cap of ten reached 41 calls during a held pour. The 49-target domain limit is unchanged.
+
+- 2026-09-23 — Phase 3 lands on `main` as one verified commit: the Codex delivery patch applied at `b660231` and checked file by file against its manifest, plus the two docs commits from local `main`; per-ticket history is not reconstructed. The Playwright suite ran for the first time and passed after one test-helper correction (authenticated reads go through the page, because Playwright's request context withholds the `Secure` session cookie from `http://127.0.0.1`). The dependency audit's two development-only advisories predate phase 3 and are fixed in a separate override change. — Afolabi / Claude.
