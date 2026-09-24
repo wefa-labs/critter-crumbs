@@ -4,8 +4,26 @@
     {
       "name": "pitch-deck",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "4173", "--directory", "docs/pitch"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173",
+        "--directory",
+        "docs/pitch"
+      ],
       "port": 4173
+    },
+    {
+      "name": "design-settle",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4175",
+        "--directory",
+        "."
+      ],
+      "port": 4175
     }
   ]
 }
