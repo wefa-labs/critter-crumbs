@@ -6,7 +6,7 @@ export const copy = {
   "gathering.assistant.copy": "Copy prompt",
   "gathering.assistant.copied": "Prompt copied.",
   "gathering.assistant.select": "Copying is unavailable. Select the prompt and copy it yourself.",
-  "gathering.assistant.prompt": "Help me draft my statement for this feast.\nTitle: {title}\nContext: {context}\nType: {kind}\nGathering ends: {gathering}\nScattering ends: {scattering}\n\nUse only the notes I provide below. Find concrete contributions, work completed, and who benefited. Ask about anything unclear; do not invent achievements. Draft in the first person, in plain text, with at most 2,000 characters. Keep it clear and specific so the burrow can understand what I contributed. I will review and edit it before submitting.\n\nMy notes:",
+  "gathering.assistant.prompt": "Help me draft my statement for this feast.\nTitle: {title}\nContext: {context}\nType: {kind}\nGathering ends: {gathering}\nScattering ends: {scattering}\n\nUse only the notes I provide below. Find concrete contributions, work completed, and who benefited. Ask about anything unclear; do not invent achievements. Draft in the first person, in plain text, with at most 2,000 characters. Keep it clear and specific so the burrow can understand what I contributed. I will review and edit it before saving.\n\nMy notes:",
   "preview.render.title": "Renderer rehearsal",
   "preview.render.count": "Critters",
   "preview.render.limit": "Keep at most ten meshes active",
@@ -32,7 +32,7 @@ export const copy = {
   'results.csv.giver': 'giver',
   'results.received': '{n} crumbs received',
   'results.verification': 'Result fingerprint',
-  'err.publicationChanged': 'The published scatters do not match the close record. Try again and tell the burrow if this continues.',
+  'err.publicationChanged': 'The published scatters do not match the close record, so the feast did not open on this device. Nothing of yours changed. Try again and tell the burrow if this continues.',
   'preview.audio.title': 'Sound workshop',
   'preview.audio.help': 'Render the sound cues silently to check their duration and peak level.',
   'preview.audio.run': 'Check sound cues',
@@ -57,7 +57,7 @@ export const copy = {
   'home.noDeadline': 'No upcoming deadline',
   "phase.void": "Ended before scattering",
   "setup.option.remove": "Remove option",
-  "setup.saved": "Draft saved. Review the details, then open gathering when you’re ready.",
+  "setup.saved": "Draft saved. Review the details, then open the feast when you're ready.",
   "setup.saved.help": "These details are fixed in this draft. To change them, cancel it and start a new feast.",
   "preview.trait.title": "World subscription workshop",
   "preview.trait.on": "Still critters on",
@@ -78,13 +78,13 @@ export const copy = {
   "err.membershipChanged": "This membership has changed. Refresh the burrow before trying again.",
   "app.pageTitle": "{title} · Critter Crumbs",
   "app.navigation": "Main navigation",
-  "time.minutes": " minutes",
   "dev.account": "Rehearsal critter {n}",
   "dev.mode": "Local rehearsal",
   "connect.title": "Choose how to connect",
   "connect.empty": "No connection is available in this browser yet.",
   "connect.rejected": "Connection wasn’t confirmed. Try again when you’re ready.",
   "app.loading": "Opening the burrow…",
+  "app.unavailable": "Can't open this right now",
   "action.close": "Close",
   "action.retry": "Try again",
   "burrow.join": "Join this burrow",
@@ -296,10 +296,11 @@ export const copy = {
   "err.saveFailed": "Couldn't save your scatter. Check your connection and try again — nothing was lost.",
   "err.saveUnverified": "Saved, but not confirmed yet. Keep this open a moment.",
   "err.saveVerified": "Your scatter is in.",
-  "err.clockSkew": "Your device clock is off by about {duration}. Deadlines here use the feast's clock, not yours.",
+  "err.clockSkew": "Your device clock is off by about {minutes} minutes. Deadlines here use the feast's clock, not yours.",
   "err.uidMissing": "Your scatter isn't in the published set. Keep this: {uid}. Tell the burrow.",
   "err.ensUnavailable": "Couldn't look up ENS names right now, so addresses are shown instead.",
   "err.storeUnreachable": "Can't reach the burrow right now. Try again in a moment.",
+  "err.rehearsalOnly": "Only the local rehearsal can sign and open feasts in this build. Your crumbs stay as you left them.",
   "err.keyUnreachable": "Can't fetch the key right now. Nothing is lost — try again in a few minutes.",
   "err.generic": "Something went wrong. Nothing you did was lost.",
   "err.notParticipant": "This feast started before you joined the burrow. You'll be in the next one.",
@@ -309,7 +310,7 @@ export const copy = {
 
 export type CopyId = keyof typeof copy;
 type Slots<Text extends string> = Text extends `${string}{${infer Slot}}${infer Rest}` ? Slot | Slots<Rest> : never;
-type NumericSlot = 'n' | 'max' | 'remaining' | 'written' | 'total' | 'crumbs' | 'i' | 'done' | 'scatterers' | 'totalCrumbs';
+type NumericSlot = 'n' | 'max' | 'remaining' | 'written' | 'total' | 'crumbs' | 'i' | 'done' | 'scatterers' | 'totalCrumbs' | 'minutes';
 export type CopyParams<Id extends CopyId> = { [Slot in Slots<(typeof copy)[Id]>]: Slot extends NumericSlot ? number : string };
 const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
   'arrive.burrow': { slot: 'n', one: '{burrowName} · {n} critter' },
@@ -319,6 +320,7 @@ const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
   'reveal.announce': { slot: 'n', one: 'Statements are open. {n} statement to read.' },
   'scatter.participation': { slot: 'done', one: '{done} of {total} has scattered' },
   'pile.remaining': { slot: 'n', one: '1 to go' },
+  'err.clockSkew': { slot: 'minutes', one: "Your device clock is off by about 1 minute. Deadlines here use the feast's clock, not yours." },
 };
 export function formatCopy<Id extends CopyId>(id: Id, ...args: keyof CopyParams<Id> extends never ? [] : [CopyParams<Id>]): string {
   const params = (args[0] ?? {}) as Record<string, string | number>;

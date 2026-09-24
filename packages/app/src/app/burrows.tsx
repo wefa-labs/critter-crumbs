@@ -3,7 +3,7 @@ import { ApiClientError, phaseAt } from '@critter-crumbs/core';
 import { copy, formatCopy, type FeastClock, type Profile, type MemberRemoval } from '@critter-crumbs/shared';
 import { absoluteTime } from './time.js';
 import { phaseCopy } from './deadlines.js';
-import { Dialog, Field, Link, Page, PortraitImage, displayName, memberLabel, navigate, shortAddress, useResource } from './ui.js';
+import { Dialog, Field, Link, Page, PendingPage, PortraitImage, displayName, memberLabel, navigate, shortAddress, useResource } from './ui.js';
 import type { AppApi, Me, Session } from './session.js';
 export type RunAction = (action: () => Promise<void>) => Promise<void>;
 export interface BurrowView { id: string; name: string; createdBy: string; removals: MemberRemoval[]; serverNow: number; members: (Profile & { membershipVersion: number; joinedAt: number | null; leftAt: number | null })[]; feasts: (FeastClock & { id: string; title: string })[] }
@@ -36,7 +36,7 @@ export function Burrow({ id, api, me, session, run, busy, announce }: { id: stri
       const detail = resource.error.detail as { burrowName?: string } | undefined;
       return <Page title={copy['burrow.unknown.title']}><p>{formatCopy('burrow.unknown.body', { burrowName: detail?.burrowName ?? copy['app.name'], shortAddress: shortAddress(me.address) })}</p><Link href="/">{copy['action.back']}</Link></Page>;
     }
-    return <Page title={resource.error ? copy['err.storeUnreachable'] : copy['app.loading']}>{resource.error ? <button onClick={resource.refresh}>{copy['action.retry']}</button> : null}</Page>;
+    return <PendingPage error={resource.error} retry={resource.refresh} />;
   }
   const burrow = resource.data, active = burrow.members.filter(member => member.leftAt === null), historical = burrow.members.filter(member => member.leftAt !== null);
   const self = active.find(member => member.address.toLowerCase() === me.address.toLowerCase());

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { phaseAt, ApiClientError } from '@critter-crumbs/core';
 import { DeadlineStrip, phaseCopy, useTrustedTime } from './deadlines.js';
-import { Link, Page, PortraitImage, shortAddress, useResource, targetLabel } from './ui.js';
+import { Link, Page, PendingPage, PortraitImage, shortAddress, useResource, targetLabel } from './ui.js';
 import type { AppApi, Me } from './session.js';
 import type { RunAction } from './burrows.js';
 import { isMemberFeast, portraitVariant, type MemberFeast, type PublicFeast } from './feast-view.js';
@@ -24,7 +24,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   const resource = useResource<PublicFeast | MemberFeast>(api, `/api/feasts/${id}`, (previous, next) => !isMemberFeast(previous) || isMemberFeast(next)), trusted = useTrustedTime(api);
   const phase = resource.data ? phaseAt(resource.data, trusted ?? resource.data.serverNow) : undefined;
   useEffect(() => { if (resource.data && phase !== resource.data.phase) resource.refresh(); }, [phase, resource.data?.phase]);
-  if (!resource.data) return <Page title={resource.error ? copy['err.storeUnreachable'] : copy['app.loading']}>{resource.error ? <button onClick={resource.refresh}>{copy['action.retry']}</button> : null}</Page>;
+  if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} />;
   const feast = resource.data, now = trusted ?? feast.serverNow;
   const props = { api, run, busy, refresh: resource.refresh, announce };
   let content;

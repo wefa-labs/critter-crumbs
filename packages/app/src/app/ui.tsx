@@ -18,6 +18,10 @@ export function Page({ title, children, context, screen, primary = true }: { tit
   useEffect(() => { document.title = context ? formatCopy('app.contextTitle', { screen: screen ?? title, burrow: context }) : formatCopy('app.pageTitle', { title }); document.getElementById('content')?.focus(); document.querySelector<HTMLElement>('[data-initial-focus="true"]')?.focus(); }, [title, context, screen]);
   return <>{primary ? <h1>{title}</h1> : <p className="feast-title">{title}</p>}{children}</>;
 }
+/** A route whose data has not arrived: the loading title, or the outage notice with a retry. Error copy never becomes a page title. */
+export function PendingPage({ error, retry }: { error: unknown; retry: () => void }) {
+  return <Page title={error ? copy['app.unavailable'] : copy['app.loading']}>{error ? <><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></> : null}</Page>;
+}
 export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0 }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {

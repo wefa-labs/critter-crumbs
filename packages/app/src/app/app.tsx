@@ -16,7 +16,7 @@ function message(error: unknown, fallback: CopyId = 'err.generic') { return erro
 export function App() {
   const [alert, setAlert] = useState(''), [announcement, announce] = useState('');
   const [services] = useState(() => {
-    const api = createApiClient({ onClockSkew: (_id, milliseconds) => announce(formatCopy('err.clockSkew', { duration: new Intl.NumberFormat().format(Math.round(milliseconds / 60000)) + copy['time.minutes'] })) });
+    const api = createApiClient({ onClockSkew: (_id, milliseconds) => announce(formatCopy('err.clockSkew', { minutes: Math.round(milliseconds / 60000) })) });
     const preferences = browserSettings(window);
     return { api, session: createSession(api), preferences, audio: createAudio(preferences.settings) };
   });
