@@ -67,6 +67,7 @@ export const copy = {
   "preview.trait.remove": "Remove world setting",
   "preview.trait.mount": "Show or hide subscriber",
   "burrow.remove": "Remove from burrow",
+  "burrow.remove.label": "Remove from burrow: {name}",
   "burrow.remove.title": "Remove {name}?",
   "burrow.remove.body": "The burrow will see who removed them and when. Feasts already scattering keep their participants and results. They can be added again later.",
   "burrow.remove.done": "{name} was removed from the burrow.",

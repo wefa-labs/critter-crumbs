@@ -7,6 +7,8 @@ import type { AppApi } from './session.js';
 
 export const displayName = (profile: Pick<Profile, 'ensName' | 'displayName' | 'address'>) => profile.ensName || profile.displayName || shortAddress(profile.address);
 export const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
+/** A stored name that is only the address falls back to the §5.5 short form; the full address is shown separately. */
+export const memberLabel = (name: string, address: string) => name.toLowerCase() === address.toLowerCase() ? shortAddress(address) : name;
 export const targetLabel = (target: Target) => target.ownerAddress?.toLowerCase() === target.name.toLowerCase() ? shortAddress(target.name) : target.name;
 export function navigate(path: string) { history.pushState(null, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
 export function Link({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
