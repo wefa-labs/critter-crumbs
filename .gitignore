@@ -152,3 +152,4 @@ vite.config.ts.timestamp-*
 playwright-report/
 test-results/
 # local wrapped copy of the deck, for previewing only
+docs/pitch/critter-crumbs.artifact.html
