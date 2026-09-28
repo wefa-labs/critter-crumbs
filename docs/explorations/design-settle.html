@@ -3,296 +3,172 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Design settle</title>
-<meta name="description" content="The proposed settled design system for Critter Crumbs, rendered: tokens with contrast, type, four element critters from the version 2 draw, a scatter cell and a results row.">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Shippori+Mincho:wght@500;700&display=swap">
+<title>Critter Crumbs design settle</title>
+<meta name="description" content="Compare the PR #31 design proposal with today's app at phone size, and mix the palette, type, critters, 3D surface and arrival picture pane by pane.">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/" } }</script>
 <style>
-@font-face { font-family: "Young Serif"; src: url("../../packages/app/public/fonts/young-serif-latin.woff2") format("woff2"); font-display: swap; }
+/* Neutral chrome, so neither palette is judged against a warm or cool frame. The phones keep the
+   app's own light theme (D1); only the chrome around them follows the viewer's theme. */
 :root {
-  --cc-oat: #E8DCC4; --cc-surface: #F1E2B8; --cc-sunken: #DCCFB0;
-  --cc-burrow: #2B2622; --cc-soil: #2E4F5C; --cc-bark: #3F5D6C;
-  --cc-line: #CDBFA3; --cc-line-strong: #4A6B7C;
-  --cc-honey: #D9A441; --cc-crust: #8F5F10; --cc-honey-tint: #F6E9C8;
-  --cc-moss: #5F7A55; --cc-moss-ink: #3E5637; --cc-moss-tint: #D9E0C9;
-  --cc-clay: #B85520; --cc-clay-ink: #7A3B3A; --cc-clay-tint: #F0D6C7;
-  --cc-dusk: #4A6B7C; --cc-sky: #8FC6D8; --cc-focus: var(--cc-burrow);
-  --cc-font-display: "Young Serif", "Iowan Old Style", "Palatino", Georgia, serif;
-  --cc-font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --cc-font-data: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --cc-radius-sm: 8px; --cc-radius-md: 14px; --cc-radius-lg: 22px; --cc-radius-pill: 999px;
-  --cc-shadow-1: 0 1px 2px rgb(43 38 34 / .10), 0 2px 6px rgb(43 38 34 / .06);
-  --cc-shadow-2: 0 6px 16px rgb(43 38 34 / .14);
-  --cc-ground-glow: radial-gradient(120% 60% at 15% -10%, #F7EBCD 0%, transparent 60%);
-  color-scheme: light;
+  color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ink: #1c1c1a; --ink-2: #57574f; --ink-3: #85857c; --paper: #eeeeea; --card: #fbfbf9; --edge: #d6d6cf;
+  --hover: #e6e6e0; --head: #e4e4de; --chosen: #1c1c1a; --on-chosen: #ffffff; --bar: rgb(238 238 234 / .95);
+  --mark: #b4410c; --pass: #2f6b3a; --fail: #a3261b; --bezel: #1c1c1a; --stage: #E8DCC4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark; --ink: #ececE6; --ink-2: #aeaea5; --ink-3: #85857c; --paper: #161615; --card: #1f1f1d; --edge: #393935;
+    --hover: #2b2b28; --head: #292926; --chosen: #ececE6; --on-chosen: #161615; --bar: rgb(22 22 21 / .94);
+    --mark: #f2955a; --pass: #86c98f; --fail: #ff8f80; --bezel: #050505;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark; --ink: #ececE6; --ink-2: #aeaea5; --ink-3: #85857c; --paper: #161615; --card: #1f1f1d; --edge: #393935;
+  --hover: #2b2b28; --head: #292926; --chosen: #ececE6; --on-chosen: #161615; --bar: rgb(22 22 21 / .94);
+  --mark: #f2955a; --pass: #86c98f; --fail: #ff8f80; --bezel: #050505;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--cc-oat); background-image: var(--cc-ground-glow); color: var(--cc-burrow); font-family: var(--cc-font-body); line-height: 1.5; }
-main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
-h1, h2, h3, .display { font-family: var(--cc-font-display); font-weight: 400; text-wrap: balance; margin: 0 0 .4em; }
-h1 { font-size: clamp(2rem, 6vw, 3rem); line-height: 1.05; }
-h2 { font-size: 1.375rem; margin-top: 2.5rem; }
-h3 { font-size: 1.125rem; margin-top: 1.5rem; }
-p { max-width: 62ch; }
-.muted { color: var(--cc-soil); }
-.small { font-size: .875rem; color: var(--cc-bark); }
-code, .data { font-family: var(--cc-font-data); font-size: .875rem; }
-.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
-.swatch { border-radius: var(--cc-radius-md); overflow: hidden; background: var(--cc-surface); box-shadow: var(--cc-shadow-1); border: 1px solid var(--cc-line); }
-.swatch .chip { height: 64px; display: flex; align-items: flex-end; padding: 8px; font-family: var(--cc-font-display); font-size: 1.1rem; }
-.swatch .meta { padding: 8px 10px 10px; font-size: .8rem; line-height: 1.35; }
-.swatch .meta strong { display: block; font-family: var(--cc-font-data); font-weight: 400; }
-.matrix { border-collapse: collapse; width: 100%; font-size: .875rem; margin-top: 12px; }
-.matrix th, .matrix td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--cc-line); vertical-align: top; }
-.matrix th { background: var(--cc-sunken); color: var(--cc-soil); font-weight: 600; }
-.specimen { background: var(--cc-surface); border: 1px solid var(--cc-line); border-radius: var(--cc-radius-lg); padding: 20px; box-shadow: var(--cc-shadow-1); }
-.specimen .big { font-family: var(--cc-font-display); font-size: clamp(2.5rem, 9vw, 4rem); line-height: 1; font-variant-numeric: tabular-nums; }
-.specimen.deck { font-family: "Atkinson Hyperlegible", var(--cc-font-body); }
-.specimen.deck .display, .specimen.deck .big, .specimen.deck h3 { font-family: "Shippori Mincho", serif; font-weight: 500; }
-.critters { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
-.critter-card { background: var(--cc-surface); border: 1px solid var(--cc-line); border-radius: var(--cc-radius-lg); padding: 16px; box-shadow: var(--cc-shadow-1); }
-.critter-card .stage { aspect-ratio: 4 / 5; background: var(--cc-sunken); border-radius: var(--cc-radius-md); display: grid; place-items: center; }
-.critter-card .stage svg { width: 88%; height: auto; }
-.sizes { display: flex; align-items: flex-end; gap: 12px; margin-top: 12px; }
-.sizes figure { margin: 0; text-align: center; }
-.sizes figcaption { font-size: .75rem; color: var(--cc-bark); }
-.pill { display: inline-block; padding: 2px 10px; border-radius: var(--cc-radius-pill); background: var(--cc-sunken); color: var(--cc-soil); font-size: .8rem; }
-.components { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; align-items: start; }
-.cell { background: var(--cc-surface); border: 1px solid var(--cc-line); border-radius: var(--cc-radius-lg); padding: 12px; box-shadow: var(--cc-shadow-1); max-width: 260px; }
-.cell .stage { aspect-ratio: 4 / 5; background: var(--cc-sunken); border-radius: var(--cc-radius-md); display: grid; place-items: center; }
-.cell .stage svg { width: 80%; height: auto; }
-.cell .name { font-family: var(--cc-font-display); font-size: 1.125rem; margin: 10px 0 2px; }
-.cell .statement { font-size: .875rem; color: var(--cc-soil); margin: 0 0 10px; }
-.controls { display: flex; gap: 8px; align-items: center; }
-.controls button { min-width: 44px; height: 44px; border-radius: var(--cc-radius-md); border: 1.5px solid var(--cc-line-strong); background: var(--cc-surface); color: var(--cc-burrow); font-size: 1.25rem; cursor: pointer; }
-.controls input { width: 64px; height: 44px; text-align: center; font-family: var(--cc-font-data); font-size: 1rem; border: 1.5px solid var(--cc-line-strong); border-radius: var(--cc-radius-sm); background: var(--cc-sunken); color: var(--cc-burrow); font-variant-numeric: tabular-nums; }
-.controls .pulse { background: var(--cc-honey-tint); }
-.primary { background: var(--cc-burrow); color: var(--cc-oat); border: 0; border-radius: var(--cc-radius-md); padding: 12px 20px; font-weight: 600; font-size: 1rem; }
-.chip-ok { display: inline-block; background: var(--cc-moss-tint); color: var(--cc-moss-ink); border-radius: var(--cc-radius-pill); padding: 2px 10px; font-size: .875rem; }
-.notice { background: var(--cc-clay-tint); color: var(--cc-clay-ink); border-radius: var(--cc-radius-md); padding: 10px 12px; font-size: .875rem; max-width: 62ch; }
-.results { width: 100%; border-collapse: collapse; background: var(--cc-surface); border-radius: var(--cc-radius-lg); overflow: hidden; box-shadow: var(--cc-shadow-1); }
-.results th { background: var(--cc-sunken); color: var(--cc-soil); text-align: left; padding: 8px 12px; font-size: .875rem; }
-.results td { padding: 8px 12px; border-top: 1px solid var(--cc-line); font-variant-numeric: tabular-nums; }
-.results td:first-child { display: flex; align-items: center; gap: 10px; font-family: var(--cc-font-display); }
-.results svg { width: 40px; height: 50px; }
-.heap { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
-.heap .mound { width: 88px; height: 44px; }
-.heap .count { font-family: var(--cc-font-data); font-size: 1.25rem; }
-.legend { font-size: .8rem; color: var(--cc-bark); }
-.portrait { overflow: visible; }
-@media (max-width: 359px) { .critters, .components { grid-template-columns: 1fr; } }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.45; }
+button, select, input, textarea { font: inherit; color: inherit; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; display: grid; gap: 6px; padding: 8px 16px; background: var(--bar); backdrop-filter: blur(8px); border-bottom: 1px solid var(--edge); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.controls h1 { margin: 0 6px 0 0; font-size: 1rem; }
+.status { margin: 0; font-size: .75rem; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 2px 14px; }
+#differs { color: var(--mark); }
+.axis { display: flex; align-items: center; gap: 8px; }
+.axis .name { font-size: .75rem; color: var(--ink-2); white-space: nowrap; }
+.axis .name small { margin-left: 5px; font-size: .6875rem; color: var(--ink-3); }
+.axis[data-differs="true"] .name { color: var(--mark); font-weight: 600; }
+.axis[data-differs="true"] .name::before { content: "● "; }
+.axis[data-off="true"] { opacity: .42; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; border: 1px solid var(--edge); border-radius: 16px; background: var(--card); }
+.seg label { position: relative; display: block; }
+.seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.seg input:disabled { cursor: not-allowed; }
+.seg span { display: block; padding: 4px 11px; border-radius: 999px; font-size: .8125rem; white-space: nowrap; }
+.seg label:hover span { background: var(--hover); }
+.seg input:checked + span { background: var(--chosen); color: var(--on-chosen); }
+.seg input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.check { display: inline-flex; align-items: center; gap: 6px; font-size: .8125rem; }
+.ghost { padding: 4px 11px; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); color: var(--ink); font-size: .8125rem; cursor: pointer; }
+.ghost:hover { background: var(--hover); }
+.copy-text { display: block; width: 100%; margin: 0 0 8px; padding: 8px 10px; border: 1px solid var(--edge); border-radius: 10px; background: var(--paper); font-size: .78rem; resize: vertical; }
+.ghost:focus-visible, select:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+main { padding: 12px 16px 64px; }
+.panes { display: grid; grid-template-columns: repeat(var(--count, 2), minmax(0, 1fr)); gap: 12px; align-items: start; }
+.pane { container-type: inline-size; min-width: 0; padding: 10px 12px 12px; background: var(--card); border: 1px solid var(--edge); border-radius: 16px; }
+.pane-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pane-head h2 { margin: 0 4px 0 0; font-size: 1rem; }
+.pane-head select { padding: 4px 8px; border: 1px solid var(--edge); border-radius: 8px; background: var(--card); }
+/* Controls sit beside the phone so a change and its effect share the viewport. */
+.pane-body { display: grid; grid-template-columns: minmax(150px, 190px) minmax(0, 1fr); gap: 12px; }
+.axes { display: grid; gap: 7px; align-content: start; }
+.axes .axis { display: grid; gap: 3px; }
+.axes .seg span { padding: 3px 9px; font-size: .78rem; }
+@container (min-width: 760px) { .pane-body { grid-template-columns: 250px minmax(0, 1fr); } }
+@container (max-width: 420px) { .pane-body { grid-template-columns: 1fr; } .axes { grid-template-columns: 1fr 1fr; } }
+.pane-summary { display: none; margin: -2px 0 4px; font-size: .75rem; color: var(--ink-2); }
+.hide-controls .axes { display: none; }
+.hide-controls .pane-body { grid-template-columns: 1fr; }
+.hide-controls .pane-summary { display: block; }
+.phone { display: flex; justify-content: center; min-width: 0; padding: 4px 0 12px; }
+.frame { flex: none; width: calc(375px * var(--scale, 1)); height: calc(812px * var(--scale, 1)); overflow: hidden; border-radius: calc(38px * var(--scale, 1)); background: var(--bezel); box-shadow: 0 0 0 calc(9px * var(--scale, 1)) var(--bezel), 0 14px 36px rgb(0 0 0 / .22); }
+.frame iframe { display: block; width: 375px; height: 812px; border: 0; transform: scale(var(--scale, 1)); transform-origin: 0 0; background: #fff; }
+.reference { max-width: 1180px; margin: 40px auto 0; }
+.reference h2 { margin: 40px 0 8px; font-size: 1.15rem; }
+.reference p, .reference li { max-width: 72ch; }
+.checkpoint { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; padding: 0; list-style: none; }
+.checkpoint li { padding: 12px 14px; background: var(--card); border: 1px solid var(--edge); border-radius: 12px; font-size: .875rem; }
+.checkpoint strong { display: block; margin-bottom: 2px; }
+.tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr)); gap: 20px; align-items: start; }
+.table-wrap { overflow-x: auto; max-width: 100%; border: 1px solid var(--edge); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; background: var(--card); font-size: .8125rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--edge); text-align: left; vertical-align: middle; }
+tbody tr:last-child > * { border-bottom: 0; }
+thead th { background: var(--head); font-weight: 600; }
+tbody th { font-weight: 500; }
+td .chip { display: inline-block; width: 22px; height: 22px; margin-right: 8px; vertical-align: middle; border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); }
+td code { font-size: .78rem; }
+td small { display: block; margin-left: 30px; color: var(--ink-2); }
+td.none { color: var(--ink-2); }
+td.pass { color: var(--pass); } td.fail { color: var(--fail); font-weight: 600; }
+.elements { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+.element { margin: 0; padding: 12px; background: var(--card); border: 1px solid var(--edge); border-radius: 12px; }
+.element .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.element .stage-box { position: relative; aspect-ratio: 4 / 5; max-width: 100%; background: var(--stage); border-radius: 10px; }
+.element .stage-box .portrait { position: absolute; inset: 0; width: 100%; height: 100%; }
+.element img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; }
+.element .sizes { display: flex; align-items: flex-end; gap: 10px; margin: 10px 0 6px; padding: 8px; background: var(--stage); border-radius: 10px; }
+.element figcaption { font-size: .78rem; color: var(--ink-2); }
+.element figcaption strong { color: var(--ink); }
+.notes { font-size: .875rem; }
+@media (max-width: 760px) { .panes { grid-template-columns: 1fr; } .tables { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
+<header class="bar">
+  <div class="controls">
+    <h1 title="PR #31 against today’s app, at phone size. Change any part in any pane; this browser keeps your last comparison.">Design settle</h1>
+    <div id="screen-group"></div>
+    <div id="view-group"></div>
+    <div id="light-group"></div>
+    <div id="count-group"></div>
+    <label class="check"><input type="checkbox" id="linked"> Scroll together</label>
+    <label class="check"><input type="checkbox" id="show-controls"> Controls</label>
+    <button type="button" id="swap" class="ghost">Swap A and B</button>
+  </div>
+  <p class="status"><span id="hint"></span><span id="differs"></span><span id="status">3D: loading three.js…</span></p>
+</header>
 <main>
-  <h1>Design settle</h1>
-  <p class="muted">The proposed <code>docs/02-design-system.md</code> revision, rendered. Tokens with their contrast, the type, four element critters from the proposed version&nbsp;2 draw, and two components in the new values. Nothing here is in the app yet.</p>
+  <section id="panes" class="panes" aria-label="Comparison panes"></section>
 
-  <h2>Tokens</h2>
-  <p>The world palette of the three settled scenes, mapped onto the existing names. Ratios are WCAG 2.2 contrast against Oat; the ★ values are derived for contrast because the scenes have no green, no tints and no hairline.</p>
-  <ul class="swatches" id="swatches"></ul>
-  <table class="matrix" id="matrix" aria-label="Contrast matrix"></table>
+  <section class="reference" aria-labelledby="checkpoint-title">
+    <h2 id="checkpoint-title">What the checkpoint asks</h2>
+    <ul class="checkpoint">
+      <li><strong>Palette · D14</strong>The world palette on the existing token names. The tables below show every text pair on both palettes.</li>
+      <li><strong>Type · D18 (DQ1)</strong>Keep Young Serif with the device’s own body face, or take the deck’s Shippori Mincho and Atkinson Hyperlegible.</li>
+      <li><strong>Surface · D15</strong>Toon ramp with one hard cel shadow, no outline, one glow point. Compare on the close-up screen.</li>
+      <li><strong>Critters · D16</strong>The element drawn first: earth, water, fire or air. This is <code>GEN_VERSION "2"</code>, a new critter for every account.</li>
+      <li><strong>Arrival · D17</strong>The burrow interior through the circular window. No final picture exists; the deck’s interior scenes stand in.</li>
+      <li><strong>DQ5 · when version 2 lands</strong>(a) before the rehearsal, (b) between the rehearsal and October, (c) after October. DQ2: the dark theme stays deferred.</li>
+    </ul>
 
-  <h2>Type</h2>
-  <div class="specimen">
-    <span class="pill">Proposed: Young Serif display, system body, system mono data (D2 stands)</span>
-    <h3 class="display" style="font-size:2rem;margin-top:.5rem">Our shared work</h3>
-    <p style="font-family:var(--cc-font-display);font-size:1.375rem;margin:.2em 0">Clover · Fern · Pebble · Moss</p>
-    <div class="big">160</div>
-    <p>Everyone here gets the same handful of crumbs to share out. Where they go stays private until the feast. Read them first, then scatter your 100 crumbs.</p>
-    <p class="data">0x7E5F…5Bdf · 0x23b86426…f9ad2</p>
-    <p class="small">One 27 KB Latin subset ships today; the body face is the device's own.</p>
-  </div>
-  <div class="specimen deck" style="margin-top:16px">
-    <span class="pill">Weighed and not taken: the deck's Shippori Mincho + Atkinson Hyperlegible</span>
-    <h3 class="display" style="font-size:2rem;margin-top:.5rem">Our shared work</h3>
-    <p class="display" style="font-size:1.375rem;margin:.2em 0">Clover · Fern · Pebble · Moss</p>
-    <div class="big">160</div>
-    <p>Everyone here gets the same handful of crumbs to share out. Where they go stays private until the feast. Read them first, then scatter your 100 crumbs.</p>
-    <p class="small">Two families, two weights each: four font files against one, and the body face stops being the device's own. Loaded here from Google Fonts for comparison only.</p>
-  </div>
-
-  <h2>Four element critters</h2>
-  <p>Drawn by an inline prototype of the proposed <code>GEN_VERSION "2"</code> sequence: the element is drawn first from the seed, then the body, then the element's ear, crest, tail and marking sets, then the hue inside the element's band. Same cyrb53 and mulberry32 as the core; the seed string ends in <code>:2</code>. Each card names the rehearsal address and variant that produced it.</p>
-  <div class="critters" id="critters"></div>
-  <p class="legend">Portraits at the §5.7 sizes: 40 px (lists), 64 px (read pass), 96 px (dialogs), and the stage. Awake, unfed; the glow point at 0.6 opacity.</p>
-
-  <h2>A scatter cell and a results row</h2>
-  <div class="components">
-    <div>
-      <div class="cell">
-        <div class="stage" id="cell-stage"></div>
-        <p class="name">Clover</p>
-        <p class="statement">I checked in with neighbours and kept the shared calendar honest.</p>
-        <div class="controls"><button type="button" aria-label="Take a crumb back from Clover">−</button><input value="12" aria-label="Crumbs for Clover" class="pulse"><button type="button" aria-label="Give a crumb to Clover">+</button></div>
-      </div>
-      <div class="heap"><svg class="mound" viewBox="0 0 88 44" id="mound" aria-hidden="true"></svg><div><div class="count">88 to go</div><span class="chip-ok">Scattered</span></div></div>
-      <p style="margin-top:12px"><button class="primary" type="button">Scatter these</button></p>
-      <p class="notice">Not confirmed. Your crumbs are still here — try again when you're ready.</p>
+    <h2>Palettes and contrast</h2>
+    <p>Ratios are computed here from the token values. Text needs 4.5 : 1; edges that carry meaning need 3 : 1.</p>
+    <div class="tables">
+      <div class="table-wrap"><table id="palette-table" aria-label="Both palettes, token by token"></table></div>
+      <div class="table-wrap"><table id="contrast-table" aria-label="Contrast of every text pair on both palettes"></table></div>
     </div>
-    <div>
-      <table class="results" aria-label="Crumbs received">
-        <thead><tr><th>Critter</th><th>Crumbs</th><th>Share</th></tr></thead>
-        <tbody id="results-rows"></tbody>
-      </table>
-      <p class="small" style="margin-top:8px">2 of 8 scattered · 200 crumbs in all. Text on Surface and Sunken uses Burrow and Soil; the tinted chips use Moss-ink and Clay-ink.</p>
-    </div>
-  </div>
+
+    <h2>The four elements</h2>
+    <p>The version 2 draw through the app’s portrait renderer, next to the deck’s painting of the same element. <span id="element-counts"></span></p>
+    <div id="elements" class="elements"></div>
+
+    <h2>What the 3D surface costs</h2>
+    <p>From Design System §4.1 against the Game Design §6 budget of 4 draw calls and 3,000 triangles per critter. The close-up screen measures each still.</p>
+    <div class="table-wrap"><table class="costs">
+      <thead><tr><th scope="col">Choice</th><th scope="col">Cost in the scene</th><th scope="col">Within budget</th><th scope="col">#31</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Toon ramp</th><td>The same draw calls and triangles as the rough material; one 2 × 1 ramp texture</td><td>Yes</td><td>Taken</td></tr>
+        <tr><th scope="row">One hard cel shadow</th><td>Comes from the ramp; the ground shadow stays a blob sprite</td><td>Yes</td><td>Taken</td></tr>
+        <tr><th scope="row">Inverted-hull outline</th><td>One extra draw per material group and about twice the triangles</td><td>No</td><td>Not taken</td></tr>
+        <tr><th scope="row">Screen-space outline</th><td>A full-screen pass</td><td>No: no post-processing</td><td>Not taken</td></tr>
+        <tr><th scope="row">Glow point in the accent group</th><td>No extra draw call; up to 40 triangles</td><td>Yes</td><td>Taken</td></tr>
+        <tr><th scope="row">Glow as an additive sprite</th><td>One extra draw call per critter and a second texture</td><td>No</td><td>Not taken</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>How this page is built</h2>
+    <ul class="notes">
+      <li>Each phone is a frame that loads the app’s own <code>packages/app/src/styles/app.css</code> with that pane’s tokens on <code>:root</code>, so the app’s rules and breakpoints lay it out at 375 px.</li>
+      <li>The screens repeat the markup of the app’s components and use its copy, with the rehearsal seed’s eight accounts and statements. They are mock-ups, not the running app.</li>
+      <li>Version 1 critters come from a port of the frozen generator and the app’s portrait renderer. Version 2 runs the #31 draw through the same renderer with the element parts added.</li>
+      <li>3D stills use three.js 0.185.1 from jsDelivr with the app’s camera, lights and mesh builder. Version 2 meshes are a prototype of Design System §5.3.</li>
+      <li>The arrival stand-ins are the deck’s interior scenes. Deck art is the deck’s four paintings, matched to each account’s version 2 element.</li>
+    </ul>
+  </section>
 </main>
-<script>
-const tokens = [
-  ['oat', '#E8DCC4', 'Page ground'], ['surface', '#F1E2B8', 'Cards and sheets'], ['sunken', '#DCCFB0', 'Recessed areas ★'],
-  ['burrow', '#2B2622', 'Text, buttons, focus'], ['soil', '#2E4F5C', 'Secondary text'], ['bark', '#3F5D6C', 'Tertiary text ★'],
-  ['line', '#CDBFA3', 'Hairlines ★'], ['line-strong', '#4A6B7C', 'Input edges'],
-  ['honey', '#D9A441', 'Crumbs only'], ['crust', '#8F5F10', 'Crumb edges ★'], ['honey-tint', '#F6E9C8', 'Pour highlight ★'],
-  ['moss', '#5F7A55', 'Done and alive ★'], ['moss-ink', '#3E5637', 'Success text ★'], ['moss-tint', '#D9E0C9', 'Success chip ★'],
-  ['clay', '#B85520', 'Error fills ★'], ['clay-ink', '#7A3B3A', 'Error text'], ['clay-tint', '#F0D6C7', 'Error banner ★'],
-  ['dusk', '#4A6B7C', 'Asleep, dusk'], ['sky', '#8FC6D8', 'Through the window'],
-];
-const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
-const lum = hex => { const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
-const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
-const el = (tag, attrs = {}, parent, ns) => { const n = ns ? document.createElementNS(ns, tag) : document.createElement(tag); for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, String(v)); if (parent) parent.append(n); return n; };
-const OAT = '#E8DCC4';
-{
-  const list = document.getElementById('swatches');
-  for (const [name, value, use] of tokens) {
-    const li = el('li', { class: 'swatch' }, list);
-    const chip = el('div', { class: 'chip' }, li); chip.style.background = value; chip.style.color = ratio(value, '#2B2622') > ratio(value, '#F1E2B8') ? '#2B2622' : '#F1E2B8'; chip.textContent = 'Aa';
-    const meta = el('div', { class: 'meta' }, li);
-    const strong = el('strong', {}, meta); strong.textContent = `--cc-${name} ${value}`;
-    meta.append(document.createTextNode(`${use} · ${ratio(value, OAT).toFixed(1)} : 1 on Oat`));
-  }
-  const T = Object.fromEntries(tokens.map(([n, v]) => [n, v]));
-  const rows = [
-    ['Burrow text on Oat / Surface / Sunken', [T.burrow, T.oat], [T.burrow, T.surface], [T.burrow, T.sunken]],
-    ['Soil text on Oat / Surface / Sunken', [T.soil, T.oat], [T.soil, T.surface], [T.soil, T.sunken]],
-    ['Bark text on Oat / Surface / Sunken', [T.bark, T.oat], [T.bark, T.surface], [T.bark, T.sunken]],
-    ['Moss-ink on Oat / Moss-tint', [T['moss-ink'], T.oat], [T['moss-ink'], T['moss-tint']]],
-    ['Clay-ink on Oat / Clay-tint', [T['clay-ink'], T.oat], [T['clay-ink'], T['clay-tint']]],
-    ['Oat text on Burrow', [T.oat, T.burrow]],
-    ['Line-strong on Oat / Surface (non-text)', [T['line-strong'], T.oat], [T['line-strong'], T.surface]],
-    ['Crust on Oat (non-text)', [T.crust, T.oat]], ['Moss on Oat (non-text)', [T.moss, T.oat]], ['Clay on Oat (non-text)', [T.clay, T.oat]],
-  ];
-  const table = document.getElementById('matrix');
-  const head = el('tr', {}, el('thead', {}, table)); for (const h of ['Pair', 'Ratio', 'Needs']) el('th', {}, head).textContent = h;
-  const body = el('tbody', {}, table);
-  for (const [label, ...pairs] of rows) {
-    const tr = el('tr', {}, body); el('td', {}, tr).textContent = label;
-    const values = pairs.map(([a, b]) => ratio(a, b)); el('td', {}, tr).textContent = values.map(v => v.toFixed(1)).join(' / ');
-    const nonText = /non-text/.test(label); el('td', {}, tr).textContent = nonText ? (values.every(v => v >= 3) ? '3 : 1 ✓' : '3 : 1 ✗') : (values.every(v => v >= 4.5) ? '4.5 : 1 ✓' : '4.5 : 1 ✗');
-  }
-}
-// Generator prototype for GEN_VERSION "2": same hash and PRNG as the core, the element drawn first.
-function cyrb53(value) { let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i < value.length; i++) { const ch = value.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); } h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909); h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909); return 4294967296 * (2097151 & h2) + (h1 >>> 0); }
-function mulberry32(seed) { let state = seed | 0; return () => { state = (state + 0x6d2b79f5) | 0; let v = Math.imul(state ^ (state >>> 15), 1 | state); v ^= v + Math.imul(v ^ (v >>> 7), 61 | v); return ((v ^ (v >>> 14)) >>> 0) / 4294967296; }; }
-const ELEMENTS = {
-  earth: { ears: ['leaf', 'round'], crests: [['sapling', 60], ['none', 40]], tails: ['branch', 'puff'], marking: 'moss', bands: [[130, 160], [60, 80]], glow: '#E9C46A', spot: 'chest' },
-  water: { ears: ['fin', 'round'], crests: [['droplet', 50], ['reed', 50]], tails: ['tadpole', 'stub'], marking: 'dew', bands: [[180, 210]], glow: '#9FE1DC', spot: 'throat' },
-  fire: { ears: ['flame', 'pointed'], crests: [['ember', 50], ['seedpods', 50]], tails: ['spark', 'emberwisp'], marking: 'belly', bands: [[20, 40], [40, 55]], glow: '#F28C38', spot: 'chest' },
-  air: { ears: ['cloud', 'fern'], crests: [['none', 100]], tails: ['cloudwisp', 'longwisp'], marking: 'sky', bands: [[200, 220]], glow: '#BFE3F5', spot: 'brow' },
-};
-function generate2(address, variant) {
-  const rng = mulberry32(cyrb53(`${address.toLowerCase()}:${variant}:2`));
-  const uniform = (a, b) => a + (b - a) * rng();
-  const choice = values => { const total = values.reduce((s, e) => s + e[1], 0); const draw = rng() * total; let acc = 0; for (const [v, w] of values) { acc += w; if (draw < acc) return v; } return values[values.length - 1][0]; };
-  const equal = list => choice(list.map(v => [v, 1]));
-  const element = equal(['earth', 'water', 'fire', 'air']), set = ELEMENTS[element];
-  const p = { element,
-    bodyShape: choice([['egg', 35], ['bean', 25], ['capsule', 25], ['round', 15]]), bodyHeight: uniform(0.85, 1.25), bodyWidth: uniform(0.75, 1.15), belly: uniform(0, 0.30),
-    headShape: choice([['round', 45], ['egg', 30], ['squarish', 25]]), headSize: uniform(0.50, 0.72), headTilt: uniform(-8, 8),
-    earType: equal(set.ears), earSize: uniform(0.18, 0.50), earSpread: uniform(35, 75), crest: choice(set.crests),
-    eyeStyle: choice([['round', 50], ['oval', 30], ['half-lid', 20]]), eyeSize: uniform(0.10, 0.20), eyeSpacing: uniform(0.32, 0.62), eyeHeight: uniform(0.45, 0.62), pupilSize: uniform(0.45, 0.70),
-    snout: choice([['none', 40], ['button', 35], ['muzzle', 25]]), cheeks: rng() < 0.30, armType: choice([['stubs', 50], ['paws', 30], ['none', 20]]), legLength: uniform(0.15, 0.35),
-    tailType: equal(set.tails), markings: choice([['none', 40], [set.marking, 60]]) };
-  const band = set.bands[Math.floor(rng() * set.bands.length)]; p.hue = uniform(band[0], band[1]); p.chroma = uniform(0.06, 0.13); p.lightness = uniform(0.58, 0.76); p.accentShift = uniform(15, 45); p.idlePhase = uniform(0, 1);
-  p.glow = set.glow; p.spot = set.spot; return p;
-}
-function layout(p) { const yF = { egg: 1.25, bean: 1.10, capsule: 1.15, round: 1.00 }[p.bodyShape]; const bh = 0.5 * p.bodyHeight * yF, bw = 0.5 * p.bodyWidth, leg = p.legLength * p.bodyHeight, bodyC = 0.6 * leg + bh, hr = 0.5 * p.headSize * p.bodyHeight, headC = bodyC + bh + 0.76 * hr; return { bh, bw, leg, bodyC, hr, headC, earLen: p.earSize * 2 * hr * 1.8 }; }
-const SVG = 'http://www.w3.org/2000/svg';
-function portrait(p, size) {
-  const L = layout(p), U = 46, FOOT = 140, CX = 60;
-  const body = `oklch(${p.lightness.toFixed(3)} ${p.chroma.toFixed(3)} ${p.hue.toFixed(1)})`, accentL = p.element === 'air' ? 0.83 : Math.min(0.9, p.lightness + 0.12), accentH = p.element === 'air' ? 80 : p.hue + p.accentShift;
-  const accent = `oklch(${accentL.toFixed(3)} ${p.chroma.toFixed(3)} ${accentH.toFixed(1)})`;
-  const svg = el('svg', { viewBox: '0 0 120 150', class: 'portrait', role: 'img' }, null, SVG);
-  el('title', {}, svg, SVG).textContent = `${p.element} critter`;
-  if (size !== 'stage') { svg.setAttribute('width', size); svg.setAttribute('height', size * 1.25); }
-  const g = el('g', { transform: `rotate(${p.headTilt.toFixed(1)} ${CX} ${(FOOT - L.headC * U).toFixed(1)})` }, null, SVG);
-  const bodyCy = FOOT - L.bodyC * U, bodyRx = L.bw * U, bodyRy = L.bh * U, headCy = FOOT - L.headC * U, hr = L.hr * U;
-  el('ellipse', { cx: CX, cy: FOOT + 2, rx: bodyRx * 1.1, ry: 5, fill: '#2B2622', opacity: .18 }, svg, SVG);
-  const legW = 0.2 * U, legH = Math.max(6, L.leg * U + 6);
-  for (const dx of [-bodyRx * 0.45, bodyRx * 0.45]) el('rect', { x: CX + dx - legW / 2, y: FOOT - legH, width: legW, height: legH, rx: legW / 2, fill: body }, svg, SVG);
-  // tail behind the body
-  const tailX = CX + bodyRx * 0.9, tailY = bodyCy + bodyRy * 0.35;
-  const tail = { branch: () => { for (const [dx, dy, r] of [[8, -6, 7], [15, -14, 6], [20, -22, 5]]) el('ellipse', { cx: tailX + dx, cy: tailY + dy, rx: r, ry: r * 0.7, fill: accent, transform: `rotate(-30 ${tailX + dx} ${tailY + dy})` }, svg, SVG); },
-    puff: () => el('circle', { cx: tailX + 6, cy: tailY, r: 8, fill: accent }, svg, SVG),
-    tadpole: () => el('path', { d: `M${tailX} ${tailY} q 14 -2 20 -14 q -4 8 -12 12`, fill: accent }, svg, SVG),
-    stub: () => el('ellipse', { cx: tailX + 4, cy: tailY, rx: 6, ry: 4, fill: accent }, svg, SVG),
-    spark: () => { for (const [dx, dy, r] of [[6, -8, 3.2], [12, -16, 2.6], [17, -25, 2]]) el('circle', { cx: tailX + dx, cy: tailY + dy, r, fill: p.glow }, svg, SVG); },
-    emberwisp: () => { el('path', { d: `M${tailX} ${tailY} q 12 -6 16 -20 q -2 10 -10 16`, fill: accent }, svg, SVG); el('circle', { cx: tailX + 15, cy: tailY - 19, r: 2.4, fill: p.glow }, svg, SVG); },
-    cloudwisp: () => { el('circle', { cx: tailX + 6, cy: tailY, r: 6, fill: accent }, svg, SVG); el('circle', { cx: tailX + 14, cy: tailY - 4, r: 4.5, fill: accent }, svg, SVG); },
-    longwisp: () => el('path', { d: `M${tailX} ${tailY} q 16 -2 24 -12 q 2 -6 6 -12 q -8 12 -30 20`, fill: accent }, svg, SVG) }[p.tailType]; tail();
-  el('ellipse', { cx: CX, cy: bodyCy, rx: bodyRx, ry: bodyRy, fill: body, transform: p.bodyShape === 'bean' ? `skewX(-5)` : '', class: 'body' }, svg, SVG);
-  if (p.belly > 0.1) el('ellipse', { cx: CX, cy: bodyCy + bodyRy * 0.35, rx: bodyRx * 0.72, ry: bodyRy * 0.5, fill: accent }, svg, SVG);
-  const marks = { moss: () => { for (const [dx, dy] of [[-0.5, -0.2], [0.35, 0.1], [-0.1, 0.5]]) el('ellipse', { cx: CX + dx * bodyRx, cy: bodyCy + dy * bodyRy, rx: 5, ry: 3.5, fill: accent }, svg, SVG); },
-    dew: () => { for (const [dx, dy] of [[-0.4, -0.3], [0.3, -0.1], [-0.2, 0.4], [0.45, 0.4]]) el('circle', { cx: CX + dx * bodyRx, cy: bodyCy + dy * bodyRy, r: 2.6, fill: p.glow }, svg, SVG); },
-    belly: () => { const grad = el('radialGradient', { id: `belly-${size}-${p.hue.toFixed(0)}`, cx: '50%', cy: '70%', r: '60%' }, svg, SVG); el('stop', { offset: '0', 'stop-color': p.glow, 'stop-opacity': .7 }, grad, SVG); el('stop', { offset: '1', 'stop-color': p.glow, 'stop-opacity': 0 }, grad, SVG); el('ellipse', { cx: CX, cy: bodyCy + bodyRy * 0.3, rx: bodyRx * 0.8, ry: bodyRy * 0.6, fill: `url(#${grad.id})` }, svg, SVG); },
-    sky: () => { for (const [dx, dy] of [[-0.45, -0.1], [0.2, 0.2], [-0.15, 0.55]]) el('rect', { x: CX + dx * bodyRx, y: bodyCy + dy * bodyRy, width: 8, height: 2.2, rx: 1.1, fill: '#8FC6D8' }, svg, SVG); },
-    none: () => {} }[p.markings]; marks();
-  if (p.armType !== 'none') for (const s of [-1, 1]) el('ellipse', { cx: CX + s * bodyRx * 0.95, cy: bodyCy - bodyRy * 0.05, rx: p.armType === 'paws' ? 6 : 4.5, ry: p.armType === 'paws' ? 8 : 10, fill: body }, svg, SVG);
-  // glow point
-  const spotY = { chest: bodyCy - bodyRy * 0.45, throat: bodyCy - bodyRy * 0.8, brow: headCy - hr * 0.55 }[p.spot];
-  const glow = el('radialGradient', { id: `glow-${size}-${p.hue.toFixed(0)}` }, svg, SVG); el('stop', { offset: '0', 'stop-color': p.glow, 'stop-opacity': 1 }, glow, SVG); el('stop', { offset: '1', 'stop-color': p.glow, 'stop-opacity': 0 }, glow, SVG);
-  // head group
-  svg.append(g);
-  const earL = L.earLen * U;
-  const ear = (side) => { const ex = CX + side * hr * 0.75, ey = headCy - hr * 0.65, rot = side * p.earSpread; const eg = el('g', { transform: `rotate(${(rot).toFixed(1)} ${ex} ${ey})` }, g, SVG);
-    ({ leaf: () => el('path', { d: `M${ex} ${ey} q ${side * 8} ${-earL * 0.6} 0 ${-earL} q ${-side * 8} ${earL * 0.4} 0 ${earL}`, fill: body }, eg, SVG),
-      round: () => el('circle', { cx: ex, cy: ey - earL * 0.45, r: earL * 0.45, fill: body }, eg, SVG),
-      fin: () => el('path', { d: `M${ex - side * 4} ${ey} l ${side * 12} ${-earL * 0.9} l ${side * 2} ${earL * 0.9} z`, fill: body }, eg, SVG),
-      flame: () => { for (const [dx, h] of [[-4, 0.7], [0, 1], [4, 0.75]]) el('path', { d: `M${ex + dx} ${ey} q 3 ${-earL * h * 0.5} 0 ${-earL * h} q -3 ${earL * h * 0.5} 0 ${earL * h}`, fill: body }, eg, SVG); },
-      pointed: () => el('path', { d: `M${ex - 5} ${ey} l 5 ${-earL} l 5 ${earL} z`, fill: body }, eg, SVG),
-      cloud: () => { el('circle', { cx: ex, cy: ey - earL * 0.4, r: earL * 0.4, fill: body }, eg, SVG); el('circle', { cx: ex + side * 5, cy: ey - earL * 0.7, r: earL * 0.3, fill: body }, eg, SVG); },
-      fern: () => el('path', { d: `M${ex} ${ey} q ${side * 4} ${-earL * 0.5} ${side * 2} ${-earL} q ${side * 6} ${earL * 0.15} ${side * 2} ${earL * 0.3} q ${-side * 4} ${earL * 0.3} ${-side * 4} ${earL * 0.7}`, fill: body }, eg, SVG) })[p.earType]();
-    el('ellipse', { cx: ex, cy: ey - earL * 0.42, rx: 2.5, ry: earL * 0.28, fill: accent, opacity: .9 }, eg, SVG); };
-  ear(-1); ear(1);
-  const headAttrs = p.headShape === 'squarish' ? ['rect', { x: CX - hr * 1.1, y: headCy - hr * 0.92, width: hr * 2.2, height: hr * 1.84, rx: hr * 0.5, fill: body }] : ['ellipse', { cx: CX, cy: headCy, rx: hr, ry: p.headShape === 'egg' ? hr * 1.15 : hr, fill: body }];
-  el(headAttrs[0], headAttrs[1], g, SVG);
-  const crestY = headCy - (p.headShape === 'egg' ? hr * 1.15 : hr);
-  ({ sapling: () => { el('rect', { x: CX - 1.2, y: crestY - 12, width: 2.4, height: 12, fill: accent }, g, SVG); el('ellipse', { cx: CX - 4, cy: crestY - 12, rx: 4.5, ry: 2.5, fill: '#5F7A55', transform: `rotate(-20 ${CX - 4} ${crestY - 12})` }, g, SVG); el('ellipse', { cx: CX + 4, cy: crestY - 9, rx: 4.5, ry: 2.5, fill: '#5F7A55', transform: `rotate(20 ${CX + 4} ${crestY - 9})` }, g, SVG); },
-    droplet: () => el('path', { d: `M${CX} ${crestY - 14} q 5 8 0 14 q -5 -6 0 -14`, fill: accent }, g, SVG),
-    reed: () => { el('rect', { x: CX - 1, y: crestY - 16, width: 2, height: 16, fill: '#5F7A55' }, g, SVG); el('ellipse', { cx: CX, cy: crestY - 15, rx: 2, ry: 4, fill: accent }, g, SVG); },
-    ember: () => el('path', { d: `M${CX - 3} ${crestY + 1} q 3 -8 3 -14 q 1 8 4 12 z`, fill: p.glow }, g, SVG),
-    seedpods: () => { for (const dx of [-6, 0, 6]) el('circle', { cx: CX + dx, cy: crestY - 4 - (dx === 0 ? 3 : 0), r: 3, fill: accent }, g, SVG); },
-    none: () => {} })[p.crest]();
-  const eyeR = p.eyeSize * hr, eyeY = headCy + hr - p.eyeHeight * hr * 2, eyeDx = p.eyeSpacing * hr;
-  for (const s of [-1, 1]) { const cx = CX + s * eyeDx; el('ellipse', { cx, cy: eyeY, rx: p.eyeStyle === 'oval' ? eyeR * 0.85 : eyeR, ry: p.eyeStyle === 'oval' ? eyeR * 1.15 : eyeR, fill: '#F1E2B8' }, g, SVG);
-    if (p.eyeStyle === 'half-lid') el('rect', { x: cx - eyeR, y: eyeY - eyeR, width: eyeR * 2, height: eyeR * 0.8, fill: body }, g, SVG);
-    el('circle', { cx: cx + eyeR * 0.15, cy: eyeY, r: p.pupilSize * eyeR, fill: '#2B2622' }, g, SVG); el('circle', { cx: cx + eyeR * 0.35, cy: eyeY - eyeR * 0.3, r: Math.max(0.8, eyeR * 0.18), fill: '#F1E2B8' }, g, SVG); }
-  if (p.snout !== 'none') el('ellipse', { cx: CX, cy: eyeY + eyeR * 1.6, rx: p.snout === 'muzzle' ? hr * 0.28 : hr * 0.12, ry: p.snout === 'muzzle' ? hr * 0.18 : hr * 0.1, fill: p.snout === 'button' ? accent : body }, g, SVG);
-  el('path', { d: `M${CX - hr * 0.16} ${eyeY + eyeR * 2.3} q ${hr * 0.16} ${hr * 0.12} ${hr * 0.32} 0`, fill: 'none', stroke: '#2B2622', 'stroke-opacity': .6, 'stroke-width': 1.2, 'stroke-linecap': 'round' }, g, SVG);
-  if (p.cheeks) for (const s of [-1, 1]) el('circle', { cx: CX + s * hr * 0.7, cy: eyeY + eyeR * 1.4, r: hr * 0.14, fill: accent, opacity: .8 }, g, SVG);
-  el('circle', { cx: CX, cy: spotY, r: 6, fill: `url(#${glow.id})`, opacity: .6 }, svg, SVG);
-  return svg;
-}
-{
-  const addresses = ['0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf', '0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF', '0x6813Eb9362372EEF6200f3b1dbC3f819671cBA69', '0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718', '0xe1AB8145F7E55DC933D51a18c793F901A3A0b276', '0xE57bFE9F44b819898F47BF37E5AF72a0783e1141', '0xd41c057fd1c78805AAC12B0A94a405c0461A6FBb', '0xF1F6619B38A98d6De0800F1DefC0a6399eB6d30C'];
-  const picked = {};
-  for (const address of addresses) for (let variant = 0; variant <= 4; variant++) { const p = generate2(address, variant); if (!picked[p.element]) picked[p.element] = { p, address, variant }; }
-  const host = document.getElementById('critters');
-  for (const element of ['earth', 'water', 'fire', 'air']) {
-    const entry = picked[element]; const card = el('div', { class: 'critter-card' }, host);
-    const stage = el('div', { class: 'stage' }, card); if (entry) stage.append(portrait(entry.p, 'stage'));
-    const h3 = el('h3', {}, card); h3.textContent = { earth: 'Earth', water: 'Water', fire: 'Fire', air: 'Air' }[element];
-    const meta = el('p', { class: 'small' }, card); meta.textContent = entry ? `Rehearsal address ${addresses.indexOf(entry.address) + 1}, variant ${entry.variant} · ${entry.p.earType} ears, ${entry.p.crest} crest, ${entry.p.tailType} tail, ${entry.p.markings} markings · hue ${entry.p.hue.toFixed(0)}°` : 'No rehearsal seed draws this element in variants 0–4.';
-    if (entry) { const sizes = el('div', { class: 'sizes' }, card); for (const size of [40, 64, 96]) { const f = el('figure', {}, sizes); f.append(portrait(entry.p, size)); el('figcaption', {}, f).textContent = `${size} px`; } }
-  }
-  const cellP = picked.earth ? picked.earth.p : generate2(addresses[0], 0); document.getElementById('cell-stage').append(portrait(cellP, 'stage'));
-  const rows = [['Clover', picked.earth, 160, '80.0%'], ['Fern', picked.water, 40, '20.0%'], ['Pebble', picked.fire, 0, '0.0%'], ['Moss', picked.air, 0, '0.0%']];
-  const tbody = document.getElementById('results-rows');
-  for (const [name, entry, crumbs, share] of rows) { const tr = el('tr', {}, tbody); const td = el('td', {}, tr); if (entry) td.append(portrait(entry.p, 40)); td.append(document.createTextNode(name)); el('td', {}, tr).textContent = crumbs; el('td', {}, tr).textContent = share; }
-  const mound = document.getElementById('mound'); let seed = 7; const r = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  for (let i = 0; i < 26; i++) { const x = 8 + r() * 72, y = 44 - r() * r() * 30 - 4; el('polygon', { points: `${x - 5},${y} ${x - 2},${y - 4} ${x + 3},${y - 4} ${x + 5},${y} ${x + 2},${y + 3} ${x - 3},${y + 3}`, fill: '#D9A441', stroke: '#8F5F10', 'stroke-width': .8, transform: `rotate(${(r() * 360).toFixed(0)} ${x} ${y})` }, mound, SVG); }
-}
-</script>
+<script type="module" src="design-settle/mixer.js"></script>
 </body>
 </html>
