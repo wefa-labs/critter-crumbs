@@ -14,7 +14,9 @@ sed -e '/^<!doctype html>$/d' -e '/^<html lang="en">$/d' -e '/^<head>$/d' -e '/^
     "$here/../design-settle.html" > "$out/design-settle.html"
 for module in copy generator mesh mixer portrait screens tokens; do cp "$here/$module.js" "$out/design-settle/"; done
 styles="$root/packages/app/src/styles"
-cp "$styles/app.css" "$styles/tokens.css" "$styles/portraits.css" "$root/packages/app/public/fonts/young-serif-latin.woff2" "$out/design-settle/app/"
+cp "$styles/app.css" "$styles/tokens.css" "$styles/portraits.css" "$out/design-settle/app/"
+# The SIL Open Font License asks that its notice travel with every copy of the font.
+cp "$root/packages/app/public/fonts/young-serif-latin.woff2" "$root/packages/app/public/licenses/young-serif-OFL.txt" "$out/design-settle/app/"
 cp "$root/packages/app/public/images/arrival.webp" "$out/design-settle/images/"
 for picture in scene-feast scene-dusk earth water fire air; do cp "$root/docs/pitch/assets/$picture.webp" "$out/design-settle/images/"; done
 
