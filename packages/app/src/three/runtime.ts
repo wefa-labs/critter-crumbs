@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { addEffect, useFrame, useThree } from '@react-three/fiber';
 import { ACESFilmicToneMapping, AmbientLight, CanvasTexture, Color, DirectionalLight, HemisphereLight, InstancedMesh, Matrix4, MeshStandardMaterial, OctahedronGeometry, OrthographicCamera, PerspectiveCamera, Scene, SRGBColorSpace, Vector3, type WebGLRenderer } from 'three';
 import { FLIGHT, REDUCED_MOTION, RENDER_BUDGET } from '@critter-crumbs/shared';
-import { Clock, Flight, FlyingTo, Identity, Mesh, Rig, Settings } from '../world/index.js';
+import { Clock, Flight, FlyingTo, Identity, Mesh, Rig, Settings } from '../world/traits.js';
 import { readAnimationTime } from '../sim/ticker-host.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import type { createRenderPolicy } from '../sim/render-policy.js';

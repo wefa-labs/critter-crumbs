@@ -10,21 +10,21 @@ import { createStageRuntime, type StageRuntime } from '../sim/stage-runtime.js';
 import { browserReceiptBook } from './receipts.js';
 import { createScatterSession } from './scatter-session.js';
 import { useScatterInput } from './scatter-input.js';
-import { createHeap, createHops, jiggleHeap } from './heap.js';
-import { GameStage } from './game-stage.js';
-import { StatementText } from './gathering.js';
+import { createHops, jiggleHeap } from './heap.js';
 import { Dialog, targetLabel } from './ui.js';
 import { absoluteTime } from './time.js';
-import { portraitVariant, type MemberFeast } from './feast-view.js';
+import { gameView, scatterFailure, portraitVariant, type MemberFeast } from './feast-view.js';
 import type { AppApi, Me } from './session.js';
+import { CrumbMound } from '../game/mound.js';
+import { GameScene, StatementPanel, GameNotice, Toast } from '../game/parts.js';
 import type { RunAction } from './burrows.js';
 
-type Controls = { entity: Entity; runtime: StageRuntime; target: Target; announce: (text: string) => void };
-function ScatterControls({ entity, runtime, target, announce }: Controls) {
+type Controls = { editable?:boolean;entity: Entity; runtime: StageRuntime; target: Target; announce: (text: string) => void };
+export function ScatterControls({ entity, runtime, target, announce, editable=true }: Controls) {
   const count = useTrait(entity, Count)!, pile = useTrait(runtime.heap, Pile)!, pouring = useTrait(runtime.heap, Pouring);
   const [text, setText] = useState(String(count.given)), editing = useRef(false), [editingVisible, setEditingVisible] = useState(false), id = useId();
   const rolling = useRef<{ from: number; to: number; start: number; ms: number } | null>(null);
-  const name = targetLabel(target), isPouring = !!pouring && runtime.heap.targetFor(PouringInto) === entity;
+  const own=entity.has(IsOwn), name = targetLabel(target), isPouring = !!pouring && runtime.heap.targetFor(PouringInto) === entity;
   useEffect(() => { if (!editing.current) setText(String(count.given)); }, [count.given]);
   const { start, stop, tap, say, held, move } = useScatterInput(entity, runtime, name, announce);
   const commit = (value = text) => {
@@ -34,14 +34,14 @@ function ScatterControls({ entity, runtime, target, announce }: Controls) {
     rolling.current = { from: entity.get(Count)!.given, to: next, start: runtime.world.get(Clock)!.now, ms: Math.min(TYPED_AMOUNT.maxMs, Math.abs(next - entity.get(Count)!.given) * TYPED_AMOUNT.perCrumbMs) };
     editing.current = false; setEditingVisible(false); setText(String(next)); runtime.actions.setCount(entity, next); runtime.animateFor(320); say();
   };
-  const button = (direction: 1 | -1) => <button type="button" data-give={direction > 0} className="secondary crumb-control" aria-label={formatCopy(direction > 0 ? 'scatter.add' : 'scatter.remove', { name })} aria-disabled={direction > 0 ? pile.remaining === 0 : count.given === 0}
+  const button = (direction: 1 | -1) => <button type="button" data-give={direction > 0} className="secondary crumb-control" disabled={own||!editable} aria-label={formatCopy(direction > 0 ? 'scatter.add' : 'scatter.remove', { name })} aria-disabled={direction > 0 ? pile.remaining === 0 : count.given === 0}
     onPointerDown={event => { if (!event.isPrimary || event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); start(direction); }}
     onPointerMove={move} onPointerLeave={stop} onPointerUp={stop} onPointerCancel={stop} onLostPointerCapture={stop} onBlur={stop}
     onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); if (!event.repeat) start(direction); } }}
     onKeyUp={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); stop(); } }}
     onClick={event => { if (event.detail === 0 && !held.current) tap(direction); }}>{direction > 0 ? copy['scatter.add.symbol'] : copy['scatter.remove.symbol']}</button>;
   return <div className="scatter-controls" data-pouring={isPouring}>
-    {button(-1)}<div className="number-field"><input id={id} data-editing={editingVisible} data-count-id={target.id} type="text" inputMode="numeric" pattern="[0-9]*" aria-label={formatCopy('scatter.count.label', { name })} value={text}
+    {button(-1)}<div className="number-field"><strong className="focus-name">{own?copy['scatter.own.short']:name}</strong><input disabled={own||!editable} id={id} data-editing={editingVisible} data-count-id={target.id} type="text" inputMode="numeric" pattern="[0-9]*" aria-label={formatCopy('scatter.count.label', { name })} value={text}
       onFocus={() => { editing.current = true; setEditingVisible(true); }} onChange={event => { editing.current = true; setEditingVisible(true); setText(event.target.value); }} onBlur={() => commit()}
       onKeyDown={event => {
         if (event.key === 'Escape') { event.preventDefault(); editing.current = false; setEditingVisible(false); rolling.current = null; setText(String(entity.get(Count)!.given)); }
@@ -58,27 +58,15 @@ function CountOutput({ id, entity, runtime, rolling, hidden }: { id: string; ent
   }, [entity, runtime, count.given]);
   return <output htmlFor={id} aria-live="off" className={hidden ? 'sr-only' : 'count-output'}><span aria-hidden="true" ref={visual}>{count.given}</span><span className="sr-only">{count.given}</span></output>;
 }
-function ScatterStage({ entity, runtime, target, announce }: Controls) {
-  const input = useScatterInput(entity, runtime, targetLabel(target), announce), own = entity.has(IsOwn);
-  return <div className="stage-input" onPointerDown={event => { if (own || !event.isPrimary || event.button !== 0) return; event.preventDefault(); event.currentTarget.parentElement?.querySelector<HTMLElement>('[data-give="true"]')?.focus(); event.currentTarget.setPointerCapture(event.pointerId); input.start(1); }} onPointerMove={input.move} onPointerLeave={input.stop} onPointerUp={input.stop} onPointerCancel={input.stop} onLostPointerCapture={input.stop}><GameStage entity={entity} /></div>;
-}
-function Heap({ runtime, host }: { runtime: StageRuntime; host: React.RefObject<HTMLDivElement | null> }) {
-  const pile = useTrait(runtime.heap, Pile)!, heap = useRef<ReturnType<typeof createHeap> | null>(null);
-  useLayoutEffect(() => { heap.current = createHeap(host.current!); return () => { heap.current?.destroy(); heap.current = null; }; }, []);
-  useLayoutEffect(() => heap.current?.update(pile.remaining, pile.issued), [pile.remaining, pile.issued]);
-  return <div className="pile-heap" ref={host} />;
-}
-function PileBar({ runtime, host, submit, busy, saved, children }: { runtime: StageRuntime; host: React.RefObject<HTMLDivElement | null>; submit: () => void; busy: boolean; saved: boolean; children: React.ReactNode }) {
-  const pile = useTrait(runtime.heap, Pile)!;
-  return <aside className="pile-bar" aria-label={copy['pile.label']}><Heap runtime={runtime} host={host} /><div><p className={pile.remaining ? 'pile-count' : 'chip pile-empty'}>{pile.remaining ? formatCopy('pile.remaining', { n: pile.remaining }) : copy['pile.empty']}</p>{pile.remaining ? <small>{formatCopy('scatter.submit.help', { n: pile.issued })}</small> : null}</div><button data-sound="ui.tap" disabled={busy} aria-disabled={pile.remaining !== 0} onClick={() => { if (pile.remaining === 0) submit(); }}>{busy ? copy['scatter.saving'] : saved ? copy['scatter.done.change'] : copy['scatter.submit']}</button>{children}</aside>;
-}
-export function Scatter({ feast, me, api, run, busy, announce, settings, account, clearError }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; announce: (text: string) => void; settings: GameSettings; account: () => Account | null; connect: () => void; clearError: () => void }) {
+export function Scatter({ feast, me, api, run, busy, announce, settings, account, clearError, initialReading=false }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; announce: (text: string) => void; settings: GameSettings; account: () => Account | null; connect: () => void; clearError: () => void; initialReading?:boolean }) {
   const audio = useAudio();
   const heapMotion = useRef<Animation | null>(null);
+  const barSource=useRef<HTMLDivElement>(null);
   const heap = useRef<HTMLDivElement>(null), done = useRef<HTMLDivElement>(null), surface = useRef<HTMLElement>(null), currentAccount = useRef(account);
   currentAccount.current = account;
   const [signing, setSigning] = useState(false), focusAccepted = useRef(false);
-  const [hops] = useState(() => createHops(document, () => heap.current, id => surface.current?.querySelector<HTMLElement>(`[data-count-id="${id}"]`) ?? null));
+  const [focus,setFocus]=useState(()=>initialReading?0:Math.max(0,feast.targets.findIndex(t=>t.ownerAddress?.toLowerCase()!==me.address.toLowerCase()))),[reading,setReading]=useState(initialReading),[failure,setFailure]=useState<'rejected'|'failed'|'closed'|undefined>(),[toast,setToast]=useState(false),[closedDismissed,setClosedDismissed]=useState(false);
+  const [hops] = useState(() => createHops(document, () => heap.current??barSource.current, id => surface.current?.querySelector<HTMLElement>(`[data-count-id="${id}"]`) ?? null));
   const [runtime] = useState(() => createStageRuntime({ issued: feast.crumbsPerCritter, viewer: me.address, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })), outputs: { sound:audio.cue, feedback: cue => { if(cue.token === 'pile.wall') { const preferences=runtime.world.get(Settings)!; if(!preferences.still && !preferences.reducedMotion) { heapMotion.current?.cancel(); heapMotion.current=jiggleHeap(heap.current); } } }, hop: cue => hops.add(cue, runtime.world.get(Clock)!.now) } }));
   const [session] = useState(() => createScatterSession({ api, feast, viewer: me.address, onAccepted: receipt => browserReceiptBook().remember(feast.id,me.address,receipt.uid), sign: async (amounts, now, latest) => {
     const connected = currentAccount.current();
@@ -99,20 +87,24 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   }, [runtime, session]);
   useEffect(() => { runtime.setSettings(settings); if (settings.still || settings.reducedMotion) { hops.clear(); heapMotion.current?.cancel(); } }, [runtime, settings]);
   useEffect(() => { session.observe(feast); }, [session, feast]);
-  const newer = state.remote && state.remote.uid !== state.receipt?.uid;
-  const missing = feast.participants.filter(address => !feast.participation.scattered.some(done => done.toLowerCase() === address.toLowerCase())).map(address => { const target = feast.targets.find(target => target.ownerAddress?.toLowerCase() === address.toLowerCase()); return target ? targetLabel(target) : `${address.slice(0, 6)}…${address.slice(-4)}`; });
+  useEffect(()=>{if(!toast)return;const timer=setTimeout(()=>setToast(false),3000);return()=>clearTimeout(timer);},[toast]);
+  useEffect(()=>{if(state.status==='saving'||state.status==='verifying')setSigning(false);},[state.status]);
+  const newer=!!state.remote&&state.remote.uid!==state.receipt?.uid;
+  useEffect(()=>{if(newer)announce(formatCopy('scatter.latest',{seq:state.remote!.seq}));},[newer,state.remote?.uid]);
+  const remaining=feast.crumbsPerCritter-state.amounts.reduce((sum,n)=>sum+n,0);
+  const view=gameView({phase:feast.phase,remaining,receipt:!!(state.receipt||state.remote),dirty:state.dirty,reading,signing,saving:state.status==='saving'||state.status==='verifying',...(failure?{failure}:{})});
+  const turn=(index:number)=>{runtime.actions.stopPour();runtime.input(false);setFocus(index);};
+  const target=feast.targets[focus]!,entity=runtime.critters[focus]!;
   if (!feast.participants.some(address => address.toLowerCase() === me.address.toLowerCase())) return <p>{copy['err.notParticipant']}</p>;
-  return <WorldProvider world={runtime.world}><section ref={surface} className="scatter-surface"><Renderer runtime={runtime} settings={settings} surface={surface} announce={announce}/><p>{copy['scatter.instruction']}</p><p>{formatCopy('scatter.participation', { done: feast.participation.scattered.length, total: feast.participants.length })}</p>{missing.length ? <p>{formatCopy('scatter.notYet', { names: missing.join(', ') })}</p> : null}
-    {newer ? <p className="notice">{formatCopy('scatter.latest', { seq: state.remote!.seq })}</p> : null}
-    <ul role="list" className="critter-grid">{feast.targets.map((target, index) => { const entity = runtime.critters[index]!, body = feast.statements.find(statement => statement.targetId === target.id)?.body ?? ''; return <li className="critter-cell" key={target.id}>
-      <ScatterStage entity={entity} runtime={runtime} target={target} announce={announce} /><h2>{targetLabel(target)}</h2><details onToggle={event => { if (event.currentTarget.open) audio.play('statement.open'); }}><summary>{body.split('\n')[0] || (target.kind === 'option' ? copy['read.option.noStatement'] : formatCopy('read.noStatement', { name: targetLabel(target) }))}</summary><StatementText body={body} /></details>
-      {entity.has(IsOwn) ? <div className="own-critter"><strong>{copy['scatter.own.label']}</strong><p>{copy['scatter.own.body']}</p></div> : <ScatterControls entity={entity} runtime={runtime} target={target} announce={announce} />}
-    </li>; })}</ul>
-    <PileBar runtime={runtime} host={heap} busy={busy} saved={!!state.receipt} submit={() => { runtime.actions.stopPour(); runtime.input(false); setSigning(true); }}>
-      {state.receipt ? <div ref={done} tabIndex={-1} className="scatter-done"><strong>{copy['scatter.done.title']}</strong><p>{formatCopy('scatter.done.body', { scatteringDeadline: absoluteTime(feast.scatteringEndsAt) })}</p>{state.dirty ? <p>{copy['scatter.unsaved']}</p> : null}</div> : null}
-    </PileBar>
-    {signing ? <Dialog title={copy['scatter.sign.title']} onClose={() => { focusAccepted.current = false; setSigning(false); }} busy={busy}><p>{copy['scatter.sign.body']}</p><button disabled={busy} onClick={() => void run(async () => { try { focusAccepted.current = false; const previousUid=session.snapshot().receipt?.uid; await session.submit(); focusAccepted.current = session.snapshot().receipt?.uid !== previousUid; setSigning(false);  } catch (error) { if (error instanceof ApiClientError && error.status === 401) { setSigning(false); } throw error; } })}>{busy ? copy['scatter.saving'] : copy['scatter.submit']}</button></Dialog> : null}
-    <SavedFocus focusAccepted={focusAccepted} receipt={state.receipt?.uid} signing={signing} done={done} onSaved={() => { clearError(); audio.play('scatter.confirm'); announce((session.snapshot().dirty ? copy['scatter.savedWithChanges'] : copy['scatter.done.title']) + ' ' + formatCopy('scatter.done.body', { scatteringDeadline: absoluteTime(feast.scatteringEndsAt) })); }} />
+  return <WorldProvider world={runtime.world}><section ref={surface} className="scatter-surface"><Renderer runtime={runtime} settings={settings} surface={surface} announce={announce}/>
+    <GameScene runtime={runtime} feast={feast} focus={focus} turnTo={turn} state={view.state} editable={view.editable&&!signing} reading={reading} onRead={()=>{setReading(true);audio.play('statement.open');}} onClose={()=>setReading(false)} announce={announce} heapHost={heap}
+      panel={reading?<StatementPanel feast={feast} focus={focus} close={()=>setReading(false)} turn={direction=>turn((focus+direction+feast.targets.length)%feast.targets.length)}/>:undefined}
+      focusRow={<ScatterControls key={target.id} entity={entity} runtime={runtime} target={target} announce={announce} editable={view.editable&&!signing&&!busy}/>}
+      middle={<div className="scatter-middle" ref={barSource}>{view.state==='saving'?<strong role="status">{copy['scatter.saving']}</strong>:view.state==='closed'?<strong>{copy['scatter.closed']}</strong>:view.state==='scattered'?<div ref={done} tabIndex={-1} className="scatter-done"><strong>{copy['scatter.done.title']}</strong><small>{formatCopy('game.closeDay',{day:absoluteTime(feast.scatteringEndsAt)})}</small></div>:remaining?<><strong className="remaining-count"><span className="bar-crumb" aria-hidden="true"><CrumbMound count={1}/></span>{remaining}</strong><small>{formatCopy('pile.remaining',{n:remaining})}</small></>:<button data-sound="ui.tap" disabled={busy||!view.editable} onClick={()=>{runtime.actions.stopPour();runtime.input(false);setFailure(undefined);setSigning(true);}}>{copy['scatter.submit']}</button>}</div>}/>
+    {failure&&!(failure==='closed'&&closedDismissed)?<GameNotice title={copy[failure==='closed'?'scatter.closed':failure==='rejected'?'scatter.sign.rejected':'err.saveFailed']}><button className="secondary" onClick={()=>{if(failure==='closed')setClosedDismissed(true);else setFailure(undefined);}}>{copy['action.close']}</button></GameNotice>:null}
+    {toast?<Toast>{copy['err.saveVerified']}</Toast>:newer?<Toast>{formatCopy('scatter.latest',{seq:state.remote!.seq})}</Toast>:null}
+    {signing ? <Dialog title={copy['scatter.sign.title']} onClose={() => { focusAccepted.current = false; setSigning(false); }} busy={busy}><p>{copy['scatter.sign.body']}</p><button disabled={busy} onClick={() => void run(async () => { try { focusAccepted.current = false; const previousUid=session.snapshot().receipt?.uid; await session.submit(); focusAccepted.current = session.snapshot().receipt?.uid !== previousUid; setSigning(false);  } catch (error) { setSigning(false);setFailure(error instanceof ApiClientError&&error.copyId==='scatter.closed'?scatterFailure.closed:error instanceof ApiClientError&&error.copyId==='scatter.sign.rejected'?scatterFailure.rejected:scatterFailure.failed);throw error; } })}>{busy ? copy['scatter.saving'] : copy['scatter.submit']}</button></Dialog> : null}
+    <SavedFocus focusAccepted={focusAccepted} receipt={state.receipt?.uid} signing={signing||busy} done={done} onSaved={() => { clearError();setToast(true);audio.play('scatter.confirm'); announce((session.snapshot().dirty ? copy['scatter.savedWithChanges'] : copy['scatter.done.title']) + ' ' + formatCopy('scatter.done.body', { scatteringDeadline: absoluteTime(feast.scatteringEndsAt) })); }} />
   </section></WorldProvider>;
 }
 function SavedFocus({ receipt, signing, done, onSaved, focusAccepted }: { focusAccepted: React.RefObject<boolean>; receipt: string | undefined; signing: boolean; done: React.RefObject<HTMLDivElement | null>; onSaved: () => void }) { const focused = useRef<string | undefined>(undefined); useEffect(() => { if (receipt && receipt !== focused.current && !signing) { focused.current = receipt; if (focusAccepted.current) { focusAccepted.current = false; done.current?.focus(); } onSaved(); } }, [receipt, signing, onSaved]); return null; }

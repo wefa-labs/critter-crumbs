@@ -2,8 +2,8 @@ import { test, expect, type Page } from 'playwright/test';
 import { readFile } from 'node:fs/promises';
 import { connectLocal, readJson } from './session.js';
 
-async function submit(page:Page, replacement=false) {
- await page.getByRole('button',{name:replacement?'Change my scatter':'Scatter These',exact:true}).click();
+async function submit(page:Page) {
+ await page.getByRole('button',{name:'Scatter These',exact:true}).click();
  await page.getByRole('dialog',{name:'Confirm your scatter'}).getByRole('button',{name:'Scatter These',exact:true}).click();
  await expect(page.locator('.scatter-done')).toBeFocused();
 }
@@ -24,11 +24,11 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   expect(requests.some(url=>/(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(false);
   for(const [i,page]of pages.entries()){
    await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}/scatter`);
-   await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
+   await page.locator('.game-profile').click();await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
    if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
    const inputs=page.locator('.number-field input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }
-  const inputs=first.locator('.number-field input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await inputs.nth(1).fill('40');await inputs.nth(1).press('Enter');await submit(first,true);
+  const inputs=first.locator('.number-field input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.locator('.dock-turn').last().click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
   const {body:updated}=await readJson<{ownReceipts:unknown[];registration:{identity:string}}>(first,`/api/feasts/${feast.id}`);expect(updated.ownReceipts).toHaveLength(2);
   await first.screenshot({path:testInfo.outputPath('scatter-375.png'),fullPage:true});
   await first.request.post('/api/dev/time',{data:{now:feast.scatteringEndsAt}});

@@ -15,7 +15,7 @@ export async function connectLocal(page: Page, index: number, name = 'Avery') {
   await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Connect', exact: true }).click();
   await page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible();
+  await expect(page.locator('.game-profile').or(page.getByRole('button', { name: 'Disconnect', exact: true }))).toBeVisible();
   await expect(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true })).toHaveCount(0);
   const { status, body: profile } = await readJson<{ ensName: string | null; displayName: string | null; critterLocked: boolean }>(page, '/api/me');
   expect(status).toBe(200);

@@ -64,3 +64,30 @@ main:has(.core-game) { width:100%;max-width:none;padding:0; }
 .game-body[data-crowd="true"] .critter-tag { font-size:var(--cc-text-xs);height:26px; }
 
 .game-body[data-desktop="true"] .critter-tag[data-focus="true"] { font-size:var(--cc-text-md);padding-inline:14px; }
+
+.game-content { position:relative;display:flex;flex:1;min-height:0; }
+.scatter-surface,.game-flow { position:relative;display:flex;flex:1;min-height:0;width:100%; }
+.scatter-surface .game-body,.game-flow .game-body { width:100%; }
+.core-game .scatter-done { display:grid;justify-items:center;gap:2px;border:0;padding:0;margin:0;background:transparent; }
+.focus-row .number-field input { height:48px;min-height:44px;width:100%;z-index:1; }
+.focus-row .count-output { position:absolute;bottom:0;pointer-events:none; }
+.game-body[data-desktop="true"] .number-field { height:48px; }
+.game-body[data-desktop="true"] .count-output { bottom:12px; }
+.game-body[data-desktop="true"] .number-field input { bottom:0; }
+.circle-spot[data-face="left"] .stage { transform:scaleX(-1); }
+.core-game .renderer-note { position:absolute;top:8px;left:16px;z-index:2700; }
+body:has(.core-game) #alert:not(.sr-only) { position:fixed;bottom:144px;left:16px;right:16px;z-index:5000; }
+@media(prefers-reduced-motion:no-preference) { .game-dock { transition:height var(--cc-dur-3) var(--cc-ease-out); } }
+
+.bar-crumb { display:inline-block;vertical-align:middle;width:24px;height:26px;margin-right:8px; }
+.sleep-glyph { width:42px;height:58px;pointer-events:none; }
+.sleep-glyph span { position:absolute;right:0;bottom:0;font-size:var(--cc-text-sm); }
+.sleep-glyph span:nth-child(2) { right:10px;bottom:18px;font-size:var(--cc-text-xl); }
+.sleep-glyph span:nth-child(3) { right:20px;bottom:36px;font-size:var(--cc-text-2xl); }
+
+.core-game .scatter-surface { padding-bottom:0;display:flex;grid-template-columns:none;column-gap:0; }
+.core-game .count-output { inset:auto auto 0; }
+.core-game .circle-hit:focus-visible { outline:2px solid var(--cc-text);outline-offset:2px;box-shadow:none;border-radius:50%; }
+
+.scatter-middle { width:100%;display:grid;justify-items:center;gap:2px; }
+.scatter-middle > button { width:100%;max-width:240px; }

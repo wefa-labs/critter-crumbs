@@ -55,4 +55,4 @@ export const RENDER_BUDGET = { slowFrameMs: 33, verySlowFrameMs: 50, degradeMs: 
 
 /** October adoption. One rule governs the remaining heap and every received pile. */
 export const PILE_RULE: 'exact' | 'proportional' = 'exact';
-export const CIRCLE_FEEL = { turnMs:320, stirMs:850, sleepGlyphMs:1100, playEveryMs:[900,2100], playMs:480, phone:{focus:140,back:66,front:100}, desktop:{focus:248,back:120,front:172}, huddle:{phone:66,desktop:150} } as const;
+export const CIRCLE_FEEL = { turnMs:320, stirMs:850, sleepGlyphMs:1100,sleepReleaseMs:130,sleepLifeMs:840,sleepDriftX:16,sleepDriftY:32, playEveryMs:[900,2100], playMs:480, phone:{focus:140,back:66,front:100}, desktop:{focus:248,back:120,front:172}, huddle:{phone:66,desktop:150} } as const;
