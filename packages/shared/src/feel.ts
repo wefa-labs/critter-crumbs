@@ -32,6 +32,8 @@ export const EXPRESSION = [
   { mood: 1, squint: 0.45, earLift: 15, mouth: 1, cheekScale: 1.1, tiltFactor: 0, posture: -3 },
 ] as const;
 export const DELIGHTED = { wiggleDegrees: 3, wiggleEveryMs: 4000 } as const;
+/** The mood awake critters show when statements open: the "pleased" step of EXPRESSION, cheeks and a small smile. */
+export const DELIGHT_MOOD = 0.5;
 export const REDUCED_MOTION = { countPulseMs: 120, growthCrossfadeMs: 320, wakeCrossfadeMs: 200, dampingDb: -6, maxTicksPerSecond: 8 } as const;
 
 /** §4. A single ordered sequence drives DOM and both later renderers. */

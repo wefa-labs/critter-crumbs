@@ -755,6 +755,9 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `results.tie` | {names} tied. |
 | `results.givers.title` | Who gave what |
 | `results.givers.caption` | Individual scatters are open to the burrow for this feast. |
+| `results.col.giver` | Giver |
+| `results.giver.you` | {name} (you) |
+| `results.givers.none` | — |
 | `results.export` | Download CSV |
 | `results.export.givers` | Download CSV (who gave what) |
 | `results.private` | Only the burrow can see these results. |

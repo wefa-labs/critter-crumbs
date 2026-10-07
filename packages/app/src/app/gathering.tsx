@@ -5,8 +5,11 @@ import { PortraitImage, targetLabel } from './ui.js';
 import { portraitVariant, type MemberFeast } from './feast-view.js';
 import type { AppApi, Me } from './session.js';
 import type { RunAction } from './burrows.js';
-export function StatementText({ body }: { body: string }) {
-  return <div className="statement-text">{statementParts(body).map((part, index) => part.href ? <a key={index} href={part.href} title={part.href} rel="noopener nofollow ugc">{part.label}</a> : part.text)}</div>;
+/** A statement as text, links as elements (never HTML). `paragraphs` sets each blank-line-separated part as its own
+ *  paragraph, as the review pages do in the game's statement panels. */
+export function StatementText({ body, paragraphs = false }: { body: string; paragraphs?: boolean }) {
+  const inline = (text: string) => statementParts(text).map((part, index) => part.href ? <a key={index} href={part.href} title={part.href} rel="noopener nofollow ugc">{part.label}</a> : part.text);
+  return <div className="statement-text">{paragraphs ? body.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{inline(paragraph)}</p>) : inline(body)}</div>;
 }
 function StatementEditor({ target, feast, api, run, busy, refresh, announce }: { target: Target; feast: MemberFeast; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void }) {
   const initial = feast.statements.find(statement => statement.targetId === target.id)?.body ?? '';

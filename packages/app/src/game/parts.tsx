@@ -1,71 +1,217 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { copy, formatCopy, CIRCLE_FEEL } from '@critter-crumbs/shared';
 import { useTrait } from 'koota/react';
 import type { Entity } from 'koota';
-import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
+import { Asleep, Count, Delight, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
 import { generateCritter } from '@critter-crumbs/core';
 import { critterVersion } from '../portraits/version.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameStage } from '../app/game-stage.js';
 import { Link, PortraitImage, targetLabel } from '../app/ui.js';
-import { StatementText } from '../app/gathering.js';
-import { absoluteTime } from '../app/time.js';
 import { portraitMetrics } from '../portraits/metrics.js';
-import { isResultState, layoutStateFor, type MemberFeast, type PublicFeast, type GameScreenState } from '../app/feast-view.js';
-import { layoutGame, shortName, type Rect } from './layout.js';
+import { layoutMomentFor, type PublicFeast, type GameScreenState } from '../app/feast-view.js';
+import { hitRect, layoutGame, shortName, type Rect } from './layout.js';
+import { composeGame, deviceFor } from './composition.js';
 import { defaultScene } from './art.js';
 import { presentSleep } from './motion.js';
 import { SceneBackdrop } from './scenes.js';
 import { CrumbMound, ThoughtBubble } from './mound.js';
+import { Dock } from './dock.js';
+import type { Element } from './icons.js';
+import { profileFace } from './styles.js';
+import { measureText } from './measure.js';
 import { useScatterInput } from '../app/scatter-input.js';
-const rectStyle=(r:Rect):CSSProperties=>({left:r.x,top:r.y,width:r.width,height:r.height});
-export function GameFrame({feast,viewer,onProfile,onConnect,children}:{feast:PublicFeast;viewer?:{address:string;variant:number};onProfile?:()=>void;onConnect?:()=>void;children:ReactNode}){
- useLayoutEffect(()=>{document.getElementById('content')?.focus();},[]);
- useEffect(()=>{document.title=formatCopy('app.contextTitle',{screen:feast.title,burrow:feast.burrowName});},[feast.title,feast.burrowName]);
- return <div className="core-game"><header className="game-header"><div><Link href={'burrowId' in feast?`/burrows/${feast.burrowId}`:'/'}>{feast.burrowName}</Link><h1>{feast.title}</h1></div><span className="closing-day">{formatCopy('game.closeDay',{day:absoluteTime(feast.scatteringEndsAt)})}</span>{viewer?<button className="game-profile" style={viewer?{'--face-y':`${22-portraitMetrics(generateCritter(viewer.address,viewer.variant,critterVersion)).extent.headY*105}px`} as CSSProperties:undefined} aria-label={copy['game.profile']} onClick={onProfile}><PortraitImage address={viewer.address} variant={viewer.variant} name={copy['scatter.own.short']} size="stage"/></button>:onConnect?<button onClick={onConnect}>{copy['action.connect']}</button>:null}</header><div className="game-content">{children}</div></div>;
+
+const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.width, height: r.height });
+
+/**
+ * The header over every core state: the burrow and the feast, a line at the right on desktop (the closing day while
+ * scattering, the summary at the feast) and your critter's face, or Connect for a visitor (flow page, screen 50).
+ */
+export function GameFrame({ feast, viewer, onProfile, onConnect, when, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; children: ReactNode }) {
+  useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
+  useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
+  const face = viewer ? profileFace(portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
+  return (
+    <div className="core-game">
+      <header className="game-header">
+        <div className="game-context">
+          <Link className="game-burrow" href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}>{feast.burrowName}</Link>
+          <h1>{feast.title}</h1>
+        </div>
+        <span className="closing-day" id="game-when">{when}</span>
+        {viewer
+          ? <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onProfile}><PortraitImage address={viewer.address} variant={viewer.variant} name={copy['scatter.own.short']} size="stage" /></button>
+          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : null}
+      </header>
+      <div className="game-content">{children}</div>
+    </div>
+  );
 }
-export function StatementPanel({feast,focus,close,turn}:{feast:MemberFeast;focus:number;close:()=>void;turn:(direction:number)=>void}){
- const target=feast.targets[focus]!,body=feast.statements.find(statement=>statement.targetId===target.id)?.body;
- const host=useRef<HTMLElement>(null),closer=useRef(close);closer.current=close;
- useEffect(()=>{host.current?.focus();const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')closer.current();};addEventListener('keydown',escape);return()=>{removeEventListener('keydown',escape);document.querySelector<HTMLElement>('.thought-target')?.focus();};},[]);
- return <article ref={host} tabIndex={-1} className="statement-panel" aria-label={formatCopy('read.statement',{name:targetLabel(target)})}><div className="statement-heading"><h2>{targetLabel(target)}</h2><button className="quiet" onClick={close}>{copy['action.close']}</button></div><div className="statement-scroll" key={target.id}>{body?<StatementText body={body}/>:<p>{formatCopy('read.noStatement',{name:targetLabel(target)})}</p>}</div><div className="statement-navigation"><button className="secondary" onClick={()=>turn(-1)}>{copy['read.prev']}</button><p>{formatCopy('read.position',{i:focus+1,n:feast.targets.length})}</p><button className="secondary" onClick={()=>turn(1)}>{copy['read.next']}</button></div></article>;
+
+/** Puts a screen's own line (the feast summary) into the header's slot once the header has rendered. */
+export function HeaderWhen({ children }: { children: ReactNode }) {
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => setHost(document.getElementById('game-when')), []);
+  return host ? createPortal(children, host) : null;
 }
-export function Dock({focusRow,middle,turn,results}:{focusRow?:ReactNode;middle:ReactNode;turn:(direction:number)=>void;results?:ReactNode}){
- return <aside className="game-dock" aria-label={copy['pile.label']}>{results?<div className="results-card">{results}</div>:null}{focusRow?<div className="focus-row">{focusRow}</div>:null}<div className="dock-bar"><button className="dock-turn" aria-label={copy['read.prev']} onClick={()=>turn(-1)}>{copy['game.previous.symbol']}</button><div className="dock-middle">{middle}</div><button className="dock-turn" aria-label={copy['read.next']} onClick={()=>turn(1)}>{copy['game.next.symbol']}</button></div></aside>;
+
+function CritterSpot({ entity, runtime, onFocus, editable, announce, onOutside, gathered }: { entity: Entity; runtime: StageRuntime; onFocus: () => void; editable: boolean; onOutside?: () => void; gathered: boolean; announce: (text: string) => void }) {
+  const own = entity.has(IsOwn) && entity.has(Asleep), name = entity.get(Name)!.display, input = useScatterInput(entity, runtime, name, announce);
+  const act = (start: () => void) => {
+    if (onOutside) { onOutside(); return; }
+    if (gathered) { runtime.circle.play(entity); runtime.animateFor(CIRCLE_FEEL.playMs); }
+    else if (own) { runtime.circle.stir(entity); runtime.animateFor(CIRCLE_FEEL.sleepGlyphMs); }
+    else if (editable && runtime.heap.get(Pile)!.remaining) start();
+    else onFocus();
+  };
+  return (
+    <button className="circle-hit" type="button" aria-label={own ? copy['scatter.own.short'] : editable ? formatCopy('scatter.add', { name }) : name}
+      onPointerDown={event => { if (!event.isPrimary || event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); act(() => input.start(1)); }}
+      onPointerMove={input.move} onPointerUp={input.stop} onPointerLeave={input.stop} onPointerCancel={input.stop} onLostPointerCapture={input.stop} onBlur={input.stop}
+      onClick={event => { if (event.detail !== 0) return; act(() => input.tap(1)); }}>
+      <GameStage entity={entity} />
+      <span className="sleep-glyph" aria-hidden="true">{[0, 1, 2].map(index => <span key={index}>{copy['game.sleep.symbol']}</span>)}</span>
+    </button>
+  );
 }
-function CritterSpot({entity,runtime,onFocus,editable,announce,onOutside,gathered}:{entity:Entity;runtime:StageRuntime;onFocus:()=>void;editable:boolean;onOutside?:()=>void;gathered:boolean;announce:(text:string)=>void}){
- const own=entity.has(IsOwn)&&entity.has(Asleep),input=useScatterInput(entity,runtime,entity.get(Name)!.display,announce);
- return <button className="circle-hit" type="button" aria-label={own?copy['scatter.own.short']:formatCopy('scatter.add',{name:entity.get(Name)!.display})} onPointerDown={event=>{if(!event.isPrimary||event.button!==0)return;event.preventDefault();event.currentTarget.focus();event.currentTarget.setPointerCapture(event.pointerId);if(onOutside){onOutside();return;}if(gathered){runtime.circle.play(entity);runtime.animateFor(CIRCLE_FEEL.playMs);}else if(own){runtime.circle.stir(entity);runtime.animateFor(CIRCLE_FEEL.sleepGlyphMs);}else if(editable&&runtime.heap.get(Pile)!.remaining){input.start(1);}else onFocus();}} onPointerMove={input.move} onPointerUp={input.stop} onPointerLeave={input.stop} onPointerCancel={input.stop} onLostPointerCapture={input.stop} onBlur={input.stop} onClick={event=>{if(event.detail!==0)return;if(onOutside){onOutside();return;}if(gathered){runtime.circle.play(entity);runtime.animateFor(CIRCLE_FEEL.playMs);}else if(own){runtime.circle.stir(entity);runtime.animateFor(CIRCLE_FEEL.sleepGlyphMs);}else if(editable&&runtime.heap.get(Pile)!.remaining)input.tap(1);else onFocus();}}><GameStage entity={entity}/><span className="sleep-glyph" aria-hidden="true">{[0,1,2].map(index=><span key={index}>{copy['game.sleep.symbol']}</span>)}</span></button>;
+function CritterPile({ entity, amount, glyphs }: { entity: Entity; amount?: number; glyphs?: number }) { const count = useTrait(entity, Count)!; return <CrumbMound count={amount ?? count.given} {...(glyphs === undefined ? {} : { glyphs })} />; }
+function TagCount({ entity, amount }: { entity: Entity; amount?: number }) { const count = useTrait(entity, Count)!, value = amount ?? count.given; return <b className="tag-count" data-zero={value <= 0}>{value}</b>; }
+
+/** A version 2 critter's element, for its statement's chip; version 1 critters have none. */
+export function critterElement(runtime: StageRuntime, index: number): Element | null {
+  const parameters = runtime.critters[index]?.get(Identity)?.parameters as { element?: Element } | undefined;
+  return parameters?.element ?? null;
 }
-function CritterPile({entity,amount}:{entity:Entity;amount?:number}){const count=useTrait(entity,Count)!;return <CrumbMound count={amount??count.given}/>;}
-export function GameScene({runtime,feast,focus,turnTo,state,reading=false,onRead,onClose,announce,focusRow,middle,panel,results,heapHost,sceneId=defaultScene,editable=true,counts,remaining,issued}:{runtime:StageRuntime;feast:PublicFeast;focus:number;turnTo:(index:number)=>void;state:GameScreenState;reading?:boolean;onRead?:()=>void;onClose?:()=>void;announce:(text:string)=>void;focusRow?:ReactNode;middle:ReactNode;panel?:ReactNode;results?:ReactNode;heapHost?:React.RefObject<HTMLDivElement|null>;sceneId?:string;editable?:boolean;counts?:readonly number[];remaining?:number;issued?:number}){
- const body=useRef<HTMLDivElement>(null),surface=useRef<HTMLDivElement>(null),[viewport,setViewport]=useState({width:390,height:844}),pile=useTrait(runtime.heap,Pile)!,previous=useRef<ReturnType<typeof layoutGame>|null>(null),from=useRef<ReturnType<typeof layoutGame>|null>(null),dockHost=useRef<HTMLDivElement>(null);
- useLayoutEffect(()=>{const host=body.current!;const observer=new ResizeObserver(entries=>{const box=entries[0]!.contentRect;setViewport({width:box.width,height:box.height+64});});observer.observe(host);return()=>observer.disconnect();},[]);
- const gathered=isResultState(state);
- const critters=runtime.critters.map((entity,index)=>({name:targetLabel(feast.targets[index]!),own:entity.has(IsOwn)&&state!=='feast'&&!gathered,count:counts?.[index]??entity.get(Count)!.given,extent:portraitMetrics(entity.get(Identity)!.parameters,gathered?entity.get(Received)!.fed:0).extent}));
- const input={viewport,critters,focus,state:layoutStateFor(state,reading),issued:issued??pile.issued};
- const layout=layoutGame(input),turn=(direction:number)=>turnTo((focus+direction+critters.length)%critters.length);
- useLayoutEffect(()=>{
-  const old=previous.current;
-  if(old&&(old.slots[focus]!.slot!==0||old.dock.height!==layout.dock.height)){from.current=old;runtime.circle.turn(old.slots.find(slot=>slot.slot===0)!.index,focus);runtime.animateFor(CIRCLE_FEEL.turnMs);}
-  previous.current=layout;runtime.circle.huddle(gathered&&state!=='nobody');
-  const earlier=from.current??layout,render=()=>{const lighting=runtime.feastPresentation()?.lighting;surface.current?.style.setProperty('--scene-dusk',String(lighting?.dusk??0));surface.current?.style.setProperty('--scene-feast',String(lighting?.feast??0));const t=runtime.circle.progress(),mix=(a:number,b:number)=>a+(b-a)*t;
-   for(const slot of layout.slots){const old=earlier.slots[slot.index]!,host=surface.current?.querySelector<HTMLElement>(`[data-spot="${slot.index}"]`);if(!host)continue;Object.assign(host.style,rectStyle({x:mix(old.stage.x,slot.stage.x),y:mix(old.stage.y,slot.stage.y),width:mix(old.stage.width,slot.stage.width),height:mix(old.stage.height,slot.stage.height)}));presentSleep(host,runtime.critters[slot.index]!,runtime.circle,gathered);}
-   if(dockHost.current)Object.assign(dockHost.current.style,rectStyle({...layout.dock,y:mix(earlier.dock.y,layout.dock.y),height:mix(earlier.dock.height,layout.dock.height)}));
-  };render();return runtime.onFrame(render);
- },[focus,viewport.width,viewport.height,gathered,reading]);
- const swipe=useRef<{x:number;y:number}|null>(null);
- return <div ref={body} className="game-body" data-desktop={layout.desktop} data-crowd={!layout.desktop&&critters.length>8} data-game-state={state} onKeyDown={event=>{if(event.target instanceof HTMLInputElement)return;if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();turn(event.key==='ArrowLeft'?-1:1);}else if(event.key==='Escape')onClose?.();}}><div ref={surface} className="game-scene" style={{width:layout.scene.width}} onPointerDown={event=>{if(event.target===event.currentTarget||event.target instanceof Element&&event.target.closest('.scene-backdrop'))swipe.current={x:event.clientX,y:event.clientY};}} onPointerUp={event=>{if(!swipe.current)return;const dx=event.clientX-swipe.current.x,dy=event.clientY-swipe.current.y;swipe.current=null;if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy))turn(dx<0?1:-1);else onClose?.();}} onPointerCancel={()=>{swipe.current=null;}}>
- <SceneBackdrop id={sceneId} desktop={layout.desktop}/><div className="scene-dusk-light" aria-hidden="true"/><div className="scene-feast-light" aria-hidden="true"/>
- {layout.slots.map(slot=><div key={slot.index} className="circle-spot" data-spot={slot.index} data-slot={slot.slot} data-face={slot.face} style={{...rectStyle(slot.stage),zIndex:slot.depth}}><CritterSpot entity={runtime.critters[slot.index]!} runtime={runtime} onFocus={()=>turnTo(slot.index)} gathered={gathered} editable={editable&&!reading&&!gathered} announce={announce} {...(reading&&onClose?{onOutside:onClose}:{})}/></div>)}
- {!gathered?layout.slots.map(slot=><div className="circle-pile" data-critter-id={feast.targets[slot.index]!.id} data-count-id={feast.targets[slot.index]!.id} key={slot.index} style={{...rectStyle(slot.pile),zIndex:slot.depth+1}}><CritterPile entity={runtime.critters[slot.index]!} {...(counts?{amount:counts[slot.index]!}:{})}/></div>):null}
- {!gathered?layout.slots.filter(slot=>!slot.tag.hidden).map(slot=><button key={slot.index} className="critter-tag-target" aria-label={targetLabel(feast.targets[slot.index]!)} onClick={()=>turnTo(slot.index)} style={{...rectStyle({...slot.tag,y:slot.tag.y-(44-slot.tag.height)/2,height:44}),zIndex:2000+slot.depth}}><span className="critter-tag" data-tag={slot.index} data-focus={slot.slot===0} style={{width:slot.tag.width,height:slot.tag.height}}>{slot.tag.short?shortName(slot.name):slot.name}{!(layout.desktop&&slot.slot===0)&&!critters[slot.index]!.own?<TagCount entity={runtime.critters[slot.index]!} {...(counts?{amount:counts[slot.index]!}:{})}/>:null}</span></button>):null}
- {!gathered&&!reading?<div className="circle-heap" data-heap="true" ref={heapHost} style={rectStyle(layout.heap)}><CrumbMound count={remaining??pile.remaining} empty ppu={layout.ppu}/></div>:null}
- {!gathered&&onRead&&!reading?<button className="thought-target" aria-label={formatCopy('read.statement',{name:targetLabel(feast.targets[focus]!)})} onClick={onRead} style={{...rectStyle(layout.bubble),zIndex:2200}}><ThoughtBubble/></button>:null}
- {reading&&!layout.desktop&&panel?<div className="phone-statement">{panel}</div>:null}
- <div ref={dockHost} className="dock-position" style={rectStyle(layout.dock)}><Dock focusRow={gathered?undefined:focusRow} middle={middle} turn={turn} results={!layout.desktop?results:undefined}/></div>
- </div>{layout.desktop?<aside className="game-side">{panel??results}</aside>:null}</div>;
+
+/** What a state's surface holds; which of these shows is the composition's choice, not the screen's. */
+export interface GameSurfaces {
+  /** dock states: the focus row and the bar's middle; the results states keep the bar */
+  focusRow?: ReactNode;
+  middle?: ReactNode;
+  /** sheet states: the phone's bottom sheet, the side panel on desktop */
+  sheet?: ReactNode;
+  /** dock states: the phone shows the statement while reading; the desktop panel always does */
+  statement?: { phone?: ReactNode; panel: ReactNode };
+  /** results states: the phone's card grown out of the dock, the desktop panel with its bar */
+  results?: { card: ReactNode; panel: ReactNode };
+  toast?: ReactNode;
+  dialog?: ReactNode;
 }
-function TagCount({entity,amount}:{entity:Entity;amount?:number}){const count=useTrait(entity,Count)!;return <b className="tag-count">{amount??count.given}</b>;}
-export function GameNotice({title,children}:{title:string;children:ReactNode}){return <div className="game-notice"><h2>{title}</h2>{children}</div>;}
-export function Toast({children}:{children:ReactNode}){return <div className="game-toast" role="status">{children}</div>;}
+
+/**
+ * One core game state: the floor and the circle, treated as the state's composition says (game/composition.ts), and
+ * the surface the composition chooses. Geometry is the pure layout's; the Koota Clock drives every motion.
+ */
+export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, reading = false, onRead, onClose, announce, editable = true, sceneId = defaultScene, counts, remaining, issued, heapHost }: {
+  runtime: StageRuntime; feast: PublicFeast; focus: number; turnTo: (index: number) => void; state: GameScreenState; surfaces: GameSurfaces;
+  reading?: boolean; onRead?: (index: number) => void; onClose?: () => void; announce: (text: string) => void; editable?: boolean; sceneId?: string;
+  counts?: readonly number[]; remaining?: number; issued?: number; heapHost?: React.RefObject<HTMLDivElement | null>;
+}) {
+  const body = useRef<HTMLDivElement>(null), scene = useRef<HTMLDivElement>(null), dockHost = useRef<HTMLDivElement>(null);
+  const [viewport, setViewport] = useState({ width: 390, height: 844 });
+  const pile = useTrait(runtime.heap, Pile)!;
+  const previous = useRef<ReturnType<typeof layoutGame> | null>(null), from = useRef<ReturnType<typeof layoutGame> | null>(null);
+  useLayoutEffect(() => {
+    const host = body.current!;
+    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; setViewport({ width: box.width, height: box.height + 64 }); });
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+  const composition = composeGame(state, deviceFor(viewport.width));
+  const { surface, scene: treatment } = composition, gathered = treatment.huddle;
+  /* the moment's mood: delighted when statements open, asleep when scattering closes; the feast sets its own */
+  useEffect(() => {
+    const delighted = treatment.mood === 'delighted' && !runtime.feastPresentation();
+    if ((runtime.world.get(Delight)?.level ?? 0) > 0 === delighted) return;
+    runtime.actions.delight(delighted); runtime.animateFor(400);
+  }, [runtime, treatment.mood]);
+  useEffect(() => { if (treatment.mood === 'asleep' && runtime.critters.some(entity => !entity.has(Asleep))) { runtime.actions.fallAsleep(); runtime.animateFor(400); } }, [runtime, treatment.mood]);
+  /* the huddle gathers the critters that were fed; with nothing fed at all, nobody is left out */
+  const fedAny = gathered && runtime.critters.some(entity => entity.get(Received)!.crumbs > 0);
+  const critters = runtime.critters.map((entity, index) => ({
+    name: targetLabel(feast.targets[index]!), own: entity.has(IsOwn) && treatment.ownAsleep,
+    count: counts?.[index] ?? entity.get(Count)!.given,
+    extent: portraitMetrics(entity.get(Identity)!.parameters, gathered ? entity.get(Received)!.fed : 0).extent,
+    away: fedAny && entity.get(Received)!.crumbs <= 0,
+  }));
+  const layout = layoutGame({ viewport, critters, focus, moment: layoutMomentFor(state), reading, issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
+  const turn = (direction: number) => turnTo((focus + direction + critters.length) % critters.length);
+  const away = critters.filter(critter => critter.away).length;
+  useLayoutEffect(() => {
+    const old = previous.current;
+    if (old && (old.slots[focus]!.slot !== 0 || old.dock.height !== layout.dock.height)) { from.current = old; runtime.circle.turn(old.slots.find(slot => slot.slot === 0)!.index, focus); runtime.animateFor(CIRCLE_FEEL.turnMs); }
+    previous.current = layout; runtime.circle.huddle(gathered);
+    const earlier = from.current ?? layout;
+    const render = () => {
+      const lighting = runtime.feastPresentation()?.lighting;
+      scene.current?.style.setProperty('--scene-dusk', String(lighting?.dusk ?? 0));
+      scene.current?.style.setProperty('--scene-feast', String(lighting?.feast ?? (treatment.light === 'feast' ? 1 : 0)));
+      const t = runtime.circle.progress(), mix = (a: number, b: number) => a + (b - a) * t;
+      for (const slot of layout.slots) {
+        const old = earlier.slots[slot.index]!, host = scene.current?.querySelector<HTMLElement>(`[data-spot="${slot.index}"]`);
+        if (!host) continue;
+        Object.assign(host.style, rectStyle({ x: mix(old.stage.x, slot.stage.x), y: mix(old.stage.y, slot.stage.y), width: mix(old.stage.width, slot.stage.width), height: mix(old.stage.height, slot.stage.height) }));
+        presentSleep(host, runtime.critters[slot.index]!, runtime.circle, gathered);
+      }
+      if (dockHost.current) Object.assign(dockHost.current.style, rectStyle({ ...layout.dock, y: mix(earlier.dock.y, layout.dock.y), height: mix(earlier.dock.height, layout.dock.height) }));
+    };
+    render();
+    return runtime.onFrame(render);
+  }, [focus, viewport.width, viewport.height, gathered, reading, surface.kind, surface.kind === 'sheet' ? surface.height : 0, away]);
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const desktop = layout.desktop, showsDock = layout.dock.height > 0;
+  const readerOf = (index: number) => () => { if (index !== focus) turnTo(index); onRead?.(index); };
+  return (
+    <div ref={body} className="game-body" data-desktop={desktop} data-crowd={!desktop && critters.length > 6} data-game-state={state} data-surface={surface.kind} data-light={treatment.light} data-reading={reading}
+      onKeyDown={event => { if (event.target instanceof HTMLInputElement) return; if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); turn(event.key === 'ArrowLeft' ? -1 : 1); } else if (event.key === 'Escape') onClose?.(); }}>
+      <div ref={scene} className="game-scene" style={{ width: layout.scene.width }}
+        onPointerDown={event => { if (event.target === event.currentTarget || event.target instanceof Element && event.target.closest('.scene-backdrop')) swipe.current = { x: event.clientX, y: event.clientY }; }}
+        onPointerUp={event => { if (!swipe.current) return; const dx = event.clientX - swipe.current.x, dy = event.clientY - swipe.current.y; swipe.current = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) turn(dx < 0 ? 1 : -1); else onClose?.(); }}
+        onPointerCancel={() => { swipe.current = null; }}>
+        <SceneBackdrop id={treatment.scene === 'dusk' ? 'dusk' : sceneId} desktop={desktop} />
+        <div className="scene-dusk-light" aria-hidden="true" />
+        <div className="scene-feast-light" aria-hidden="true" />
+        {layout.slots.map(slot => (
+          <div key={slot.index} className="circle-spot" data-spot={slot.index} data-slot={slot.slot} data-face={slot.face} data-away={slot.away} style={{ ...rectStyle(slot.stage), zIndex: slot.depth }}>
+            <CritterSpot entity={runtime.critters[slot.index]!} runtime={runtime} onFocus={() => turnTo(slot.index)} gathered={gathered} editable={editable && !reading && !gathered} announce={announce} {...(reading && onClose ? { onOutside: onClose } : {})} />
+          </div>
+        ))}
+        {treatment.piles ? layout.slots.map(slot => (
+          <div className="circle-pile" data-critter-id={feast.targets[slot.index]!.id} data-count-id={feast.targets[slot.index]!.id} key={slot.index} style={{ ...rectStyle(slot.pile), zIndex: slot.depth + 1 }}>
+            <CritterPile entity={runtime.critters[slot.index]!} {...(slot.pile.glyphs === undefined ? {} : { glyphs: slot.pile.glyphs })} {...(counts ? { amount: counts[slot.index]! } : {})} />
+          </div>
+        )) : null}
+        {layout.slots.filter(slot => !slot.tag.hidden).map(slot => (
+          <button key={slot.index} type="button" className="critter-tag-target" aria-label={targetLabel(feast.targets[slot.index]!)} onClick={() => turnTo(slot.index)} style={{ ...rectStyle({ ...slot.tag, y: slot.tag.y - (44 - slot.tag.height) / 2, height: 44 }), zIndex: 2000 + slot.depth }}>
+            <span className="critter-tag" data-tag={slot.index} data-focus={slot.slot === 0} data-own={critters[slot.index]!.own} style={{ minWidth: slot.tag.width, height: slot.tag.height }}>
+              {slot.tag.short ? shortName(slot.name) : slot.name}
+              {!(desktop && slot.slot === 0) && !critters[slot.index]!.own ? <TagCount entity={runtime.critters[slot.index]!} {...(counts ? { amount: counts[slot.index]! } : {})} /> : null}
+            </span>
+          </button>
+        ))}
+        {layout.heap && !reading ? <div className="circle-heap" data-heap="true" ref={heapHost} style={rectStyle(layout.heap)}><CrumbMound count={remaining ?? pile.remaining} empty ppu={layout.ppu} /></div> : null}
+        {!reading ? layout.bubbles.map(bubble => (
+          <button key={bubble.index} type="button" className="thought-target" data-focus={bubble.index === focus} aria-label={formatCopy('read.statement', { name: targetLabel(feast.targets[bubble.index]!) })} onClick={readerOf(bubble.index)} style={{ ...rectStyle(hitRect(bubble.rect)), zIndex: 2950, '--bubble-width': `${bubble.rect.width}px`, '--bubble-height': `${bubble.rect.height}px` } as CSSProperties}><ThoughtBubble /></button>
+        )) : null}
+        {layout.trail.map((puff, index) => <i key={index} className="thought-puff" aria-hidden="true" style={rectStyle(puff)} />)}
+        {reading && !desktop && surfaces.statement?.phone ? surfaces.statement.phone : null}
+        {surfaces.toast ?? null}
+        {showsDock ? (
+          <div ref={dockHost} className="dock-position" data-surface={surface.kind} style={rectStyle(layout.dock)}>
+            {surface.kind === 'sheet'
+              ? <section className="game-sheet">{surfaces.sheet}</section>
+              : <Dock focusRow={surface.kind === 'dock' ? surfaces.focusRow : undefined} middle={surfaces.middle} turn={turn} results={surface.kind === 'results' && !desktop ? surfaces.results?.card : undefined} />}
+          </div>
+        ) : null}
+      </div>
+      {desktop ? (
+        <aside className="game-side" data-surface={surface.kind}>
+          {surface.kind === 'sheet' ? <section className="side-sheet">{surfaces.sheet}</section> : surface.kind === 'results' ? surfaces.results?.panel : surfaces.statement?.panel}
+        </aside>
+      ) : null}
+      {surfaces.dialog ?? null}
+    </div>
+  );
+}

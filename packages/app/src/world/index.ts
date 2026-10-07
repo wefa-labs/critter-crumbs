@@ -1,7 +1,7 @@
 import { createActions, createWorld as createKootaWorld, type Entity, type World } from 'koota';
 import { generateCritter, type CritterVersion } from '@critter-crumbs/core';
-import { HOLD_DELAY_MS, POUR_RATE_MIN, POUR_RATE_MAX, POUR_RAMP_S, POUR_SCALE, REPLY, TYPED_AMOUNT, MAX_FEAST_TARGETS, ValidationError, integer, REDUCED_MOTION, type TallyResult } from '@critter-crumbs/shared';
-import { Asleep, Clock, Count, Flight, Hop, Identity, IsOwn, Name, Owner, Phase, Pile, Pouring, PouringInto, Received, Rig, Settings, SoundEvent, Viewer, type SoundToken } from './traits.js';
+import { DELIGHT_MOOD, HOLD_DELAY_MS, POUR_RATE_MIN, POUR_RATE_MAX, POUR_RAMP_S, POUR_SCALE, REPLY, TYPED_AMOUNT, MAX_FEAST_TARGETS, ValidationError, integer, REDUCED_MOTION, type TallyResult } from '@critter-crumbs/shared';
+import { Asleep, Clock, Count, Delight, Flight, Hop, Identity, IsOwn, Name, Owner, Phase, Pile, Pouring, PouringInto, Received, Rig, Settings, SoundEvent, Viewer, type SoundToken } from './traits.js';
 import { createReveal } from './reveal.js';
 import { createDirector } from './director.js';
 import { createMotion } from './motion.js';
@@ -19,7 +19,7 @@ export interface WorldOptions {
   outputs?: { feedback?: (cue: SoundCue) => void; sound?: (cue: SoundCue) => void; hop?: (cue: HopCue) => void; render2d?: (world: World) => void; render3d?: (world: World) => void };
 }
 type Input = { type: 'press'; critter: Entity; direction: 1 | -1; hold: boolean }
-  | { type: 'idle'; value: boolean } | { type: 'suspend' } | { type: 'reveal' } | { type: 'stop' } | { type: 'count'; critter: Entity; count: number }
+  | { type: 'idle'; value: boolean } | { type: 'delight'; on: boolean } | { type: 'sleep' } | { type: 'suspend' } | { type: 'reveal' } | { type: 'stop' } | { type: 'count'; critter: Entity; count: number }
   | { type: 'settings'; patch: Partial<GameSettings> } | { type: 'feast'; result: TallyResult } | { type: 'skip' } | { type: 'replay' };
 
 /** One injected clock and one action queue serve headless, SVG and 3D hosts. */
@@ -28,7 +28,7 @@ export function createWorld(options: WorldOptions) {
   if (options.critters.length > MAX_FEAST_TARGETS) throw new ValidationError('err.feastCapacity');
   if (new Set(options.critters.map(critter => critter.id)).size !== options.critters.length) throw new RangeError('Duplicate critter identity');
   const generated = options.critters.map(value => generateCritter(value.address, value.variant, options.critterVersion));
-  const world = createKootaWorld(Clock, Phase, Settings(options.settings ?? {}), Viewer({ address: options.viewer ?? '' }));
+  const world = createKootaWorld(Clock, Phase, Delight, Settings(options.settings ?? {}), Viewer({ address: options.viewer ?? '' }));
   const heap = world.spawn(Pile({ issued: options.issued, remaining: options.issued }));
   const critters = options.critters.map((value, index) => {
     const entity = world.spawn(Count, Received, Rig, Name({ display: value.name }), Identity({
@@ -58,6 +58,9 @@ export function createWorld(options: WorldOptions) {
     stopPour() { queue.push({ type: 'stop' }); },
     suspend() { queue.push({ type: 'suspend' }); },
     setIdleMotion(value: boolean) { queue.push({ type: 'idle', value }); },
+    delight(on: boolean) { queue.push({ type: 'delight', on }); },
+    /** Scattering closed with the screen open: the whole circle sleeps (flow page, screen 41). */
+    fallAsleep() { queue.push({ type: 'sleep' }); },
     setCount(critter: Entity, count: number) { queue.push({ type: 'count', critter, count }); },
     setSettings(patch: Partial<GameSettings>) { queue.push({ type: 'settings', patch: { ...patch } }); },
     beginFeast(result: TallyResult) { queue.push({ type: 'feast', result: structuredClone(result) }); },
@@ -106,6 +109,8 @@ export function createWorld(options: WorldOptions) {
   function input() {
     for (const action of queue.splice(0)) {
       if (action.type === 'idle') { motion.setIdleMotion(action.value); continue; }
+      if (action.type === 'delight') { world.set(Delight, { level: action.on ? DELIGHT_MOOD : 0 }); continue; }
+      if (action.type === 'sleep') { stop(); for (const critter of critters) if (!critter.has(Asleep)) critter.add(Asleep); continue; }
       if (action.type === 'suspend') { stop(); continue; }
       if (action.type === 'settings') {
         const before = world.get(Settings)!;

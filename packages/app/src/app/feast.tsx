@@ -12,7 +12,9 @@ import type { GameSettings } from '../world/index.js';
 import { Reveal } from './read.js';
 const Scatter = lazy(() => import('./scatter.js').then(module => ({ default: module.Scatter })));
 import type { Account } from '@critter-crumbs/core';
-import { GameFrame, Toast } from '../game/parts.js';
+import { GameFrame } from '../game/parts.js';
+import { Toast } from '../game/surface.js';
+import { absoluteDeadline, closingLine } from './time.js';
 import { Gathering } from './gathering.js';
 const PublicResults = lazy(() => import('./public-results.js'));
 const Results = lazy(() => import('./results.js'));
@@ -36,10 +38,10 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   else if (!isMemberFeast(feast) || !me) content = me ? <section><h2>{copy['burrow.unknown.title']}</h2><p>{formatCopy('burrow.unknown.body', { burrowName: feast.burrowName, shortAddress: shortAddress(me.address) })}</p></section> : <><p>{copy['arrive.explainer']}</p><button onClick={connect}>{copy['arrive.cta']}</button><p>{copy['arrive.asleep']}</p><PortraitGrid feast={feast} /></>;
   else if (phase === 'draft') content = <><DraftSummary feast={feast} /><FeastActions feast={feast} me={me} {...props} />{feast.kind === 'options' ? <Gathering feast={feast} me={me} {...props} /> : <PortraitGrid feast={feast} />}</>;
   else if (phase === 'gathering') content = <><Gathering feast={feast} me={me} {...props} /><FeastActions feast={feast} me={me} {...props} /></>;
-  else if (phase === 'scattering') content = path.endsWith('/read') || path.endsWith('/scatter') ? <Suspense fallback={<p>{copy['app.loading']}</p>}><Scatter feast={feast} me={me} {...props} clearError={clearError} settings={settings} account={account} connect={connect} initialReading={path.endsWith('/read')}/></Suspense> : <Reveal feast={feast} viewer={me.address} settings={settings} announce={announce} />;
+  else if (phase === 'scattering') content = path.endsWith('/read') || path.endsWith('/scatter') ? <Suspense fallback={<p>{copy['app.loading']}</p>}><Scatter feast={feast} me={me} {...props} clearError={clearError} settings={settings} account={account} connect={connect} now={now} initialReading={path.endsWith('/read')}/></Suspense> : <Reveal feast={feast} viewer={me.address} settings={settings} announce={announce} />;
   else content = <Suspense fallback={<h1>{copy['feast.waiting.title']}</h1>}><Results feast={feast} api={api} me={me} settings={settings} announce={announce} account={account} run={run} busy={busy} clearError={clearError} report={error=>void run(async()=>{throw error;})}/></Suspense>;
   if(phase==='feast'&&feast.aggregatePublic&&!isMemberFeast(feast))return <GameFrame feast={feast} onConnect={connect}>{content}</GameFrame>;
-  if(isMemberFeast(feast)&&me&&(phase==='scattering'||phase==='feast'))return <GameFrame feast={feast} viewer={{address:me.address,variant:me.variant}} onProfile={onProfile}>{content}{resource.error?<Toast>{resource.error instanceof ApiClientError&&resource.error.status===401?copy['err.sessionExpired']:copy['err.storeUnreachable']}</Toast>:null}</GameFrame>;
+  if(isMemberFeast(feast)&&me&&(phase==='scattering'||phase==='feast'))return <GameFrame feast={feast} viewer={{address:me.address,variant:me.variant}} onProfile={onProfile} when={phase==='scattering'?`${closingLine(feast.scatteringEndsAt,now)} · ${absoluteDeadline(feast.scatteringEndsAt)}`:undefined}>{content}{resource.error?<Toast>{resource.error instanceof ApiClientError&&resource.error.status===401?copy['err.sessionExpired']:copy['err.storeUnreachable']}</Toast>:null}</GameFrame>;
   return <Page primary={!(phase === feast.phase && phase === 'feast' && ((isMemberFeast(feast) && !!me) || feast.aggregatePublic))} title={feast.title} context={feast.burrowName} screen={phase === 'scattering' ? path.endsWith('/scatter') ? copy['scatter.title'] : path.endsWith('/read') ? copy['read.title'] : copy['reveal.title'] : copy[phaseCopy[phase!]]}><FeastTop feast={feast} now={now} />{isMemberFeast(feast) ? <Link href={`/burrows/${feast.burrowId}`}>{feast.burrowName}</Link> : null}<p>{feast.context}</p>{resource.error ? <p className="notice">{resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable']}</p> : null}{content}</Page>;
 }
 export function PortraitGrid({ feast }: { feast: PublicFeast }) {

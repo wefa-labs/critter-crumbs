@@ -36,7 +36,13 @@
       "h": 0.62
     },
     "lookFilter": "scene-filter",
-    "aspect": 1.7837235228539576
+    "aspect": 1.7837235228539576,
+    "layers": {
+      "floor": "/scenes/window-floor.jpg",
+      "wall": "/scenes/window-wall.jpg",
+      "cornerL": "/scenes/window-corner-left.jpg",
+      "cornerR": "/scenes/window-corner-right.jpg"
+    }
   },
   {
     "id": "entrance",
@@ -75,7 +81,13 @@
       "h": 0.6
     },
     "lookFilter": "scene-filter",
-    "aspect": 1.7843866171003717
+    "aspect": 1.7843866171003717,
+    "layers": {
+      "floor": "/scenes/entrance-floor.jpg",
+      "wall": "/scenes/entrance-wall.jpg",
+      "cornerL": "/scenes/entrance-corner-left.jpg",
+      "cornerR": "/scenes/entrance-corner-right.jpg"
+    }
   },
   {
     "id": "dusk",
@@ -114,6 +126,12 @@
       "h": 0.4
     },
     "lookFilter": "scene-filter",
-    "aspect": 1.7837235228539576
+    "aspect": 1.7837235228539576,
+    "layers": {
+      "floor": "/scenes/dusk-floor.jpg",
+      "wall": "/scenes/dusk-wall.jpg",
+      "cornerL": "/scenes/dusk-corner-left.jpg",
+      "cornerR": "/scenes/dusk-corner-right.jpg"
+    }
   }
 ]

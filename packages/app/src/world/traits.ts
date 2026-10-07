@@ -32,3 +32,5 @@ export const Flight = trait({ t: 0, x: 0, y: 0, z: 0, startX: -1, startY: 0, sta
 export const FlyingTo = relation({ autoDestroy: 'source' });
 
 export const StatementReveal = trait({ daylight: 0, ready: false });
+/** A mood every awake critter shows at least, as when statements open (flow page, screen 34). */
+export const Delight = trait({ level: 0 });
