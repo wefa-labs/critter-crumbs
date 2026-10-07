@@ -38,7 +38,7 @@ Inside a frame: the crumbs you have left heap in the middle of the circle (their
 - `lib/generator.js` is a port of the frozen generator plus the version 2 draw from PR #31 (`generate2`) and its colour (`palette`), used only by this page. The app's generator lives in `packages/core`; nothing here changes it.
 - `images/` links to the tracked paintings: `window.webp` to `docs/pitch/assets/scene-feast.webp`, `dusk.webp` to `docs/pitch/assets/scene-dusk.webp`, `entrance.webp` to `packages/app/public/images/arrival.webp`. The entrance painting also exists at 1600 px as `docs/pitch/assets/scene-day.webp`.
 
-The fifth pass (three layouts on the floor, per-critter − and +) is kept outside git at `.scratch/design-review/pass-5/index.html`. Passes six to eleven are versions 1 to 12 of the artifact below (pass eleven is versions 6 to 12: 8 adds the backgrounds section, 9 your critter stirring when tapped, 10 the shared kit module, 11 the phone's results buttons in one row, 12 Replay Feast on desktop).
+The fifth pass (three layouts on the floor, per-critter − and +) is kept outside git at `.scratch/design-review/pass-5/index.html`. Passes six to eleven are versions 1 to 13 of the artifact below (pass eleven is versions 6 to 13: 8 adds the backgrounds section, 9 your critter stirring when tapped, 10 the shared kit module, 11 the phone's results buttons in one row, 12 Replay Feast on desktop, 13 the notes citing D3 for the gold button).
 
 ## Publish
 
