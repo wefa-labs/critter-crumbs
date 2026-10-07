@@ -1,0 +1,24 @@
+[
+  {
+    "device": "phone",
+    "width": 390,
+    "height": 844,
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "fps": 30,
+    "duration": 84.833333,
+    "bytes": 4181680,
+    "sha256": "b47a2d40c7656d878a330bca79db968d3e2d47369b4a640db0bd896d45285724"
+  },
+  {
+    "device": "desktop",
+    "width": 1440,
+    "height": 900,
+    "codec": "h264",
+    "pixelFormat": "yuv420p",
+    "fps": 30,
+    "duration": 84.2,
+    "bytes": 13569374,
+    "sha256": "245e834b55da5b0dfe41555460a04c73b72367d4fec4c2de824be19860910628"
+  }
+]
