@@ -124,14 +124,14 @@ What seven passes of review have settled. Where this summary and Afolabi's own w
 
 **The look.**
 
-- Art direction: Appendix A, with the WEFA reference painting he attached on 2026-10-02 (`.scratch/design-review/reference/wefa-reference-painting.jpg`; the same painting `design-directions.md` §14 describes) as the anchor for surface: a visible pencil-and-ink underdrawing, painterly colour, hard-edged cel shadows with brush strokes inside them.
+- Art direction: Appendix A, with the WEFA reference painting Afolabi attached on 2026-10-02 (`.scratch/design-review/reference/wefa-reference-painting.jpg`; the same painting `design-directions.md` §14 describes) as the anchor for surface: a visible pencil-and-ink underdrawing, painterly colour, hard-edged cel shadows with brush strokes inside them.
 - Colour: warm and calm, from Daylight's palette (Appendix D). Pass four read as too strong and too vibrant. The primary action is a warm colour from the palette, not the dark ink.
 - Type: Daylight's (system sans, bold headings), one scale on every screen (12, 14, 16, 20 and 28 px). The first complaint was type that reads as a default AI choice.
 - Shape: Ink & Ember's borders (an ink outline and a hard offset shadow) with Daylight's pill buttons.
-- Scenes: the project's own paintings (`docs/pitch/assets/scene-*.webp`), not backdrops drawn for the page. He wants a game-like space: mostly floor, with walls and foliage only at the top and in the corners. A floor plate painted for that view does not exist yet; the prompts for one are at the foot of the page.
+- Scenes: the project's own paintings (`docs/pitch/assets/scene-*.webp`), not backdrops drawn for the page. Afolabi wants a game-like space: mostly floor, with walls and foliage only at the top and in the corners. A floor plate painted for that view does not exist yet; the prompts for one are at the foot of the page.
 - Critters: generated from primitives, never stored art. Pass five was "getting there" but "still a little too cartoonish" against the reference painting. Eyes: big round dark eyes (decided 2026-10-05), as in Appendix A and `design-directions.md` §16. Colour: each critter's element as an accent on its markings and features, the body kept calm (chosen 2026-10-05).
 
-**Later words that override Appendix A:** the seed pod is out (he found it confusing); "Scatter These" is Title Case although the brief says sentence case; rounded cards are for panels, not for critters.
+**Later words that override Appendix A:** the seed pod is out (Afolabi found it confusing); "Scatter These" is Title Case although the brief says sentence case; rounded cards are for panels, not for critters.
 
 **Departures from the specs that the mock-up keeps.** Recorded in `docs/decisions.md` on 2026-10-05: Title Case on one button (Design System §10.1); a painted scene in place of the flat ground (§6.3); the closing day in place of the participation line and the deadline strip (§6.2, §7.1); round eyes; names of 16 characters at most (Design System §5.5 and the 80-character validators). Still needing a line before they reach the app: the Inked daylight tokens (§3); its gold primary button, which breaks D3 and §1 (honey is reserved for crumbs, never a button colour); "You" as a new string in `copy.ts`; the circle with one in focus in place of the critter grid (§6.2, §6.3); the version 2 critter draw (D8, and PR #31's DQ5 on when); a dark look, if Dusk glow is ever chosen (D1).
 
@@ -492,7 +492,7 @@ PR #31 (`phase-4/design-settle`, a draft since 2026-09-24) proposed six design s
 
 ## Appendix A — the art direction, verbatim (Afolabi, 2026-10-02)
 
-Given in answer to "Which existing game UIs are closest to the bar you want?". He also answered yes to standing the critters in the illustrated burrow and yes to redrawing them to match the style.
+Given in answer to "Which existing game UIs are closest to the bar you want?". Afolabi also answered yes to standing the critters in the illustrated burrow and yes to redrawing them to match the style.
 
 ```text
 You are designing Critter Crumbs, a private voting and allocation game from
@@ -584,7 +584,7 @@ The review pass five answers. Dictated, so read "UEFA" as WEFA and "scatter of t
 >
 > Feel free to ask me questions to align
 
-His answers to the three questions asked before pass five: explore the floor view, the circle and the rows equally; crop the existing plates for the floor now and write the prompt for a real one; and, for the critters, the option discussed in §8's first open point.
+Afolabi's answers to the three questions asked before pass five: explore the floor view, the circle and the rows equally; crop the existing plates for the floor now and write the prompt for a real one; and, for the critters, the option discussed in §8's first open point.
 
 ## Appendix C — the answers that set pass six, verbatim (Afolabi, 2026-10-05)
 
