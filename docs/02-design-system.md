@@ -17,9 +17,9 @@ Upstream: `01-prd.md` (vocabulary §3, rules §5, flows §7). Downstream: `03-ga
 
 **The world.** A burrow: warm earth, sunlight coming in from the entrance, small soft creatures, bread crumbs. Everything visual and audible should be describable with the same six words (§2). This is a tool adults use to move real money, so the charm is in materials and motion, never in cuteness of copy or cartoon UI.
 
-**Palette.** Six named colours carry the identity: **Oat** ground, **Burrow** ink, **Honey** crumbs, **Moss** for done and alive, **Clay** only for errors, **Dusk** only for sleep. Honey is reserved for crumbs — it is never a button colour — so a crumb is recognisable anywhere by colour alone before you read anything.
+**Palette.** Six named colours carry the identity: **Oat** ground, **Burrow** ink, **Honey** crumbs, **Moss** for done and alive, **Clay** only for errors, **Dusk** only for sleep. Honey is reserved for crumbs, except the gold primary action adopted on 2026-10-06 (D14). The primary action uses ink text and an ink outline.
 
-**Type.** One display face with a carved, low-contrast, slightly chunky character (Young Serif) for names, titles, and the big numbers at the feast; the device's own sans for everything else. One font file in the whole app.
+**Type.** The device’s system sans throughout, with bold headings and one 12, 14, 16, 20 and 28 px scale (D14). No font download.
 
 **Layout.** Mobile-first, one column of content with a grid of critters standing on a shared ground; the pile of crumbs sits under the thumb. Desktop widens the grid and moves the pile to a side rail. Nothing is a shrunken desktop app.
 
@@ -947,8 +947,8 @@ The Game Design document owns every sound token. This document fixes what is sha
 | # | Decision | Why |
 |---|---|---|
 | D1 | One light theme in v0; `color-scheme: light` declared; dark theme is a token swap in v1 | Four weeks to the rehearsal; one theme done well. Tokens are semantic so the swap is mechanical later |
-| D2 | Young Serif display + system sans body + system mono data; one ~30 KB font file | Character where it counts, zero payload elsewhere, no layout shift via `font-size-adjust` |
-| D3 | Primary actions are Burrow on Oat; honey is reserved for crumbs | Honey fails contrast as a button; reserving it makes a crumb recognisable anywhere |
+| D2 | Superseded by D14: system sans throughout | October review chose Inked daylight |
+| D3 | Amended by D14: primary actions are gold with ink text and ink outline; honey otherwise belongs to crumbs | October review adopts the gold button; text and meaningful edges retain contrast |
 | D4 | No icon library; one inline SVG sprite of 22 icons | A dependency for 22 shapes is not justified |
 | D5 | The heap is the signature element; it lives in the DOM | Zero cost, works in Simple view, memorable |
 | D6 | 3D only where feeding happens; portraits everywhere else; portraits render first and crossfade to 3D | Reading never waits for WebGL; the fallback is the default path, not an error path |
@@ -959,16 +959,27 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D11 | `xs` breakpoint (< 360 px) collapses the grid to one column | 200 % zoom on small phones must reflow without horizontal scroll |
 | D12 | Statement links open in the same tab with `rel="noopener nofollow ugc"` | Predictable; user-generated links are never endorsed |
 | D13 | Auto-link only `http(s)://` URLs; visible text truncated at 48 characters | No sanitisation surface beyond one regex; long URLs don't break cells |
+| D14 | Inked daylight; gold primary action; system sans, bold headings, 12/14/16/20/28 px | Answers DQ1, replaces D2 and amends D3/§1; generated semantic tokens own values |
+| D15 | Exact heaps and piles, one drawn crumb per crumb; Proportional is one per four | Answers DQ4 with one shared feel setting |
+| D16 | Version 2 element draw and October portrait beside frozen v1; dev/demo v2, production v1; v2 portraits only | Partly answers DQ5; exception to D6 only for v2 until mesh/style and shipping are decided |
+| D17 | Circle with one critter in focus in place of the core game grid | Adopts the review’s §6.2/§6.3 departure |
+| D18 | Focus row and bar combined as a dock | Giving controls remain fixed under the scene |
+| D19 | Crumb heap in the middle of the circle, remaining count in the bar | Same arrangement on phone and desktop |
+| D20 | Piles beside every critter’s feet | Amounts become visible in the scene |
+| D21 | Centred above-head tags; whole names where they fit, ten-character short form otherwise; desktop focus tag carries its name | Preserves identity, avoids tag collisions and retains 44 px hit areas |
+| D22 | Thought bubble opens fixed-height scrolling statement; phone top, desktop side panel; outside tap/Escape closes | Reading preserves the circle and dock |
+| D23 | Own tag says You; own tap stirs without changing focus or giving | Own critter stays asleep and cannot receive own crumbs |
+| D24 | Phone results grow from dock with playing huddle; desktop results/action bar beside it | Results remain connected to the scene |
+
+**October adoption (2026-10-06).** D14–D24 override the earlier grid, type, control, heap and reading descriptions in §1, §3, §6 and §7 for core game screens. The generated token source is normative for Inked daylight values. Other screens inherit these tokens and keep their existing layouts.
 
 ### Open — confirm before implementation
 
 | # | Question |
 |---|---|
-| DQ1 | The look: type, palette and controls. The October design review (`docs/explorations/design-pass-2026-10.md` §8) proposes **Inked daylight**: the system sans with bold headings, Daylight's warm palette, ink outlines with a hard offset shadow, and pill buttons. Its one scale (12, 14, 16, 20, 28 px) and a warm primary action are already decided (`docs/decisions.md`, 2026-10-05); the rest is not, and its gold primary button breaks D3 and §1. Confirming it replaces D2 and revises §1, §3, §6.2 and §7.1 |
 | DQ2 | Dark theme deferred to v1 (D1). If it must be v0, budget roughly two days for a second token set and a lighting preset |
 | DQ3 | The signing step's wording avoids "wallet" entirely (`scatter.sign.body`). Confirm this reads clearly to the October council, who all use wallets |
-| DQ4 | Exact or proportional crumbs. The October review pages compare one drawn crumb for every crumb (Exact) with one for every four (Proportional), for the heap of crumbs left and for the pile beside each critter (design pass §14); this replaces the narrower question of exact crumbs at 24 or fewer. Either way the number carries the count (§4.5) |
-| DQ5 | Generator version 2: what it is and when it lands. The October review pages draw every critter with the element draw prototyped in PR #31 and ported in `docs/explorations/scatter-layouts/lib/generator.js` (the element drawn first, fixing a hue band and the ear, crest, tail and marking sets), painted with big round dark eyes and the element as an accent on a calm body (2026-10-05). The creature research (`docs/explorations/creature-research.md`) proposes species within each element, some of them flying; if they are wanted, they belong in version 2 so critters change once. It changes every critter (D8), so it lands before the October feast, with a second feel pass on phones, or after it, so October runs on version 1 |
+| DQ5 | When does v2 ship to production, and will it receive a v2 mesh and 3D render style? D16 answers its present definition and development use; future species/flying critters remain undecided |
 
 ## 15. What the other documents own
 
