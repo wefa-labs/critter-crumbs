@@ -1,5 +1,5 @@
 body:has(.core-game) { background:var(--cc-bg); }
-body:has(main .core-game) #root > header,body:has(main .core-game) #root > .notice { display:none; }
+body:has(main .core-game) #root > header { display:none; }
 main:has(.core-game) { width:100%;max-width:none;padding:0; }
 .core-game { position:relative;width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--cc-bg);color:var(--cc-text);container-type:inline-size; }
 .game-header { width:100%;max-width:none;flex:none;height:64px;min-height:64px;padding:8px 16px;display:flex;flex-wrap:nowrap;align-items:center;gap:16px;background:var(--cc-bg);border-bottom:1px solid var(--cc-line); }
@@ -76,7 +76,7 @@ main:has(.core-game) { width:100%;max-width:none;padding:0; }
 .game-body[data-desktop="true"] .number-field input { bottom:0; }
 .circle-spot[data-face="left"] .stage { transform:scaleX(-1); }
 .core-game .renderer-note { position:absolute;top:8px;left:16px;z-index:2700; }
-body:has(.core-game) #alert:not(.sr-only) { position:fixed;bottom:144px;left:16px;right:16px;z-index:5000; }
+body:has(main .core-game) #root > div > #alert:not(.sr-only) { position:fixed;bottom:144px;left:16px;right:16px;z-index:5000; }
 @media(prefers-reduced-motion:no-preference) { .game-dock { transition:height var(--cc-dur-3) var(--cc-ease-out); } }
 
 .bar-crumb { display:inline-block;vertical-align:middle;width:24px;height:26px;margin-right:8px; }
@@ -109,3 +109,7 @@ body:has(.core-game) #alert:not(.sr-only) { position:fixed;bottom:144px;left:16p
 .scene-dusk-light,.scene-feast-light { position:absolute;inset:0;pointer-events:none; }.scene-dusk-light { background:color-mix(in srgb,var(--cc-dusk) 40%,transparent);opacity:var(--scene-dusk,0); }.scene-feast-light { background:radial-gradient(ellipse at 50% 60%,color-mix(in srgb,var(--cc-light-feast-sun) 35%,transparent),transparent 70%);opacity:var(--scene-feast,0); }
 
 .core-game summary,.core-game .statement-text a { min-height:44px;min-width:44px;display:inline-flex;align-items:center; }
+
+.core-game .scatter-controls [data-give="true"] { background:var(--cc-action);color:var(--cc-action-text); }
+
+body:has(main .core-game) #root > .notice { position:fixed;top:64px;left:16px;right:16px;z-index:5000; }
