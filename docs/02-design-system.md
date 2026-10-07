@@ -964,10 +964,11 @@ The Game Design document owns every sound token. This document fixes what is sha
 
 | # | Question |
 |---|---|
-| DQ1 | Young Serif as the display face (swappable through one token). The alternative that keeps the brief's "soft, matte" reading is Fraunces at its soft setting; it is more widely used and less distinctive |
+| DQ1 | The look: type, palette and controls. The October design review (`docs/explorations/design-pass-2026-10.md` §8) proposes **Inked daylight**: the system sans with bold headings, Daylight's warm palette, ink outlines with a hard offset shadow, and pill buttons. Its one scale (12, 14, 16, 20, 28 px) and a warm primary action are already decided (`docs/decisions.md`, 2026-10-05); the rest is not, and its gold primary button breaks D3 and §1. Confirming it replaces D2 and revises §1, §3, §6.2 and §7.1 |
 | DQ2 | Dark theme deferred to v1 (D1). If it must be v0, budget roughly two days for a second token set and a lighting preset |
 | DQ3 | The signing step's wording avoids "wallet" entirely (`scatter.sign.body`). Confirm this reads clearly to the October council, who all use wallets |
-| DQ4 | Whether the heap should show exact crumbs (one glyph per crumb) when a feast issues 24 crumbs or fewer, instead of the scaled mound |
+| DQ4 | Exact or proportional crumbs. The October review pages compare one drawn crumb for every crumb (Exact) with one for every four (Proportional), for the heap of crumbs left and for the pile beside each critter (design pass §14); this replaces the narrower question of exact crumbs at 24 or fewer. Either way the number carries the count (§4.5) |
+| DQ5 | Generator version 2: what it is and when it lands. The October review pages draw every critter with the element draw prototyped in PR #31 and ported in `docs/explorations/scatter-layouts/lib/generator.js` (the element drawn first, fixing a hue band and the ear, crest, tail and marking sets), painted with big round dark eyes and the element as an accent on a calm body (2026-10-05). The creature research (`docs/explorations/creature-research.md`) proposes species within each element, some of them flying; if they are wanted, they belong in version 2 so critters change once. It changes every critter (D8), so it lands before the October feast, with a second feel pass on phones, or after it, so October runs on version 1 |
 
 ## 15. What the other documents own
 
