@@ -15,3 +15,7 @@
 .portrait[data-asleep="true"] .portrait__sleep-eye { opacity:1; }
 .portrait__cheek { scale:var(--cheeks); }
 .portrait-fade { pointer-events:none; }
+
+.portrait-v2 .p-calm { opacity:calc(1 - var(--mouth)); }
+.portrait-v2 .portrait__mouth { opacity:var(--mouth); }
+

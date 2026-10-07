@@ -1,5 +1,6 @@
+import { paintCritter as createPortrait } from '../portraits/painter.js';
 import { copy, formatCopy } from '@critter-crumbs/shared';
-import { createPortrait, disposePortrait, renderPortraits } from '../portraits/index.js';
+import {  disposePortrait, renderPortraits } from '../portraits/index.js';
 import { Asleep, Identity, Portrait, Received, createWorld } from '../world/index.js';
 import { createTickerHost } from '../sim/ticker-host.js';
 import { browserSettings, saveSetting } from '../sim/settings.js';

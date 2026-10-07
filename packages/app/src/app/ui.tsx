@@ -1,7 +1,9 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { generate, ApiClientError } from '@critter-crumbs/core';
+import { generateCritter, ApiClientError } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
-import { createPortrait, disposePortrait } from '../portraits/index.js';
+import { disposePortrait } from '../portraits/index.js';
+import { paintCritter } from '../portraits/painter.js';
+import { critterVersion } from '../portraits/version.js';
 import { useModalAnnouncements } from './announcements.js';
 import type { AppApi } from './session.js';
 
@@ -25,7 +27,7 @@ export function PendingPage({ error, retry }: { error: unknown; retry: () => voi
 export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0 }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const svg = createPortrait(document, generate(address, variant), { name, size, asleep, decorative, fed });
+    const svg = paintCritter(document, generateCritter(address, variant, critterVersion), { name, size, asleep, decorative, fed });
     host.current?.replaceChildren(svg);
     return () => { disposePortrait(svg); svg.remove(); };
   }, [address, variant, name, size, asleep, decorative, fed]);

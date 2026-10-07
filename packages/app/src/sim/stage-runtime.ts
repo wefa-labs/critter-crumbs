@@ -1,3 +1,4 @@
+import { critterVersion } from '../portraits/version.js';
 import type { World } from 'koota';
 import { Asleep, Identity, Mesh, Clock, Settings, createWorld, type WorldOptions, type GameSettings } from '../world/index.js';
 import { renderPortraits } from '../portraits/index.js';
@@ -7,7 +8,7 @@ export function createStageRuntime(options: WorldOptions) {
   let alive = true;
   const disposers = new Set<() => void>();
   let renderer: ((world: World) => void) | undefined, idleMotion = true;
-  const game = createWorld({ ...options, outputs: { ...options.outputs, render2d: renderPortraits, render3d: world => renderer?.(world), hop: cue => { if (cue.from === 'feast' || !game.critters.some(entity => entity.get(Identity)!.id === cue.to && entity.has(Mesh))) options.outputs?.hop?.(cue); } } });
+  const game = createWorld({ critterVersion, ...options, outputs: { ...options.outputs, render2d: renderPortraits, render3d: world => renderer?.(world), hop: cue => { if (cue.from === 'feast' || !game.critters.some(entity => entity.get(Identity)!.id === cue.to && entity.has(Mesh))) options.outputs?.hop?.(cue); } } });
   let activeInput = false, animatedUntil = 0;
   const ticker = createTickerHost({ request: callback => requestAnimationFrame(callback), cancel: id => cancelAnimationFrame(id), stopInput: () => { activeInput = false; if (alive) { game.actions.suspend(); game.tick(game.world.get(Clock)!.now); } }, tick: now => {
     game.tick(now); for (const frame of frames) frame(now);

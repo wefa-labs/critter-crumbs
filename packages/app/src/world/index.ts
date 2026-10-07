@@ -1,10 +1,11 @@
 import { createActions, createWorld as createKootaWorld, type Entity, type World } from 'koota';
-import { generate, GEN_VERSION } from '@critter-crumbs/core';
+import { generateCritter, type CritterVersion } from '@critter-crumbs/core';
 import { HOLD_DELAY_MS, POUR_RATE_MIN, POUR_RATE_MAX, POUR_RAMP_S, POUR_SCALE, REPLY, TYPED_AMOUNT, MAX_FEAST_TARGETS, ValidationError, integer, REDUCED_MOTION, type TallyResult } from '@critter-crumbs/shared';
 import { Asleep, Clock, Count, Flight, Hop, Identity, IsOwn, Name, Owner, Phase, Pile, Pouring, PouringInto, Received, Rig, Settings, SoundEvent, Viewer, type SoundToken } from './traits.js';
 import { createReveal } from './reveal.js';
 import { createDirector } from './director.js';
 import { createMotion } from './motion.js';
+import { createCircleMotion } from './circle.js';
 import { createFlights } from './flights.js';
 export * from './traits.js';
 
@@ -13,7 +14,7 @@ export interface SoundCue { token: SoundToken; pitchStep: number; level: number;
 export interface HopCue { from: string; to: string; reverse: boolean }
 export interface GameSettings { effects: boolean; ambience: boolean; still: boolean; simple: boolean; reducedMotion: boolean }
 export interface WorldOptions {
-  asleep?: boolean; issued: number; critters: CritterInput[]; viewer?: string; settings?: Partial<GameSettings>;
+  critterVersion?: CritterVersion; asleep?: boolean; issued: number; critters: CritterInput[]; viewer?: string; settings?: Partial<GameSettings>;
   outputs?: { feedback?: (cue: SoundCue) => void; sound?: (cue: SoundCue) => void; hop?: (cue: HopCue) => void; render2d?: (world: World) => void; render3d?: (world: World) => void };
 }
 type Input = { type: 'press'; critter: Entity; direction: 1 | -1; hold: boolean }
@@ -25,13 +26,13 @@ export function createWorld(options: WorldOptions) {
   integer(options.issued, 10, 1000, 'setup.crumbs.help');
   if (options.critters.length > MAX_FEAST_TARGETS) throw new ValidationError('err.feastCapacity');
   if (new Set(options.critters.map(critter => critter.id)).size !== options.critters.length) throw new RangeError('Duplicate critter identity');
-  const generated = options.critters.map(value => generate(value.address, value.variant));
+  const generated = options.critters.map(value => generateCritter(value.address, value.variant, options.critterVersion));
   const world = createKootaWorld(Clock, Phase, Settings(options.settings ?? {}), Viewer({ address: options.viewer ?? '' }));
   const heap = world.spawn(Pile({ issued: options.issued, remaining: options.issued }));
   const critters = options.critters.map((value, index) => {
     const entity = world.spawn(Count, Received, Rig, Name({ display: value.name }), Identity({
       id: value.id, address: value.address, variant: value.variant,
-      seed: `${value.address.toLowerCase()}:${value.variant}:${GEN_VERSION}`, parameters: generated[index]!,
+      seed: `${value.address.toLowerCase()}:${value.variant}:${options.critterVersion ?? '1'}`, parameters: generated[index]!,
     }));
     const owner = value.ownerAddress === undefined ? value.address : value.ownerAddress;
     if (owner) entity.add(Owner({ address: owner }));
@@ -44,6 +45,7 @@ export function createWorld(options: WorldOptions) {
   let previous: number | undefined;
   let lastRemaining = options.issued;
   const director = createDirector(world, critters);
+  const circle = createCircleMotion(world, critters);
   const motion = createMotion(world, critters, director);
   const flights = createFlights(world, motion.bump);
 
@@ -205,10 +207,10 @@ export function createWorld(options: WorldOptions) {
     }
     for (const event of world.query(SoundEvent)) event.destroy();
   }
-  const systems = [clock, input, pour, pile, feast, expression, rig, flight, sound, render3d, render2d, sweep];
+  const systems = [clock, input, pour, pile, feast, expression, rig, circle.tick, flight, sound, render3d, render2d, sweep];
   function tick(now: number) {
     if (!Number.isFinite(now) || (previous !== undefined && now < previous)) throw new RangeError('Tick time must be finite and monotonic');
     for (const system of systems) system(now);
   }
-  return { world, heap, critters, actions, tick, isAnimating: () => director.playing() || motion.isAnimating() || world.query(Flight).length > 0, feastPresentation:director.presentation, destroy: () => { motion.destroy(); world.destroy(); } };
+  return { world, heap, critters, actions, circle, tick, isAnimating: () => director.playing() || circle.isAnimating() || motion.isAnimating() || world.query(Flight).length > 0, feastPresentation:director.presentation, destroy: () => { motion.destroy(); world.destroy(); } };
 }

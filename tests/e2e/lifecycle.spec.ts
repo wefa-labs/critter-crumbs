@@ -3,8 +3,8 @@ import { readFile } from 'node:fs/promises';
 import { connectLocal, readJson } from './session.js';
 
 async function submit(page:Page, replacement=false) {
- await page.getByRole('button',{name:replacement?'Change my scatter':'Scatter these',exact:true}).click();
- await page.getByRole('dialog',{name:'Confirm your scatter'}).getByRole('button',{name:'Scatter these',exact:true}).click();
+ await page.getByRole('button',{name:replacement?'Change my scatter':'Scatter These',exact:true}).click();
+ await page.getByRole('dialog',{name:'Confirm your scatter'}).getByRole('button',{name:'Scatter These',exact:true}).click();
  await expect(page.locator('.scatter-done')).toBeFocused();
 }
 for(const kind of ['people','options'] as const)for(const simple of [true,false])test(`${kind} lifecycle in ${simple?'Simple view':'3D'} opens independently and exports the latest scatter`,async({browser,request},testInfo)=>{
@@ -25,7 +25,7 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   for(const [i,page]of pages.entries()){
    await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}/scatter`);
    await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
-   if(simple)await expect(page.locator('canvas')).toHaveCount(0);else await expect(page.locator('[data-mesh="ready"]').first()).toBeVisible();
+   if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
    const inputs=page.locator('.number-field input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }
   const inputs=first.locator('.number-field input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await inputs.nth(1).fill('40');await inputs.nth(1).press('Enter');await submit(first,true);

@@ -12,7 +12,7 @@ export function RenderingWorkshop(){
 }
 function Fixture({count,limit}:{count:number;limit:boolean}){
  const host=useRef<HTMLUListElement>(null),output=useRef<HTMLOutputElement>(null),[stages,setStages]=useState<HTMLElement[]>([]),[ready,setReady]=useState(false);
- const [runtime]=useState(()=>createStageRuntime({issued:100,critters:renderingCritters(count)}));
+ const [runtime]=useState(()=>createStageRuntime({critterVersion:'1',issued:100,critters:renderingCritters(count)}));
  const [settings,setSettings]=useState({effects:false,ambience:false,still:false,simple:false,reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches}),[announcement,announce]=useState('');
  useEffect(()=>runtime.setSettings(settings),[runtime,settings]);
  const samples=useRef<RenderSample[]>([]),sampleCount=useRef(0),renderer=useRef<import('three').WebGLRenderer|null>(null);

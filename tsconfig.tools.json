@@ -9,7 +9,8 @@
     ],
     "lib": [
       "ES2022",
-      "DOM"
+      "DOM",
+      "DOM.Iterable"
     ],
     "allowJs": true,
     "checkJs": false
@@ -23,6 +24,8 @@
     "vitest.config.ts",
     "vitest.neon.config.ts",
     "playwright.config.ts",
+    "playwright.screens.config.ts",
+    "tests/screens/**/*.ts",
     "tests/e2e/**/*.ts",
     "tests/api/**/*.ts",
     "tests/deployment/**/*.ts"

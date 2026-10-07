@@ -15,3 +15,5 @@ The Latin font subset was made with isolated FontTools 4.59.2 / Brotli 1.1.0, pr
 Renderer colours use the [CSS Color 4 conversion matrices](https://www.w3.org/TR/css-color-4/#color-conversion-code). Chroma alone is reduced to fit sRGB, preserving the generator's lightness/hue. The same returned sRGB colours serve SVG and later mesh materials; renderer conversion does not change generator output.
 
 Web Audio implementation reference, checked2026-09-06: the normative [Web Audio specification](https://webaudio.github.io/web-audio-api/) defines scheduled AudioParam automation, compressor nodes and context time; MDN's [OfflineAudioContext.startRendering](https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext/startRendering) documents offline DSP rendering. Sound voices use that rendering path for measured browser checks. No downloaded effects or music library is used.
+
+October 2026: the adopted Inked daylight look uses system sans throughout; the unused Young Serif file and OFL copy were removed (D14). The row above records the historical phase-3 asset.
