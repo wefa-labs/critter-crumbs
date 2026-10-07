@@ -66,8 +66,8 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   currentAccount.current = account;
   const [signing, setSigning] = useState(false), focusAccepted = useRef(false);
   const [focus,setFocus]=useState(()=>initialReading?0:Math.max(0,feast.targets.findIndex(t=>t.ownerAddress?.toLowerCase()!==me.address.toLowerCase()))),[reading,setReading]=useState(initialReading),[failure,setFailure]=useState<'rejected'|'failed'|'closed'|undefined>(),[toast,setToast]=useState(false),[closedDismissed,setClosedDismissed]=useState(false);
-  const [hops] = useState(() => createHops(document, () => heap.current??barSource.current, id => surface.current?.querySelector<HTMLElement>(`[data-count-id="${id}"]`) ?? null));
-  const [runtime] = useState(() => createStageRuntime({ issued: feast.crumbsPerCritter, viewer: me.address, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })), outputs: { sound:audio.cue, feedback: cue => { if(cue.token === 'pile.wall') { const preferences=runtime.world.get(Settings)!; if(!preferences.still && !preferences.reducedMotion) { heapMotion.current?.cancel(); heapMotion.current=jiggleHeap(heap.current); } } }, hop: cue => hops.add(cue, runtime.world.get(Clock)!.now) } }));
+  const [hops] = useState(() => createHops(document, () => heap.current??barSource.current, id => surface.current?.querySelector<HTMLElement>(`[data-count-id="${id}"]`) ?? null,()=>runtime.world));
+  const [runtime] = useState(() => createStageRuntime({ issued: feast.crumbsPerCritter, viewer: me.address, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })), outputs: { sound:audio.cue, feedback: cue => { if(cue.token === 'pile.wall') { const preferences=runtime.world.get(Settings)!; if(!preferences.still && !preferences.reducedMotion) { heapMotion.current?.cancel(); heapMotion.current=jiggleHeap(heap.current); } } }, hop: cue => hops.add(cue) } }));
   const [session] = useState(() => createScatterSession({ api, feast, viewer: me.address, onAccepted: receipt => browserReceiptBook().remember(feast.id,me.address,receipt.uid), sign: async (amounts, now, latest) => {
     const connected = currentAccount.current();
     if (!connected || connected.address.toLowerCase() !== me.address.toLowerCase()) { setSigning(false); throw new ApiClientError('scatter.sign.rejected', 401); }
@@ -77,8 +77,8 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   const state = useSyncExternalStore(session.subscribe, session.snapshot);
   useEffect(() => {
     const stop = runtime.start(); let previous = runtime.critters.map(() => 0), previousRemaining = feast.crumbsPerCritter;
-    const unwatch = runtime.onFrame(now => {
-      hops.tick(now); const amounts = runtime.critters.map(entity => entity.get(Count)!.given);
+    const unwatch = runtime.onFrame(() => {
+      hops.tick(); const amounts = runtime.critters.map(entity => entity.get(Count)!.given);
       if (amounts.some((amount, index) => amount !== previous[index])) { previous = amounts; session.edit(amounts); }
       const remaining = runtime.heap.get(Pile)!.remaining;
       if (!remaining && previousRemaining) announce(copy['pile.empty.announce']); previousRemaining = remaining;

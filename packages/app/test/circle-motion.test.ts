@@ -19,3 +19,7 @@ for(const setting of ['still','reducedMotion'] as const)test(`${setting} stir ke
  const game=createWorld({issued:100,viewer:address,settings:{[setting]:true},critters:[{id:address,address,name:'Juniper',variant:0}]});game.tick(0);game.circle.stir(game.critters[0]!);game.tick(260);
  expect(game.circle.facing(game.critters[0]!)).toBe(1);for(const glyph of game.circle.sleepGlyphs(game.critters[0]!)){expect(glyph.x).toBe(0);expect(glyph.y).toBe(0);}game.destroy();
 });
+
+test('a huddle tap hops on the Clock and settles without changing any allocation',()=>{
+ const game=createWorld({issued:100,critters:[{id:address,address,name:'Moss',variant:0}],settings:{still:false,reducedMotion:false}});game.actions.setIdleMotion(false);game.tick(0);game.circle.play(game.critters[0]!);game.tick(230);expect(game.critters[0]!.get(Rig)!.liftY).toBeGreaterThan(0);expect(game.critters[0]!.get(Count)!.given).toBe(0);game.tick(700);expect(game.critters[0]!.get(Rig)!.liftY).toBe(0);game.destroy();
+});

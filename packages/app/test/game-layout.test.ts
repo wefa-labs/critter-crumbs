@@ -29,3 +29,8 @@ describe('October circle layout',()=>{
  });
 
 });
+
+it('shows the whole focused name on desktop, and chooses a short form only when needed',()=>{
+ const group=critters(4);group[0]!.name='Alexandra Winterbourne';
+ const layout=layoutGame({viewport:{width:1440,height:900},critters:group,focus:0,state:'scatter',issued:100});expect(layout.slots[0]!.name).toBe('Alexandra Winterbourne');expect(layout.slots[0]!.tag.short).toBe(false);
+});

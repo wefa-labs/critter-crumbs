@@ -16,3 +16,7 @@ test('quiet reveal changes poses in the same tick and becomes ready at 200ms', (
   expect(game.critters.every(critter => !critter.has(Asleep))).toBe(true); game.tick(199); expect(game.world.get(StatementReveal)!.ready).toBe(false);
   game.tick(200); expect(game.world.get(StatementReveal)!.ready).toBe(true); game.destroy();
 });
+
+test('the statement reveal leaves your own critter asleep until the feast',()=>{
+ const own='0x0000000000000000000000000000000000000001';const game=createWorld({issued:100,asleep:true,viewer:own,critters:[{id:own,address:own,name:'Juniper',variant:0},{id:'other',address:'0x0000000000000000000000000000000000000002',name:'Fern',variant:0}]});game.actions.beginReveal();game.tick(0);game.tick(1400);expect(game.critters[0]!.has(Asleep)).toBe(true);expect(game.critters[1]!.has(Asleep)).toBe(false);game.destroy();
+});

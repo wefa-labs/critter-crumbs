@@ -1,7 +1,7 @@
 import { copy, CIRCLE_FEEL, PILE_RULE } from '@critter-crumbs/shared';
 import type { PortraitExtent } from '../portraits/metrics.js';
 export interface Rect { x:number;y:number;width:number;height:number }
-export type LayoutState = 'scatter'|'reading'|'feast'|'results';
+export type LayoutState = 'scatter'|'reading'|'feast'|'results'|'empty-results';
 export interface LayoutCritter { name:string;own:boolean;count:number;extent:PortraitExtent }
 export interface LayoutInput { viewport:{width:number;height:number};critters:readonly LayoutCritter[];focus:number;state:LayoutState;issued:number }
 export const overlapArea=(a:Rect,b:Rect)=>Math.max(0,Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y));
@@ -17,8 +17,8 @@ function geometry(W:number,H:number,n:number,desktop:boolean,feast:boolean){
 export function layoutGame(input:LayoutInput){
  const desktop=input.viewport.width>=900,W=input.viewport.width-(desktop?Math.min(480,Math.max(400,input.viewport.width*.25)):0),H=input.viewport.height-64,n=input.critters.length;
  if(!n||input.focus<0||input.focus>=n)throw new RangeError('Invalid circle focus');
- const geo=geometry(W,H,n,desktop,input.state==='feast'),gathered=input.state==='results';
- const dockH=gathered?(desktop?74:Math.max(130,H-196)):130;
+ const gathered=input.state==='results',empty=input.state==='empty-results',dockH=empty?(desktop?74:260):gathered?(desktop?74:Math.max(130,H-196)):130;
+ const geo=geometry(W,empty?H-dockH+130:H,n,desktop,input.state==='feast');
  const dock:Rect={x:0,y:H-dockH,width:W,height:dockH};
  const slots=input.critters.map((critter,index)=>{
   const slot=(index-input.focus+n)%n;let x=geo.cx,y=geo.focusY,size=geo.focusSize,depth=999,face:'left'|'right'|'front'='front';
@@ -29,8 +29,8 @@ export function layoutGame(input:LayoutInput){
   const figure:Rect={x:stage.x+ext.left*width,y:stage.y+ext.top*height,width:(ext.right-ext.left)*width,height:y+3-(stage.y+ext.top*height)};
   const pileSize=moundSize(PILE_RULE === 'exact' ? critter.count : Math.ceil(critter.count/4)),pileWidth=critter.count?Math.min(width*.58,pileSize.width*1.1):0;
   const pile:Rect={x:stage.x+.54*width,y:stage.y+.98*height-pileWidth*pileSize.height/pileSize.width,width:pileWidth,height:pileWidth*pileSize.height/pileSize.width};
-  const name=critter.own?copy['scatter.own.short']:shortName(critter.name,16),tagHeight=slot===0&&desktop?36:n>8&&!desktop?26:28,fullWidth=nameWidth(name)*(slot===0&&desktop?1.14:n>8&&!desktop?.86:1)+(critter.own||slot===0&&desktop?24:48),shortWidth=nameWidth(shortName(name))*(n>8&&!desktop?.86:1)+(critter.own?24:48);
-  return {index,slot,stage,figure,pile,foot:{x,y},depth,face,fullWidth,shortWidth,name,tag:{x:x-fullWidth/2,y:figure.y-4-tagHeight,width:fullWidth,height:tagHeight,hidden:gathered||slot===0&&!desktop,short:false}};
+  const name=critter.own?copy['scatter.own.short']:critter.name,tagHeight=slot===0&&desktop?36:n>8&&!desktop?26:28,fullWidth=nameWidth(name)*(slot===0&&desktop?1.14:n>8&&!desktop?.86:1)+(critter.own||slot===0&&desktop?24:48),shortWidth=nameWidth(shortName(name))*(n>8&&!desktop?.86:1)+(critter.own?24:48);
+  return {index,slot,stage,figure,pile,foot:{x,y},depth,face,fullWidth,shortWidth,name,tag:{x:x-fullWidth/2,y:figure.y-4-tagHeight,width:fullWidth,height:tagHeight,hidden:gathered||empty||slot===0&&!desktop,short:false}};
  });
  const focused=slots.find(it=>it.slot===0)!,extent=input.critters[focused.index]!.extent,headR=extent.headRadius*focused.stage.width,headY=focused.stage.y+extent.headY*focused.stage.height;
  const obstacles=slots.filter(it=>it.pile.width&&it.slot!==0).map(it=>it.pile);
@@ -52,7 +52,7 @@ export function layoutGame(input:LayoutInput){
    const box:Rect={x:Math.min(Math.max(it.foot.x-width/2,6),W-6-width),y:Math.max(2,above-i*4),width,height:it.tag.height};
    const hit=slots.reduce((maximum,other)=>other===it?maximum:Math.max(maximum,overlapArea(box,other.figure)),0);
    const blocked=overlapArea(box,{x:heap.x-2,y:heap.y-2,width:heap.width+4,height:heap.height+4})>0||obstacles.some(other=>overlapArea(box,other)>0)||box.y+box.height>dock.y;
-   return {box,short:shortIndex>0,cost:i+shortIndex*20+hit,valid:!blocked&&hit<=tolerance};
+   return {box,short:shortIndex>0,cost:i+shortIndex*20+hit,valid:width<=W-12&&!blocked&&hit<=tolerance};
   })).filter(it=>it.valid).sort((a,b)=>a.cost-b.cost);
   return {it,candidates};
  }).sort((a,b)=>a.candidates.length-b.candidates.length);

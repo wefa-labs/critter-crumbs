@@ -1,6 +1,6 @@
 import type { Entity, World } from 'koota';
 import { STATEMENTS_FOCUS_MS, STATEMENTS_REVEAL as TIMING, WAKE } from '@critter-crumbs/shared';
-import { Asleep, Clock, Settings, SoundEvent, StatementReveal } from './traits.js';
+import { Asleep, IsOwn, Clock, Settings, SoundEvent, StatementReveal } from './traits.js';
 export function createReveal(world: World, critters: Entity[]) {
   let start: number | null = null;
   return {
@@ -9,7 +9,7 @@ export function createReveal(world: World, critters: Entity[]) {
       if (start === null) return;
       const now = world.get(Clock)!.now - start, settings = world.get(Settings)!, quiet = settings.still || settings.reducedMotion;
       const step = Math.min(TIMING.staggerMs, Math.max(0, (STATEMENTS_FOCUS_MS - TIMING.wakeStartMs - WAKE.ms) / Math.max(1, critters.length - 1)));
-      critters.forEach((entity, index) => { if (now >= (quiet ? 0 : TIMING.wakeStartMs + step * index) && entity.has(Asleep)) entity.remove(Asleep); });
+      critters.forEach((entity, index) => { if (now >= (quiet ? 0 : TIMING.wakeStartMs + step * index) && !entity.has(IsOwn) && entity.has(Asleep)) entity.remove(Asleep); });
       world.set(StatementReveal, { daylight: Math.min(1, now / (quiet ? TIMING.reducedMs : TIMING.lightMs)), ready: now >= (quiet ? TIMING.reducedMs : STATEMENTS_FOCUS_MS) });
     },
   };

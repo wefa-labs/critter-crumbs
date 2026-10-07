@@ -12,10 +12,15 @@ function Floor({scene,src}:{scene:Scene;src:string}){
 }
 /** A manifest addition chooses crops or a painted plate without a screen change. */
 export function SceneBackdrop({id=defaultScene,desktop}:{id?:string;desktop:boolean}){
- const [scenes,setScenes]=useState<Scene[]>([]);
- useEffect(()=>{let active=true;const controller=new AbortController();void fetch('/scenes/manifest.json',{signal:controller.signal}).then(response=>response.json()).then((value:Scene[])=>{validateScenes(value);if(active)setScenes(value);}).catch(error=>{if(error.name!=='AbortError'&&active)setScenes([]);});return()=>{active=false;controller.abort();};},[]);
+ const scenes=useScenes();
  const scene=scenes.find(scene=>scene.id===id)??scenes[0];if(!scene)return <div className="scene-backdrop" aria-hidden="true"/>;
  const device=desktop?scene.devices.desktop:scene.devices.phone,style={filter:tokens[scene.lookFilter]} as CSSProperties;
  if(device.kind==='plate')return <div className="scene-backdrop scene-plate" aria-hidden="true" style={{...style,backgroundImage:`url(${device.image})`}}/>;
  return <div className="scene-backdrop" aria-hidden="true" style={style}><Floor scene={scene} src={device.image}/><div className="floor-shade"/><CroppedImage src={device.image} crop={scene.wall} className="wall-band"/><CroppedImage src={device.image} crop={scene.cornerL} className="scene-corner left"/><CroppedImage src={device.image} crop={scene.cornerR} className="scene-corner right"/><div className="scene-wash"/></div>;
+}
+
+export function useScenes(){
+ const [scenes,setScenes]=useState<Scene[]>([]);
+ useEffect(()=>{let active=true;const controller=new AbortController();void fetch('/scenes/manifest.json',{signal:controller.signal}).then(response=>response.json()).then((value:Scene[])=>{validateScenes(value);if(active)setScenes(value);}).catch(error=>{if(error.name!=='AbortError'&&active)setScenes([]);});return()=>{active=false;controller.abort();};},[]);
+ return scenes;
 }

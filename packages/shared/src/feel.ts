@@ -41,7 +41,7 @@ export const FEAST = { glyphs: 24, fillMs: 400, glyphStaggerMs: 20, openSoundMs:
 /** §6 and §7.3: the 3D flight lifetime and hard live-particle budget. */
 export const FLIGHT = { ms: 380, maxAlive: 64 } as const;
 /** §6 and §8: DOM hop geometry and the live-node budget shared by both views. */
-export const DOM_HOP = { maxAlive: 60, apexPx: 70, turnDegrees: 200, fadeAt: 0.8 } as const;
+export const DOM_HOP = { ms:320,ease:[.2,.8,.2,1],maxAlive: 60, apexPx: 70, turnDegrees: 240, fadeAt: 0.8 } as const;
 /** §5.6. Persistence values are strings, as required by localStorage. */
 export const SETTINGS = {
   effects: { key: 'cc.sound.effects', default: '1' },
@@ -55,4 +55,4 @@ export const RENDER_BUDGET = { slowFrameMs: 33, verySlowFrameMs: 50, degradeMs: 
 
 /** October adoption. One rule governs the remaining heap and every received pile. */
 export const PILE_RULE: 'exact' | 'proportional' = 'exact';
-export const CIRCLE_FEEL = { turnMs:320, stirMs:850, sleepGlyphMs:1100,sleepReleaseMs:130,sleepLifeMs:840,sleepDriftX:16,sleepDriftY:32, playEveryMs:[900,2100], playMs:480, phone:{focus:140,back:66,front:100}, desktop:{focus:248,back:120,front:172}, huddle:{phone:66,desktop:150} } as const;
+export const CIRCLE_FEEL = { presentationMs:100,turnMs:320, stirMs:850, sleepGlyphMs:1100,sleepReleaseMs:130,sleepLifeMs:840,sleepDriftX:16,sleepDriftY:32, playEveryMs:[900,2100], playMs:480, phone:{focus:140,back:66,front:100}, desktop:{focus:248,back:120,front:172}, huddle:{phone:66,desktop:150} } as const;

@@ -20,15 +20,15 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   const editor=first.locator('.statement-editor textarea').first();await editor.fill(text);await first.locator('.statement-editor').first().getByRole('button',{name:'Save statement'}).click();await expect(first.getByText('Saved.',{exact:true}).first()).toBeVisible();
   await expect(second.getByText('A concrete contribution for this rehearsal.',{exact:false})).toHaveCount(0);
   await first.request.post('/api/dev/time',{data:{now:feast.gatheringEndsAt}});
-  await first.goto(`http://127.0.0.1:5173/feasts/${feast.id}/read`);await expect(first.locator('.statement-text').filter({hasText:'A concrete contribution'})).toBeVisible();
+  await first.goto(`http://127.0.0.1:5173/feasts/${feast.id}/read`);await expect(first.locator('.statement-panel')).toBeVisible();for(let i=0;i<feast.targets.findIndex((t:{name:string})=>t.name==='Moss');i++)await first.locator('.statement-navigation button').last().click();await expect(first.locator('.statement-text').filter({hasText:'A concrete contribution'})).toBeVisible();
   expect(requests.some(url=>/(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(false);
   for(const [i,page]of pages.entries()){
    await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}/scatter`);
    await page.locator('.game-profile').click();await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
-   if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
+   if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.game-scene .portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
    const inputs=page.locator('.number-field input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }
-  const inputs=first.locator('.number-field input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.locator('.dock-turn').last().click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
+  const inputs=first.locator('.number-field input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:kind==='people'?'Fern':feast.targets[1].name,exact:true}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
   const {body:updated}=await readJson<{ownReceipts:unknown[];registration:{identity:string}}>(first,`/api/feasts/${feast.id}`);expect(updated.ownReceipts).toHaveLength(2);
   await first.screenshot({path:testInfo.outputPath('scatter-375.png'),fullPage:true});
   await first.request.post('/api/dev/time',{data:{now:feast.scatteringEndsAt}});

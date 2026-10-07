@@ -6,6 +6,7 @@ import { createReveal } from './reveal.js';
 import { createDirector } from './director.js';
 import { createMotion } from './motion.js';
 import { createCircleMotion } from './circle.js';
+import { tickDomFlights,DomFlight } from './dom-flights.js';
 import { createFlights } from './flights.js';
 export * from './traits.js';
 
@@ -207,10 +208,10 @@ export function createWorld(options: WorldOptions) {
     }
     for (const event of world.query(SoundEvent)) event.destroy();
   }
-  const systems = [clock, input, pour, pile, feast, expression, rig, circle.tick, flight, sound, render3d, render2d, sweep];
+  const systems = [clock, input, pour, pile, feast, expression, rig, circle.tick,()=>tickDomFlights(world), flight, sound, render3d, render2d, sweep];
   function tick(now: number) {
     if (!Number.isFinite(now) || (previous !== undefined && now < previous)) throw new RangeError('Tick time must be finite and monotonic');
     for (const system of systems) system(now);
   }
-  return { world, heap, critters, actions, circle, tick, isAnimating: () => director.playing() || circle.isAnimating() || motion.isAnimating() || world.query(Flight).length > 0, feastPresentation:director.presentation, destroy: () => { motion.destroy(); world.destroy(); } };
+  return { world, heap, critters, actions, circle, tick, isAnimating: () => director.playing() || circle.isAnimating() || motion.isAnimating() || world.query(Flight).length > 0 || world.query(DomFlight).length > 0, feastPresentation:director.presentation, destroy: () => { motion.destroy(); world.destroy(); } };
 }
