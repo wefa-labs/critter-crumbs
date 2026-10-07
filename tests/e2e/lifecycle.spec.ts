@@ -5,7 +5,7 @@ import { connectLocal, readJson } from './session.js';
 async function submit(page:Page) {
  await page.getByRole('button',{name:'Scatter These',exact:true}).click();
  await page.getByRole('dialog',{name:'Confirm your scatter'}).getByRole('button',{name:'Scatter These',exact:true}).click();
- await expect(page.locator('.scatter-done')).toBeFocused();
+ await expect(page.locator('.dock-scattered')).toBeFocused();
 }
 for(const kind of ['people','options'] as const)for(const simple of [true,false])test(`${kind} lifecycle in ${simple?'Simple view':'3D'} opens independently and exports the latest scatter`,async({browser,request},testInfo)=>{
  test.setTimeout(120000);
@@ -20,22 +20,22 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   const editor=first.locator('.statement-editor textarea').first();await editor.fill(text);await first.locator('.statement-editor').first().getByRole('button',{name:'Save statement'}).click();await expect(first.getByText('Saved.',{exact:true}).first()).toBeVisible();
   await expect(second.getByText('A concrete contribution for this rehearsal.',{exact:false})).toHaveCount(0);
   await first.request.post('/api/dev/time',{data:{now:feast.gatheringEndsAt}});
-  await first.goto(`http://127.0.0.1:5173/feasts/${feast.id}/read`);await expect(first.locator('.statement-panel')).toBeVisible();for(let i=0;i<feast.targets.findIndex((t:{name:string})=>t.name==='Moss');i++)await first.locator('.statement-navigation button').last().click();await expect(first.locator('.statement-text').filter({hasText:'A concrete contribution'})).toBeVisible();
+  await first.goto(`http://127.0.0.1:5173/feasts/${feast.id}/read`);await expect(first.locator('.phone-statement')).toBeVisible();for(let i=0;i<feast.targets.findIndex((t:{name:string})=>t.name==='Moss');i++)await first.locator('.dock-turn').last().click();await expect(first.locator('.statement-text').filter({hasText:'A concrete contribution'})).toBeVisible();
   expect(requests.some(url=>/(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(false);
   for(const [i,page]of pages.entries()){
    await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}/scatter`);
    await page.locator('.game-profile').click();await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
    if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.game-scene .portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
-   const inputs=page.locator('.number-field input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
+   const inputs=page.locator('.focus-count input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }
-  const inputs=first.locator('.number-field input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:kind==='people'?'Fern':feast.targets[1].name,exact:true}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
+  const inputs=first.locator('.focus-count input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:kind==='people'?'Fern':feast.targets[1].name,exact:true}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
   const {body:updated}=await readJson<{ownReceipts:unknown[];registration:{identity:string}}>(first,`/api/feasts/${feast.id}`);expect(updated.ownReceipts).toHaveLength(2);
   await first.screenshot({path:testInfo.outputPath('scatter-375.png'),fullPage:true});
   await first.request.post('/api/dev/time',{data:{now:feast.scatteringEndsAt}});
   await first.request.post('/api/dev/release-key',{data:{identity:updated.registration.identity}});
   for(const page of pages){await page.reload();await expect(page.locator('[data-result-hash]')).toBeVisible();const skip=page.getByRole('button',{name:'Skip to results',exact:true});if(await skip.isVisible())await skip.press('Enter');await expect(page.getByRole('heading',{name:'Results',exact:true})).toBeFocused();await expect(page.locator('h1')).toHaveCount(1);}
   const hash=await first.locator('[data-result-hash]').getAttribute('data-result-hash');expect(hash).toMatch(/^0x[0-9a-f]{64}$/);await expect(second.locator('[data-result-hash]')).toHaveAttribute('data-result-hash',hash!);
-  await expect(first.getByText('2 of 8 scattered · 200 crumbs in all',{exact:true})).toBeVisible();
+  await expect(first.locator('.results-list').getByText('2 of 8 scattered · 200 crumbs in all',{exact:true})).toBeVisible();
   const downloadPromise=first.waitForEvent('download');await first.getByRole('button',{name:'Download CSV',exact:true}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/^feast-.+-results\.csv$/);const path=await download.path();const csv=await readFile(path!,'utf8');expect(csv).toContain('critter,address,crumbs,share\r\n');expect(csv.trim().split('\r\n')).toHaveLength(feast.targets.length+1);
   await first.screenshot({path:testInfo.outputPath('results-375.png'),fullPage:true});expect(errors).toEqual([]);
  }finally{for(const context of contexts)await context.close();}

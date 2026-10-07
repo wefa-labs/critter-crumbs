@@ -17,11 +17,12 @@ test('statements remain private, cap safely, then reveal and read without WebGL 
   await page.reload(); await expect(page.getByRole('button', { name: 'Start reading', exact: true })).toBeFocused();
   await expect(page.locator('#announce')).toContainText('Statements are open');
   await page.getByRole('button', { name: 'Start reading', exact: true }).click();
-  await expect(page.locator('.statement-panel')).toBeVisible();for(let i=0;i<feast.targets.findIndex((t:{name:string})=>t.name===accounts[0].name);i++)await page.locator('.statement-navigation button').last().click();
-  await expect(page.getByRole('article', { name: `Read ${accounts[0].name}’s statement` })).toContainText('<script>Literal text</script>');
+  // Desktop keeps the focused critter's statement in the side panel; the dock's › steps through the circle.
+  await expect(page.locator('.panel-statement')).toBeVisible();for(let i=0;i<feast.targets.findIndex((t:{name:string})=>t.name===accounts[0].name);i++)await page.locator('.dock-turn').last().click();
+  await expect(page.getByRole('article', { name: accounts[0].name, exact: true })).toContainText('<script>Literal text</script>');
   await expect(page.locator('.statement-text script')).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'https://example.com/work', exact: true })).toHaveAttribute('href', 'https://example.com/work');
-  for(let i=feast.targets.findIndex((t:{name:string})=>t.name===accounts[0].name);i<7;i++)await page.locator('.statement-navigation button').last().click(); await expect(page.getByText('8 of 8', { exact: true })).toBeVisible();
+  for(let i=feast.targets.findIndex((t:{name:string})=>t.name===accounts[0].name);i<7;i++)await page.locator('.dock-turn').last().click(); await expect(page.locator('.panel-statement h2')).toHaveText(feast.targets[7].name);
   expect(errors).toEqual([]); expect(requests.some(url => /(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(false);
   await second.close();
 });
