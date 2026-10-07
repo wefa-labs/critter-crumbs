@@ -6,6 +6,18 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "4173", "--directory", "docs/pitch"],
       "port": 4173
+    },
+    {
+      "name": "scatter-layouts",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4184", "--directory", "docs/explorations/scatter-layouts"],
+      "port": 4184
+    },
+    {
+      "name": "app-screens",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4185", "--directory", "docs/explorations/app-screens"],
+      "port": 4185
     }
   ]
 }
