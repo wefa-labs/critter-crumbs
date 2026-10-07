@@ -40,7 +40,9 @@
     "test:api:neon": "node --env-file-if-exists=.env scripts/test-neon.mjs",
     "check:shutter": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/check-shutter.js",
     "deploy": "node --env-file-if-exists=.env scripts/deploy.mjs",
-    "check:tokens": "node scripts/generate-tokens.mjs --check"
+    "check:tokens": "node scripts/generate-tokens.mjs --check",
+    "screens:capture": "playwright test --config playwright.capture.config.ts",
+    "demo:record": "playwright test --config playwright.demo.config.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

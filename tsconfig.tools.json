@@ -28,6 +28,10 @@
     "tests/screens/**/*.ts",
     "tests/e2e/**/*.ts",
     "tests/api/**/*.ts",
-    "tests/deployment/**/*.ts"
+    "tests/deployment/**/*.ts",
+    "playwright.capture.config.ts",
+    "tests/capture/**/*.ts",
+    "playwright.demo.config.ts",
+    "tests/demo/**/*.ts"
   ]
 }
