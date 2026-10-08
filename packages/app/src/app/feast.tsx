@@ -30,13 +30,18 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   const phase = resource.data ? phaseAt(resource.data, trusted ?? resource.data.serverNow) : undefined;
   useEffect(() => { if (resource.data && phase !== resource.data.phase) resource.refresh(); }, [phase, resource.data?.phase]);
   const scatterScreen = path.endsWith('/read') || path.endsWith('/scatter');
+  /* the trusted clock has passed the deadline while the screen still holds the scattering feast: closed from this very
+     render, so the screen is never unmounted; the hold then keeps it a moment after the feast data arrives */
+  const passedOnScreen = scatterScreen && resource.data?.phase === 'scattering' && phase === 'feast';
   const [closing, setClosing] = useState(false), closingTimer = useRef<number | undefined>(undefined);
   useEffect(() => {
-    if (resource.data?.phase !== 'scattering' || phase !== 'feast' || !scatterScreen) return;
+    if (!passedOnScreen) return;
     setClosing(true); window.clearTimeout(closingTimer.current);
     closingTimer.current = window.setTimeout(() => setClosing(false), CLOSING_HOLD_MS);
-  }, [phase, resource.data?.phase]);
+  }, [passedOnScreen]);
   useEffect(() => () => window.clearTimeout(closingTimer.current), []);
+  /* the feast's screens load while scattering, so closing goes straight to the laid-out sheet with no loading flash */
+  useEffect(() => { if (phase === 'scattering' && me) void import('./results.js'); }, [phase, me]);
   /* the game's notices are not live regions; a failed refresh is read out through the polite announcer */
   const refreshFailure = resource.error ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
   useEffect(() => { if (refreshFailure) announce(refreshFailure); }, [refreshFailure]);
@@ -46,7 +51,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   /* one element in one place, so the scatter screen stays mounted as scattering closes under it */
   const scatter = (closed: boolean) => isMemberFeast(feast) && me ? <Suspense fallback={<p>{copy['app.loading']}</p>}><Scatter feast={feast} me={me} {...props} clearError={clearError} settings={settings} account={account} connect={connect} now={now} initialReading={path.endsWith('/read')} closed={closed} /></Suspense> : null;
   let content;
-  if (closing && isMemberFeast(feast) && me) content = scatter(true);
+  if ((passedOnScreen || closing) && isMemberFeast(feast) && me) content = scatter(true);
   else if (phase !== feast.phase) content = <p>{copy['app.loading']}</p>;
   else if (phase === 'cancelled') content = <p>{copy['feast.cancelled']}</p>;
   else if (phase === 'void') content = <p>{formatCopy('feast.tooFew', { feastTitle: feast.title })}</p>;
