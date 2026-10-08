@@ -1,0 +1,1040 @@
+<meta charset="utf-8">
+<title>Critter Crumbs Scatter Layouts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Josefin+Sans:wght@700&family=Lilita+One&family=Nunito:wght@600;800&family=Public+Sans:wght@400;600&family=Shippori+Mincho:wght@700&display=swap">
+<style>
+/* Layout: a sticky bar with state, burrow size, scene and device; one frame per look, side by side; then the
+   backgrounds to paint (guide, tools, prompts, a plate to try) and the notes. The chrome is neutral and follows the
+   viewer; the frames follow their look. */
+:root {
+  color-scheme: light;
+  --paper: #efede8; --card: #faf9f6; --ink: #1d1c1a; --ink-2: #5b5952; --ink-3: #85827a; --edge: #d9d6cd;
+  --hover: #e6e4dd; --chosen: #1d1c1a; --on-chosen: #ffffff; --bar: rgb(239 237 232 / .92); --bezel: #17160f; --focus: #1d1c1a;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; --paper: #151513; --card: #1e1e1b; --ink: #ecebe6; --ink-2: #b0ada4; --ink-3: #85827a; --edge: #36352f; --hover: #2a2a26; --chosen: #ecebe6; --on-chosen: #151513; --bar: rgb(21 21 19 / .92); --bezel: #000000; --focus: #ecebe6; }
+}
+:root[data-theme="dark"] { color-scheme: dark; --paper: #151513; --card: #1e1e1b; --ink: #ecebe6; --ink-2: #b0ada4; --ink-3: #85827a; --edge: #36352f; --hover: #2a2a26; --chosen: #ecebe6; --on-chosen: #151513; --bar: rgb(21 21 19 / .92); --bezel: #000000; --focus: #ecebe6; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.45 var(--font); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .9em; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--card); border: 1px solid var(--edge); border-radius: 12px; padding: 12px 14px; margin: 8px 0 0; line-height: 1.5; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 16px; background: var(--bar); backdrop-filter: blur(8px); border-bottom: 1px solid var(--edge); }
+.bar h1 { font-size: 1rem; font-weight: 600; margin-right: 4px; }
+.seg { display: inline-flex; gap: 2px; padding: 2px; margin: 0; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); }
+.seg legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.seg label { position: relative; display: block; }
+.seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.seg span { display: block; padding: 5px 12px; border-radius: 999px; font-size: .8125rem; white-space: nowrap; }
+.seg label:hover span { background: var(--hover); }
+.seg input:checked + span { background: var(--chosen); color: var(--on-chosen); }
+.seg input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+.segname { font-size: .72rem; color: var(--ink-2); margin-right: -8px; }
+.seg[hidden], .segname[hidden] { display: none; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.chips .lead { font-size: .75rem; color: var(--ink-2); margin-right: 2px; }
+.chip { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px 4px 9px; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); font-size: .8125rem; cursor: pointer; user-select: none; }
+.chip input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--ink-3); }
+.chip:has(input:checked) { border-color: var(--ink); }
+.chip:has(input:checked) .dot { background: var(--ink); border-color: var(--ink); }
+.hint { flex-basis: 100%; font-size: .75rem; color: var(--ink-2); }
+main { padding: 16px 16px 64px; }
+section + section { margin-top: 44px; }
+.section-head { max-width: 76ch; margin-bottom: 14px; }
+.section-head h2 { font-size: 1.2rem; font-weight: 650; }
+.section-head p { color: var(--ink-2); margin-top: 4px; }
+.panes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--pane-min, 320px)), 1fr)); gap: 14px; align-items: start; }
+.panes[data-device="desktop"] { --pane-min: 640px; }
+.pane { min-width: 0; background: var(--card); border: 1px solid var(--edge); border-radius: 16px; padding: 12px 12px 14px; }
+.pane[hidden] { display: none; }
+.pane-head { display: grid; gap: 2px; margin: 0 2px 10px; }
+.pane-head h3 { font-size: 1rem; font-weight: 650; }
+.pane-head p { font-size: .78rem; color: var(--ink-2); line-height: 1.4; }
+.phone { container-type: inline-size; display: flex; justify-content: center; }
+.phone-box { width: calc(var(--fw) * var(--s, 1)); height: calc(var(--fh) * var(--s, 1)); }
+.frame { width: var(--fw); height: var(--fh); overflow: hidden; border-radius: var(--fr); background: var(--bezel); box-shadow: 0 0 0 7px var(--bezel), 0 12px 32px rgb(0 0 0 / .22); transform: scale(var(--s, 1)); transform-origin: 0 0; }
+.pane[data-device="phone"] { --fw: 375px; --fh: 812px; --fr: 40px; }
+.pane[data-device="desktop"] { --fw: 1280px; --fh: 800px; --fr: 12px; }
+.prose { max-width: 76ch; }
+.prose p, .prose li { font-size: .92rem; line-height: 1.55; }
+.prose p + p { margin-top: 8px; }
+.prose ul { margin: 8px 0 0; padding-left: 20px; }
+.prose li + li { margin-top: 6px; }
+/* backgrounds: how a plate is laid out, the tools, a prompt per scene and device, and trying a plate in the frames */
+.bg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 20px 32px; align-items: start; max-width: 1120px; }
+.guide { margin: 0; display: grid; gap: 12px; }
+.guide figcaption { font-size: .8rem; color: var(--ink-2); max-width: 60ch; }
+.guides { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px; }
+.guides .g { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.guides .g-name { font-size: .75rem; color: var(--ink-2); }
+.gbox { position: relative; display: grid; border: 1.5px solid var(--ink); border-radius: 10px; overflow: hidden; background: var(--card); font-size: .72rem; line-height: 1.3; color: var(--ink-2); }
+.g-phone { width: 124px; aspect-ratio: 1 / 2; grid-template-rows: 17% 1fr 17%; }
+.g-desk { width: 300px; max-width: calc(100vw - 64px); aspect-ratio: 16 / 9; grid-template-rows: 20% 1fr 18%; }
+.tools ul + p { margin-top: 12px; }
+.gbox .b { display: grid; place-items: center; padding: 4px 8px; text-align: center; }
+.gbox .wall { background: color-mix(in srgb, var(--ink) 14%, var(--card)); color: var(--ink); font-weight: 600; }
+.gbox .dock { background: color-mix(in srgb, var(--ink) 7%, var(--card)); border-top: 1px dashed var(--ink-3); }
+.gbox .crop { position: absolute; top: 0; bottom: 0; width: 20%; background: repeating-linear-gradient(-45deg, transparent 0 5px, color-mix(in srgb, var(--ink) 18%, transparent) 5px 6px); }
+.gbox .crop.l { left: 0; border-right: 1px dashed var(--ink-3); }
+.gbox .crop.r { right: 0; border-left: 1px dashed var(--ink-3); }
+.prompt-ui { margin-top: 24px; display: grid; gap: 12px; max-width: 1120px; }
+.prompt-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.prompt-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+.pcard { min-width: 0; display: grid; gap: 6px; align-content: start; }
+.pc-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pc-head h3 { font-size: .95rem; font-weight: 650; }
+.pcard pre { margin: 0; }
+.copy { padding: 5px 12px; border: 1px solid var(--edge); border-radius: 999px; background: var(--card); font-size: .8rem; cursor: pointer; }
+.copy:hover { background: var(--hover); }
+.pnote { font-size: .8rem; color: var(--ink-2); max-width: 80ch; }
+.try { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; max-width: 1120px; }
+.try-label { font-weight: 600; font-size: .9rem; }
+.try .pnote { flex-basis: 100%; }
+
+/* ============================================================================================
+   Inside the frames. One type scale: 12 meta, 14 small, 16 body, 20 title, 28 count. Every colour,
+   face and shape is a look token (--l-*) set on the frame by script.
+   ============================================================================================ */
+.screen { position: relative; width: var(--fw); height: var(--fh); overflow: hidden; background: var(--l-page); color: var(--l-ink); font-family: var(--l-body); font-weight: var(--l-bw); font-size: 16px; line-height: 1.4; display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); -webkit-font-smoothing: antialiased; }
+.screen * { box-sizing: border-box; }
+.screen p { margin: 0; }
+.screen button { cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; font-family: inherit; color: inherit; }
+.screen .display { font-family: var(--l-display); font-weight: var(--l-dw); }
+.screen .num { font-variant-numeric: tabular-nums; }
+.screen .pill { height: 48px; padding: 0 22px; border-radius: var(--l-radius); border: var(--l-edge) solid var(--l-edge-colour); background: var(--l-action); color: var(--l-action-text); font-weight: 700; font-size: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--l-hard); transition: transform 140ms var(--ease); white-space: nowrap; }
+.screen .pill:active { transform: scale(.97); }
+.screen .pill.soft { background: var(--l-soft); color: var(--l-ink); }
+.screen .icon-btn { width: 44px; height: 44px; border-radius: 50%; border: var(--l-edge) solid var(--l-edge-colour); background: var(--l-soft); color: var(--l-ink); display: grid; place-items: center; padding: 0; box-shadow: var(--l-hard); flex: none; }
+.screen .icon-btn svg { width: 20px; height: 20px; }
+.screen .icon-btn.big { width: 52px; height: 52px; background: var(--l-action); color: var(--l-action-text); font-size: 28px; font-weight: 700; line-height: 1; }
+.screen .icon-btn.big.soft { background: var(--l-page); color: var(--l-ink); }
+.screen .icon-btn[aria-disabled="true"] { opacity: .4; cursor: default; }
+.screen .el { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--el-soft); color: var(--el-shadow); }
+.screen .el svg { width: 13px; height: 13px; }
+.screen .crumb .cf, .screen .crumb .ch { transition: opacity 160ms; }
+.screen [data-zero="true"] .crumb .cf, .screen [data-zero="true"] .crumb .ch { opacity: 0; }
+.screen [data-zero="true"] .crumb .co { stroke: var(--l-muted); stroke-dasharray: 2.4 2; }
+/* header: burrow and feast title; on desktop the closing day (or the feast summary) on the right */
+.screen .hdr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 16px; align-items: end; padding: 10px 16px 9px; background: var(--l-page); border-bottom: 1px solid var(--l-rule); z-index: 3; }
+.screen .hdr .burrow { grid-column: 1; font-size: 14px; font-weight: 700; color: var(--l-muted); line-height: 1.25; }
+.screen .hdr .title { grid-column: 1; font-size: 20px; line-height: 1.2; letter-spacing: -.01em; }
+.screen .hdr .when { grid-column: 2; grid-row: 1 / 3; align-self: center; font-size: 14px; color: var(--l-muted); text-align: right; }
+.screen .hdr .me { grid-column: -2; grid-row: 1 / 3; align-self: center; position: relative; width: 44px; height: 44px; padding: 0; border-radius: 50%; border: var(--l-edge-plate) solid var(--l-edge-colour); background: var(--l-soft); overflow: hidden; box-shadow: var(--l-hard-small); }
+.screen .hdr .me .critter { position: absolute; left: 50%; width: 84px; translate: -50% 0; }
+/* scene: a floor cropped from the painting, wall along the top, foliage in the corners */
+.screen .scene { position: relative; overflow: hidden; min-height: 0; background: var(--l-floor-base); touch-action: pan-y; }
+.screen .stage { position: absolute; inset: 0; overflow: hidden; perspective: 760px; background: var(--l-floor-base); }
+.screen .stage.plate { background-size: cover; background-position: center top; background-repeat: no-repeat; filter: var(--l-img-filter, none); }
+.screen .floorplane { position: absolute; left: -90%; width: 280%; top: var(--wallH); height: 320%; transform-origin: 50% 0; transform: rotateX(56deg); background-image: var(--floor); background-size: 560px auto; background-repeat: repeat; filter: var(--l-img-filter, none); }
+.screen .floorshade { position: absolute; inset: 0; background: linear-gradient(to bottom, rgb(20 10 10 / .55) var(--wallH), rgb(20 10 10 / .12) calc(var(--wallH) + 16%), transparent 66%); }
+.screen .wallband { position: absolute; left: 0; right: 0; top: 0; height: calc(var(--wallH) + 5%); background-image: var(--wall); background-size: cover; background-position: center 55%; filter: var(--l-img-filter, none); mask-image: linear-gradient(to bottom, #000 72%, transparent); -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); }
+.screen .corner { position: absolute; top: 0; width: 34%; height: 44%; background-size: cover; background-position: center; filter: var(--l-img-filter, none); }
+.screen .corner.l { left: 0; background-image: var(--cornerL); mask-image: radial-gradient(130% 120% at 0 0, #000 40%, transparent 70%); -webkit-mask-image: radial-gradient(130% 120% at 0 0, #000 40%, transparent 70%); }
+.screen .corner.r { right: 0; background-image: var(--cornerR); mask-image: radial-gradient(130% 120% at 100% 0, #000 40%, transparent 70%); -webkit-mask-image: radial-gradient(130% 120% at 100% 0, #000 40%, transparent 70%); }
+.screen .layer { position: absolute; inset: 0; pointer-events: none; }
+.screen .wash { background: var(--l-wash); }
+.screen .tint { background: var(--l-tint); mix-blend-mode: multiply; }
+.screen .light { background: var(--l-light); mix-blend-mode: screen; }
+.screen .grain { background-image: var(--grain); opacity: var(--l-grain, 0); mix-blend-mode: multiply; }
+.screen .dots { background-image: radial-gradient(circle at 1.5px 1.5px, var(--l-ink) 1.1px, transparent 1.6px); background-size: 7px 7px; opacity: var(--l-dots, 0); mix-blend-mode: multiply; }
+.screen .feastlight { background: radial-gradient(60% 50% at 50% 40%, rgb(242 221 142 / .5), transparent 70%); mix-blend-mode: screen; }
+/* your crumbs: a heap in the middle of the circle, drawn larger than a critter's pile, by the same rule as the piles.
+   Crumbs fly from it to a critter you give to and back to it when you take one back; it shrinks toward its base as
+   you give, and empty it leaves three faint outlines. The count stays in the bar. */
+.screen .heap { position: absolute; left: 0; top: 0; width: var(--hw, 150px); height: var(--hh, 110px); z-index: 1; display: grid; place-items: end center; transition: opacity 240ms var(--ease); pointer-events: none; }
+.screen .heap svg { display: block; height: auto; overflow: visible; transform-origin: 50% 100%; filter: drop-shadow(0 3px 2px rgb(0 0 0 / .25)); }
+.screen .heap.bump svg { animation: heapbump 260ms var(--ease); }
+@keyframes heapbump { 40% { scale: 1.06 .94; } }
+.screen[data-mode="read"] .heap { opacity: 0; }
+/* the circle: one spot per critter, placed by script; spots make no stacking context, so tags sit above every figure */
+.screen .spot { position: absolute; left: 0; top: 0; width: 80px; height: 100px; transition: left 320ms var(--ease), top 320ms var(--ease), width 320ms var(--ease), height 320ms var(--ease); }
+.screen .scene.still .spot { transition: none; }
+.screen .spot .fig { position: absolute; inset: 6% 12% 4%; z-index: var(--zf); cursor: pointer; line-height: 0; border-radius: 45%; }
+.screen .spot .fig .critter { position: absolute; left: -16%; top: -6%; width: 132%; height: 110%; display: block; overflow: visible; }
+.screen .spot .fig::before { content: ''; position: absolute; left: 50%; bottom: 0; width: 70%; height: 10px; translate: -50% 40%; border-radius: 50%; background: rgb(20 10 10 / .3); filter: blur(4px); }
+.screen .spot .pile { position: absolute; left: 54%; bottom: 2%; width: calc(var(--pw, 0) * 1%); z-index: var(--zp); pointer-events: none; line-height: 0; }
+.screen .spot .pile svg { width: 100%; height: auto; display: block; overflow: visible; }
+.screen .spot .tag { position: absolute; left: var(--tag-l, 0px); top: var(--tag-t, 100%); z-index: var(--zt); display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px 0 11px; border-radius: 999px; background: var(--l-page); color: var(--l-ink); border: var(--l-edge-plate) solid var(--l-edge-colour); font-size: 14px; font-weight: 800; line-height: 1; white-space: nowrap; box-shadow: 0 1px 2px rgb(0 0 0 / .22), var(--l-hard-small); transition: opacity 200ms var(--ease), left 320ms var(--ease), top 320ms var(--ease); }
+.screen .scene.still .spot .tag { transition: none; }
+.screen .spot .tag::after { content: ''; position: absolute; inset: -7px -2px; }
+.screen .spot .tag .tc { font-variant-numeric: tabular-nums; }
+.screen .spot .tag .short, .screen .spot .tag[data-short="true"] .full { display: none; }
+.screen .spot .tag[data-short="true"] .short { display: inline; }
+.screen .spot .tag[data-zero="true"] .tc { color: var(--l-muted); font-weight: 700; }
+.screen .spot .tag.own { color: var(--l-muted); font-weight: 700; }
+/* the phone names the critter in focus in the dock, so its tag goes; desktop keeps it, larger, without the count
+   (the count sits between − and + right under it) */
+.screen.d-phone .spot[data-slot="0"] .tag, .screen .spot .tag[data-covered="true"] { opacity: 0; pointer-events: none; }
+.d-desktop .spot[data-slot="0"] .tag { height: 36px; padding: 0 14px; font-size: 16px; }
+.d-desktop .spot[data-slot="0"] .tag .tc { display: none; }
+.screen.d-phone[data-crowd="true"] .spot .tag { height: 26px; padding: 0 8px 0 9px; font-size: 12px; gap: 4px; }
+.screen.d-phone[data-crowd="true"] .spot .tag::after { inset: -9px -2px; }
+/* the thought bubble beside the head of the critter in focus opens its statement (phone) */
+.screen .think { position: absolute; left: 0; top: 0; width: 52px; height: 44px; padding: 0; border: 0; background: transparent; z-index: 2950; filter: drop-shadow(0 2px 3px rgb(0 0 0 / .18)); transition: left 320ms var(--ease), top 320ms var(--ease), opacity 200ms var(--ease); }
+.screen .think svg { display: block; width: 100%; height: 100%; }
+.screen .scene.still .think, .screen .scene.still .trail i { transition: none; }
+.screen .trail i { position: absolute; display: block; border-radius: 50%; background: var(--l-page); border: var(--l-edge-plate) solid var(--l-edge-colour); box-shadow: var(--l-hard-small), 0 2px 5px rgb(0 0 0 / .14); z-index: 2900; transition: left 320ms var(--ease), top 320ms var(--ease), opacity 200ms var(--ease); }
+.screen[data-mode="read"] .think, .screen[data-mode="results"] .think, .screen:not([data-mode="read"]) .trail i { opacity: 0; pointer-events: none; }
+/* the dock: one surface holding the critter in focus (− name and count +) above the bar (‹ crumbs left ›),
+   lying over the bottom of the floor with a rounded top edge. At the feast, Results grows the same surface
+   upward into the results (phone); the critters sit on its top edge. */
+.screen .dock { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3000; height: var(--dock-h, 130px); display: flex; flex-direction: column; justify-content: flex-end; padding: 10px 16px 12px; background: var(--l-page); border-top: var(--l-edge) solid var(--l-edge-colour); border-radius: 22px 22px 0 0; box-shadow: 0 -6px 16px rgb(0 0 0 / .12); transition: height 320ms var(--ease); }
+.screen .scene.still ~ .dock { transition: none; }
+.screen .dock .bottom { flex: none; margin-top: 4px; }
+.screen .dock .focus { flex: none; }
+.screen .dock-results { flex: 1 1 0; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+.screen .dock-results:empty { display: none; }
+.screen .dock-results .rh { display: flex; align-items: center; gap: 8px; min-height: 48px; padding-left: 4px; }
+.screen .dock-results .rh .close { margin-left: auto; background: transparent; box-shadow: none; border-color: transparent; }
+/* the list fades out just above the bar while there is more to scroll; its last 28 px are padding, so the end of
+   the list always scrolls clear of the fade */
+.screen .dock-results .results { padding: 0 4px 28px; mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }
+/* the focus row keeps one height for every critter and state: two lines of 24 px, never wrapping */
+.screen .focus { display: grid; grid-template-columns: 52px minmax(0, 1fr) 52px; align-items: center; column-gap: 8px; height: 52px; padding: 0 40px; }
+.screen .focus[data-controls="false"] [data-minus], .screen .focus[data-controls="false"] [data-plus] { visibility: hidden; }
+.screen[data-mode="results"] .focus { display: none; }
+.screen .focus .fc { display: grid; grid-auto-rows: 24px; align-content: center; justify-items: center; min-width: 0; }
+.screen .focus .fc > * { max-width: 100%; line-height: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.screen .focus .fname { font-size: 20px; }
+.screen .focus .fname[data-size="16"] { font-size: 16px; }
+.screen .focus .fname[data-size="14"] { font-size: 14px; }
+.screen .think[data-side="left"] svg { transform: scaleX(-1); }
+.screen .focus .fcount { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.screen .focus .fcount[data-zero="true"] { color: var(--l-muted); }
+.screen .focus .fcount .fshare { font-size: 14px; font-weight: 600; color: var(--l-muted); }
+.screen .focus .fsub { font-size: 14px; color: var(--l-muted); font-weight: 600; text-align: center; }
+/* phone panels: the statement as a thought bubble at the top, over the back of the circle; the results as a sheet */
+.screen .panel { position: absolute; left: 12px; right: 12px; z-index: 2900; display: grid; grid-template-rows: auto minmax(0, 1fr); background: var(--l-page); border: var(--l-edge) solid var(--l-edge-colour); box-shadow: var(--l-hard), 0 6px 18px rgb(0 0 0 / .16); padding: 2px 4px 10px 16px; touch-action: pan-y; }
+.screen .panel.bubble { top: 12px; height: 378px; border-radius: 28px; transform-origin: 66% 100%; animation: think 240ms var(--ease); }
+@keyframes think { from { scale: .7; opacity: 0; } to { scale: 1; opacity: 1; } }
+@keyframes rise { from { translate: 0 24px; opacity: 0; } to { translate: 0 0; opacity: 1; } }
+.screen .panel .ph { display: flex; align-items: center; gap: 8px; min-height: 50px; }
+.screen .panel .ph .pos, .screen .side .pos { font-size: 12px; font-weight: 600; color: var(--l-muted); }
+.screen .panel .ph .close { margin-left: auto; background: transparent; box-shadow: none; border-color: transparent; }
+.screen .panel .pbody { overflow-y: auto; min-height: 0; padding: 0 10px 4px 0; font-size: 16px; line-height: 1.55; overscroll-behavior: contain; }
+.screen .pbody p + p, .screen .sbody p + p { margin-top: .7em; }
+/* the bar, inside the dock: ‹ and › never move; the middle is the crumbs left, then the one action, then the scattered state */
+.screen .bottom { display: grid; grid-template-columns: 48px minmax(0, 1fr) 48px; align-items: center; column-gap: 12px; min-height: 52px; }
+.screen .bottom .nav { width: 48px; height: 48px; border-radius: 50%; border: var(--l-edge) solid var(--l-edge-colour); background: var(--l-soft); color: var(--l-ink); display: grid; place-items: center; padding: 0; }
+.screen .bottom .nav svg { width: 22px; height: 22px; }
+.screen .bottom .mid { display: grid; justify-items: center; align-content: center; row-gap: 2px; min-width: 0; text-align: center; }
+.screen .bottom .mid .left { display: inline-flex; align-items: center; gap: 6px; }
+.screen .bottom .mid .crumb-ic { width: 24px; height: 24px; line-height: 0; }
+.screen .bottom .mid .n { font-size: 28px; font-weight: 800; line-height: 1; }
+.screen .bottom .mid .w { font-size: 14px; font-weight: 600; color: var(--l-muted); }
+.screen .bottom .mid .when { font-size: 12px; color: var(--l-muted); line-height: 1.25; }
+.screen .bottom .mid .go { width: 100%; max-width: 240px; }
+.screen .bottom .mid .done { font-size: 16px; font-weight: 800; line-height: 1.2; }
+.screen .toast { position: absolute; left: 50%; bottom: 144px; translate: -50% 0; width: max-content; max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 16px; background: var(--l-ink); color: var(--l-page); font-size: 14px; font-weight: 600; line-height: 1.3; text-align: center; z-index: 4000; pointer-events: none; animation: toast 2600ms var(--ease) forwards; }
+@keyframes toast { 0% { opacity: 0; translate: -50% 8px; } 8%, 86% { opacity: 1; translate: -50% 0; } 100% { opacity: 0; translate: -50% 0; } }
+/* results */
+.screen .results { display: grid; gap: 6px; align-content: start; overflow-y: auto; min-height: 0; padding: 0 10px 4px 0; }
+.screen .results .sum { font-size: 14px; color: var(--l-muted); margin: 0 2px 4px; }
+.screen .results .r { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 10px; padding: 4px 10px 4px 6px; border-radius: 16px; background: var(--l-page); }
+.screen .results .r .critter { width: 44px; }
+.screen .results .r .nm { font-weight: 700; font-size: 16px; }
+.screen .results .r .amt { font-weight: 800; font-size: 20px; display: grid; text-align: right; line-height: 1.1; }
+.screen .results .r .amt small { font-size: 12px; color: var(--l-muted); font-weight: 600; }
+/* the phone's two results actions share one row, half each, with their short labels */
+.screen .results .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 6px 0 2px; }
+.screen .results .acts .pill { min-width: 0; padding: 0 12px; }
+/* desktop: the circle on the left; the panel for the critter in focus always open on the right. The panel is
+   400 px up to 1600 px wide and a quarter of the width beyond, to 480 px. */
+.d-desktop { grid-template-columns: minmax(0, 1fr) var(--side-w, 400px); }
+.d-desktop .hdr { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto auto; padding: 12px 28px 10px; }
+.d-desktop .scene { grid-column: 1; grid-row: 2; }
+.d-desktop .dock { right: var(--side-w, 400px); }
+.d-desktop .focus { align-self: center; width: 336px; padding: 0; }
+.d-desktop .bottom { grid-template-columns: 48px 240px 48px; justify-content: center; column-gap: 24px; }
+.d-desktop .side { grid-column: 2; grid-row: 2; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; border-left: 1px solid var(--l-rule); background: var(--l-page); z-index: 6; }
+.d-desktop .side .sh { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 18px 24px 8px; }
+.d-desktop .side .sh .nm { font-size: 20px; line-height: 1.2; }
+.d-desktop .side .sh .pos { margin-left: auto; }
+.d-desktop .side .sbody { padding: 4px 24px 24px; overflow-y: auto; min-height: 0; font-size: 16px; line-height: 1.55; }
+.d-desktop .side .results { padding: 0 16px 28px 20px; mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }
+/* with the results open, Replay and Download CSV sit in a bar at the foot of the panel, level with the folded dock */
+.d-desktop .side .sbar { display: flex; align-items: center; justify-content: center; gap: 10px; height: 74px; padding: 0 16px; background: var(--l-page); border-top: var(--l-edge) solid var(--l-edge-colour); box-shadow: 0 -6px 16px rgb(0 0 0 / .12); }
+.d-desktop .side .sbar:empty { display: none; }
+/* critter animation */
+.critter .p-figure { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe 3.8s ease-in-out infinite; animation-delay: var(--d, 0s); }
+.critter .p-eye { transform-box: fill-box; transform-origin: 50% 50%; animation: blink 6.5s infinite; animation-delay: var(--d, 0s); }
+.critter .p-ear-r { animation: twitch 11s infinite; animation-delay: var(--d, 0s); transform-box: fill-box; transform-origin: 50% 100%; }
+.critter.asleep .p-figure { animation-duration: 5.2s; }
+.critter.hop .p-figure { animation: hop 320ms var(--ease); }
+.critter .p-cheek, .critter .p-smile { opacity: 0; transition: opacity 160ms; }
+.critter.delighted .p-cheek, .critter.delighted .p-smile { opacity: 1; }
+.critter.delighted .p-calm { opacity: 0; }
+@keyframes breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.012, 1.025); } }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(.08); } }
+@keyframes twitch { 0%, 90%, 100% { rotate: 0deg; } 92% { rotate: -9deg; } 95% { rotate: 5deg; } }
+@keyframes hop { 0% { transform: translateY(0) scale(1, 1); } 30% { transform: translateY(-9px) scale(.96, 1.06); } 70% { transform: translateY(0) scale(1.05, .95); } 100% { transform: translateY(0) scale(1, 1); } }
+/* results open: no tags or piles; the critters huddle on the top edge of the results and play. The script picks
+   one at random every half second or so: it turns to a neighbour and boops it while the neighbour turns back, or
+   it hops on the spot (startPlay). A critter facing left is mirrored. */
+.screen[data-mode="results"] .spot .tag, .screen[data-mode="results"] .spot .pile, .screen[data-mode="results"] .heap { opacity: 0; pointer-events: none; }
+.screen .spot[data-face="left"] .fig { transform: scaleX(-1); }
+/* the z's your own critter breathes out when you tap it */
+.screen .zz { position: absolute; z-index: 2960; font-family: var(--l-display); font-weight: 800; line-height: 1; color: var(--l-ink); text-shadow: 0 0 3px var(--l-page), 0 0 6px var(--l-page); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .critter, .critter *, .screen .panel, .screen .toast { animation: none !important; } .screen .spot, .screen .think, .screen .trail i, .critter * { transition: none !important; } }
+</style>
+
+<header class="bar">
+  <h1>Scatter layouts</h1>
+  <fieldset class="seg" id="state-seg"><legend>State</legend></fieldset>
+  <span class="segname">Critters</span><fieldset class="seg" id="size-seg"><legend>Critters</legend></fieldset>
+  <span class="segname">Piles</span><fieldset class="seg" id="pile-seg"><legend>Piles</legend></fieldset>
+  <span class="segname">Scene</span><fieldset class="seg" id="scene-seg"><legend>Scene</legend></fieldset>
+  <fieldset class="seg" id="device-seg"><legend>Device</legend></fieldset>
+  <span class="segname" id="desk-name">Size</span><fieldset class="seg" id="desk-seg"><legend>Desktop size</legend></fieldset>
+  <div class="chips" id="look-chips"><span class="lead">Looks</span></div>
+  <p class="hint" id="hint"></p>
+</header>
+
+<main>
+  <section id="panes" class="panes" aria-label="One frame per look"></section>
+
+  <section id="backgrounds" aria-labelledby="bg-title">
+    <div class="section-head"><h2 id="bg-title">Backgrounds to paint</h2><p>Today the circle stands on a floor cropped out of the paintings and tilted onto a plane, which blurs it. One painted plate per scene and device replaces that: the floor fills the frame and the wall runs only along the top, as in a top-down game room. The prompts keep the scene style the three paintings were made in (design directions §15).</p></div>
+    <div class="bg-grid">
+      <figure class="guide" aria-labelledby="guide-cap">
+        <div class="guides">
+          <div class="g"><div class="gbox g-phone"><span class="b wall">Wall</span><span class="b open">Open floor: the circle stands here. Low detail, even light</span><span class="b dock">Under the dock</span></div><span class="g-name">Phone, 1 : 2</span></div>
+          <div class="g"><div class="gbox g-desk"><span class="b wall">Wall, props against it</span><span class="b open">Open floor</span><span class="b dock">Under the dock</span><i class="crop l"></i><i class="crop r"></i></div><span class="g-name">Desktop, 16 : 9</span></div>
+        </div>
+        <figcaption id="guide-cap">The wall takes the top fifth (17 % of the scene on the phone, 20 % on desktop). The bottom sixth sits under the dock. On desktop the plate is cropped to the circle's side of the screen, so the hatched outer fifths may disappear: keep the round window and every prop inside the middle three fifths.</figcaption>
+      </figure>
+      <div class="prose tools">
+        <p><b>Tools, in the order to try them</b></p>
+        <ul>
+          <li><b>Midjourney V8.2</b> for the painting itself. It is still the strongest at painterly looks, and the earlier scenes came from it. Give the existing paintings as style references (<code>--sref</code>) so the plates match them; <code>--raw</code> makes it follow the layout more literally, <code>--hd</code> renders at 2048 px. V8 replaced <code>--oref</code> with the Edit model (up to four reference images) and <code>--style raw</code> with <code>--raw</code>.</li>
+          <li><b>Nano Banana Pro</b> (Gemini, or AI Studio) to turn an existing painting into the top-down view, or to fix a Midjourney plate by instruction ("move the table into the top-left corner"). It takes up to three style references and renders 9:16, 16:9 and 21:9 up to 4K.</li>
+          <li><b>GPT Images 2.5</b> (ChatGPT) when the layout must be exact: it follows placement instructions best, renders any size (1024 × 2048 for the phone), and edits by comment without repainting the rest.</li>
+          <li><b>Scenario</b> once four to eight plates are approved: train a style model on them (the paintings are WEFA's own) to paint the seasons and later scenes in exactly the same hand. Paid plans include a commercial licence.</li>
+          <li><b>Photoshop Generative Expand</b> (Firefly Image 5) to widen or heighten an approved plate for another screen size rather than repainting it.</li>
+        </ul>
+        <p>Paint each plate at twice the frame (750 × 1500 for the phone, 2560 × 1440 for desktop) and export WebP. Use a paid plan for anything that ships, and note the tool beside each file.</p>
+      </div>
+    </div>
+    <div class="prompt-ui">
+      <div class="prompt-pick"><span class="segname">Scene</span><fieldset class="seg" id="bg-scene-seg"><legend>Scene to paint</legend></fieldset><span class="segname">Tool</span><fieldset class="seg" id="bg-tool-seg"><legend>Prompt for</legend></fieldset></div>
+      <div class="prompt-cards">
+        <article class="pcard"><div class="pc-head"><h3>Phone</h3><button class="copy" type="button" data-copy="bg-phone">Copy</button></div><pre id="bg-phone"></pre></article>
+        <article class="pcard"><div class="pc-head"><h3>Desktop</h3><button class="copy" type="button" data-copy="bg-desktop">Copy</button></div><pre id="bg-desktop"></pre></article>
+      </div>
+      <p class="pnote" id="bg-note"></p>
+    </div>
+    <div class="try">
+      <label class="try-label" for="plate-file">Try a plate in the frames</label>
+      <input type="file" id="plate-file" accept="image/*">
+      <button class="copy" type="button" id="plate-clear" hidden>Back to the crops</button>
+      <p class="pnote">The image fills the scene behind the critters on the device shown above, wall at the top, cropped at the sides. It stays in this browser tab only.</p>
+    </div>
+  </section>
+
+  <section id="notes" aria-labelledby="notes-title">
+    <div class="section-head"><h2 id="notes-title">Pass eleven: your crumbs in the middle, desktop that scales</h2><p>Built from the review of pass ten (5 October 2026), on Inked daylight. Same seed, strings and looks in every frame.</p></div>
+    <div class="prose"><ul style="margin-top:0">
+      <li><b>Your crumb pile in the middle.</b> On both devices the crumbs you have left heap in the middle of the circle, about twice the size they were, drawn by the same rule as the critters' piles (the Piles control switches both). The heap keeps its place as you give, shrinking toward its base, and takes the height in the middle that covers least of the critters and tags around it. Empty, it leaves three faint outlines. The count stays in the bar, with Scatter These, Scattered. and Results after it, as before.</li>
+      <li><b>Crumbs fly both ways.</b> A crumb hops from the heap to the critter's pile when you give, and from the pile back onto the heap when you take one back; a hold pours a stream either way. On the phone, while the statement covers the heap, the crumbs fly from the crumb in the bar.</li>
+      <li><b>Your own critter stirs.</b> A tap on it no longer turns the circle to it: it turns over in its sleep with a little squash and three z's drift up, and the critter in focus stays in focus. At the feast a tap still brings any critter into focus.</li>
+      <li><b>Desktop controls centred.</b> − count + sits centred under the critter in focus again (pass ten's dock change had pushed it to the left).</li>
+      <li><b>The focused critter's tag on desktop.</b> It shows the whole name, a size larger, without the count, which sits between − and + right under it.</li>
+      <li><b>Whole names.</b> A tag shows the whole name (up to 16 characters) wherever it fits, and the 10-character form only where the whole name would cover a neighbour or a tag still to be placed. On desktop at 1440 and 1920 every name fits whole.</li>
+      <li><b>No background behind the statement.</b> On desktop the statement sits straight on the side panel.</li>
+      <li><b>Results buttons in one row on the phone.</b> Replay Feast and Download sit side by side at the end of the results, half the width each. Download still reads as "Download CSV" to a screen reader. Desktop says Replay Feast too, and keeps Download CSV.</li>
+      <li><b>A bar for the results on desktop.</b> With Results open, Replay Feast and Download CSV sit in a bar at the foot of the side panel, level with the folded dock, while the list scrolls above it under a fade.</li>
+      <li><b>Bigger critters that scale.</b> On desktop everything in the circle scales with the floor: at 1280 × 800 the critter in focus is 248 px (was 190) and the rest about a quarter larger; at 1440 × 900 and 1920 × 1080 they grow with the screen. Type and controls keep their size. The side panel is 400 px, and a quarter of the width on screens wider than 1600 px, up to 480. The Size control switches the desktop frame between the three sizes. With Results open the critters huddle larger on the folded dock.</li>
+      <li><b>From pass ten.</b> Results grows out of the dock on the phone, the critters huddle on its edge and play at random; tags centred above; a focus row that never changes height; piles beside each critter (Proportional or Exact); "You" on your critter; names up to 16 characters.</li>
+      <li><b>Still to design.</b> A short first-run hint that a tap on a critter gives a crumb and a hold pours (the existing <code>scatter.instruction</code> string); it goes into the onboarding on the screens page.</li>
+      <li><b>Still open.</b> Taking Inked daylight to the app; the gold button against D3; Proportional or Exact piles; the floor plate; decision lines for the circle in place of the grid (§6.2, §6.3), tokens (§3) and renderer version 2 (D8).</li>
+    </ul></div>
+  </section>
+</main>
+
+<script type="module">
+import { BURROW, FEAST, ISSUED, VIEWER, MEMBERS, ELEMENT, LOOKS, h, s, mix, applyLook, paragraphs, fill, FOOT, BOX_H, paint, crumbSvg, moundSize, moundSvg, elementChip, iconSvg, installDefs } from './lib/kit.js';
+installDefs();
+
+/* ------------------------------------------------------------------ copy, from packages/shared/src/copy.ts */
+const copy = {
+  'action.close': 'Close', 'action.settings': 'Settings',
+  'scatter.own.short': 'You', /* not in copy.ts: asked for on 2026-10-05 in place of "Your critter" on the tag */
+  'scatter.add': 'Give a crumb to {name}', 'scatter.remove': 'Take a crumb back from {name}', 'scatter.add.symbol': '+', 'scatter.remove.symbol': '−',
+  'scatter.count.label': 'Crumbs for {name}', 'scatter.statement.show': 'Show statement', 'scatter.statement.hide': 'Hide statement',
+  'scatter.own.label': 'Your critter', 'scatter.none.left': 'No crumbs left. Take some back to move them.',
+  'pile.label': 'Your crumbs', 'pile.remaining': '{n} to go',
+  'scatter.submit': 'Scatter These', /* copy.ts: "Scatter these"; Title Case requested, against §10.1 */
+  'scatter.done.title': 'Scattered.', 'scatter.done.body': 'You can change this until {scatteringDeadline}.',
+  'deadline.scattering': 'Scattering closes {relative}', 'deadline.absolute': '{weekday} {day} {month}, {time} ({tz})',
+  'read.prev': 'Previous', 'read.next': 'Next',
+  'results.title': 'Results', 'results.summary': '{scatterers} of {total} scattered · {totalCrumbs} crumbs in all', 'results.didNotScatter': "{names} didn't scatter.",
+  'results.received': '{n} crumbs received', 'results.private': 'Only the burrow can see these results.', 'results.export': 'Download CSV',
+  'feast.replay': 'Replay Feast', /* copy.ts: "Replay the feast"; Afolabi asked for "Replay Feast" on both devices, 2026-10-06 */
+  'results.export.short': 'Download', /* not in copy.ts: the phone's label, so its two buttons fit one row (2026-10-06) */
+};
+const plurals = { 'pile.remaining': ['n', '1 to go'] };
+const t = (id, params = {}) => { const plural = plurals[id]; const template = plural && new Intl.PluralRules('en').select(Number(params[plural[0]])) === 'one' ? plural[1] : copy[id]; return template.replace(/\{([^}]+)\}/g, (_, key) => String(params[key])); };
+
+const SIZES = [[4, '4'], [6, '6'], [8, '8'], [10, '10']];
+/* names: 16 characters at most (decided 2026-10-05); a longer ENS name is cut to 16 with an ellipsis.
+   A tag shows the whole name wherever it fits, and the first 10 characters only where the whole name would
+   cover a neighbour; the critter in focus always shows the whole name. */
+const NAME_LIMIT = 16, TAG_NAME = 10;
+const clip = (name, limit) => name.length > limit ? `${name.slice(0, limit - 1).trimEnd()}…` : name;
+function tagName(name) {
+  const full = clip(name, NAME_LIMIT), short = clip(name, TAG_NAME);
+  return h('span', { class: 'tn' }, h('span', { class: 'full' }, full), short === full ? null : h('span', { class: 'short' }, short));
+}
+const CLOSES_REL = t('deadline.scattering', { relative: 'in 2 days' });
+const CLOSES_ABS = t('deadline.absolute', { weekday: 'Wed', day: 7, month: 'Oct', time: '18:00', tz: 'PDT' });
+const percent = new Intl.NumberFormat('en', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const sum = list => list.reduce((a, b) => a + b, 0);
+/* largest remainder, so the seed always adds up; members with no weight stay at zero */
+function distribute(weights, total) {
+  const all = sum(weights); if (!all) return weights.map(() => 0);
+  const raw = weights.map(w => w / all * total), out = raw.map(Math.floor);
+  const order = raw.map((r, i) => [r - out[i], i]).filter(([, i]) => weights[i] > 0).sort((a, b) => b[0] - a[0]);
+  for (let j = 0, left = total - sum(out); left > 0; j++, left--) out[order[j % order.length][1]]++;
+  return out;
+}
+let cast = [], SEED = { start: [], done: [], received: [], skipped: null };
+function castFor(size) {
+  cast = MEMBERS.slice(0, size);
+  const zero = cast.find(m => m.name === 'Acorn') ?? [...cast].reverse().find(m => !m.own);
+  const startW = cast.map(m => m.own || m === zero ? 0 : m.weight), doneW = cast.map(m => m.own ? 0 : m === zero ? 8 : m.weight);
+  SEED = { start: distribute(startW, ISSUED - 12), done: distribute(doneW, ISSUED), received: distribute(cast.map(m => m.received), (size - 1) * ISSUED), skipped: zero };
+}
+
+/* ------------------------------------------------------------------ scenes */
+const SCENES = {
+  window: { name: 'Window', src: 'images/window.webp', floor: { x: .22, y: .72, w: .56, h: .28 }, wall: { x: 0, y: .2, w: 1, h: .52 }, cornerL: { x: 0, y: 0, w: .32, h: .55 }, cornerR: { x: .66, y: 0, w: .34, h: .62 }, hint: 'Inside, open to the sky.' },
+  entrance: { name: 'Entrance', src: 'images/entrance.webp', floor: { x: .24, y: .7, w: .5, h: .3 }, wall: { x: 0, y: .18, w: 1, h: .54 }, cornerL: { x: 0, y: 0, w: .3, h: .6 }, cornerR: { x: .7, y: 0, w: .3, h: .6 }, hint: 'The entrance by day.' },
+  dusk: { name: 'Dusk', src: 'images/dusk.webp', floor: { x: .1, y: .75, w: .8, h: .25 }, wall: { x: 0, y: .1, w: 1, h: .64 }, cornerL: { x: 0, y: 0, w: .4, h: .55 }, cornerR: { x: .6, y: 0, w: .4, h: .4 }, hint: 'Inside at dusk.' },
+};
+const STATES = [
+  ['scatter', 'Scattering', 'One circle, one critter in focus at the front, the crumbs you have left heaped in the middle. Tap any critter to give a crumb (it hops from the heap to the critter’s pile), hold to pour; − sends one back. Your own critter is asleep: a tap makes it stir and turn over. − and + belong to the one in focus; ‹ and ›, a swipe across the floor or a name tag turn the circle; on the phone, the thought bubble by its head opens what it wrote.'],
+  ['reading', 'Reading', 'The thought bubble opens at the top: the statement scrolls in a fixed box, the circle stays where it is, the critter in focus stays in view above the dock, and ‹ and › step through. A tap on the floor outside it closes it.'],
+  ['done', 'All given', 'Every crumb given: the heap is empty and the middle of the bar becomes "Scatter These". − still works on the critter in focus; with no crumbs left, a tap turns the circle to that critter instead of giving.'],
+  ['scattered', 'Scattered', 'After scattering: the middle reads "Scattered." with the closing day. Take one back and the count returns; give it elsewhere and "Scatter These" comes back.'],
+  ['feast', 'Feast', 'After the feast: everyone grown by what they received, the totals on their tags, Results in the middle of the bar. Results grows the dock into the results card and the critters huddle on its edge to play.'],
+];
+
+
+/* ------------------------------------------------------------------ scene assets: floors and walls cropped from the paintings */
+const assets = new Map();
+function cropToUrl(img, rect, mirror) {
+  const W = img.naturalWidth, H = img.naturalHeight, sx = rect.x * W, sy = rect.y * H, sw = rect.w * W, sh = rect.h * H;
+  const canvas = document.createElement('canvas'); canvas.width = Math.round(mirror ? sw * 2 : sw); canvas.height = Math.round(mirror ? sh * 2 : sh);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+  if (mirror) { ctx.save(); ctx.translate(sw * 2, 0); ctx.scale(-1, 1); ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh); ctx.restore(); ctx.save(); ctx.translate(0, sh * 2); ctx.scale(1, -1); ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh); ctx.restore(); ctx.save(); ctx.translate(sw * 2, sh * 2); ctx.scale(-1, -1); ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh); ctx.restore(); }
+  return new Promise(resolve => canvas.toBlob(blob => resolve(URL.createObjectURL(blob)), 'image/jpeg', .88));
+}
+function sceneAssets(key) {
+  if (assets.has(key)) return assets.get(key);
+  const sc = SCENES[key];
+  const promise = new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = sc.src; })
+    .then(async img => ({ floor: await cropToUrl(img, sc.floor, true), wall: await cropToUrl(img, sc.wall, false), cornerL: await cropToUrl(img, sc.cornerL, false), cornerR: await cropToUrl(img, sc.cornerR, false) }));
+  assets.set(key, promise);
+  return promise;
+}
+
+/* how many crumbs a mound of this many draws. Exact: one for every crumb. Proportional: one for every four, so
+   mounds keep their proportions without growing as large. */
+const crumbsFor = amount => amount <= 0 ? 0 : G.pile === 'exact' ? amount : Math.ceil(amount / 4);
+/* the crumbs you have given, heaped beside the critter's feet; the width is returned as a share of the critter's box */
+function pileSvg(look, amount) { const { svg, w } = moundSvg(look, crumbsFor(amount)); return { svg, width: amount > 0 ? w * 1.1 : 0 }; }
+/* your heap: the crumbs you have left, a mound larger than any pile; the count lives in the bar */
+function heapNode(pane) {
+  const node = h('div', { class: 'heap', 'aria-hidden': 'true' });
+  fillHeap(pane, node);
+  return node;
+}
+function fillHeap(pane, node) {
+  const left = remainingOf(pane), { svg, w } = moundSvg(pane.look, crumbsFor(left), true);
+  svg.style.width = `${(w * Number(node.dataset.ppu || 3.4)).toFixed(1)}px`;
+  node.replaceChildren(svg);
+  node.dataset.empty = String(left <= 0);
+}
+function fillPile(node, look, amount) { const { svg, width } = pileSvg(look, amount); node.replaceChildren(svg); node.style.setProperty('--pw', width.toFixed(1)); }
+
+/* ------------------------------------------------------------------ page state */
+const G = { state: 'scatter', size: 8, pile: 'proportional', scene: 'window', device: 'phone', desk: '1280', on: Object.fromEntries(LOOKS.map(l => [l.key, l.on])) };
+const PILES = [['proportional', 'Proportional', 'One drawn crumb for every four given'], ['exact', 'Exact', 'One drawn crumb for every crumb given']];
+/* desktop frames at three common sizes; the layout inside scales with the frame */
+const DESKS = { 1280: [1280, 800, '1280 × 800', 'A 13- or 14-inch laptop'], 1440: [1440, 900, '1440 × 900', 'A 15-inch laptop'], 1920: [1920, 1080, '1920 × 1080', 'A desktop monitor'] };
+const STORE = 'scatter-layouts:view-8';
+/* a background plate tried in the frames, per device; it lives only as long as the tab */
+const plates = {};
+try { const saved = JSON.parse(localStorage.getItem(STORE) ?? 'null'); if (saved) { for (const key of ['state', 'pile', 'scene', 'device', 'desk']) if (typeof saved[key] === 'string') G[key] = saved[key]; if (typeof saved.size === 'number') G.size = saved.size; if (saved.on) for (const [k, v] of Object.entries(saved.on)) if (k in G.on) G.on[k] = !!v; } } catch { /* fine */ }
+if (!STATES.some(([k]) => k === G.state)) G.state = 'scatter'; if (!SIZES.some(([k]) => k === G.size)) G.size = 8; if (!PILES.some(([k]) => k === G.pile)) G.pile = 'proportional'; if (!SCENES[G.scene]) G.scene = 'window'; if (!['phone', 'desktop'].includes(G.device)) G.device = 'phone'; if (!DESKS[G.desk]) G.desk = '1280';
+const hashState = location.hash.slice(1); if (STATES.some(([k]) => k === hashState)) G.state = hashState;
+function save() { try { localStorage.setItem(STORE, JSON.stringify(G)); } catch { /* fine */ } }
+const panes = new Map();
+const remainingOf = pane => ISSUED - sum(pane.local.given);
+const isScattered = pane => !!pane.local.submitted && remainingOf(pane) === 0 && pane.local.submitted.every((v, i) => v === pane.local.given[i]);
+const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const scaleOf = pane => Number(pane.phone.style.getPropertyValue('--s') || 1);
+
+/* ------------------------------------------------------------------ the circle's geometry, in scene pixels */
+/* the dock lies over the bottom of the scene; at rest the floor ends at its top edge. Results on the phone grows
+   it until this much floor is left above it, where the critters huddle on its edge. */
+const FOOT_AT = FOOT / BOX_H, DOCK_BASE = 130, RESULTS_FLOOR = 196, PANEL_BOTTOM = 12 + 378;
+function geometry(pane) {
+  const W = pane.sceneW, H = pane.sceneH, n = cast.length, floor = H - DOCK_BASE;
+  /* at the feast every critter grows by what it received, so the circle's spots shrink to make room */
+  const feast = pane.local.view === 'feast' ? .9 : 1;
+  if (G.device === 'desktop') {
+    /* everything scales with the floor: u is 1 in a 1280 × 800 window and grows with the screen. The back of the
+       circle sits a quarter of the way down the floor, leaving its tags room under the top edge; the critters either
+       side of the one in focus stand just clear of the dock. */
+    const u = Math.min(W / 880, floor / 606), room = (n > 8 ? .78 : 1) * feast;
+    const back = 120 * u * room, beside = Math.cos(2 * Math.PI / n), frontY = floor * .95;
+    /* the back row stands low enough for the tallest critter's tag to stay on the floor */
+    const backY = Math.max(floor * .22, back * 1.04 + 40), ry = Math.min((frontY - backY) / (1 + beside), floor * .4);
+    return { u, cx: W / 2, cy: backY + ry, rx: W * (n > 8 ? .44 : .42), ry, back, front: 172 * u * room, focus: { y: floor - 14 * u, size: 248 * u * feast }, heap: { ppu: 4.2 * u, maxW: 210 * u } };
+  }
+  const crowd = (n > 8 ? .8 : n > 6 ? .94 : 1) * feast;
+  /* the heap: 3.4 px per drawing unit, so each crumb is about 18 px, unless a full heap would be wider than 150 px */
+  return { u: 1, cx: W / 2, cy: floor * (n > 8 ? .475 : n > 6 ? .455 : .45), rx: W * .34, ry: floor * (n > 8 ? .32 : n > 6 ? .29 : .28), back: 66 * crowd, front: 100 * crowd, focus: { y: floor - 14, size: 140 }, heap: { ppu: 3.4, maxW: 150 } };
+}
+function slotAt(geo, slot, n) {
+  if (slot === 0) return { x: geo.cx, y: geo.focus.y, size: geo.focus.size, depth: 999 };
+  const angle = (90 - slot * 360 / n) * Math.PI / 180, sin = Math.sin(angle);
+  return { x: geo.cx + geo.rx * Math.cos(angle), y: geo.cy + geo.ry * sin, size: geo.back + (geo.front - geo.back) * (sin + 1) / 2, depth: Math.max(1, Math.round(geo.cy + geo.ry * sin)) };
+}
+/* results open: the critters huddle shoulder to shoulder on the top edge of the results, the front row sitting
+   with their feet just over the edge and a smaller back row peeking from the gaps behind them, everyone facing
+   the middle of the group. The edge is the grown dock on the phone and the dock under the circle on desktop. */
+function huddleAt(m, n, W, edge, desktop, u = 1) {
+  const front = n <= 5 ? n : Math.ceil(n / 2) + 1, back = n - front, crowd = n > 8 ? .88 : 1;
+  const size = (desktop ? 150 * u : 66) * crowd, step = size * .58, frontX = j => W / 2 + (j - (front - 1) / 2) * step;
+  if (m < front) { const x = frontX(m); return { x, y: edge + size * .1, size, depth: 3200 + m, face: x < W / 2 ? 'right' : 'left' }; }
+  const gap = Math.floor((front - 1 - back) / 2) + (m - front), x = (frontX(gap) + frontX(gap + 1)) / 2;
+  return { x, y: edge - size * .26, size: size * .9, depth: 3100 + m, face: x < W / 2 ? 'right' : 'left' };
+}
+function layoutRing(pane, animate = true) {
+  const scene = pane.screen.querySelector('.scene'); if (!scene || !scene.clientHeight) return;
+  pane.sceneW = scene.clientWidth; pane.sceneH = scene.clientHeight;
+  const geo = geometry(pane), n = cast.length, W = pane.sceneW, mode = pane.screen.dataset.mode, phone = G.device !== 'desktop';
+  const gathered = mode === 'results', read = mode === 'read';
+  const floorLimit = pane.sceneH - DOCK_BASE;
+  scene.classList.toggle('still', !animate || reduced.matches);
+  /* the dock grows into the results on the phone; on desktop, where the results fill the side panel, it folds
+   down to the bar alone. The critters sit on its top edge either way. */
+  const dockH = gathered ? (phone ? pane.sceneH - RESULTS_FLOOR : DOCK_BASE - 56) : DOCK_BASE;
+  pane.screen.querySelector('.dock')?.style.setProperty('--dock-h', `${dockH}px`);
+  const items = [];
+  for (const spot of scene.querySelectorAll('.spot')) {
+    const m = Number(spot.dataset.m), slot = (m - pane.local.focus + n) % n, p = gathered ? huddleAt(m, n, W, pane.sceneH - dockH, !phone, geo.u) : slotAt(geo, slot, n);
+    const w = Math.round(p.size), hh = Math.round(p.size * BOX_H / 120), left = p.x - w / 2, top = p.y - hh * FOOT_AT;
+    Object.assign(spot.style, { left: `${left.toFixed(1)}px`, top: `${top.toFixed(1)}px`, width: `${w}px`, height: `${hh}px` });
+    spot.style.setProperty('--zf', String(p.depth * 2)); spot.style.setProperty('--zp', String(p.depth * 2 + 1)); spot.style.setProperty('--zt', String(2000 + p.depth));
+    /* in the circle everyone faces front, except your own critter, which keeps the side it turned over to */
+    if (gathered) spot.dataset.face = p.face; else if (!cast[m].own) delete spot.dataset.face;
+    spot.dataset.slot = String(slot);
+    const art = spot.querySelector('svg.critter').dataset, tag = spot.querySelector('.tag'), box = spot.querySelector('.pile svg')?.viewBox.baseVal;
+    const pileW = (Number(spot.querySelector('.pile').style.getPropertyValue('--pw')) || 0) / 100 * w, pileH = box && box.width ? pileW * box.height / box.width : 0;
+    /* the tag's width with the whole name, and with the short one where the name has one */
+    tag.dataset.short = 'false';
+    const tw = tag.offsetWidth, th = tag.offsetHeight;
+    let tws = tw; if (tag.querySelector('.short')) { tag.dataset.short = 'true'; tws = tag.offsetWidth; tag.dataset.short = 'false'; }
+    items.push({ spot, slot, p, left, top, w, hh, hy: Number(art.hy), hr: Number(art.hr), tw, tws, th, hidden: slot === 0 && phone, fig: { l: left + Number(art.left) * w, r: left + Number(art.right) * w, t: top + Number(art.top) * hh, b: p.y + 3 }, pile: pileW ? { l: left + .54 * w, r: left + .54 * w + pileW, t: top + .98 * hh - pileH, b: top + .98 * hh } : null });
+  }
+  if (!animate) requestAnimationFrame(() => requestAnimationFrame(() => scene.classList.remove('still')));
+  if (gathered) return;
+  const focused = items.find(it => it.slot === 0), headR = focused.hr * focused.w, headY = focused.top + focused.hy * focused.hh;
+  const think = scene.querySelector('.think'), panelBottom = PANEL_BOTTOM, obstacles = items.filter(it => it.pile && it.slot !== 0).map(it => it.pile);
+  const overlap = (a, b) => Math.max(0, Math.min(a.r, b.r) - Math.max(a.l, b.l)) * Math.max(0, Math.min(a.b, b.b) - Math.max(a.t, b.t));
+  /* your heap sits in the middle of the circle, under the back row's feet and above the critter in focus (above its
+     tag on desktop, above its thought bubble on the phone). Its box is the size of a full heap, so it never moves as
+     you give; the crumbs shrink toward its base. Within the gap it takes the height that covers least of the critters
+     around it and of their tags as they would sit (short names, centred above the head); the middle breaks ties. */
+  const heap = scene.querySelector('.heap');
+  if (heap) {
+    const full = moundSize(crumbsFor(ISSUED)), top = geo.cy - geo.ry + 12 * geo.u;
+    const bottom = phone ? Math.min(focused.fig.t, headY - headR * 1.05 - 56) - 6 : focused.fig.t - 4 - focused.th - 12;
+    const ppu = Math.min(geo.heap.ppu, geo.heap.maxW / full.w, Math.max(1, bottom - top) / full.h), bw = full.w * ppu, bh = full.h * ppu;
+    const span = Math.max(0, bottom - top - bh), middle = top + span / 2;
+    const box = y => ({ l: geo.cx - bw / 2, r: geo.cx + bw / 2, t: y + bh * .2, b: y + bh });
+    const around = items.filter(it => it.slot !== 0).flatMap(it => [it.fig, { l: it.p.x - it.tws / 2, r: it.p.x + it.tws / 2, t: it.fig.t - 4 - it.th, b: it.fig.t - 4 }]);
+    let y = middle, least = Infinity;
+    for (let step = 0; step <= 10; step++) {
+      const at = top + span * step / 10, cost = around.reduce((sum, other) => sum + overlap(box(at), other), 0) + Math.abs(at - middle) * .5;
+      if (cost < least) { least = cost; y = at; }
+    }
+    Object.assign(heap.style, { left: `${(geo.cx - bw / 2).toFixed(1)}px`, top: `${y.toFixed(1)}px` });
+    heap.style.setProperty('--hw', `${bw.toFixed(1)}px`); heap.style.setProperty('--hh', `${bh.toFixed(1)}px`);
+    if (heap.dataset.ppu !== ppu.toFixed(3)) { heap.dataset.ppu = ppu.toFixed(3); fillHeap(pane, heap); }
+    if (!read) obstacles.push(box(y));
+  }
+  /* the thought bubble sits just above and right of the focused critter's head; open, a trail of three bubbles
+     rises from the head to the statement at the top (phone only) */
+  if (think) {
+    /* right of the head unless that side is crowded, then mirrored to the left */
+    const top0 = headY - headR * 1.05 - 40, right = Math.min(focused.p.x + headR * .55, W - 58), left = Math.max(focused.p.x - headR * .55 - 52, 6);
+    const crowding = (l, t) => items.reduce((sum, it) => it.slot === 0 ? sum : sum + Math.max(0, Math.min(l + 52, it.fig.r) - Math.max(l, it.fig.l)) * Math.max(0, Math.min(t + 44, it.fig.b) - Math.max(t, it.fig.t)), 0);
+    /* right of the head first, then mirrored to the left, then either side lifted a little; the least crowded wins */
+    const [side, l, bubbleTop] = [['right', right, top0, 0], ['left', left, top0, 40], ['right', right, top0 - 16, 60], ['left', left, top0 - 16, 100]]
+      .map(([s, x, y, bias]) => [s, x, y, crowding(x, y) + bias]).sort((a, b) => a[3] - b[3])[0];
+    think.dataset.side = side;
+    Object.assign(think.style, { left: `${l.toFixed(1)}px`, top: `${bubbleTop.toFixed(1)}px` });
+    if (!read) obstacles.push({ l, r: l + 52, t: bubbleTop, b: bubbleTop + 44 });
+    const from = { x: focused.p.x + headR * .8, y: headY - headR - 6 }, to = { x: Math.min(focused.p.x + headR + 36, W - 40), y: panelBottom + 6 };
+    [...scene.querySelectorAll('.trail i')].forEach((dot, i) => { const along = [.18, .5, .8][i], size = [8, 11, 15][i]; Object.assign(dot.style, { width: `${size}px`, height: `${size}px`, left: `${(from.x + (to.x - from.x) * along - size / 2).toFixed(1)}px`, top: `${(from.y + (to.y - from.y) * along - size / 2).toFixed(1)}px` }); });
+  }
+  const panel = read ? { l: 12, r: W - 12, t: 12, b: panelBottom } : null;
+  /* tags always sit centred above the head (decided 2026-10-05), so the pile at the feet stays clear. Front to back,
+     each tag rises a little where that covers less of the other critters, their piles, the tags already placed and
+     the thought bubble; it never slides sideways off its critter. A tag keeps the whole name unless the short name
+     covers clearly less. Tags under the open statement are hidden. */
+  const placed = [...obstacles], waiting = new Map(items.filter(it => !it.hidden).map(it => [it, { l: it.p.x - it.tws / 2, r: it.p.x + it.tws / 2, t: it.fig.t - 4 - it.th, b: it.fig.t - 4 }]));
+  for (const it of [...items].sort((a, b) => b.p.depth - a.p.depth)) {
+    const above = it.fig.t - 4 - it.th;
+    waiting.delete(it);
+    /* a whole name also has to leave room for the tags still to be placed, as they would sit with short names */
+    const place = (tw, roomForOthers) => {
+      const clampX = l => Math.min(Math.max(l, 6), W - 6 - tw);
+      const candidates = [[0, 0], [1, -8], [2, -16]].map(([bias, dy]) => [bias, clampX(it.p.x - tw / 2), above + dy]);
+      let best = null;
+      for (const [bias, l, t] of it.hidden ? candidates.slice(0, 1) : candidates) {
+        const box = { l, r: l + tw, t, b: t + it.th };
+        let cost = bias;
+        for (const other of items) if (other !== it) cost += overlap(box, other.fig) * (other.slot === 0 ? 3 : 1);
+        for (const taken of placed) cost += overlap(box, taken) * 4;
+        if (roomForOthers) for (const later of waiting.values()) cost += overlap(box, later) * 2;
+        if (box.t < 2) cost += (2 - box.t) * tw;
+        if (box.b > floorLimit) cost += (box.b - floorLimit) * tw * 2;
+        if (!best || cost < best.cost) best = { box, cost };
+      }
+      return best;
+    };
+    const canShort = it.tws < it.tw && !(it.slot === 0 && !phone);
+    const whole = place(it.tw, canShort), short = canShort && whole.cost > 40 ? place(it.tws, true) : null;
+    const useShort = !!short && short.cost < whole.cost - 20, best = useShort ? short : whole;
+    it.spot.querySelector('.tag').dataset.short = String(useShort);
+    it.spot.style.setProperty('--tag-l', `${(best.box.l - it.left).toFixed(1)}px`);
+    it.spot.style.setProperty('--tag-t', `${(best.box.t - it.top).toFixed(1)}px`);
+    const covered = !!panel && overlap(best.box, panel) > 0;
+    it.spot.querySelector('.tag').dataset.covered = String(covered);
+    if (!it.hidden && !covered) placed.push(best.box);
+  }
+}
+
+/* ------------------------------------------------------------------ interactions */
+function pressable(node, act) {
+  let timer = null, interval = null;
+  const stop = () => { clearTimeout(timer); clearInterval(interval); timer = interval = null; };
+  node.addEventListener('pointerdown', event => { if (event.button !== 0) return; event.preventDefault(); try { node.setPointerCapture(event.pointerId); } catch { /* fine */ } if (act() === false) return; timer = setTimeout(() => { interval = setInterval(() => { if (act() === false) stop(); }, 90); }, 300); });
+  for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) node.addEventListener(type, stop);
+  node.addEventListener('keydown', event => { if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) { event.preventDefault(); act(); } });
+}
+function swipeable(pane, node, ignore) {
+  let start = null;
+  node.addEventListener('pointerdown', event => { if (event.target.closest(ignore)) return; start = { x: event.clientX, y: event.clientY, id: event.pointerId }; });
+  node.addEventListener('pointerup', event => { if (!start || event.pointerId !== start.id) return; const dx = (event.clientX - start.x) / scaleOf(pane), dy = (event.clientY - start.y) / scaleOf(pane); start = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3) { node.swipedAt = event.timeStamp; turn(pane, dx < 0 ? 1 : -1); } });
+  node.addEventListener('pointercancel', () => { start = null; });
+}
+const figuresOf = (pane, m) => pane.screen.querySelectorAll(`.spot[data-m="${m}"] .critter`);
+function give(pane, m, delta) {
+  const local = pane.local, member = cast[m];
+  if (local.view === 'feast' || member.own) return false;
+  if (delta > 0 && remainingOf(pane) <= 0) return false;
+  if (delta < 0 && local.given[m] <= 0) return false;
+  local.given[m] += delta;
+  refresh(pane);
+  if (delta > 0) fly(pane, m); else { for (const fig of figuresOf(pane, m)) nudge(fig, false); fly(pane, m, true); }
+  return true;
+}
+/* a tap on a critter: give one; with nothing left to give, turn the circle to it instead. Your own critter never
+   takes the focus from a tap: it stirs in its sleep (stir). At the feast a tap turns the circle to any critter. */
+function tapCritter(pane, m) {
+  const local = pane.local;
+  if (pane.screen.dataset.mode === 'results') { const spot = pane.screen.querySelector(`.spot[data-m="${m}"]`); if (spot && !reduced.matches) animateCritter(spot, HOP, 420); return false; }
+  if (local.view === 'feast') { turnTo(pane, m); return false; }
+  if (cast[m].own) { stir(pane, m); return false; }
+  if (remainingOf(pane) <= 0) { if (local.focus !== m) turnTo(pane, m); else for (const fig of figuresOf(pane, m)) nudge(fig, false); toast(pane, copy['scatter.none.left']); return false; }
+  return give(pane, m, 1);
+}
+function turnTo(pane, m) {
+  if (pane.local.focus === m) return;
+  pane.local.focus = m;
+  layoutRing(pane, true); updateFocus(pane); updatePanel(pane);
+}
+function turn(pane, step) { const n = cast.length; turnTo(pane, (pane.local.focus + step + n) % n); }
+/* ring: the circle; read: the statement open at the top (phone); results: the results open, critters at play */
+const modeOf = pane => pane.local.sheet === 'results' ? 'results' : pane.local.sheet === 'statement' && G.device !== 'desktop' ? 'read' : 'ring';
+function setSheet(pane, sheet) {
+  pane.local.sheet = sheet;
+  pane.screen.dataset.mode = modeOf(pane);
+  if (G.device !== 'desktop') {
+    const scene = pane.screen.querySelector('.scene');
+    scene.querySelector('.panel')?.remove();
+    if (sheet === 'statement') scene.append(phonePanel(pane));
+  }
+  layoutRing(pane, true); updateFocus(pane); updatePanel(pane); syncPlay(pane);
+}
+/* results open: every half second or so one critter, picked at random, either turns to a neighbour and boops it
+   while the neighbour turns back and bounces, or hops on the spot and sometimes turns round. Stops when Results
+   closes; nothing moves with reduced motion. */
+const BOOP = [{ translate: '0 0', rotate: '0deg' }, { translate: '5px -2px', rotate: '8deg', offset: .3 }, { translate: '8px 0', rotate: '5deg', offset: .5 }, { translate: '0 -6px', rotate: '-3deg', offset: .78 }, { translate: '0 0', rotate: '0deg' }];
+const BOUNCE = [{ translate: '0 0', rotate: '0deg' }, { translate: '-3px -8px', rotate: '-6deg', offset: .45 }, { translate: '0 0', rotate: '0deg' }];
+const HOP = [{ translate: '0 0' }, { translate: '0 -12px', offset: .42 }, { translate: '0 0' }];
+function animateCritter(spot, frames, duration) { spot.querySelector('.critter')?.animate(frames, { duration, easing: 'cubic-bezier(.2,.8,.2,1)' }); }
+/* your own critter, asleep: a tap makes it squash, wobble and turn over in its sleep while three z's drift up from
+   its head; it stays where it is and the circle does not turn */
+const STIR = [{ translate: '0 0', scale: '1 1', rotate: '0deg' }, { translate: '0 3px', scale: '1.1 .88', rotate: '-5deg', offset: .22 }, { translate: '0 -5px', scale: '.94 1.07', rotate: '6deg', offset: .5 }, { translate: '0 0', scale: '1.04 .96', rotate: '-2deg', offset: .78 }, { translate: '0 0', scale: '1 1', rotate: '0deg' }];
+function stir(pane, m) {
+  const spot = pane.screen.querySelector(`.spot[data-m="${m}"]`), scene = pane.screen.querySelector('.scene');
+  if (!spot || !scene || reduced.matches) return;
+  spot.dataset.face = spot.dataset.face === 'left' ? 'right' : 'left';
+  animateCritter(spot, STIR, 720);
+  const art = spot.querySelector('svg.critter').dataset, w = parseFloat(spot.style.width), hh = parseFloat(spot.style.height);
+  /* the z's leave from beside the head and drift sideways toward the middle of the floor, clear of the tag above */
+  const cx = parseFloat(spot.style.left) + w * .5, side = cx > scene.clientWidth / 2 ? -1 : 1;
+  const x = cx + side * Number(art.hr) * w * .95 - (side < 0 ? 12 : 0), y = parseFloat(spot.style.top) + Number(art.hy) * hh - Number(art.hr) * w * .4;
+  scene.querySelectorAll(`.zz[data-m="${m}"]`).forEach(z => z.remove());
+  for (let i = 0; i < 3; i++) {
+    const z = h('span', { class: 'zz', 'data-m': m, 'aria-hidden': 'true', style: `left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;font-size:${14 + i * 4}px` }, 'z');
+    scene.append(z);
+    z.animate([{ translate: '0 0', opacity: 0 }, { translate: `${side * (8 + i * 9)}px ${-6 - i * 5}px`, opacity: 1, offset: .3 }, { translate: `${side * (20 + i * 16)}px ${-18 - i * 9}px`, opacity: 0 }], { duration: 1300, delay: 140 + i * 240, easing: 'ease-out', fill: 'both' }).finished.then(() => z.remove(), () => z.remove());
+  }
+}
+function syncPlay(pane) {
+  clearTimeout(pane.play); pane.play = null;
+  if (pane.screen.dataset.mode !== 'results' || reduced.matches) return;
+  const centre = spot => ({ x: parseFloat(spot.style.left) + parseFloat(spot.style.width) / 2, y: parseFloat(spot.style.top) + parseFloat(spot.style.height) });
+  const tick = () => {
+    if (!pane.screen.isConnected || pane.screen.dataset.mode !== 'results') return;
+    const spots = [...pane.screen.querySelectorAll('.spot')], a = spots[Math.floor(Math.random() * spots.length)], at = centre(a);
+    const near = spots.filter(b => { if (b === a) return false; const bt = centre(b); return Math.abs(bt.x - at.x) < parseFloat(a.style.width) * .95 && Math.abs(bt.y - at.y) < 40; });
+    if (near.length && Math.random() < .7) {
+      const b = near[Math.floor(Math.random() * near.length)], right = centre(b).x > at.x;
+      a.dataset.face = right ? 'right' : 'left'; b.dataset.face = right ? 'left' : 'right';
+      animateCritter(a, BOOP, 640); setTimeout(() => animateCritter(b, BOUNCE, 420), 260);
+    } else {
+      if (Math.random() < .4) a.dataset.face = a.dataset.face === 'left' ? 'right' : 'left';
+      animateCritter(a, HOP, 420);
+    }
+    pane.play = setTimeout(tick, 450 + Math.random() * 550);
+  };
+  pane.play = setTimeout(tick, 250);
+}
+function toast(pane, text) {
+  const scene = pane.screen.querySelector('.scene');
+  scene.querySelector('.toast')?.remove();
+  const node = h('div', { class: 'toast', role: 'status' }, text); scene.append(node);
+  setTimeout(() => node.remove(), 2700);
+}
+function nudge(fig, delighted) { fig.classList.remove('hop'); void fig.getBoundingClientRect(); fig.classList.add('hop'); if (delighted) { fig.classList.add('delighted'); clearTimeout(fig._t); fig._t = setTimeout(() => fig.classList.remove('delighted'), 900); } }
+/* a crumb hops from your heap to the critter's pile when you give, and from the pile back to the heap when you take
+   one back (Design System §7.4). While the statement covers the heap (phone), the crumb in the bar stands in for it. */
+function fly(pane, m, back = false) {
+  const screen = pane.screen, mound = screen.querySelector('.heap svg');
+  const home = (mound && screen.dataset.mode !== 'read' && mound.getBoundingClientRect().width ? mound : null) ?? screen.querySelector('.bottom .crumb-ic') ?? screen.querySelector('.bottom .mid');
+  const pile = screen.querySelector(`.spot[data-m="${m}"] .pile`);
+  const [source, target] = back ? [pile, home] : [home, pile];
+  const land = () => {
+    if (!back) { for (const fig of figuresOf(pane, m)) nudge(fig, true); return; }
+    const heap = screen.querySelector('.heap'); if (!heap) return;
+    heap.classList.remove('bump'); void heap.offsetWidth; heap.classList.add('bump');
+  };
+  if (!source || !target || reduced.matches) { land(); return; }
+  /* crumbs leave from and land a little below the middle of the heap, where most of its crumbs are */
+  const scale = scaleOf(pane), base = screen.getBoundingClientRect(), point = node => { const r = node.getBoundingClientRect(); return [(r.left + r.width / 2 - base.left) / scale - 10, (r.top + r.height * (node === mound ? .62 : .5) - base.top) / scale - 10]; };
+  const [x0, y0] = point(source), [x1, y1] = point(target);
+  const outer = h('div', { style: 'position:absolute;left:0;top:0;z-index:5000;pointer-events:none;width:20px;height:20px' }), inner = h('div', {}, crumbSvg(pane.look, 20)); outer.append(inner); screen.append(outer);
+  outer.animate([{ translate: `${x0}px ${y0}px` }, { translate: `${x1}px ${y1}px` }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+  inner.animate([{ translate: '0 0', rotate: '0deg' }, { translate: '0 -70px', rotate: '120deg', offset: .5 }, { translate: '0 0', rotate: '240deg' }], { duration: 320, easing: 'ease-in-out', fill: 'forwards' }).finished.then(() => { outer.remove(); land(); }).catch(() => outer.remove());
+}
+function refresh(pane) {
+  const local = pane.local, screen = pane.screen, left = remainingOf(pane);
+  for (const node of screen.querySelectorAll('[data-count]')) node.textContent = String(local.given[Number(node.dataset.count)]);
+  for (const node of screen.querySelectorAll('[data-zero-of]')) node.dataset.zero = String(local.given[Number(node.dataset.zeroOf)] <= 0);
+  if (local.view !== 'feast') for (const node of screen.querySelectorAll('.spot .pile')) fillPile(node, pane.look, local.given[Number(node.closest('.spot').dataset.m)]);
+  const m = local.focus;
+  screen.querySelector('[data-minus]')?.setAttribute('aria-disabled', String(local.given[m] <= 0));
+  screen.querySelector('[data-plus]')?.setAttribute('aria-disabled', String(left <= 0));
+  const mid = screen.querySelector('.bottom .mid'); if (mid) fillMiddle(pane, mid);
+  const heap = screen.querySelector('.heap'); if (heap) fillHeap(pane, heap);
+}
+
+/* ------------------------------------------------------------------ pieces */
+function header(pane) {
+  const desktop = G.device === 'desktop', feast = pane.local.view === 'feast', me = MEMBERS[VIEWER];
+  /* the profile button: your critter's face, cropped to the head */
+  const face = paint(me.params, pane.look.critter, {});
+  face.style.top = `${(22 - Number(face.dataset.hy) * 105).toFixed(1)}px`;
+  const profile = h('button', { class: 'me', 'aria-label': `${me.name} · ${copy['action.settings']}` }, face);
+  return h('div', { class: 'hdr' }, h('span', { class: 'burrow' }, BURROW), h('span', { class: 'title display' }, FEAST), desktop ? h('span', { class: 'when' }, feast ? summary() : `${CLOSES_REL} · ${CLOSES_ABS}`) : null, profile);
+}
+function summary() { return t('results.summary', { scatterers: cast.length - 1, total: cast.length, totalCrumbs: sum(SEED.received) }); }
+function spotNode(pane, m) {
+  const member = cast[m], local = pane.local, feast = local.view === 'feast', look = pane.look;
+  const art = paint(member.params, look.critter, { asleep: member.own && !feast, fed: feast ? Math.min(1, SEED.received[m] / sum(SEED.received) * cast.length / 2.5) ** .75 : 0, delighted: feast });
+  const fig = h('div', { class: 'fig', role: 'button', tabindex: 0, 'aria-label': member.own ? `${member.name}: ${copy['scatter.own.label']}` : feast ? member.name : t('scatter.add', { name: member.name }) }, art);
+  pressable(fig, () => tapCritter(pane, m));
+  const amount = feast ? SEED.received[m] : local.given[m];
+  const tag = member.own && !feast
+    ? h('button', { class: 'tag own', 'aria-label': `${member.name}: ${copy['scatter.own.label']}` }, h('span', { class: 'tn' }, copy['scatter.own.short']))
+    : h('button', { class: 'tag', 'data-zero-of': feast ? null : m, 'data-zero': String(amount <= 0), 'aria-label': `${member.name}, ${feast ? t('results.received', { n: amount }) : t('scatter.count.label', { name: member.name })}` }, tagName(member.name), h('span', { class: 'tc' }, h('span', feast ? {} : { 'data-count': m }, String(amount))));
+  tag.addEventListener('click', () => turnTo(pane, m));
+  const pile = h('div', { class: 'pile' });
+  if (!feast) fillPile(pile, look, amount);
+  return h('div', { class: 'spot', 'data-m': m }, fig, pile, tag);
+}
+function scene(pane) {
+  const local = pane.local, desktop = G.device === 'desktop';
+  const wallH = desktop ? '20%' : '17%', plate = plates[G.device];
+  /* a plate tried from the backgrounds section replaces the floor cropped from the paintings */
+  const stage = plate ? h('div', { class: 'stage plate', style: `background-image:url("${plate}")` })
+    : h('div', { class: 'stage', style: `--wallH:${wallH}` }, h('div', { class: 'floorplane' }), h('div', { class: 'floorshade' }), h('div', { class: 'wallband' }), h('div', { class: 'corner l' }), h('div', { class: 'corner r' }));
+  if (!plate) sceneAssets(G.scene).then(a => { if (!stage.isConnected) return; stage.style.setProperty('--floor', `url(${a.floor})`); stage.style.setProperty('--wall', `url(${a.wall})`); stage.style.setProperty('--cornerL', `url(${a.cornerL})`); stage.style.setProperty('--cornerR', `url(${a.cornerR})`); }).catch(() => {});
+  const node = h('div', { class: 'scene still' }, stage, h('div', { class: 'layer tint' }), h('div', { class: 'layer light' }), h('div', { class: 'layer wash' }), h('div', { class: 'layer dots' }), h('div', { class: 'layer grain' }));
+  if (local.view === 'feast') node.append(h('div', { class: 'layer feastlight' }));
+  else node.append(heapNode(pane));
+  for (let m = 0; m < cast.length; m++) node.append(spotNode(pane, m));
+  if (!desktop) {
+    const think = h('button', { class: 'think', 'aria-expanded': 'false' }, thinkSvg(pane.look));
+    think.addEventListener('click', () => setSheet(pane, 'statement'));
+    node.append(think, h('div', { class: 'trail', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')));
+    if (local.sheet === 'statement') node.append(phonePanel(pane));
+    /* a tap on the floor outside the open statement or the open results closes it; critters, tags and buttons
+       keep their own taps */
+    node.addEventListener('click', event => {
+      if (!local.sheet || event.target.closest('.panel, .fig, .tag, button')) return;
+      if (node.swipedAt && event.timeStamp - node.swipedAt < 400) return;
+      setSheet(pane, null);
+    });
+  }
+  swipeable(pane, node, '.fig, .tag, button, .panel');
+  return node;
+}
+/* the dock: the critter in focus above the bar, on one surface */
+function dock(pane) {
+  return h('div', { class: 'dock' }, h('div', { class: 'dock-results' }), focusRow(pane, G.device !== 'desktop'), bottomBar(pane));
+}
+/* a small thought cloud with three dots, trailing down to the left toward the head */
+function thinkSvg(look) {
+  const svg = s('svg', { viewBox: '0 0 52 44', 'aria-hidden': 'true' }), page = look.tokens.page, line = look.critter.line;
+  const puffs = [[22, 17, 11], [33, 14, 10], [42, 20, 8], [31, 25, 9], [17, 25, 7.5]];
+  for (const [cx, cy, r] of puffs) s('circle', { cx, cy, r, fill: page, stroke: line, 'stroke-width': 1.7 }, svg);
+  for (const [cx, cy, r] of puffs) s('circle', { cx, cy, r: r - 1, fill: page }, svg);
+  s('circle', { cx: 10, cy: 35, r: 3.6, fill: page, stroke: line, 'stroke-width': 1.5 }, svg);
+  s('circle', { cx: 4.5, cy: 40.5, r: 2.3, fill: page, stroke: line, 'stroke-width': 1.3 }, svg);
+  for (const cx of [23, 30, 37]) s('circle', { cx, cy: 19.5, r: 2, fill: line }, svg);
+  return svg;
+}
+function focusRow(pane, withName) {
+  const minus = h('button', { class: 'icon-btn big soft', 'data-minus': '' }, copy['scatter.remove.symbol']);
+  const plus = h('button', { class: 'icon-btn big', 'data-plus': '' }, copy['scatter.add.symbol']);
+  pressable(minus, () => give(pane, pane.local.focus, -1)); pressable(plus, () => give(pane, pane.local.focus, 1));
+  const row = h('div', { class: 'focus' }, minus, h('div', { class: 'fc' }), plus);
+  row.dataset.withName = String(withName);
+  return row;
+}
+function updateFocus(pane) {
+  const row = pane.screen.querySelector('.focus'); if (!row) return;
+  const local = pane.local, m = local.focus, member = cast[m], feast = local.view === 'feast', look = pane.look;
+  row.dataset.controls = String(!member.own && !feast);
+  row.querySelector('[data-minus]').setAttribute('aria-label', t('scatter.remove', { name: member.name }));
+  row.querySelector('[data-plus]').setAttribute('aria-label', t('scatter.add', { name: member.name }));
+  const parts = [], name = clip(member.name, NAME_LIMIT);
+  if (row.dataset.withName === 'true') parts.push(h('span', { class: 'fname display', title: member.name }, name));
+  /* at the feast the second line is the crumbs received and the share, on one line like the count while scattering */
+  if (feast) parts.push(h('span', { class: 'fcount', 'aria-label': `${t('results.received', { n: SEED.received[m] })}, ${percent.format(SEED.received[m] / sum(SEED.received))}` }, String(SEED.received[m]), h('span', { class: 'fshare' }, ` · ${percent.format(SEED.received[m] / sum(SEED.received))}`)));
+  else if (member.own) parts.push(h('span', { class: 'fsub' }, copy['scatter.own.short']));
+  else parts.push(h('span', { class: 'fcount', role: 'status', 'data-zero-of': m, 'data-zero': String(local.given[m] <= 0), 'aria-label': t('scatter.count.label', { name: member.name }) }, h('span', { 'data-count': m }, String(local.given[m]))));
+  row.querySelector('.fc').replaceChildren(...parts);
+  /* the name takes the largest size on the type scale that fits between − and + */
+  const nameNode = row.querySelector('.fname');
+  if (nameNode) for (const size of ['20', '16', '14']) { nameNode.dataset.size = size; if (nameNode.scrollWidth <= nameNode.clientWidth) break; }
+  const think = pane.screen.querySelector('.think');
+  if (think) { think.setAttribute('aria-label', `${member.name}: ${copy['scatter.statement.show']}`); think.setAttribute('aria-expanded', String(local.sheet === 'statement')); }
+  refresh(pane);
+}
+function phonePanel(pane) {
+  const close = h('button', { class: 'icon-btn close', 'aria-label': copy['action.close'] }, iconSvg('ic-x'));
+  close.addEventListener('click', () => setSheet(pane, null));
+  const panel = h('div', { class: 'panel bubble' }, h('div', { class: 'ph' }, h('span', { class: 'meta' }), close), h('div', { class: 'pbody' }));
+  swipeable(pane, panel, 'button');
+  return panel;
+}
+function updatePanel(pane) {
+  const local = pane.local, member = cast[local.focus], desktop = G.device === 'desktop';
+  const results = local.sheet === 'results';
+  if (desktop) {
+    const side = pane.screen.querySelector('.side'); if (!side) return;
+    fill(side.querySelector('.sh'), ...(results ? [h('span', { class: 'nm display' }, copy['results.title'])] : [h('span', { class: 'nm display' }, member.name), elementChip(member.params.element), member.own ? h('span', { class: 'pos' }, copy['scatter.own.short']) : null]));
+    side.querySelector('.sbody, .results')?.replaceWith(results ? resultsList(pane, false) : h('div', { class: 'sbody' }, paragraphs(member.statement)));
+    fill(side.querySelector('.sbar'), ...(results ? resultActions() : []));
+    return;
+  }
+  /* the results live in the grown dock, above the bar */
+  const tray = pane.screen.querySelector('.dock-results');
+  if (results) {
+    const close = h('button', { class: 'icon-btn close', 'aria-label': copy['action.close'] }, iconSvg('ic-x'));
+    close.addEventListener('click', () => setSheet(pane, null));
+    fill(tray, h('div', { class: 'rh' }, h('span', { class: 'display', style: 'font-size:20px' }, copy['results.title']), close), resultsList(pane));
+  } else tray?.replaceChildren();
+  const panel = pane.screen.querySelector('.panel'); if (!panel) return;
+  panel.querySelector('.meta').replaceChildren(elementChip(member.params.element));
+  panel.querySelector('.pbody')?.replaceWith(h('div', { class: 'pbody' }, paragraphs(member.statement)));
+}
+/* the ranked list; on the phone Replay and Download CSV close it, on desktop they sit in the panel's bar */
+function resultsList(pane, withActions = true) {
+  const total = sum(SEED.received), order = cast.map((member, m) => ({ member, m })).sort((a, b) => SEED.received[b.m] - SEED.received[a.m]);
+  return h('div', { class: 'results' }, h('p', { class: 'sum' }, summary(), h('br'), t('results.didNotScatter', { names: SEED.skipped.name })),
+    order.map(({ member, m }) => h('div', { class: 'r' }, paint(member.params, pane.look.critter, { size: 44, fed: Math.min(1, SEED.received[m] / total * cast.length / 2.5) ** .75 }), h('span', { class: 'nm' }, member.name), h('span', { class: 'amt num' }, String(SEED.received[m]), h('small', {}, percent.format(SEED.received[m] / total))))),
+    h('p', { class: 'sum', style: 'margin-top:6px' }, copy['results.private']), withActions ? h('div', { class: 'acts' }, resultActions(true)) : null);
+}
+/* Replay Feast on both devices; Download is "Download CSV" on desktop and "Download" on the phone, so the phone's two
+   fit one row, keeping "Download CSV" as its spoken name */
+function resultActions(short = false) {
+  return [h('button', { class: 'pill soft' }, copy['feast.replay']), h('button', { class: 'pill soft', 'aria-label': short ? copy['results.export'] : null }, copy[short ? 'results.export.short' : 'results.export'])];
+}
+function sidePanel() {
+  return h('div', { class: 'side' }, h('div', { class: 'sh' }), h('div', { class: 'sbody' }), h('div', { class: 'sbar' }));
+}
+function bottomBar(pane) {
+  const nav = (step, id, label) => { const button = h('button', { class: 'nav', 'aria-label': copy[label] }, iconSvg(id)); button.addEventListener('click', () => turn(pane, step)); return button; };
+  const mid = h('div', { class: 'mid', 'aria-live': 'polite' });
+  fillMiddle(pane, mid);
+  return h('div', { class: 'bottom' }, nav(-1, 'ic-left', 'read.prev'), mid, nav(1, 'ic-right', 'read.next'));
+}
+function fillMiddle(pane, mid) {
+  const local = pane.local, left = remainingOf(pane), desktop = G.device === 'desktop';
+  const kind = local.view === 'feast' ? 'feast' : left > 0 ? 'count' : isScattered(pane) ? 'scattered' : 'go';
+  if (kind === 'count' && mid.dataset.kind === 'count') { mid.querySelector('.n').textContent = String(left); mid.querySelector('.w').textContent = t('pile.remaining', { n: left }).replace(/^\d+\s*/, ''); return; }
+  mid.dataset.kind = kind;
+  if (kind === 'count') fill(mid, h('span', { class: 'left', 'aria-label': copy['pile.label'] }, h('span', { class: 'crumb-ic' }, crumbSvg(pane.look, 24)), h('span', { class: 'n num' }, String(left)), h('span', { class: 'w' }, t('pile.remaining', { n: left }).replace(/^\d+\s*/, ''))), desktop ? null : h('span', { class: 'when' }, CLOSES_REL));
+  else if (kind === 'go') { const go = h('button', { class: 'pill go' }, copy['scatter.submit']); go.addEventListener('click', () => { local.submitted = [...local.given]; refresh(pane); }); mid.replaceChildren(go); }
+  else if (kind === 'scattered') mid.replaceChildren(h('span', { class: 'done' }, copy['scatter.done.title']), h('span', { class: 'when' }, t('scatter.done.body', { scatteringDeadline: CLOSES_ABS })));
+  else { const results = h('button', { class: 'pill soft go' }, copy['results.title']); results.addEventListener('click', () => setSheet(pane, local.sheet === 'results' ? null : 'results')); mid.replaceChildren(results); }
+}
+
+/* ------------------------------------------------------------------ render */
+function render(pane) {
+  const desktop = G.device === 'desktop';
+  pane.screen.className = `screen d-${G.device} look-${pane.key}`;
+  pane.screen.dataset.mode = modeOf(pane);
+  pane.screen.dataset.crowd = String(cast.length > 6);
+  applyLook(pane.screen, pane.look);
+  if (desktop) pane.screen.style.setProperty('--side-w', `${Math.round(Math.min(480, Math.max(400, frameSize()[0] * .25)))}px`);
+  const parts = [header(pane), scene(pane)];
+  if (desktop) parts.push(sidePanel());
+  parts.push(dock(pane));
+  pane.screen.replaceChildren(...parts);
+  layoutRing(pane, false); updateFocus(pane); updatePanel(pane); syncPlay(pane);
+}
+function buildPane(look) {
+  const screen = h('div', { class: 'screen', 'aria-label': look.name });
+  screen.addEventListener('keydown', event => {
+    if (event.target.closest('input, textarea')) return;
+    const pane = panes.get(look.key);
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); turn(pane, event.key === 'ArrowRight' ? 1 : -1); }
+    else if (event.key === 'Escape' && pane.local.sheet && G.device !== 'desktop') { event.preventDefault(); setSheet(pane, null); }
+  });
+  const phone = h('div', { class: 'phone' }, h('div', { class: 'phone-box' }, h('div', { class: 'frame' }, screen)));
+  const pane = { key: look.key, look, screen, phone, local: { view: 'scatter', sheet: null, focus: 0, given: [], submitted: null } };
+  pane.root = h('article', { class: 'pane', 'data-device': G.device }, h('div', { class: 'pane-head' }, h('h3', {}, look.name), h('p', {}, look.thesis)), phone);
+  panes.set(look.key, pane);
+  return pane.root;
+}
+function setGlobalState(state) {
+  castFor(G.size);
+  for (const pane of panes.values()) {
+    const local = pane.local;
+    local.focus = 0; local.submitted = null;
+    local.view = state === 'feast' ? 'feast' : 'scatter';
+    local.sheet = state === 'reading' ? 'statement' : null;
+    local.given = state === 'done' || state === 'scattered' ? [...SEED.done] : [...SEED.start];
+    if (state === 'scattered') local.submitted = [...SEED.done];
+  }
+  renderAll();
+}
+const frameSize = () => G.device === 'desktop' ? DESKS[G.desk] : [375, 812];
+function renderAll() {
+  const [fw, fh] = frameSize();
+  document.getElementById('panes').dataset.device = G.device;
+  for (const pane of panes.values()) { pane.root.hidden = !G.on[pane.key]; pane.root.dataset.device = G.device; pane.root.style.setProperty('--fw', `${fw}px`); pane.root.style.setProperty('--fh', `${fh}px`); }
+  for (const id of ['desk-seg', 'desk-name']) document.getElementById(id).hidden = G.device !== 'desktop';
+  fitFrames();
+  for (const pane of panes.values()) if (!pane.root.hidden) render(pane);
+  document.getElementById('hint').textContent = `${STATES.find(([k]) => k === G.state)[2]} ${SCENES[G.scene].hint}`;
+}
+function fitFrames() { const [fw] = frameSize(); for (const pane of panes.values()) { if (pane.root.hidden) continue; pane.phone.style.setProperty('--s', Math.min(1, (pane.phone.clientWidth || fw) / fw).toFixed(4)); } }
+function segmented(id, name, options, value, onChange) { const seg = document.getElementById(id); for (const [key, label, hint] of options) { const input = h('input', { type: 'radio', name, id: `${name}-${key}`, value: key }); input.checked = key === value; input.addEventListener('change', () => { if (input.checked) onChange(key); }); seg.append(h('label', { title: hint ?? '' }, input, h('span', {}, label))); } }
+segmented('state-seg', 'state', STATES, G.state, key => { G.state = key; save(); try { history.replaceState(null, '', `#${key}`); } catch { /* fine */ } setGlobalState(key); });
+segmented('size-seg', 'size', SIZES, G.size, key => { G.size = Number(key); save(); setGlobalState(G.state); });
+segmented('pile-seg', 'pile', PILES, G.pile, key => { G.pile = key; save(); renderAll(); });
+segmented('scene-seg', 'scene', Object.entries(SCENES).map(([key, sc]) => [key, sc.name, sc.hint]), G.scene, key => { G.scene = key; save(); renderAll(); });
+segmented('device-seg', 'device', [['phone', 'Phone'], ['desktop', 'Desktop']], G.device, key => { G.device = key; save(); renderAll(); });
+segmented('desk-seg', 'desk', Object.entries(DESKS).map(([key, [, , label, hint]]) => [key, label, hint]), G.desk, key => { G.desk = key; save(); renderAll(); });
+const chips = document.getElementById('look-chips');
+for (const look of LOOKS) { const input = h('input', { type: 'checkbox', id: `show-${look.key}` }); input.checked = G.on[look.key]; input.addEventListener('change', () => { G.on[look.key] = input.checked; save(); renderAll(); }); chips.append(h('label', { class: 'chip' }, input, h('span', { class: 'dot', 'aria-hidden': 'true' }), look.name)); }
+const host = document.getElementById('panes');
+for (const look of LOOKS) host.append(buildPane(look));
+new ResizeObserver(fitFrames).observe(host);
+addEventListener('resize', fitFrames);
+setGlobalState(G.state);
+
+/* ------------------------------------------------------------------ the background prompts */
+/* the scene style the three paintings were made in (design directions §15), and the floor-first view */
+const SCENE_STYLE = 'illustrated like a background painting from a hand-drawn animated series: confident ink outlines of varying weight, pen hatching in the shadows on bark and stone, flat colour blocking with hard-edged cel shadow shapes, a visible pencil underdrawing left in place beneath the colour, a warm sunlit key light from the upper left, a sunlit cream ground with cool blue-teal cast shadows, saturated natural colours';
+const VIEW = 'a game background seen from high above at a steep three-quarter angle, looking down at the floor like the play area of a cosy top-down life-sim game; the back wall runs straight across the top of the frame and fills only the top fifth; the floor fills everything below it; the middle of the floor is open, flat and evenly lit, with large simple shapes and little detail, so small characters and their name labels read clearly on it; props stand only against the wall and in the top corners; the bottom of the frame is plain floor';
+const PLATES = {
+  window: { name: 'Window', file: 'scene-feast.webp', subject: 'the inside of a burrow under the roots of an old tree. Along the top, a back wall of cream stone blocks laced with twisting brown roots, a round opening in the middle onto bright blue sky with a few stone steps up to it, a stone shelf with two candles; against the wall, a low wooden table with a bowl of bread rolls and two clay bowls, an orange cushion and a clay jar. The floor: big pale cream flagstones with cool blue-grey shadows, moss and grass in the joints, and a soft pool of sunlight from the opening across the middle' },
+  entrance: { name: 'Entrance', file: 'scene-day.webp', subject: 'the sunlit terrace in front of a burrow. Along the top, the burrow’s face of cream and teal-green stone between the rust-orange roots of an old tree, a round stone window onto blue sky and a dark doorway; against the stone, a rough wooden table with a bowl and a woven basket. The floor: a terrace of cream flagstones with dry grass and moss creeping in at the edges and teal shadows cast by the roots' },
+  dusk: { name: 'Dusk', file: 'scene-dusk.webp', subject: 'the inside of the burrow at dusk. Along the top, a back wall of teal-blue stone with a mossy tree trunk running up one side and a round window glowing warm gold; against the wall, a lantern and a clay bowl on a low wooden bench with grass tufts at its feet. The floor: blue-teal flagstones with a warm pool of lantern light spreading across the middle' },
+};
+const FRAMES = {
+  phone: { ar: '--ar 1:2', words: 'a tall portrait image twice as tall as it is wide', keep: 'keep the round window and every prop within the middle of the width, nothing important in the outer tenth on either side' },
+  desktop: { ar: '--ar 16:9', words: 'a wide 16:9 landscape image', keep: 'keep the round window and every prop within the middle three fifths of the width; the outer fifth on either side is plain wall and floor' },
+};
+const TOOLS = [['midjourney', 'Midjourney V8.2', 'Parameters for Midjourney V8.2'], ['words', 'Nano Banana Pro or ChatGPT', 'Plain instructions, with the painting attached']];
+const TOOL_NOTES = {
+  midjourney: 'Upload the painting named after --sref to Midjourney and paste its link in place of the angle brackets; several links are fine. If the angle comes out too low, give a screenshot of the frame above as an image prompt, or take the best result to Nano Banana Pro and ask for a higher view.',
+  words: 'Attach the painting named in the first line. Nano Banana Pro: choose 9:16 for the phone and crop to 1 : 2, and 16:9 for desktop. ChatGPT: ask for 1024 × 2048 for the phone and 2048 × 1152 for desktop.',
+};
+const BG = { scene: 'window', tool: 'midjourney' };
+function platePrompt(scene, device, tool) {
+  const p = PLATES[scene], f = FRAMES[device];
+  if (tool === 'midjourney') return `${VIEW}; ${f.keep}. The scene: ${p.subject}. ${SCENE_STYLE}, environment art, no creatures, no people ${f.ar} --raw --s 80 --hd --sref <${p.file} link> --sw 300 --v 8.2 --no text, watermark, logo, signature, people, creatures, animals, characters`;
+  return `Attach: ${p.file}\n\nUse the attached painting as the style reference and match its ink outlines, hatching, flat colour and light. Paint a new background in that style, ${f.words}: ${VIEW}; ${f.keep}. The scene: ${p.subject}. No people, creatures, animals, characters, text or logos.`;
+}
+function fillPrompts() {
+  for (const device of ['phone', 'desktop']) document.getElementById(`bg-${device}`).textContent = platePrompt(BG.scene, device, BG.tool);
+  document.getElementById('bg-note').textContent = TOOL_NOTES[BG.tool];
+}
+segmented('bg-scene-seg', 'bgscene', Object.entries(PLATES).map(([key, p]) => [key, p.name]), BG.scene, key => { BG.scene = key; fillPrompts(); });
+segmented('bg-tool-seg', 'bgtool', TOOLS, BG.tool, key => { BG.tool = key; fillPrompts(); });
+fillPrompts();
+/* copy needs the click itself; where the clipboard is refused, the prompt is selected instead */
+for (const button of document.querySelectorAll('[data-copy]')) button.addEventListener('click', () => {
+  const pre = document.getElementById(button.dataset.copy), select = () => { const range = document.createRange(); range.selectNodeContents(pre); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range); };
+  const done = text => { button.textContent = text; setTimeout(() => { button.textContent = 'Copy'; }, 1600); };
+  try { navigator.clipboard.writeText(pre.textContent).then(() => done('Copied'), () => { select(); done('Selected'); }); } catch { select(); done('Selected'); }
+});
+/* trying a plate: the image fills the scene on the device shown */
+const plateFile = document.getElementById('plate-file'), plateClear = document.getElementById('plate-clear');
+plateFile.addEventListener('change', () => {
+  const file = plateFile.files?.[0]; if (!file) return;
+  if (plates[G.device]) URL.revokeObjectURL(plates[G.device]);
+  plates[G.device] = URL.createObjectURL(file);
+  plateClear.hidden = false;
+  renderAll();
+});
+plateClear.addEventListener('click', () => {
+  for (const key of Object.keys(plates)) { URL.revokeObjectURL(plates[key]); delete plates[key]; }
+  plateClear.hidden = true; plateFile.value = '';
+  renderAll();
+});
+</script>

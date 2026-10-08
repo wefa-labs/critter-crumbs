@@ -1,13 +1,16 @@
+import { critterVersion } from '../portraits/version.js';
 import type { World } from 'koota';
-import { Asleep, Identity, Mesh, Clock, Settings, createWorld, type WorldOptions, type GameSettings } from '../world/index.js';
+import { Asleep, Delight, Identity, Mesh, Clock, Settings, createWorld, type WorldOptions, type GameSettings } from '../world/index.js';
 import { renderPortraits } from '../portraits/index.js';
 import { createTickerHost } from './ticker-host.js';
+/** Long enough for a change of mood (lids, mouth, cheeks) to settle on the Clock. */
+const MOOD_CHANGE_MS = 400;
 export function createStageRuntime(options: WorldOptions) {
   const frames = new Set<(now: number) => void>();
   let alive = true;
   const disposers = new Set<() => void>();
   let renderer: ((world: World) => void) | undefined, idleMotion = true;
-  const game = createWorld({ ...options, outputs: { ...options.outputs, render2d: renderPortraits, render3d: world => renderer?.(world), hop: cue => { if (cue.from === 'feast' || !game.critters.some(entity => entity.get(Identity)!.id === cue.to && entity.has(Mesh))) options.outputs?.hop?.(cue); } } });
+  const game = createWorld({ critterVersion, ...options, outputs: { ...options.outputs, render2d: renderPortraits, render3d: world => renderer?.(world), hop: cue => { if (cue.from === 'feast' || !game.critters.some(entity => entity.get(Identity)!.id === cue.to && entity.has(Mesh))) options.outputs?.hop?.(cue); } } });
   let activeInput = false, animatedUntil = 0;
   const ticker = createTickerHost({ request: callback => requestAnimationFrame(callback), cancel: id => cancelAnimationFrame(id), stopInput: () => { activeInput = false; if (alive) { game.actions.suspend(); game.tick(game.world.get(Clock)!.now); } }, tick: now => {
     game.tick(now); for (const frame of frames) frame(now);
@@ -25,6 +28,13 @@ export function createStageRuntime(options: WorldOptions) {
     },
     onFrame(callback: (now: number) => void) { frames.add(callback); return () => { frames.delete(callback); }; },
     animateFor(milliseconds: number) { animatedUntil = Math.max(animatedUntil, game.world.get(Clock)!.now + milliseconds); ticker.setMode('continuous'); },
+    /** A moment's mood for every critter but your own: delighted when statements open, asleep when scattering closes. The feast sets its own expressions, so delight waits until it is over. */
+    setMood(mood: 'awake' | 'asleep' | 'delighted') {
+      if (mood === 'asleep') { if (game.critters.some(entity => !entity.has(Asleep))) { game.actions.fallAsleep(); this.animateFor(MOOD_CHANGE_MS); } return; }
+      const delighted = mood === 'delighted' && !game.feastPresentation();
+      if ((game.world.get(Delight)?.level ?? 0) > 0 === delighted) return;
+      game.actions.delight(delighted); this.animateFor(MOOD_CHANGE_MS);
+    },
     input(held: boolean) { activeInput = held; ticker.setMode('continuous'); ticker.invalidate(); },
     setSettings(settings: GameSettings) { game.actions.setSettings(settings); ticker.setMode('continuous'); ticker.invalidate(); },
     destroy() { if (!alive) return; ticker.destroy(); for (const dispose of disposers) dispose(); disposers.clear(); frames.clear(); alive = false; game.destroy(); },

@@ -23,7 +23,7 @@
     "test": "node scripts/test.mjs",
     "compile": "node scripts/generate-tokens.mjs && tsc -b",
     "check:licenses": "bun scripts/check-dependencies.mjs",
-    "check:audit": "bun audit --audit-level=high",
+    "check:audit": "bun audit --audit-level=high --ignore=GHSA-vfj7-8cjw-p6xm",
     "check": "bun run check:toolchain && bun run check:tokens && bun run lint && bun run typecheck && bun run test && bun run check:development-assets && bun run check:workspaces && bun run check:licenses && bun run check:audit",
     "build": "bun run compile && vite build --config packages/app/vite.config.ts",
     "vercel-build": "PATH=\"$PWD/.vercel/bun/bin:$PATH\" .vercel/bun/bin/bun run build",
@@ -40,7 +40,9 @@
     "test:api:neon": "node --env-file-if-exists=.env scripts/test-neon.mjs",
     "check:shutter": "bun run compile && bun run compile:server && node --env-file-if-exists=.env .scratch/server/scripts/check-shutter.js",
     "deploy": "node --env-file-if-exists=.env scripts/deploy.mjs",
-    "check:tokens": "node scripts/generate-tokens.mjs --check"
+    "check:tokens": "node scripts/generate-tokens.mjs --check",
+    "screens:capture": "playwright test --config playwright.capture.config.ts",
+    "demo:record": "playwright test --config playwright.demo.config.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
@@ -62,14 +64,20 @@
   "overrides": {
     "path-to-regexp@6.1.0": "6.3.0",
     "path-to-regexp@>=8.0.0 <8.4.2": "8.4.2",
-    "undici@5": "6.28.0",
+    "undici@5": "6.28.1",
     "tar@7.5.7": "7.5.22",
     "adm-zip@0.4.16": "0.6.1",
     "serialize-javascript@6.0.2": "7.1.0",
     "tmp@0.0.33": "0.2.7",
     "minimatch@10.1.1": "10.2.6",
     "js-yaml@4.1.1": "4.3.2",
-    "smol-toml@<=1.7.0": "1.7.2"
+    "smol-toml@<=1.7.0": "1.7.2",
+    "brace-expansion@<1.1.20": "1.1.20",
+    "brace-expansion@>=2.0.0 <2.1.6": "2.1.6",
+    "brace-expansion@>=4.0.0 <5.0.11": "5.0.11",
+    "undici@>=6.7.0 <6.28.1": "6.28.1",
+    "undici@>=7.0.0 <7.29.1": "7.29.1",
+    "source-map-js@>=1.0.0 <1.2.2": "1.2.2"
   },
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",

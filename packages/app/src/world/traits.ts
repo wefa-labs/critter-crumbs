@@ -1,5 +1,5 @@
 import { relation, trait } from 'koota';
-import { generate } from '@critter-crumbs/core';
+import { generateCritter } from '@critter-crumbs/core';
 import type { Phase as FeastPhase } from '@critter-crumbs/shared';
 import type { Group } from 'three';
 
@@ -14,7 +14,7 @@ export const SoundEvent = trait({ token: 'ui.tap' as SoundToken, pitchStep: 0, l
 export const Hop = trait({ from: '', to: '', reverse: false });
 export const IsOwn = trait();
 export const Asleep = trait();
-export const Identity = trait({ id: '', address: '', variant: 0, seed: '', parameters: () => generate(`0x${'0'.repeat(40)}`, 0) });
+export const Identity = trait({ id: '', address: '', variant: 0, seed: '', parameters: () => generateCritter(`0x${'0'.repeat(40)}`, 0) });
 export const Name = trait({ display: '' });
 export const Owner = trait({ address: '' });
 export const Phase = trait({ name: 'scattering' as FeastPhase, gatheringEndsAt: 0, scatteringEndsAt: 0 });
@@ -32,3 +32,5 @@ export const Flight = trait({ t: 0, x: 0, y: 0, z: 0, startX: -1, startY: 0, sta
 export const FlyingTo = relation({ autoDestroy: 'source' });
 
 export const StatementReveal = trait({ daylight: 0, ready: false });
+/** A mood every awake critter shows at least, as when statements open (flow page, screen 34). */
+export const Delight = trait({ level: 0 });

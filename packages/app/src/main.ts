@@ -5,7 +5,11 @@ import { App } from './app/app.js';
 import { copy } from '@critter-crumbs/shared';
 document.title = copy['app.name'];
 const root = document.getElementById('root')!;
-if (import.meta.env.DEV && location.pathname.startsWith('/__preview/portraits')) {
+if (import.meta.env.DEV && location.pathname === '/dev/screens') {
+  const { ScreenGallery } = await import('./dev/screens.js');
+  const reactRoot = createRoot(root); reactRoot.render(createElement(ScreenGallery));
+  import.meta.hot?.dispose(() => reactRoot.unmount());
+} else if (import.meta.env.DEV && location.pathname.startsWith('/__preview/portraits')) {
   const { mountPortraitWorkshop } = await import('./dev/portraits.js');
   const dispose = mountPortraitWorkshop(root);
   import.meta.hot?.dispose(dispose);

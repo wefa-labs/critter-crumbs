@@ -12,9 +12,10 @@ export const clockAdapters = new Set([
   'packages/core/src/api-client/clock-offset.ts',
 ]);
 const structuralAttributes = new Set([
-  'id', 'className', 'type', 'name', 'role', 'href', 'src', 'target', 'rel',
+  'style', 'id', 'className', 'type', 'name', 'role', 'href', 'src', 'target', 'rel',
   'scope', 'htmlFor', 'autoComplete', 'autoCapitalize', 'inputMode', 'method', 'action', 'loading',
   'width', 'height', 'size', 'pattern', 'phase', 'viewBox', 'fill', 'stroke', 'd', 'tabIndex',
+  'patternUnits', 'x', 'y', 'transform', 'cx', 'cy', 'r', 'rx', 'ry', 'opacity', 'strokeWidth', 'strokeLinejoin', 'strokeDasharray', 'preserveAspectRatio',
 ]);
 const staticString = (node) => {
   if (typeof node?.value === 'string') return node.value;
@@ -129,14 +130,15 @@ export default {
             if (callee === 'includes' && programStates.has(value) && parent.callee.object === current) return true;
             if (callee === 'play' && argument === 0 && ['connect', 'reroll', 'ui.tap', 'crumb.add', 'crumb.remove', 'pour.hold', 'pour.reverse', 'pile.wall', 'pile.empty', 'statement.open', 'scatter.confirm', 'statements.reveal', 'feast.open', 'feast.feed', 'feast.settle', 'error'].includes(value)) return true;
             if (callee === 'scrollIntoView' && argument === 0) return true;
-            if (callee === 'createPortrait' && argument === 2 && node.parent.type === 'Property' && node.parent.key.name === 'size' && value === 'stage') return true;
+            if (['createPortrait', 'paintCritter'].includes(callee) && argument === 2 && node.parent.type === 'Property' && node.parent.key.name === 'size' && value === 'stage') return true;
             if (callee === 'formatCopy' && argument === 0 && copyIds.has(value)) return true;
             if (['addEventListener', 'removeEventListener', 'PopStateEvent', 'getElementById', 'closest', 'querySelector', 'querySelectorAll', 'matchMedia', 'setProperty'].includes(callee) && argument === 0) return true;
-            if (['get', 'write', 'navigate', 'endsWith'].includes(callee) && argument === 0 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
+            if (['get', 'write', 'navigate', 'endsWith', 'fetch'].includes(callee) && argument === 0 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
             if (callee === 'useResource' && argument === 1 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
             if (callee === 'write' && argument === 1 && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(value)) return true;
             if (callee === 'writeText' && argument === 0 && node.type === 'TemplateLiteral' && node.expressions[0]?.type === 'MemberExpression' && node.expressions[0].object.name === 'location' && node.expressions[0].property.name === 'origin') return true;
           }
+          if (parent.type === 'Property' && parent.key.name === 'critterVersion' && ['1','2'].includes(value)) return true;
           if (parent.type === 'Property' && parent.key === current && !parent.computed) return true;
           if (parent.type === 'MemberExpression' && parent.object.name === 'copy' && parent.property === current) return true;
           if (parent.type === 'CallExpression' && parent.callee.name === 'copy') return true;

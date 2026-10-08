@@ -1,8 +1,7 @@
-import { DOM_HOP, REPLY } from '@critter-crumbs/shared';
+import { REPLY } from '@critter-crumbs/shared';
 import type { HopCue } from '../world/index.js';
-import { hopPosition, hopProgress } from './hop-geometry.js';
-import { tokens } from '../styles/tokens.js';
-const DOM_HOP_MS = Number.parseFloat(tokens['dur-2']);
+import type {Entity,World} from 'koota';
+import {DomFlight,spawnDomFlight} from '../world/dom-flights.js';
 const ns = 'http://www.w3.org/2000/svg';
 const shape = 'M-6-3 -1-6 5-4 7 1 2 6 -5 4Z';
 export function crumb(document: Document) {
@@ -22,27 +21,18 @@ export function createHeap(host: HTMLElement) {
   let previous = -1;
   return { update(remaining: number, issued: number) { const visible = Math.ceil(remaining / issued * 24); if (visible === previous) return; previous = visible; glyphs.forEach((glyph, index) => { glyph.style.display = index < (visible || 3) ? '' : 'none'; glyph.classList.toggle('empty-crumb', visible === 0); }); }, destroy() { svg.remove(); } };
 }
-export function createHops(document: Document, source: () => HTMLElement | null, target: (id: string) => HTMLElement | null) {
-  const flights: { glyph: SVGSVGElement; start: number; from: { x: number; y: number }; to: { x: number; y: number } }[] = [];
-  return {
-    add(cue: HopCue, now: number) {
-      if (flights.length >= DOM_HOP.maxAlive) return;
-      const a = source()?.getBoundingClientRect(), b = target(cue.to)?.getBoundingClientRect(); if (!a || !b) return;
-      let from = { x: a.x + a.width / 2, y: a.y + a.height / 2 }, to = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
-      if (cue.reverse) [from, to] = [to, from];
-      const glyph = crumb(document); glyph.classList.add('crumb-hop'); document.body.append(glyph); flights.push({ glyph, start: now, from, to });
-    },
-    tick(now: number) {
-      for (let index = flights.length - 1; index >= 0; index--) {
-        const flight = flights[index]!, t = Math.min(1, (now - flight.start) / DOM_HOP_MS);
-        if (t >= 1) { flight.glyph.remove(); flights.splice(index, 1); continue; }
-        const { x, y } = hopPosition(flight.from, flight.to, hopProgress(t));
-        flight.glyph.style.transform = `translate(${x - 8}px, ${y - 8}px) rotate(${DOM_HOP.turnDegrees * t}deg)`;
-        flight.glyph.style.opacity = String(t < DOM_HOP.fadeAt ? 1 : (1 - t) / (1 - DOM_HOP.fadeAt));
-      }
-    },
-    clear() { for (const flight of flights) flight.glyph.remove(); flights.length = 0; },
-  };
+/** DOM owns the endpoint measurements and SVG nodes; Koota owns flight state and time. */
+export function createHops(document:Document,source:()=>HTMLElement|null,target:(id:string)=>HTMLElement|null,world:()=>World){
+ const glyphs=new Map<Entity,SVGSVGElement>();
+ return {
+  add(cue:HopCue){
+   const a=source()?.getBoundingClientRect(),b=target(cue.to)?.getBoundingClientRect();if(!a||!b)return;
+   let from={x:a.x+a.width/2,y:a.y+a.height/2},to={x:b.x+b.width/2,y:b.y+b.height/2};if(cue.reverse)[from,to]=[to,from];
+   const entity=spawnDomFlight(world(),from,to);if(!entity)return;const glyph=crumb(document);glyph.classList.add('crumb-hop');document.body.append(glyph);glyphs.set(entity,glyph);
+  },
+  tick(){for(const [entity,glyph]of glyphs){if(!entity.isAlive()){glyph.remove();glyphs.delete(entity);continue;}const pose=entity.get(DomFlight)!;glyph.style.transform=`translate(${pose.x-8}px, ${pose.y-8}px) rotate(${pose.rotation}deg)`;glyph.style.opacity=String(pose.opacity);}},
+  clear(){for(const [entity,glyph]of glyphs){glyph.remove();if(entity.isAlive())entity.destroy();}glyphs.clear();},
+ };
 }
 
 export function jiggleHeap(host: HTMLElement | null) { return host?.animate([{transform:'rotate(0deg)'},{transform:`rotate(${REPLY.wallDegrees}deg)`},{transform:`rotate(${-REPLY.wallDegrees}deg)`},{transform:'rotate(0deg)'}],{duration:REPLY.wallMs}) ?? null; }

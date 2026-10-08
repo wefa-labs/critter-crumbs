@@ -8,3 +8,4 @@ export * from './tally/index.js';
 export * from './eas/index.js';
 export * from './publication.js';
 export * from './api-client/index.js';
+export { generateCritter, generate2, layoutCritter, GEN_VERSION_2, type CritterVersion, type CritterV2, type VersionedCritter } from './generator/versioned.js';

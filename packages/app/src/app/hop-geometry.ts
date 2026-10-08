@@ -1,7 +1,6 @@
 import { DOM_HOP } from '@critter-crumbs/shared';
-import { tokens } from '../styles/tokens.js';
 export interface Point { x: number; y: number }
-const curve = tokens['ease-hop'].match(/[\d.]+/g)!.map(Number);
+const curve=DOM_HOP.ease;
 const cubic = (t: number, a: number, b: number) => 3 * (1 - t) ** 2 * t * a + 3 * (1 - t) * t * t * b + t ** 3;
 export function hopProgress(progress: number) {
   if (progress <= 0 || progress >= 1) return Math.max(0, Math.min(1, progress));

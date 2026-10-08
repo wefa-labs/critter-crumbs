@@ -1,5 +1,5 @@
 import type { Entity, World } from 'koota';
-import { layout } from '@critter-crumbs/core';
+import { layoutCritter } from '@critter-crumbs/core';
 import { FLIGHT } from '@critter-crumbs/shared';
 import { Clock, Flight, FlyingTo, Identity, Mesh, Settings } from './traits.js';
 
@@ -7,7 +7,7 @@ export function createFlights(world: World, bump: (critter: Entity) => void) {
   function spawn(critter: Entity, reverse: boolean) {
     const settings = world.get(Settings)!;
     if (!critter.has(Mesh) || settings.simple || settings.still || settings.reducedMotion || world.query(Flight).length >= FLIGHT.maxAlive) return;
-    const dimensions = layout(critter.get(Identity)!.parameters);
+    const dimensions = layoutCritter(critter.get(Identity)!.parameters);
     const mouth = { x: 0, y: dimensions.headC - dimensions.hr / 3, z: dimensions.hr };
     const heap = { x: -dimensions.bw * 2, y: 0, z: 0 };
     const start = reverse ? mouth : heap, end = reverse ? heap : mouth;

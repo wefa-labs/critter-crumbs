@@ -47,7 +47,7 @@ test('stored Still critters applies before first render; wake and growth remain 
   expect(errors).toEqual([]);
 });
 
-test('desktop portraits draw all generated variants and load the self-hosted font', async ({ page }) => {
+test('desktop portraits draw all generated variants and use the system typeface', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/__preview/portraits');
@@ -58,6 +58,6 @@ test('desktop portraits draw all generated variants and load the self-hosted fon
   }
   expect(await page.locator('.critter-grid .portrait').evaluateAll(nodes => [...new Set(nodes.map(node => node.getAttribute('data-ear-type')))].sort())).toEqual(['floppy','long','none','pointed','round','tufts']);
   await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => document.fonts.check('22px "Young Serif"'))).toBe(true);
+  expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily)).toContain('system-ui');
   await page.screenshot({ path: '.scratch/evidence/portraits-desktop.png' });
 });

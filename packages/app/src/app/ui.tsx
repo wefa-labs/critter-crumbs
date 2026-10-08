@@ -1,7 +1,9 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { generate, ApiClientError } from '@critter-crumbs/core';
+import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { generateCritter, ApiClientError } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
-import { createPortrait, disposePortrait } from '../portraits/index.js';
+import { disposePortrait } from '../portraits/index.js';
+import { paintCritter } from '../portraits/painter.js';
+import { critterVersion } from '../portraits/version.js';
 import { useModalAnnouncements } from './announcements.js';
 import type { AppApi } from './session.js';
 
@@ -25,15 +27,20 @@ export function PendingPage({ error, retry }: { error: unknown; retry: () => voi
 export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0 }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const svg = createPortrait(document, generate(address, variant), { name, size, asleep, decorative, fed });
+    const svg = paintCritter(document, generateCritter(address, variant, critterVersion), { name, size, asleep, decorative, fed });
     host.current?.replaceChildren(svg);
     return () => { disposePortrait(svg); svg.remove(); };
   }, [address, variant, name, size, asleep, decorative, fed]);
   return <div className={size === 'stage' ? 'stage' : 'portrait-slot'} ref={host} />;
 }
-export function Dialog({ title, children, onClose, busy = false }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean }) {
-  const ref = useRef<HTMLDialogElement>(null), id = useId(), announceWithin = useModalAnnouncements();
+/** A native modal dialog: opened on mount, announced, and focus returned where it was when it closes. */
+export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
+  const announceWithin = useModalAnnouncements();
   useEffect(() => { const dialog = ref.current!; const previous = document.activeElement; dialog.showModal(); announceWithin(dialog); dialog.querySelector<HTMLElement>('input, textarea')?.focus(); return () => { announceWithin(null); dialog.close(); if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); else document.getElementById('content')?.focus(); }; }, [announceWithin]);
+}
+export function Dialog({ title, children, onClose, busy = false }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean }) {
+  const ref = useRef<HTMLDialogElement>(null), id = useId();
+  useModalDialog(ref);
   return <dialog ref={ref} aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
     <div className="dialog-heading"><h2 id={id}>{title}</h2><button className="secondary" disabled={busy} onClick={onClose}>{copy['action.close']}</button></div>{children}
   </dialog>;

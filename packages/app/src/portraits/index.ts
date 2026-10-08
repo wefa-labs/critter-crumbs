@@ -127,4 +127,6 @@ export function renderPortraits(world: World) {
   }
 }
 
+export function rememberPortrait(svg: SVGSVGElement, radii: { eyeRadius: number; headRadius: number }) { state.set(svg, radii); }
+
 export function disposePortrait(svg: SVGSVGElement) { state.get(svg)?.cleanup?.(); state.delete(svg); }

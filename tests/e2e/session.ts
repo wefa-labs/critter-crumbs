@@ -1,4 +1,4 @@
-import { expect, type Page } from 'playwright/test';
+import { expect, type Page, type Locator } from 'playwright/test';
 /**
  * Authenticated reads go through the page itself. The session cookie is `Secure`, and Playwright's
  * request context withholds Secure cookies from http://127.0.0.1, so `page.request` would read the
@@ -11,18 +11,18 @@ export async function readJson<T>(page: Page, path: string): Promise<{ status: n
   }, path);
 }
 /** Wait for server profile state before deciding which onboarding dialog exists. */
-export async function connectLocal(page: Page, index: number, name = 'Avery') {
+export async function connectLocal(page: Page, index: number, name = 'Avery', click: (target:Locator)=>Promise<void> = target=>target.click()) {
   await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Connect', exact: true }).click();
-  await page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible();
+  await click(page.getByRole('button', { name: 'Connect', exact: true }));
+  await click(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true }));
+  await expect(page.locator('.game-profile').or(page.getByRole('button', { name: 'Disconnect', exact: true }))).toBeVisible();
   await expect(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true })).toHaveCount(0);
   const { status, body: profile } = await readJson<{ ensName: string | null; displayName: string | null; critterLocked: boolean }>(page, '/api/me');
   expect(status).toBe(200);
   if (!profile.ensName && !profile.displayName) {
     await page.getByRole('textbox', { name: 'Display name', exact: true }).fill(name);
-    await page.getByRole('button', { name: 'Save name', exact: true }).click();
+    await click(page.getByRole('button', { name: 'Save name', exact: true }));
   }
-  if (!profile.critterLocked) await page.getByRole('button', { name: 'Keep this one', exact: true }).click();
+  if (!profile.critterLocked) await click(page.getByRole('button', { name: 'Keep this one', exact: true }));
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }

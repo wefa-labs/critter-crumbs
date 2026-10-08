@@ -24,6 +24,6 @@ export function colour(lightness: number, chroma: number, hue: number) {
   const css = '#' + rgb.map(value => Math.round(255 * (value <= 0.0031308 ? 12.92 * value : 1.055 * value ** (1 / 2.4) - 0.055)).toString(16).padStart(2, '0')).join('');
   return { linear: rgb, css };
 }
-export function palette(params: CritterParameters) {
+export function palette(params: Pick<CritterParameters, 'lightness' | 'chroma' | 'hue' | 'accentShift'>) {
   return { body: colour(params.lightness, params.chroma, params.hue), accent: colour(params.lightness + 0.12, params.chroma, params.hue + params.accentShift) };
 }

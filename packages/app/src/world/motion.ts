@@ -1,6 +1,6 @@
 import { trait, type Entity, type TraitRecord, type World } from 'koota';
 import { BUMP, CHEW, CRUMB_GAZE, DELIGHTED, EXPRESSION, FEAST, GROWTH, IDLE, RIG, WAKE } from '@critter-crumbs/shared';
-import { Asleep, Bump, Chewing, Clock, Identity, Received, Rig, Settings } from './traits.js';
+import { Asleep, Bump, Chewing, Clock, Delight, Identity, Received, Rig, Settings } from './traits.js';
 import type { createDirector } from './director.js';
 
 const Waking = trait({ t: 0 });
@@ -25,13 +25,13 @@ export function createMotion(world: World, critters: readonly Entity[], director
     for (const [index, critter] of critters.entries()) {
       if (!critter.isAlive()) { targets.delete(critter); continue; }
       const received = critter.get(Received)!, identity = critter.get(Identity)!.parameters;
-      const amount = director.growth(index), mood = received.mood * Math.min(1, amount);
+      const asleep = critter.has(Asleep), amount = director.growth(index);
+      const mood = Math.max(received.mood * Math.min(1, amount), asleep ? 0 : world.get(Delight)?.level ?? 0);
       const scale = 1 + GROWTH.scaleGain * received.fed * amount;
       const lower = EXPRESSION[Math.min(EXPRESSION.length - 1, Math.floor(mood * 4))]!;
       const upper = EXPRESSION[Math.min(EXPRESSION.length - 1, Math.floor(mood * 4) + 1)]!;
       const progress = upper.mood === lower.mood ? 0 : (mood - lower.mood) / (upper.mood - lower.mood);
       const blend = (key: keyof typeof lower) => lower[key] + (upper[key] - lower[key]) * progress;
-      const asleep = critter.has(Asleep);
       const ears = asleep ? -IDLE.asleep.earDroop : blend('earLift');
       const target = { scaleX: scale, scaleY: scale, scaleZ: scale, leanZ: 0, liftY: 0,
         headTilt: identity.headTilt * blend('tiltFactor'), earL: ears, earR: ears,

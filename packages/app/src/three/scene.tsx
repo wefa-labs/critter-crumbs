@@ -1,7 +1,7 @@
 import { createPortal } from 'react-dom';
 import { Canvas } from '@react-three/fiber';
 import { View } from '@react-three/drei/web/View.js';
-import { Identity } from '../world/index.js';
+import { Identity } from '../world/traits.js';
 import { canvasConfig, configureRenderer, contextConfig, useStageDriver, useStageLights, useStageModel, type SceneProps } from './runtime.js';
 export type { SceneProps, RenderSample } from './runtime.js';
 function Stage({entity,texture,registry,stage,runtime}:Parameters<typeof useStageModel>[0] & Pick<SceneProps,'runtime'>) {

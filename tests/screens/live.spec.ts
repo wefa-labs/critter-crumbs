@@ -1,0 +1,20 @@
+import {test,expect} from 'playwright/test';
+import {connectLocal} from '../e2e/session.js';
+for(const viewport of [{width:375,height:812},{width:430,height:932},{width:1280,height:800},{width:1440,height:900},{width:1920,height:1080}])test(`live dock ${viewport.width}`,async({page,request})=>{
+ const desktop=viewport.width>=900;
+ await page.setViewportSize(viewport);const response=await request.post('/api/dev/seed',{data:{kind:'people',phase:'scattering'}});expect(response.ok()).toBe(true);const {feasts}=await response.json(),feast=feasts[0],fern=feast.targets.findIndex((t:{name:string})=>t.name==='Fern'),own=feast.targets.findIndex((t:{name:string})=>t.name==='Moss'),clover=feast.targets.findIndex((t:{name:string})=>t.name==='Clover');await page.goto(`/feasts/${feasts[0].id}/scatter`);await connectLocal(page,1);
+ await expect(page.locator('.game-dock')).toBeVisible();await page.context().setOffline(true);await expect(page.locator('#root > p.notice')).toHaveText("You're offline. Your crumbs are safe on this screen until you're back.");await expect(page.locator('#root > p.notice')).toBeVisible();const dock=await page.locator('.game-dock').boundingBox();expect(dock!.y+dock!.height).toBeLessThanOrEqual(viewport.height);await page.context().setOffline(false);await expect(page.locator('#root > p.notice')).toHaveCount(0);
+ await page.getByRole('button',{name:'Fern',exact:true}).click();const input=page.locator('.focus-count input');await expect(page.locator('.circle-spot')).toHaveCount(8);
+ await page.locator(`.circle-spot[data-spot="${fern}"] button`).click();await expect(input).toHaveValue('1');
+ const hold=page.locator(`.circle-spot[data-spot="${fern}"] button`),box=(await hold.boundingBox())!;await page.mouse.move(box.x+box.width/2,box.y+box.height/2);await page.mouse.down();await page.waitForTimeout(900);await page.mouse.up();await expect.poll(async()=>Number(await input.inputValue())).toBeGreaterThan(1);
+ await expect(page.locator('.focus-count')).toHaveAttribute('data-pouring','false');const before=Number(await input.inputValue());await page.getByRole('button',{name:'Take a crumb back from Fern',exact:true}).click();await expect(input).toHaveValue(String(before-1));
+ // The phone opens the statement from the thought bubble; desktop keeps it open in the side panel.
+ if(desktop){await expect(page.locator('.thought-target')).toHaveCount(0);await expect(page.locator('.panel-statement h2')).toHaveText('Fern');await expect(page.locator('.panel-scroll')).toContainText('library');}
+ else{await page.locator('.thought-target').click();await expect(page.locator('.phone-statement')).toBeVisible();await expect(page.locator('.statement-scroll')).toContainText('library');await page.keyboard.press('Escape');await expect(page.locator('.phone-statement')).toHaveCount(0);}
+ await page.locator('.dock-turn').last().click();await expect(page.locator('.circle-spot[data-slot="0"]')).toHaveAttribute('data-spot',String((fern+1)%8));await input.fill('100');await input.press('Enter');await expect(page.getByRole('button',{name:'Scatter These',exact:true})).toBeVisible();
+ await page.locator(`.circle-spot[data-spot="${clover}"] button`).click();await expect(page.locator('.circle-spot[data-slot="0"]')).toHaveAttribute('data-spot',String(clover));await expect(input).toHaveValue('0');
+ await page.locator(`.circle-spot[data-spot="${own}"] button`).click();await expect(page.locator('.circle-spot[data-slot="0"]')).toHaveAttribute('data-spot',String(clover));await expect(page.locator(`.circle-spot[data-spot="${own}"]`)).toHaveAttribute('data-stir','true');
+ // Confirming is a dialog with Cancel; cancelling keeps the allocation and Scatter These.
+ await page.getByRole('button',{name:'Scatter These',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Confirm your scatter'});await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'Cancel',exact:true}).click();await expect(dialog).toHaveCount(0);await expect(page.getByRole('button',{name:'Scatter These',exact:true})).toBeVisible();
+ await page.screenshot({path:`.scratch/screens/live-${viewport.width}.png`});
+});

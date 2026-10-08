@@ -25,17 +25,17 @@ test('local connection, identity and creator removal leave a durable visible his
   await page.getByRole('button', { name: 'Create burrow', exact: true }).click();
   const add = page.getByRole('textbox', { name: 'Address or ENS name' });
   await expect(add).toBeFocused();
-  await add.fill('0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF');
+  await add.fill('0x00000000000000000000000000000000000000ff');
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   // Each row's control names its member; the dialog's control keeps the plain label.
-  await page.getByRole('button', { name: 'Remove from burrow: 0x2B5A…D6cF', exact: true }).click();
+  await page.getByRole('button', { name: 'Remove from burrow: 0x0000…00ff', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Remove from burrow', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Membership history' })).toBeVisible();
   await page.setViewportSize({ width: 375, height: 812 });
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Membership history' })).toBeVisible();
   // The line uses the §5.5 short form for a nameless member and never widens the page.
-  await expect(page.locator('.history-list li p').first()).toHaveText(/ removed 0x2B5A…D6cF$/);
+  await expect(page.locator('.history-list li p').first()).toHaveText(/ removed 0x0000…00ff$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
   await expect(page.locator('#announce')).toHaveCount(1);
   await expect(page.locator('#alert')).toHaveCount(1);
