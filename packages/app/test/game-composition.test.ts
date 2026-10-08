@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { composeGame, deviceFor, stateToast } from '../src/game/composition.js';
+import { composeGame, deviceFor, stateControls, stateToast } from '../src/game/composition.js';
 
 /* Expected values are read off the review pages, never off the app: the flow page's SCREENS
    (docs/explorations/app-screens/index.html) and the scatter page, pass eleven
@@ -8,37 +8,39 @@ describe('core game compositions', () => {
   it('opens statements on a 230 px sheet, every critter but yours awake and thinking, nothing to give yet', () => {
     expect(composeGame('reveal', 'phone')).toEqual({
       surface: { kind: 'sheet', height: 230 },
-      scene: { scene: 'window', light: 'day', mood: 'delighted', ownAsleep: true, bubbles: 'all', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
+      scene: { scene: 'window', light: 'day', mood: 'delighted', ownAsleep: true, grown: false, bubbles: 'all', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
     });
   });
 
   it('scatters on the dock with the heap, piles and tags; the bubble is the phone’s, the desktop panel always reads', () => {
-    const scattering = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: true, tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'live' };
+    const scattering = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: true, grown: false, tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'live' };
     for (const state of ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed'] as const) {
       expect(composeGame(state, 'phone')).toMatchObject({ surface: { kind: 'dock' }, scene: { ...scattering, bubbles: 'focus' } });
       expect(composeGame(state, 'desktop')).toMatchObject({ surface: { kind: 'dock' }, scene: { ...scattering, bubbles: 'none' } });
     }
   });
 
-  it('confirms in a dialog and reports a decline or a failed save as a toast over the kept allocation', () => {
-    expect(composeGame('signing', 'phone').dialog).toBe('sign');
-    expect(composeGame('scattered', 'phone').toast).toBe('err.saveVerified');
-    expect(composeGame('rejected', 'phone').toast).toBe('scatter.sign.rejected');
-    expect(composeGame('failed', 'phone').toast).toBe('err.saveFailed');
-    for (const state of ['scatter', 'reading', 'done', 'saving', 'closed'] as const) expect(composeGame(state, 'phone')).not.toHaveProperty('toast');
+  it('reports a saved scatter, a decline or a failed save as a toast over the kept allocation', () => {
+    expect(stateToast('scattered')).toBe('err.saveVerified');
+    expect(stateToast('rejected')).toBe('scatter.sign.rejected');
+    expect(stateToast('failed')).toBe('err.saveFailed');
+    for (const state of ['scatter', 'reading', 'done', 'signing', 'saving', 'closed'] as const) expect(stateToast(state)).toBeUndefined();
   });
 
   it('closes scattering at dusk with every critter asleep and the giving controls dimmed', () => {
     expect(composeGame('closed', 'phone')).toEqual({
       surface: { kind: 'dock' },
-      scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, bubbles: 'none', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'disabled' },
+      scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'disabled' },
     });
+    expect(stateControls('closed')).toBe('disabled');
+    expect(stateControls('saving')).toBe('live');
+    expect(stateControls('feasted')).toBe('none');
   });
 
   it('lays out the feast on a 250 px sheet over the sleeping dusk circle, with no dock', () => {
     for (const state of ['waiting', 'key'] as const) expect(composeGame(state, 'phone')).toEqual({
       surface: { kind: 'sheet', height: 250 },
-      scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' },
+      scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' },
     });
   });
 
@@ -46,7 +48,7 @@ describe('core game compositions', () => {
     /* the feast heap stays while crumbs fly from it (Game Design G6); the flow page's still frame leaves it out */
     expect(composeGame('feast', 'phone')).toEqual({
       surface: { kind: 'sheet', height: 144 },
-      scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, bubbles: 'none', tags: false, piles: true, heap: 'remaining', huddle: false, controls: 'none' },
+      scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: true, heap: 'remaining', huddle: false, controls: 'none' },
     });
   });
 
@@ -54,7 +56,7 @@ describe('core game compositions', () => {
     /* the scatter page's #feast with Results closed */
     expect(composeGame('feasted', 'phone')).toEqual({
       surface: { kind: 'dock' },
-      scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' },
+      scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' },
     });
     expect(composeGame('feasted', 'desktop').scene.bubbles).toBe('none');
   });
@@ -63,24 +65,17 @@ describe('core game compositions', () => {
     expect([375, 430, 899, 900, 1280].map(deviceFor)).toEqual(['phone', 'phone', 'phone', 'desktop', 'desktop']);
   });
 
-  it('names each state’s toast once, for the live screens and the gallery alike', () => {
-    expect(stateToast('scattered')).toBe('err.saveVerified');
-    expect(stateToast('rejected')).toBe('scatter.sign.rejected');
-    expect(stateToast('failed')).toBe('err.saveFailed');
-    expect(stateToast('closed')).toBeUndefined();
-  });
-
   it('shows nobody scattered on a 260 px sheet over the awake circle, with nothing to replay', () => {
     expect(composeGame('nobody', 'phone')).toEqual({
       surface: { kind: 'sheet', height: 260 },
-      scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
+      scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
     });
   });
 
   it('grows every result into the results surface with the critters huddled on its edge', () => {
     for (const state of ['results', 'tie', 'givers', 'recording', 'recorded', 'public'] as const) expect(composeGame(state, 'desktop')).toEqual({
       surface: { kind: 'results' },
-      scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' },
+      scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' },
     });
   });
 });

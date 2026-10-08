@@ -573,6 +573,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `deadline.closed` | {phase} closed {relative} |
 | `deadline.soon` | Closing soon — {relative} |
 | `deadline.absolute` | {weekday} {day} {month}, {time} ({tz}) |
+| `deadline.line` | {deadline} · {date} (the closing line and its absolute time, on one line) |
 | `skip.content` | Skip to content |
 
 **Arrive (F1)**
@@ -715,10 +716,12 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `scatter.count.label` | Crumbs for {name} |
 | `scatter.count.announce` | {n} for {name}. {remaining} to go. |
 | `scatter.own.label` | Your critter |
+| `element.earth` / `.water` / `.fire` / `.air` | Earth / Water / Fire / Air (a version 2 critter's element chip) |
 | `scatter.own.body` | Asleep, eating what the others give it. |
 | `scatter.statement.show` / `.hide` | Show statement / Hide statement |
 | `scatter.none.left` | No crumbs left. Take some back to move them. |
 | `pile.remaining` | {n} to go (one: 1 to go) |
+| `pile.remaining.words` | to go (beside the number in the bar) |
 | `pile.empty` | All scattered |
 | `pile.empty.announce` | All scattered. Scatter these when you're ready. |
 | `scatter.submit` | Scatter these |
@@ -743,6 +746,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `feast.keyNotYet` | The key isn't out yet. Try again in a few minutes. |
 | `feast.replay` | Replay the feast |
 | `feast.skip` | Skip to results |
+| `feast.sequence` | Everyone wakes, then each critter eats and grows in turn. |
 | `feast.announce` | Results are ready. {topName} received the most crumbs. |
 | `results.title` | Results |
 | `results.caption` | Crumbs received in {feastTitle} |

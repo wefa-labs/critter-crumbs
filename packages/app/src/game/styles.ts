@@ -15,15 +15,14 @@ export const ICON_PATHS = {
 } as const;
 export type IconName = keyof typeof ICON_PATHS;
 export const ELEMENT_ICON = { earth: 'leaf', water: 'drop', fire: 'flame', air: 'cloud' } as const;
-export type Element = keyof typeof ELEMENT_ICON;
+/** A version 2 critter's element (the generator's earth, water, fire or air). */
+export type CritterElement = keyof typeof ELEMENT_ICON;
 /** A stroke-drawn icon's line ends and joins. */
 export const ROUND = 'round';
 /** The focus row's name takes the largest size on the type scale that fits between − and +. */
 export const NAME_SIZES = ['20', '16', '14'] as const;
 
-export const elementStyle = (element: Element) => ({ '--element-soft': `var(--cc-element-${element}-soft)`, '--element-shadow': `var(--cc-element-${element}-shadow)` }) as CSSProperties;
-/** The header's profile button: your critter's face in a 44 px circle, its 84 px drawing lifted to the head. */
-export const profileFace = (headY: number) => ({ '--face-y': `${22 - headY * 105}px` }) as CSSProperties;
+export const elementStyle = (element: CritterElement) => ({ '--element-soft': `var(--cc-element-${element}-soft)`, '--element-shadow': `var(--cc-element-${element}-shadow)` }) as CSSProperties;
 /** A face cropped to the head at any size, as the flow page's face(): the drawing 1.9 times the circle. */
 export function faceCrop(size: number, headY: number) {
   const width = size * 1.9, height = width * 150 / 120;

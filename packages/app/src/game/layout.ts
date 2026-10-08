@@ -3,12 +3,12 @@ import type { PortraitExtent } from '../portraits/metrics.js';
 import type { SceneTreatment, Surface } from './composition.js';
 
 /**
- * Where everything in the circle goes, ported from the scatter review page (geometry, slotAt, huddleAt, layoutRing).
- * Pure: the viewport, the critters, the focus and the state's composition in; rectangles out. The scene's bottom
- * edge is the state's surface: the scattering dock, a sheet of its height, or the results grown out of the dock.
+ * Where everything in the circle goes, ported from the scatter review page (geometry, slotAt, huddleAt, layoutRing)
+ * and, over a sheet, the flow page (circle, heapAt). Pure: the viewport, the critters, the focus and the state's
+ * composition in; rectangles out. The scene's bottom edge is the state's surface: the scattering dock, a sheet of its
+ * height, or the results grown out of the dock.
  */
 export interface Rect { x: number; y: number; width: number; height: number }
-export type LayoutMoment = 'scatter' | 'feast';
 export interface LayoutCritter {
   name: string; own: boolean; count: number; extent: PortraitExtent;
   /** Left out of the huddle: it received no crumbs (flow page 46 gathers only the critters that were fed). */
@@ -18,15 +18,13 @@ export interface LayoutInput {
   viewport: { width: number; height: number };
   critters: readonly LayoutCritter[];
   focus: number;
-  /** the feast grows everyone, so the circle's spots shrink to make room */
-  moment: LayoutMoment;
   /** a statement open on the phone: the heap, the bubble and the tags under it give way */
   reading?: boolean;
   /** crumbs still in the heap; an empty heap over a sheet is drawn as the flow page's outlines */
   remaining?: number;
   issued: number;
   surface: Surface;
-  scene: Pick<SceneTreatment, 'bubbles' | 'tags' | 'heap' | 'huddle'>;
+  scene: Pick<SceneTreatment, 'grown' | 'bubbles' | 'tags' | 'heap' | 'huddle'>;
   /** a tag's text width in the page's font (game/measure.ts); without it, an estimate from the letters */
   measure?: (text: string, size: number, weight: number) => number | undefined;
 }
@@ -35,11 +33,15 @@ export const HEADER_HEIGHT = 64;
 export const DOCK_HEIGHT = 130;
 /** Desktop: with results open the dock folds to its bar, level with the panel's actions. */
 export const FOLDED_DOCK_HEIGHT = 74;
+/** Phone: the results grow the dock until this much floor is left above them (RESULTS_FLOOR). */
+export const RESULTS_FLOOR = 196;
 export const DESKTOP_MIN_WIDTH = 900;
 export const sidePanelWidth = (width: number) => Math.min(480, Math.max(400, width * 0.25));
+/** Phone: an open statement is a bubble across the top of the scene (.panel.bubble). */
+const STATEMENT = { inset: 12, height: 378 };
 
 export const overlapArea = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
-/** A target at least `min` square around a smaller drawing, centred on it, so a small bubble still takes a finger. */
+/** A target at least `min` square around a smaller drawing, centred on it, so a small one still takes a finger. */
 export function hitRect(rect: Rect, min = 44): Rect {
   const width = Math.max(min, rect.width), height = Math.max(min, rect.height);
   return { x: rect.x - (width - rect.width) / 2, y: rect.y - (height - rect.height) / 2, width, height };
@@ -48,8 +50,18 @@ export function shortName(name: string, limit = 10) { return name.length > limit
 const nameWidth = (name: string) => [...name].reduce((width, ch) => width + (/[MW@]/.test(ch) ? 11 : /[ilj1 .]/.test(ch) ? 4 : 8), 0);
 export function moundSize(n: number) { let rows = 0; while (rows * (rows + 1) / 2 < n) rows++; return { rows, width: Math.max(1, rows) * 5.2 + 8, height: Math.max(1, rows) * 3.4 + 9 }; }
 
-function geometry(W: number, floor: number, n: number, desktop: boolean, feast: boolean) {
-  const growth = feast ? 0.9 : 1;
+/**
+ * A name tag's type and frame (.spot .tag): 14 px with 11 + 10 px of padding, 12 px and 9 + 8 on a crowded phone,
+ * 16 px and 14 + 14 for the critter in focus on desktop, which drops its count; the border adds 3, the gap before the
+ * count 6 (4 crowded).
+ */
+function tagStyle(focusOnDesktop: boolean, crowded: boolean) {
+  if (focusOnDesktop) return { font: 16, height: 36, frame: 31, gap: 0, counted: false };
+  return crowded ? { font: 12, height: 26, frame: 20, gap: 4, counted: true } : { font: 14, height: 30, frame: 24, gap: 6, counted: true };
+}
+
+function geometry(W: number, floor: number, n: number, desktop: boolean, grown: boolean) {
+  const growth = grown ? 0.9 : 1;
   if (desktop) {
     const u = Math.min(W / 880, floor / 606), room = (n > 8 ? 0.78 : 1) * growth, back = CIRCLE_FEEL.desktop.back * u * room, beside = Math.cos(2 * Math.PI / n);
     const frontY = floor * 0.95, backY = Math.max(floor * 0.22, back * 1.04 + 40), ry = Math.min((frontY - backY) / (1 + beside), floor * 0.4);
@@ -62,7 +74,7 @@ function geometry(W: number, floor: number, n: number, desktop: boolean, feast: 
 /** The bottom inset each surface takes from the scene. */
 function surfaceHeight(surface: Surface, desktop: boolean, H: number) {
   if (surface.kind === 'dock') return DOCK_HEIGHT;
-  if (surface.kind === 'results') return desktop ? FOLDED_DOCK_HEIGHT : Math.max(DOCK_HEIGHT, H - 196);
+  if (surface.kind === 'results') return desktop ? FOLDED_DOCK_HEIGHT : Math.max(DOCK_HEIGHT, H - RESULTS_FLOOR);
   return desktop ? 0 : surface.height;
 }
 
@@ -70,9 +82,10 @@ export function layoutGame(input: LayoutInput) {
   const desktop = input.viewport.width >= DESKTOP_MIN_WIDTH;
   const W = input.viewport.width - (desktop ? sidePanelWidth(input.viewport.width) : 0), H = input.viewport.height - HEADER_HEIGHT, n = input.critters.length;
   if (!n || input.focus < 0 || input.focus >= n) throw new RangeError('Invalid circle focus');
-  const gathered = input.scene.huddle, dockH = surfaceHeight(input.surface, desktop, H);
+  /* the scatter page crowds the phone's tags from seven critters (data-crowd) */
+  const gathered = input.scene.huddle, dockH = surfaceHeight(input.surface, desktop, H), crowded = !desktop && n > 6;
   /* a sheet sits over the floor; the circle stands on what is left of it, as on the flow page */
-  const geo = geometry(W, gathered ? H - DOCK_HEIGHT : H - dockH, n, desktop, input.moment === 'feast');
+  const geo = geometry(W, gathered ? H - DOCK_HEIGHT : H - dockH, n, desktop, input.scene.grown);
   const dock: Rect = { x: 0, y: H - dockH, width: W, height: dockH };
   /* over a sheet there is no critter in focus: the flow page stands the circle in a plain ring (circle()), on a floor
      that runs 24 px under the sheet's rounded top on the phone, the critters 1.5 times larger on desktop */
@@ -105,22 +118,21 @@ export function layoutGame(input: LayoutInput) {
     /* while scattering, the pile at the feet takes a share of the critter's box: its drawing width × 1.1, in percent
        (pileSvg). At the feast, what each critter received heaps beside it at a sixth of a glyph a crumb and 1.9 px a
        unit (flow page 44), since a pile of every crumb received would dwarf the critter */
-    const feastPile = ring && input.moment === 'feast', glyphs = feastPile ? Math.ceil(critter.count / 6) : PILE_RULE === 'exact' ? critter.count : Math.ceil(critter.count / 4);
+    const feastPile = ring && input.scene.grown, glyphs = feastPile ? Math.ceil(critter.count / 6) : PILE_RULE === 'exact' ? critter.count : Math.ceil(critter.count / 4);
     const pileSize = moundSize(glyphs), pileWidth = !critter.count ? 0 : feastPile ? pileSize.width * 1.9 * ringScale : pileSize.width * 1.1 / 100 * width, pileHeight = pileWidth * pileSize.height / pileSize.width;
     const pile: Rect & { glyphs?: number } = feastPile
       ? { x: x + ringSize / 13 / 100 * W - pileWidth / 2, y: y + 0.01 * ringFloor - pileHeight, width: pileWidth, height: pileHeight, glyphs }
       : { x: stage.x + 0.54 * width, y: stage.y + 0.98 * height - pileHeight, width: pileWidth, height: pileHeight };
-    const crowded = !desktop && n > 6, name = critter.own ? copy['scatter.own.short'] : critter.name, tagHeight = slot === 0 && desktop ? 36 : crowded ? 26 : 30;
-    /* a tag's width from its text, as the scatter page measures it: padding 11 + 10 (9 + 8 crowded, 14 + 14 for desktop's focus), the 1.5 px border, the name, then the gap and the count */
-    const font = slot === 0 && desktop ? 16 : crowded ? 12 : 14, text = (value: string, weight: number) => input.measure?.(value, font, weight) ?? nameWidth(value) * font / 14;
-    const frame = (slot === 0 && desktop ? 28 : crowded ? 17 : 21) + 3, count = critter.own || slot === 0 && desktop ? 0 : (crowded ? 4 : 6) + text(String(critter.count), 800);
-    const fullWidth = Math.ceil(text(name, critter.own ? 700 : 800) + frame + count) + 2;
-    const shortWidth = Math.ceil(text(shortName(name), critter.own ? 700 : 800) + frame + count) + 2;
+    /* a tag's width from its text, measured as the scatter page measures it */
+    const name = critter.own ? copy['scatter.own.short'] : critter.name, style = tagStyle(slot === 0 && desktop, crowded);
+    const text = (value: string) => input.measure?.(value, style.font, critter.own ? 700 : 800) ?? nameWidth(value) * style.font / 14;
+    const count = style.counted && !critter.own ? style.gap + text(String(critter.count)) : 0;
+    const fullWidth = Math.ceil(text(name) + style.frame + count) + 2, shortWidth = Math.ceil(text(shortName(name)) + style.frame + count) + 2;
     /* a thought bubble rides just right of the top of the drawing (the flow page's .cr .bubble) */
     const bubbleWidth = desktop ? 46 : 34;
     const ownBubble: Rect = { x: stage.x + 0.62 * width, y: figure.y - bubbleWidth * 0.85 * 0.78, width: bubbleWidth, height: bubbleWidth * 0.85 };
     return { index, slot, away, stage, figure, pile, foot: { x, y }, depth, face, fullWidth, shortWidth, name, ownBubble,
-      tag: { x: x - fullWidth / 2, y: figure.y - 4 - tagHeight, width: fullWidth, height: tagHeight, hidden: !input.scene.tags || gathered || slot === 0 && !desktop, short: false } };
+      tag: { x: x - fullWidth / 2, y: figure.y - 4 - style.height, width: fullWidth, height: style.height, hidden: !input.scene.tags || gathered || slot === 0 && !desktop, short: false } };
   });
   const focused = slots.find(it => it.slot === 0)!, extent = input.critters[focused.index]!.extent;
   const headR = extent.headRadius * focused.stage.width, headY = focused.stage.y + extent.headY * focused.stage.height;
@@ -157,8 +169,9 @@ export function layoutGame(input: LayoutInput) {
   const bubbles = input.scene.bubbles === 'all' ? slots.filter((_, index) => !input.critters[index]!.own).map(it => ({ index: it.index, rect: it.ownBubble }))
     : input.scene.bubbles === 'focus' ? [{ index: focused.index, rect: bestBubble }] : [];
 
-  /* open on the phone, three puffs rise from the focused head to the statement at the top of the scene */
-  const panelBottom = 12 + 378, trailFrom = { x: focused.foot.x + headR * 0.8, y: headY - headR - 6 }, trailTo = { x: Math.min(focused.foot.x + headR + 36, W - 40), y: panelBottom + 6 };
+  /* open on the phone, the statement is a bubble across the top, three puffs rising to it from the focused head */
+  const statement: Rect = { x: STATEMENT.inset, y: STATEMENT.inset, width: W - STATEMENT.inset * 2, height: STATEMENT.height };
+  const trailFrom = { x: focused.foot.x + headR * 0.8, y: headY - headR - 6 }, trailTo = { x: Math.min(focused.foot.x + headR + 36, W - 40), y: statement.y + statement.height + 6 };
   const trail: Rect[] = !desktop && input.reading ? [0.18, 0.5, 0.8].map((along, i) => { const size = [8, 11, 15][i]!; return { x: trailFrom.x + (trailTo.x - trailFrom.x) * along - size / 2, y: trailFrom.y + (trailTo.y - trailFrom.y) * along - size / 2, width: size, height: size }; }) : [];
 
   /* the tags, centred above each head and solved together so a tall back critter leaves room (layoutRing) */
@@ -190,8 +203,8 @@ export function layoutGame(input: LayoutInput) {
   const fitted = fit(0);
   for (const it of visible) {
     const choice = selected.get(it.index) ?? choices.find(entry => entry.it === it)?.candidates[0];
-    if (choice) it.tag = { ...choice.box, short: choice.short, hidden: !!input.reading && !desktop && choice.box.y < panelBottom };
+    if (choice) it.tag = { ...choice.box, short: choice.short, hidden: !!input.reading && !desktop && overlapArea(choice.box, statement) > 0 };
     else if (!fitted) it.tag = { ...it.tag, y: Math.max(2, it.tag.y) };
   }
-  return { desktop, scene: { x: 0, y: HEADER_HEIGHT, width: W, height: H }, dock, heap: showHeap ? heap : null, bubble: bestBubble, bubbles, trail, slots, ppu, unit: geo.u };
+  return { desktop, crowded, scene: { x: 0, y: HEADER_HEIGHT, width: W, height: H }, dock, statement, heap: showHeap ? heap : null, bubble: bestBubble, bubbles, trail, slots, ppu, unit: geo.u };
 }

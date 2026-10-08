@@ -4,8 +4,10 @@
     "composite": false,
     "declaration": false,
     "noEmit": true,
+    "jsx": "react-jsx",
     "types": [
-      "node"
+      "node",
+      "vite/client"
     ],
     "lib": [
       "ES2022",

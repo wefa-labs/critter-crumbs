@@ -1,5 +1,5 @@
 import { Renderer } from './renderer.js';
-import { getAddress } from 'viem';
+import { memberName, targetOwnedBy } from './names.js';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { WorldProvider, useTrait } from 'koota/react';
 import type { Entity } from 'koota';
@@ -23,13 +23,12 @@ import type { RunAction } from './burrows.js';
 import { joinNames, percentShare } from './time.js';
 import { browserReceiptBook } from './receipts.js';
 import { createHops } from './heap.js';
-import { PortraitImage, shortAddress, targetLabel } from './ui.js';
+import { PortraitImage, targetLabel } from './ui.js';
 import { gameView, isMemberFeast, portraitVariant, resultStates, resultsViews, type MemberFeast, type PublicFeast, type ResultsView } from './feast-view.js';
 import type { OpenedFeast } from './feast-session.js';
 import type { AppApi, Me } from './session.js';
 
 
-const nameFor = (feast: PublicFeast, address: string) => { const target = feast.targets.find(target => target.ownerAddress?.toLowerCase() === address.toLowerCase()); return target ? targetLabel(target) : shortAddress(getAddress(address)); };
 
 export default function Results({ feast, api, me, settings, announce, report, account, run, busy, clearError }: { feast: MemberFeast; api: AppApi; me: Me; settings: GameSettings; announce: (text: string) => void; report: (error: unknown) => void; account: () => Account | null; run: RunAction; busy: boolean; clearError: () => void }) {
   const [opened, setOpened] = useState<OpenedFeast | null>(null), [error, setError] = useState<CopyId | null>(null), [retry, setRetry] = useState(0);
@@ -61,6 +60,8 @@ export function WaitingScene({ feast, settings, announce, error, retry }: { feas
   const [focus, setFocus] = useState(0), [runtime] = useState(() => createStageRuntime({ issued: feast.crumbsPerCritter, asleep: true, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })) }));
   useEffect(() => { const stop = runtime.start(); announce(copy['feast.waiting.title']); return () => { stop(); queueMicrotask(() => runtime.destroy()); }; }, [runtime]);
   useEffect(() => runtime.setSettings(settings), [runtime, settings]);
+  /* the reason the feast cannot be laid out yet is read out once; other errors reach the app's alert */
+  useEffect(() => { if (error === 'feast.keyNotYet') announce(copy[error]); }, [error]);
   const view = gameView({ phase: feast.phase, remaining: 0, keyPending: error === 'feast.keyNotYet' });
   return <WorldProvider world={runtime.world}><section className="game-flow"><GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={view.state} editable={false} announce={announce} remaining={0} surfaces={{ sheet: <WaitingSheet error={error} retry={retry} /> }} /></section></WorldProvider>;
 }
@@ -88,16 +89,16 @@ function ResultsList({ feast, opened, record, givers, actions }: { feast: Public
   const one = member && result.counted.length === 1, ties = result.ties.filter(group => result.totalScattered > 0 && group.length > 1);
   return (
     <div className="results-list">
-      <p className="results-sum"><span>{summaryOf(feast, result)}</span>{member && !one ? <><br />{result.didNotScatter.length ? formatCopy('results.didNotScatter', { names: joinNames(result.didNotScatter.map(address => nameFor(feast, address))) }) : copy['results.everyone']}</> : null}</p>
+      <p className="results-sum"><span>{summaryOf(feast, result)}</span>{member && !one ? <><br />{result.didNotScatter.length ? formatCopy('results.didNotScatter', { names: joinNames(result.didNotScatter.map(address => memberName(feast, address))) }) : copy['results.everyone']}</> : null}</p>
       <ol className="results-rows">
         {rows.map(row => {
           const target = feast.targets.find(t => t.id === row.targetId)!;
           return <li key={row.targetId} className="results-row"><span className="results-face"><PortraitImage address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size="stage" fed={fedFor(row.share, feast.targets.length)} /></span><span className="results-name">{targetLabel(target)}</span><span className="results-amount">{row.crumbs}<small>{percentShare(row.share)}</small></span></li>;
         })}
       </ol>
-      {one ? <p className="results-sum">{formatCopy('results.one', { name: nameFor(feast, result.counted[0]!.attester) })}</p> : null}
+      {one ? <p className="results-sum">{formatCopy('results.one', { name: memberName(feast, result.counted[0]!.attester) })}</p> : null}
       {ties.map(group => <p className="results-sum" key={group[0]}>{formatCopy('results.tie', { names: joinNames(group.map(id => targetLabel(feast.targets.find(t => t.id === id)!))) })}</p>)}
-      {result.rejected.length ? <p className="results-note">{formatCopy('results.unreadable', { names: joinNames(result.rejected.map(entry => nameFor(feast, entry.attester))) })}</p> : null}
+      {result.rejected.length ? <p className="results-note">{formatCopy('results.unreadable', { names: joinNames(result.rejected.map(entry => memberName(feast, entry.attester))) })}</p> : null}
       {opened.missingUids.map(uid => <p className="results-note receipt-evidence" key={uid}>{formatCopy('err.uidMissing', { uid })}</p>)}
       {record ?? <p className="results-sum">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>}
       {givers ? <button type="button" className="quiet left" onClick={givers}>{copy['results.givers.title']}</button> : null}
@@ -116,15 +117,16 @@ function CritterFace({ address, variant, name, size }: { address: string; varian
 
 /** Flow 47: who gave what, the table scrolling sideways with each giver held at the left (Design System §6.5). */
 function GiverTable({ feast, opened, viewer }: { feast: MemberFeast; opened: OpenedFeast; viewer?: string }) {
-  const ownerOf = (address: string) => feast.targets.find(target => target.ownerAddress?.toLowerCase() === address.toLowerCase());
+
   return (
     <div className="results-list">
-      <p className="results-sum">{copy['results.givers.caption']}</p>
+      <p className="results-sum" aria-hidden="true">{copy['results.givers.caption']}</p>
       <div className="giver-scroll">
-        <table className="giver-matrix" aria-label={`${copy['results.givers.title']}. ${copy['results.givers.caption']}`}>
+        <table className="giver-matrix">
+          <caption className="sr-only">{copy['results.givers.caption']}</caption>
           <thead><tr><th scope="col">{copy['results.col.giver']}</th>{feast.targets.map(target => <th scope="col" key={target.id} aria-label={targetLabel(target)}><CritterFace address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={26} /></th>)}</tr></thead>
           <tbody>{opened.givers.map(giver => {
-            const owner = ownerOf(giver.attester), name = nameFor(feast, giver.attester);
+            const owner = targetOwnedBy(feast, giver.attester), name = memberName(feast, giver.attester);
             return <tr key={giver.uid}><th scope="row">{owner ? <CritterFace address={owner.ownerAddress ?? owner.id} variant={portraitVariant(feast, owner)} name={name} size={26} /> : null}{giver.attester.toLowerCase() === viewer?.toLowerCase() ? formatCopy('results.giver.you', { name }) : name}</th>{giver.amounts.map((amount, index) => <td key={feast.targets[index]!.id} className={amount ? undefined : 'zero'}>{amount ? amount : <><span aria-hidden="true">{copy['results.givers.none']}</span><span className="sr-only">{amount}</span></>}</td>)}</tr>;
           })}</tbody>
         </table>

@@ -21,11 +21,14 @@ export interface SceneTreatment {
   /** Every critter but your own. */
   mood: 'awake' | 'asleep' | 'delighted';
   ownAsleep: boolean;
+  /** At the feast everyone grows, so the circle's spots shrink to make room. */
+  grown: boolean;
   bubbles: 'none' | 'focus' | 'all';
   tags: boolean;
   piles: boolean;
   heap: 'none' | 'remaining';
   huddle: boolean;
+  /** The focus row's − and +: live, dimmed and stopped once scattering has closed, or not there at all. */
   controls: 'none' | 'live' | 'disabled';
 }
 
@@ -34,23 +37,21 @@ export interface Composition {
   scene: SceneTreatment;
   /** A passing message at the top of the floor. */
   toast?: CopyId;
-  /** The signing step, over the dock. */
-  dialog?: 'sign';
 }
 
-const scattering: SceneTreatment = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: true, bubbles: 'focus', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'live' };
-const sleeping: SceneTreatment = { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' };
-const gathered: SceneTreatment = { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' };
+const scattering: SceneTreatment = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: true, grown: false, bubbles: 'focus', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'live' };
+const sleeping: SceneTreatment = { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' };
+const gathered: SceneTreatment = { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' };
 
 const COMPOSITIONS: Record<GameScreenState, Composition> = {
   /* flow 34 */
-  reveal: { surface: { kind: 'sheet', height: 230 }, scene: { scene: 'window', light: 'day', mood: 'delighted', ownAsleep: true, bubbles: 'all', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' } },
+  reveal: { surface: { kind: 'sheet', height: 230 }, scene: { scene: 'window', light: 'day', mood: 'delighted', ownAsleep: true, grown: false, bubbles: 'all', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' } },
   /* scatter page: #scatter, #reading, #done, #scattered */
   scatter: { surface: { kind: 'dock' }, scene: scattering },
   reading: { surface: { kind: 'dock' }, scene: scattering },
   done: { surface: { kind: 'dock' }, scene: scattering },
-  /* flow 36–40: the dock moments */
-  signing: { surface: { kind: 'dock' }, scene: scattering, dialog: 'sign' },
+  /* flow 36–40: the dock moments; confirming is a dialog over the dock */
+  signing: { surface: { kind: 'dock' }, scene: scattering },
   saving: { surface: { kind: 'dock' }, scene: scattering },
   scattered: { surface: { kind: 'dock' }, scene: scattering, toast: 'err.saveVerified' },
   rejected: { surface: { kind: 'dock' }, scene: scattering, toast: 'scatter.sign.rejected' },
@@ -61,11 +62,11 @@ const COMPOSITIONS: Record<GameScreenState, Composition> = {
   waiting: { surface: { kind: 'sheet', height: 250 }, scene: sleeping },
   key: { surface: { kind: 'sheet', height: 250 }, scene: sleeping },
   /* flow 44; the feast heap stays while the crumbs fly from it (Game Design G6), though the flow page's still omits it */
-  feast: { surface: { kind: 'sheet', height: 144 }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, bubbles: 'none', tags: false, piles: true, heap: 'remaining', huddle: false, controls: 'none' } },
+  feast: { surface: { kind: 'sheet', height: 144 }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: true, heap: 'remaining', huddle: false, controls: 'none' } },
   /* scatter page #feast with Results closed: everyone grown, the totals on their tags, Results in the bar */
-  feasted: { surface: { kind: 'dock' }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' } },
+  feasted: { surface: { kind: 'dock' }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' } },
   /* flow 45 */
-  nobody: { surface: { kind: 'sheet', height: 260 }, scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' } },
+  nobody: { surface: { kind: 'sheet', height: 260 }, scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' } },
   /* scatter page #feast with Results open; flow 46–50 give each variant's contents */
   results: { surface: { kind: 'results' }, scene: gathered },
   tie: { surface: { kind: 'results' }, scene: gathered },
@@ -80,6 +81,8 @@ export const deviceFor = (width: number): Device => width >= DESKTOP_MIN_WIDTH ?
 
 /** The message a state shows at the top of the floor; the screen decides how long it stays. */
 export const stateToast = (state: GameScreenState): CopyId | undefined => COMPOSITIONS[state].toast;
+/** Whether a state's − and + are live, dimmed or absent (the same on every device). */
+export const stateControls = (state: GameScreenState): SceneTreatment['controls'] => COMPOSITIONS[state].scene.controls;
 
 export function composeGame(state: GameScreenState, device: Device): Composition {
   const composition = COMPOSITIONS[state];

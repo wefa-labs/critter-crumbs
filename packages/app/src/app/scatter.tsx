@@ -3,7 +3,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalSto
 import { WorldProvider, useTrait } from 'koota/react';
 import type { Entity } from 'koota';
 import { ApiClientError, type Account } from '@critter-crumbs/core';
-import { copy, formatCopy, TYPED_AMOUNT, type Target } from '@critter-crumbs/shared';
+import { copy, formatCopy, TYPED_AMOUNT, ValidationError, type Target } from '@critter-crumbs/shared';
 import { Count, Pile, Clock, IsOwn, Pouring, PouringInto, Settings, type GameSettings } from '../world/index.js';
 import { useAudio } from '../audio/context.js';
 import { createStageRuntime, type StageRuntime } from '../sim/stage-runtime.js';
@@ -13,27 +13,27 @@ import { useScatterInput } from './scatter-input.js';
 import { createHops, jiggleHeap } from './heap.js';
 import { targetLabel } from './ui.js';
 import { absoluteDeadline, closingLine } from './time.js';
-import { gameView, readingAt, scatterFailure, portraitVariant, type MemberFeast } from './feast-view.js';
+import { gameView, readingAt, scatterFailure, scatterFailureOf, portraitVariant, type MemberFeast, type ScatterFailure } from './feast-view.js';
 import type { AppApi, Me } from './session.js';
 import { GameScene } from '../game/parts.js';
-import { ClosedNote, CrumbsLeft, FocusRow, SavingPill, ScatteredNote } from '../game/dock.js';
+import { FocusRow, ScatterMiddle } from '../game/dock.js';
 import { SignDialog, statementSurfaces } from '../game/sheets.js';
 import { Toast } from '../game/surface.js';
-import { stateToast } from '../game/composition.js';
+import { stateControls, stateToast } from '../game/composition.js';
 import { useDesktop } from '../game/device.js';
 import type { RunAction } from './burrows.js';
 
-type Controls = { entity: Entity; runtime: StageRuntime; target: Target; announce: (text: string) => void; held?: boolean; closed?: boolean };
+type Controls = { entity: Entity; runtime: StageRuntime; target: Target; announce: (text: string) => void; busy?: boolean; closed?: boolean };
 /**
  * The focus row while scattering (scatter page .focus): − and + for the critter in focus, its name over its count. The
- * count is the typed amount (Game Design §2.6), drawn as the count until it is focused. `held` keeps the controls'
- * look while a confirmation or save is in progress; `closed` dims them once scattering has closed.
+ * count is the typed amount (Game Design §2.6), drawn as the count until it is focused. `busy` stops the controls but keeps
+ * their look while a confirmation or save is in progress; `closed` dims them once scattering has closed.
  */
-export function ScatterControls({ entity, runtime, target, announce, held: waiting = false, closed = false }: Controls) {
+export function ScatterControls({ entity, runtime, target, announce, busy = false, closed = false }: Controls) {
   const count = useTrait(entity, Count)!, pile = useTrait(runtime.heap, Pile)!, pouring = useTrait(runtime.heap, Pouring);
   const [text, setText] = useState(String(count.given)), editing = useRef(false), [editingVisible, setEditingVisible] = useState(false), id = useId();
   const rolling = useRef<{ from: number; to: number; start: number; ms: number } | null>(null);
-  const own = entity.has(IsOwn), name = targetLabel(target), isPouring = !!pouring && runtime.heap.targetFor(PouringInto) === entity, live = !waiting && !closed;
+  const own = entity.has(IsOwn), name = targetLabel(target), isPouring = !!pouring && runtime.heap.targetFor(PouringInto) === entity, live = !busy && !closed;
   useEffect(() => { if (!editing.current) setText(String(count.given)); }, [count.given]);
   const { start, stop, tap, say, held, move } = useScatterInput(entity, runtime, name, announce);
   const commit = (value = text) => {
@@ -76,14 +76,14 @@ function startingFocus(feast: MemberFeast, me: Me, reading: boolean) {
   return Math.max(0, feast.targets.findIndex(target => target.ownerAddress?.toLowerCase() !== me.address.toLowerCase()));
 }
 
-export function Scatter({ feast, me, api, run, busy, announce, settings, account, clearError, now, initialReading = false }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; announce: (text: string) => void; settings: GameSettings; account: () => Account | null; connect: () => void; clearError: () => void; now: number; initialReading?: boolean }) {
+export function Scatter({ feast, me, api, run, busy, announce, settings, account, clearError, now, initialReading = false, closed = false }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; announce: (text: string) => void; settings: GameSettings; account: () => Account | null; connect: () => void; clearError: () => void; now: number; initialReading?: boolean; closed?: boolean }) {
   const audio = useAudio();
   const heapMotion = useRef<Animation | null>(null);
   const barSource = useRef<HTMLSpanElement>(null);
   const heap = useRef<HTMLDivElement>(null), done = useRef<HTMLDivElement>(null), surface = useRef<HTMLElement>(null), currentAccount = useRef(account);
   currentAccount.current = account;
   const [signing, setSigning] = useState(false), focusAccepted = useRef(false);
-  const [focus, setFocus] = useState(() => startingFocus(feast, me, initialReading)), [reading, setReading] = useState(initialReading), desktop = useDesktop(), [failure, setFailure] = useState<'rejected' | 'failed' | 'closed' | undefined>(), [saved, setSaved] = useState(false);
+  const [focus, setFocus] = useState(() => startingFocus(feast, me, initialReading)), [reading, setReading] = useState(initialReading), desktop = useDesktop(), [failure, setFailure] = useState<ScatterFailure | undefined>(), failing = useRef(false), [saved, setSaved] = useState(false);
   const [hops] = useState(() => createHops(document, () => heap.current ?? barSource.current, id => surface.current?.querySelector<HTMLElement>(`[data-count-id="${id}"]`) ?? null, () => runtime.world));
   const [runtime] = useState(() => createStageRuntime({ issued: feast.crumbsPerCritter, viewer: me.address, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })), outputs: { sound: audio.cue, feedback: cue => { if (cue.token === 'pile.wall') { const preferences = runtime.world.get(Settings)!; if (!preferences.still && !preferences.reducedMotion) { heapMotion.current?.cancel(); heapMotion.current = jiggleHeap(heap.current); } } }, hop: cue => hops.add(cue) } }));
   const [session] = useState(() => createScatterSession({ api, feast, viewer: me.address, onAccepted: receipt => browserReceiptBook().remember(feast.id, me.address, receipt.uid), sign: async (amounts, now, latest) => {
@@ -97,8 +97,8 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
     const stop = runtime.start(); let previous = runtime.critters.map(() => 0), previousRemaining = feast.crumbsPerCritter;
     const unwatch = runtime.onFrame(() => {
       hops.tick(); const amounts = runtime.critters.map(entity => entity.get(Count)!.given);
-      /* a changed allocation answers a declined or failed save: the toast goes with it */
-      if (amounts.some((amount, index) => amount !== previous[index])) { previous = amounts; session.edit(amounts); setFailure(value => value === 'closed' ? value : undefined); }
+      /* a changed allocation answers a declined or failed save: its message goes with it */
+      if (amounts.some((amount, index) => amount !== previous[index])) { previous = amounts; session.edit(amounts); if (failing.current) { failing.current = false; setFailure(undefined); clearError(); } }
       const remaining = runtime.heap.get(Pile)!.remaining;
       if (!remaining && previousRemaining) announce(copy['pile.empty.announce']); previousRemaining = remaining;
     });
@@ -114,7 +114,9 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   /* desktop keeps the statement open in its panel, so only the phone's open bubble is a reading state */
   const statementOpen = reading && !desktop;
   const remaining = feast.crumbsPerCritter - state.amounts.reduce((sum, n) => sum + n, 0);
-  const view = gameView({ phase: feast.phase, remaining, receipt: !!(state.receipt || state.remote), dirty: state.dirty, reading: statementOpen, signing, saving: state.status === 'saving' || state.status === 'verifying', ...(failure ? { failure } : {}) });
+  /* the deadline passing with the screen open stops it as a refused save would (flow 41) */
+  const shownFailure = closed ? scatterFailure.closed : failure;
+  const view = gameView({ phase: feast.phase, remaining, receipt: !!(state.receipt || state.remote), dirty: state.dirty, reading: statementOpen, signing, saving: state.status === 'saving' || state.status === 'verifying', ...(shownFailure ? { failure: shownFailure } : {}) });
   const turn = (index: number) => { runtime.actions.stopPour(); runtime.input(false); setFocus(index); };
   const target = feast.targets[focus]!, entity = runtime.critters[focus]!;
   if (!feast.participants.some(address => address.toLowerCase() === me.address.toLowerCase())) return <p>{copy['err.notParticipant']}</p>;
@@ -122,23 +124,23 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
     try { focusAccepted.current = false; const previousUid = session.snapshot().receipt?.uid; await session.submit(); focusAccepted.current = session.snapshot().receipt?.uid !== previousUid; setSigning(false); }
     catch (error) {
       setSigning(false);
-      /* a session that needs reconnecting goes to the app; the designed failures stay on the floor as a toast */
-      if (error instanceof ApiClientError && error.status === 401) throw error;
-      setFailure(error instanceof ApiClientError && error.copyId === 'scatter.closed' ? scatterFailure.closed : error instanceof ApiClientError && error.copyId === 'scatter.sign.rejected' ? scatterFailure.rejected : scatterFailure.failed);
-      audio.play('error');
+      /* the designed failures set the screen's state (flow 39–41); every message still goes to the app's alert, which
+         the game shows as the toast at the top of the floor, except scattering closed, which the bar says itself */
+      const coded = error instanceof ApiClientError || error instanceof ValidationError ? error : undefined;
+      const kind = scatterFailureOf(coded?.copyId, error instanceof ApiClientError ? error.status : undefined);
+      if (kind) { failing.current = true; setFailure(kind); }
+      if (kind === scatterFailure.closed) { announce(copy['scatter.closed']); audio.play('error'); return; }
+      throw kind === scatterFailure.failed ? new ApiClientError('err.saveFailed', error instanceof ApiClientError ? error.status : 0) : error;
     }
   });
-  const go = <button type="button" className="pill dock-go" data-sound="ui.tap" disabled={busy || !view.editable} onClick={() => { runtime.actions.stopPour(); runtime.input(false); setFailure(undefined); setSigning(true); }}>{copy['scatter.submit']}</button>;
-  const middle = view.state === 'saving' ? <SavingPill />
-    : view.state === 'closed' ? <ClosedNote />
-    : view.state === 'scattered' ? <ScatteredNote until={absoluteDeadline(feast.scatteringEndsAt)} focusRef={done} />
-    : remaining ? <CrumbsLeft remaining={remaining} closes={closingLine(feast.scatteringEndsAt, now)} source={barSource} />
-    : go;
-  const message = view.state === 'scattered' && !saved ? undefined : stateToast(view.state);
+  const middle = <ScatterMiddle state={view.state} remaining={remaining} closes={closingLine(feast.scatteringEndsAt, now)} until={absoluteDeadline(feast.scatteringEndsAt)} source={barSource} done={done}
+    goDisabled={busy || !view.editable} onGo={() => { runtime.actions.stopPour(); runtime.input(false); failing.current = false; setFailure(undefined); clearError(); setSigning(true); }} />;
+  /* the saved toast is the one this screen shows itself; refusals and failures arrive through the app's alert */
+  const message = view.state === 'scattered' && saved ? stateToast(view.state) : undefined;
   return <WorldProvider world={runtime.world}><section ref={surface} className="scatter-surface"><Renderer runtime={runtime} settings={settings} surface={surface} announce={announce} />
     <GameScene runtime={runtime} feast={feast} focus={focus} turnTo={turn} state={view.state} editable={view.editable && !signing} reading={statementOpen} onRead={() => { setReading(true); audio.play('statement.open'); }} onClose={() => setReading(false)} announce={announce} heapHost={heap}
       surfaces={{
-        focusRow: <ScatterControls key={target.id} entity={entity} runtime={runtime} target={target} announce={announce} held={!view.editable || signing || busy} closed={view.state === 'closed'} />,
+        focusRow: <ScatterControls key={target.id} entity={entity} runtime={runtime} target={target} announce={announce} busy={!view.editable || signing || busy} closed={stateControls(view.state) === 'disabled'} />,
         middle,
         statement: statementSurfaces({ feast, runtime, focus, close: () => setReading(false) }),
         toast: message ? <Toast>{copy[message]}</Toast> : newer ? <Toast>{formatCopy('scatter.latest', { seq: state.remote!.seq })}</Toast> : null,

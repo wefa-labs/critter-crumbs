@@ -14,10 +14,22 @@ export function gameView(input:GameViewInput) {
 }
 
 export const isResultState=(state:GameScreenState)=>['results','nobody','tie','givers','recording','recorded','public'].includes(state);
-/** The circle's moment: the feast grows everyone. The surface and scene come from the state's composition (game/composition.ts). */
-export const layoutMomentFor=(state:GameScreenState):'feast'|'scatter'=>state==='feast'||state==='feasted'?'feast':'scatter';
 
 export const scatterFailure={closed:'closed',rejected:'rejected',failed:'failed'} as const;
+export type ScatterFailure = keyof typeof scatterFailure;
+/** Errors from a confirmation that are the app's own notices, not a state of the scatter screen. */
+const appNotices = ['err.saveUnverified', 'err.notParticipant', 'err.sessionExpired', 'scatter.submit.help'];
+/**
+ * The state a failed confirmation leaves the scatter screen in (flow 39–41): scattering closed, the signature
+ * declined, or a save that could not be made. A scatter saved but not yet confirmed, a reconnect (401) and the app's
+ * own notices leave the screen as it was, and their message reaches the app's alert unchanged.
+ */
+export function scatterFailureOf(copyId: string | undefined, status: number | undefined): ScatterFailure | undefined {
+  if (status === 401 || copyId && appNotices.includes(copyId)) return undefined;
+  if (copyId === 'scatter.closed') return scatterFailure.closed;
+  if (copyId === 'scatter.sign.rejected') return scatterFailure.rejected;
+  return scatterFailure.failed;
+}
 
 export const resultStates={nobody:'nobody',givers:'givers'} as const;
 

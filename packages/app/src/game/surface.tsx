@@ -2,25 +2,25 @@ import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { copy } from '@critter-crumbs/shared';
 import { useModalDialog } from '../app/ui.js';
 import { StatementText } from '../app/gathering.js';
-import { ElementChip, GameIcon, type Element } from './icons.js';
+import { ElementChip, GameIcon, type CritterElement } from './icons.js';
 
 /**
  * The pieces each core state's surface is made of (game/composition.ts), ported from the review pages' CSS and DOM:
  * the flow page's .sheet, .toast and dialog, and the scatter page's statement bubble, side panel and results.
  */
 
-/** A passing message at the top of the floor, clear of the circle and the critter in focus. */
+/** A passing message at the top of the floor, clear of the circle and the critter in focus. It is not a live region: the screen that shows it also says it through the app's announcers (Design System §12.6). */
 export function Toast({ children }: { children: ReactNode }) {
-  return <div className="game-toast" role="status">{children}</div>;
+  return <div className="game-toast">{children}</div>;
 }
 
 /** In a sheet, pushes what follows it to the foot. */
 export const Grow = () => <div className="sheet-grow" />;
 
-/** A notice inside a sheet: a leaf beside the line, or a cloud when something is not right yet, which is announced. */
+/** A notice inside a sheet: a leaf beside the line, or a cloud when something is not right yet. Not a live region. */
 export function SheetNotice({ trouble = false, children }: { trouble?: boolean; children: ReactNode }) {
   return trouble
-    ? <div className="sheet-notice" role="status"><GameIcon name="cloud" /><span>{children}</span></div>
+    ? <div className="sheet-notice"><GameIcon name="cloud" /><span>{children}</span></div>
     : <div className="sheet-notice"><GameIcon name="leaf" /><span>{children}</span></div>;
 }
 
@@ -52,7 +52,7 @@ export function GameDialog({ title, children, cancel, action, busy = false }: { 
  * A statement opened from the thought bubble on the phone: the bubble panel at the top of the screen, the element
  * chip and a close icon above the text. The dock's ‹ and › step through the circle; there is no position count.
  */
-export function PhoneStatement({ name, element, body, empty, close }: { name: string; element: Element | null; body: string | undefined; empty: string; close: () => void }) {
+export function PhoneStatement({ name, element, body, empty, close }: { name: string; element: CritterElement | null; body: string | undefined; empty: string; close: () => void }) {
   const host = useRef<HTMLElement>(null), closer = useRef(close);
   closer.current = close;
   useEffect(() => {
@@ -73,7 +73,7 @@ export function PhoneStatement({ name, element, body, empty, close }: { name: st
 }
 
 /** On desktop the side panel always holds the focused critter's statement: its name, element and "You" for your own. */
-export function PanelStatement({ name, element, own, body, empty }: { name: string; element: Element | null; own: boolean; body: string | undefined; empty: string }) {
+export function PanelStatement({ name, element, own, body, empty }: { name: string; element: CritterElement | null; own: boolean; body: string | undefined; empty: string }) {
   return (
     <article className="panel-statement" aria-label={name}>
       <div className="panel-heading">

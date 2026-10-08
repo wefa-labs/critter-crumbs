@@ -7,16 +7,16 @@ import { copy, FEAST, type CopyId } from '@critter-crumbs/shared';
 import { Feast, Pile, type GameSettings } from '../world/index.js';
 import { createStageRuntime, type StageRuntime } from '../sim/stage-runtime.js';
 import { GameFrame, GameScene } from '../game/parts.js';
-import { ClosedNote, CrumbsLeft, SavingPill, ScatteredNote } from '../game/dock.js';
+import { ScatterMiddle } from '../game/dock.js';
 import { FeastSheet, SignDialog, statementSurfaces } from '../game/sheets.js';
 import { Toast } from '../game/surface.js';
-import { stateToast } from '../game/composition.js';
+import { stateControls, stateToast } from '../game/composition.js';
 import { Reveal } from '../app/read.js';
 import { ScatterControls } from '../app/scatter.js';
 import { FeastResults, WaitingScene, feastHeapGlyphs } from '../app/results.js';
 import PublicResults from '../app/public-results.js';
 import { RecordReceipt, ResultRecord } from '../app/result-record.js';
-import { absoluteDeadline, closingLine } from '../app/time.js';
+import { absoluteDeadline, closingLine, scatteringDeadline } from '../app/time.js';
 import type { AppApi, Me } from '../app/session.js';
 import { gameStates, resultsViews, type GameScreenState, type MemberFeast } from '../app/feast-view.js';
 import type { OpenedFeast } from '../app/feast-session.js';
@@ -36,7 +36,7 @@ const viewer = members[VIEWER]!;
 export function FixtureScreen({ state, count, scene }: { state: GameScreenState; count: number; scene: string }) {
   const [feast] = useState(() => fixtureFeast(count, state)), [opened] = useState(() => fixtureOpened(feast, state));
   const frame = (children: ReactNode, when?: string) => <GameFrame feast={feast} viewer={{ address: viewer.address, variant: 0 }} onProfile={quiet} {...(when ? { when } : {})}>{children}</GameFrame>;
-  const closes = `${closingLine(feast.scatteringEndsAt, feast.serverNow)} · ${absoluteDeadline(feast.scatteringEndsAt)}`;
+  const closes = scatteringDeadline(feast.scatteringEndsAt, feast.serverNow);
   if (state === 'public') return <GameFrame feast={feast} onConnect={quiet}><PublicResults feast={fixturePublic(feast, opened)} settings={settings} announce={quiet} /></GameFrame>;
   if (state === 'reveal') return frame(<Reveal feast={feast} viewer={viewer.address} settings={settings} announce={quiet} read={quiet} />, closes);
   if (state === 'waiting' || state === 'key') return frame(<WaitingScene feast={feast} settings={settings} announce={quiet} error={state === 'key' ? 'feast.keyNotYet' : null} retry={quiet} />);
@@ -64,17 +64,13 @@ function ScatterMoment({ state, scene, feast, runtime }: { state: GameScreenStat
   /* giving and taking back in the gallery moves between scattering and all given, as it does live */
   const moment: GameScreenState = mode === 'scatter' || mode === 'done' || mode === 'reading' ? pile.remaining ? gameStates.scatter : gameStates.done : mode;
   const view = reading ? gameStates.reading : moment, message = stateToast(view), target = feast.targets[focus]!;
-  const middle = view === 'saving' ? <SavingPill />
-    : view === 'closed' ? <ClosedNote />
-    : view === 'scattered' ? <ScatteredNote until={absoluteDeadline(feast.scatteringEndsAt)} />
-    : pile.remaining ? <CrumbsLeft remaining={pile.remaining} closes={closingLine(feast.scatteringEndsAt, feast.serverNow)} />
-    : <button type="button" className="pill dock-go" onClick={() => setMode(gameStates.signing)}>{copy['scatter.submit']}</button>;
+  const middle = <ScatterMiddle state={view} remaining={pile.remaining} closes={closingLine(feast.scatteringEndsAt, feast.serverNow)} until={absoluteDeadline(feast.scatteringEndsAt)} onGo={() => setMode(gameStates.signing)} />;
   return (
     <>
       <section className="game-flow">
         <GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={view} sceneId={scene} reading={reading} editable={view !== 'closed' && view !== 'saving' && view !== 'signing'} onRead={() => setReading(true)} onClose={() => setReading(false)} announce={quiet} heapHost={heap}
           surfaces={{
-            focusRow: <ScatterControls key={target.id} entity={runtime.critters[focus]!} runtime={runtime} target={target} announce={quiet} held={view === 'saving' || view === 'signing' || view === 'closed'} closed={view === 'closed'} />,
+            focusRow: <ScatterControls key={target.id} entity={runtime.critters[focus]!} runtime={runtime} target={target} announce={quiet} busy={view === 'saving' || view === 'signing' || view === 'closed'} closed={stateControls(view) === 'disabled'} />,
             middle,
             statement: statementSurfaces({ feast, runtime, focus, close: () => setReading(false) }),
             toast: message ? <Toast>{copy[message]}</Toast> : null,

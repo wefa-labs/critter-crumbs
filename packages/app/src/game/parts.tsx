@@ -3,23 +3,23 @@ import { createPortal } from 'react-dom';
 import { copy, formatCopy, CIRCLE_FEEL } from '@critter-crumbs/shared';
 import { useTrait } from 'koota/react';
 import type { Entity } from 'koota';
-import { Asleep, Count, Delight, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
+import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
 import { generateCritter } from '@critter-crumbs/core';
 import { critterVersion } from '../portraits/version.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameStage } from '../app/game-stage.js';
 import { Link, PortraitImage, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
-import { layoutMomentFor, type PublicFeast, type GameScreenState } from '../app/feast-view.js';
-import { hitRect, layoutGame, shortName, type Rect } from './layout.js';
+import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
+import { HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
 import { composeGame, deviceFor } from './composition.js';
 import { defaultScene } from './art.js';
 import { presentSleep } from './motion.js';
 import { SceneBackdrop } from './scenes.js';
 import { CrumbMound, ThoughtBubble } from './mound.js';
 import { Dock } from './dock.js';
-import type { Element } from './icons.js';
-import { profileFace } from './styles.js';
+import type { CritterElement } from './icons.js';
+import { faceCrop } from './styles.js';
 import { measureText } from './measure.js';
 import { useScatterInput } from '../app/scatter-input.js';
 
@@ -32,7 +32,7 @@ const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w
 export function GameFrame({ feast, viewer, onProfile, onConnect, when, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; children: ReactNode }) {
   useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
   useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
-  const face = viewer ? profileFace(portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
+  const face = viewer ? faceCrop(44, portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
   return (
     <div className="core-game">
       <header className="game-header">
@@ -80,9 +80,9 @@ function CritterPile({ entity, amount, glyphs }: { entity: Entity; amount?: numb
 function TagCount({ entity, amount }: { entity: Entity; amount?: number }) { const count = useTrait(entity, Count)!, value = amount ?? count.given; return <b className="tag-count" data-zero={value <= 0}>{value}</b>; }
 
 /** A version 2 critter's element, for its statement's chip; version 1 critters have none. */
-export function critterElement(runtime: StageRuntime, index: number): Element | null {
-  const parameters = runtime.critters[index]?.get(Identity)?.parameters as { element?: Element } | undefined;
-  return parameters?.element ?? null;
+export function critterElement(runtime: StageRuntime, index: number): CritterElement | null {
+  const parameters = runtime.critters[index]?.get(Identity)?.parameters;
+  return parameters?.version === '2' ? parameters.element as CritterElement : null;
 }
 
 /** What a state's surface holds; which of these shows is the composition's choice, not the screen's. */
@@ -115,19 +115,14 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
   const previous = useRef<ReturnType<typeof layoutGame> | null>(null), from = useRef<ReturnType<typeof layoutGame> | null>(null);
   useLayoutEffect(() => {
     const host = body.current!;
-    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; setViewport({ width: box.width, height: box.height + 64 }); });
+    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; setViewport({ width: box.width, height: box.height + HEADER_HEIGHT }); });
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
   const composition = composeGame(state, deviceFor(viewport.width));
   const { surface, scene: treatment } = composition, gathered = treatment.huddle;
   /* the moment's mood: delighted when statements open, asleep when scattering closes; the feast sets its own */
-  useEffect(() => {
-    const delighted = treatment.mood === 'delighted' && !runtime.feastPresentation();
-    if ((runtime.world.get(Delight)?.level ?? 0) > 0 === delighted) return;
-    runtime.actions.delight(delighted); runtime.animateFor(400);
-  }, [runtime, treatment.mood]);
-  useEffect(() => { if (treatment.mood === 'asleep' && runtime.critters.some(entity => !entity.has(Asleep))) { runtime.actions.fallAsleep(); runtime.animateFor(400); } }, [runtime, treatment.mood]);
+  useEffect(() => runtime.setMood(treatment.mood), [runtime, treatment.mood]);
   /* the huddle gathers the critters that were fed; with nothing fed at all, nobody is left out */
   const fedAny = gathered && runtime.critters.some(entity => entity.get(Received)!.crumbs > 0);
   const critters = runtime.critters.map((entity, index) => ({
@@ -136,7 +131,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
     extent: portraitMetrics(entity.get(Identity)!.parameters, gathered ? entity.get(Received)!.fed : 0).extent,
     away: fedAny && entity.get(Received)!.crumbs <= 0,
   }));
-  const layout = layoutGame({ viewport, critters, focus, moment: layoutMomentFor(state), reading, issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
+  const layout = layoutGame({ viewport, critters, focus, reading, issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
   const turn = (direction: number) => turnTo((focus + direction + critters.length) % critters.length);
   const away = critters.filter(critter => critter.away).length;
   useLayoutEffect(() => {
@@ -164,7 +159,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
   const desktop = layout.desktop, showsDock = layout.dock.height > 0;
   const readerOf = (index: number) => () => { if (index !== focus) turnTo(index); onRead?.(index); };
   return (
-    <div ref={body} className="game-body" data-desktop={desktop} data-crowd={!desktop && critters.length > 6} data-game-state={state} data-surface={surface.kind} data-light={treatment.light} data-reading={reading}
+    <div ref={body} className="game-body" data-desktop={desktop} data-crowd={layout.crowded} data-game-state={state} data-surface={surface.kind} data-light={treatment.light} data-reading={reading}
       onKeyDown={event => { if (event.target instanceof HTMLInputElement) return; if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); turn(event.key === 'ArrowLeft' ? -1 : 1); } else if (event.key === 'Escape') onClose?.(); }}>
       <div ref={scene} className="game-scene" style={{ width: layout.scene.width }}
         onPointerDown={event => { if (event.target === event.currentTarget || event.target instanceof Element && event.target.closest('.scene-backdrop')) swipe.current = { x: event.clientX, y: event.clientY }; }}
@@ -184,7 +179,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
           </div>
         )) : null}
         {layout.slots.filter(slot => !slot.tag.hidden).map(slot => (
-          <button key={slot.index} type="button" className="critter-tag-target" aria-label={targetLabel(feast.targets[slot.index]!)} onClick={() => turnTo(slot.index)} style={{ ...rectStyle({ ...slot.tag, y: slot.tag.y - (44 - slot.tag.height) / 2, height: 44 }), zIndex: 2000 + slot.depth }}>
+          <button key={slot.index} type="button" className="critter-tag-target" aria-label={targetLabel(feast.targets[slot.index]!)} onClick={() => turnTo(slot.index)} style={{ ...rectStyle(hitRect(slot.tag)), zIndex: 2000 + slot.depth }}>
             <span className="critter-tag" data-tag={slot.index} data-focus={slot.slot === 0} data-own={critters[slot.index]!.own} style={{ minWidth: slot.tag.width, height: slot.tag.height }}>
               {slot.tag.short ? shortName(slot.name) : slot.name}
               {!(desktop && slot.slot === 0) && !critters[slot.index]!.own ? <TagCount entity={runtime.critters[slot.index]!} {...(counts ? { amount: counts[slot.index]! } : {})} /> : null}
@@ -196,13 +191,13 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
           <button key={bubble.index} type="button" className="thought-target" data-focus={bubble.index === focus} aria-label={formatCopy('read.statement', { name: targetLabel(feast.targets[bubble.index]!) })} onClick={readerOf(bubble.index)} style={{ ...rectStyle(hitRect(bubble.rect)), zIndex: 2950, '--bubble-width': `${bubble.rect.width}px`, '--bubble-height': `${bubble.rect.height}px` } as CSSProperties}><ThoughtBubble /></button>
         )) : null}
         {layout.trail.map((puff, index) => <i key={index} className="thought-puff" aria-hidden="true" style={rectStyle(puff)} />)}
-        {reading && !desktop && surfaces.statement?.phone ? surfaces.statement.phone : null}
+        {reading && !desktop && surfaces.statement?.phone ? <div className="statement-host" style={rectStyle(layout.statement)}>{surfaces.statement.phone}</div> : null}
         {surfaces.toast ?? null}
         {showsDock ? (
           <div ref={dockHost} className="dock-position" data-surface={surface.kind} style={rectStyle(layout.dock)}>
             {surface.kind === 'sheet'
               ? <section className="game-sheet">{surfaces.sheet}</section>
-              : <Dock focusRow={surface.kind === 'dock' ? surfaces.focusRow : undefined} middle={surfaces.middle} turn={turn} results={surface.kind === 'results' && !desktop ? surfaces.results?.card : undefined} />}
+              : <Dock crumbs={surface.kind === 'dock' && treatment.heap === 'remaining'} focusRow={surface.kind === 'dock' ? surfaces.focusRow : undefined} middle={surfaces.middle} turn={turn} results={surface.kind === 'results' && !desktop ? surfaces.results?.card : undefined} />}
           </div>
         ) : null}
       </div>

@@ -23,5 +23,8 @@ export const percentShare = (share: [number,number]) => new Intl.NumberFormat('e
 /** Names in a sentence, as the review pages write them: "Moss and Clover", "Acorn, Pebble and Willow". */
 export const joinNames = (names: readonly string[]) => new Intl.ListFormat('en-GB', { type: 'conjunction' }).format(names);
 
+/** The header's line while scattering: "Scattering closes in 2 days · Wed 7 Oct, 18:00 (PDT)". */
+export const scatteringDeadline = (at: number, now: number) => formatCopy('deadline.line', { deadline: closingLine(at, now), date: absoluteDeadline(at) });
+
 /** "Scattering closes in 2 days", at minute granularity: the dock's line on the phone and the header's on desktop. */
 export const closingLine = (at: number, now: number) => formatCopy('deadline.scattering', { relative: relativeTime(at, Math.floor(now / 60000) * 60000) });
