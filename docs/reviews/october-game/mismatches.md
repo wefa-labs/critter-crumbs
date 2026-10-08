@@ -81,6 +81,57 @@ The reference column describes the phone; on desktop, sheet content moves into t
 
 The flow page draws these moments over the whole painting, as a page-level simplification; its intro says the scatter screen itself is on its own page. The scatter page builds the floor-first stage Afolabi asked for in Appendix H: floor based, with walls at the top. The repair uses the scatter page's stage for every core state, so the game has one scene, and the painted floor plates of §22 replace it in one place. This is the repairer's judgement, recorded here for Afolabi to confirm. It is not one of Afolabi's decisions.
 
-## Progress
+## Progress (2026-10-07)
 
-Each repaired row is re-captured and marked here with its evidence.
+Every row above is repaired and re-captured at the same sizes and data as its reference. Each pair image puts the reference on the left and the app on the right: `compare/<state>-phone.jpg` and `compare/<state>-desktop.jpg`. The gallery now uses the scatter page's own seed (`castFor`), so the numbers match where the reference is the scatter page.
+
+The comparisons were made by eye, pair by pair; they are evidence, not a pass mark. What is checked automatically is the geometry the review pages specify, in `tests/screens/compositions.spec.ts` and `tests/screens/sweep.spec.ts`. That covers:
+
+- the sheet heights;
+- the 130 px dock and the results card at 196 px of floor;
+- the 74 px desktop bar level with the folded dock;
+- the 400–480 px side panel;
+- the toast at the top of the floor;
+- the dialog as a bottom sheet or a 460 px card;
+- the 378 px statement bubble with its trail;
+- no notice card in any core state.
+
+The sweep checks every state at 375×812, 430×932, 1280×800, 1440×900 and 1920×1080 with 4, 8 and 10 critters. The tag sweep checks every focus for the scattering circle and for the circle after the feast.
+
+| State | Reference | Result |
+|---|---|---|
+| Statements open | Flow 34 | Matches: the ring of critters, each but yours with a bubble, over the 230 px sheet |
+| Scattering, reading, all given | Scatter page | Matches, data included: the focus row with the typed amount drawn as the count; the bar's crumb, count, "to go" and closing line; the statement bubble with its chip and trail; the side panel |
+| Confirm, saving, saved | Flow 36–38 | Matches: the bottom sheet or 460 px card with Cancel; the held Saving… pill; "Scattered." with the day it can change until, and the toast at the top of the floor |
+| Not signed, could not save | Flow 39, 40 | Matches: the allocation kept, Scatter These, the message as the toast at the top of the floor |
+| Scattering closed | Flow 41 | Matches, and now reachable live: when the deadline passes with the screen open, the same screen stops at dusk with every critter asleep, then the feast is laid out |
+| Being laid out, key not out yet | Flow 42, 43 | Matches: the sleeping ring at dusk over the 250 px sheet, the bobbing crumbs or the notice and Try again |
+| Feast | Flow 44 | Matches the composition: the ring in feast light, piles beside each critter, the 144 px sheet with Skip to results; the line differs, see below |
+| After the feast (results closed) | Scatter page `#feast` | Matches: everyone grown with their totals on their tags, the focus row with what they received and their share, Results in the bar; added because the results card's close icon needs it |
+| Results | Scatter page `#feast`, Results open | Matches: the card grown out of the dock with its close icon, the summary and who didn't scatter, ranked rows with fed portraits, the privacy line, Replay Feast and Download; desktop's panel with its 74 px bar and the summary in the header |
+| Nobody scattered | Flow 45 | Matches: the awake ring over the 260 px sheet, no actions |
+| One scatterer and a tie | Flow 46 | Matches the contents: the two receivers huddle, "Only Fern scattered.", "Moss and Clover tied." |
+| Who gave what | Flow 47 | Matches: faces as column heads, the giver column held, "—" for nothing given, the giver CSV |
+| Recording, recorded, public | Flow 48–50 | Matches the contents in the results container: the creator's record button with its cost line (folded for other members), the record line with View the record, the visitor's soft Connect and "7 of 8 scattered" |
+
+### Differences kept on purpose
+
+1. **One floor-first scene for every state** (above).
+2. **The results container is the scatter page's for every result variant.** The flow page draws its result variants (46–50) as sheets of 470–590 px over the whole painting. The repair keeps the scatter page's card and panel and puts each variant's contents in it. So recording and recorded also show:
+   - the summary;
+   - who didn't scatter;
+   - the fingerprint;
+   - Replay Feast and Download.
+
+   Nobody scattered keeps the flow page's 260 px sheet, since there is nothing to rank or replay.
+3. **Rows and the huddle leave out critters that received nothing**, as flow 46 does.
+4. **The feast line** reads "Everyone wakes, then each critter eats and grows in turn." The flow page says the critters wake "in the order of what they received", and PR #35's line said they wake one by one. Game Design G3 rules out both: everyone wakes together, then the critters are fed in a fixed order, never by rank.
+5. **The feast heap stays during the sequence** (Game Design G6), drawing at most 24 crumbs, and empties to its outlines. Flow 44's still frame omits it.
+6. **Feast piles draw a sixth of a crumb per crumb received**, as flow 44 does, since a pile of every crumb received would dwarf the critter.
+7. **Growth follows Game Design §3** (scale 1 + 0.35 × fed). The review pages draw 1 + 0.2 × fed, so fed critters stand about 9 % larger than on the scatter page. The spot geometry matches the reference to within 3 px.
+8. **Recording uses the rehearsal strings** (`results.local.*`), since this build records a local fixture with no gas.
+9. **The creator is prompted first to record** (PRD F9, Design System §9). Other members find the button folded. The flow page shows only the prompted view.
+10. **Replay hides the results while the feast plays**, as flow page 44's Replay does. Game Design G3's "the table stays" was written for the grid layout, with the table below the critters. The dock layout has no place for the table during the replay. This needs Afolabi's call.
+11. **Toasts are not live regions.** Refusals and failures come through the app's assertive alert, which the game shows as the toast at the top of the floor. A saved scatter is announced politely (Design System §12.6).
+12. **The side panel is one width for every state:** the scatter page's 400–480 px rule. The flow page draws its sheets 20 px wider at 1280.
+13. **Shadows are tinted with Burrow, never black** (Design System §3.5). The review pages use black.

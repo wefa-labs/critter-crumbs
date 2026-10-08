@@ -6,9 +6,9 @@
     "codec": "h264",
     "pixelFormat": "yuv420p",
     "fps": 30,
-    "duration": 84.833333,
-    "bytes": 4181680,
-    "sha256": "b47a2d40c7656d878a330bca79db968d3e2d47369b4a640db0bd896d45285724"
+    "duration": 85.666667,
+    "bytes": 4169483,
+    "sha256": "8a4c6254495e860241f2aa955d6d7521b17b5e705c568a937850ac35a15eb5b9"
   },
   {
     "device": "desktop",
@@ -17,8 +17,8 @@
     "codec": "h264",
     "pixelFormat": "yuv420p",
     "fps": 30,
-    "duration": 84.2,
-    "bytes": 13569374,
-    "sha256": "245e834b55da5b0dfe41555460a04c73b72367d4fec4c2de824be19860910628"
+    "duration": 80.833333,
+    "bytes": 12312044,
+    "sha256": "b86380841372a3aa25779560468f3120480aac2fda9aebaeeaecec81a7f9b8b1"
   }
 ]
