@@ -130,7 +130,7 @@ Each file kept gets a record: its source URL, licence, the date fetched and any 
   - M4 rides above everything;
   - the effects master rises from −12 dB peak;
   - the 6 kHz low-pass goes, and a limiter stays at the end of the chain.
-- **Toggles:** Sounds (effects) stays. Burrow ambience becomes Music.
+- **Toggles:** Sounds (effects) stays. Burrow ambience becomes Music. Music is on by default and starts with the first tap; the choice is remembered (Afolabi, 8 October).
 
 ## The demo films
 
@@ -143,6 +143,5 @@ Playwright cannot capture the app's own Web Audio, so the films' soundtrack is l
 
 ## Open for Afolabi
 
-1. Whether music is on or off by default. The proposal is on, starting after the first tap, with the choice remembered.
-2. Whether scattering closing at dusk gets J3. Today it is silent on purpose: deadline changes never make a sound.
-3. Which tool and plan make the music, and who runs the generations from the prompts above.
+1. Whether scattering closing at dusk gets J3. Today it is silent on purpose: deadline changes never make a sound.
+2. Which tool and plan make the music, and who runs the generations from the prompts above.
