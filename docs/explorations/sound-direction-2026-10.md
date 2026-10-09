@@ -4,7 +4,9 @@ Afolabi's direction, 8 October 2026, verbatim: "The type of music and effects I 
 
 Afolabi's review of the first takes, 9 October, verbatim: "Roller coaster park music does match the mood of critter crumbs, it is engaging but it needs to be more grounded in the themes of critter crumbs. We are lacking the Nintendo feel. Feeding time is nice and kid like maybe a little to toddler like but it's nice and calm."
 
-This brief records the settled sound set: the house style, the music and stings with the prompts that made them, a new voice for each Game Design §5.2 token, and what is still to check. It replaces Game Design §5.1's character and §5.5's quiet bed. Game Design §5 is rewritten with the implementation. The decisions are in `docs/decisions.md`.
+This brief records the settled sound set: the house style, the music and stings with the prompts that made them, a new voice for each Game Design §5.2 token, and what is still to check. It replaces Game Design §5.1's character and §5.5's quiet bed. The decisions are in `docs/decisions.md`.
+
+**Built on 9 October 2026.** Game Design §5 now describes the sound as built, and `docs/research/audio-assets.md` records each file's take, processing and measurements. Where the build settled something this brief left open (the levels, the feast cue fading under its resolve, what the music does around a sting), Game Design §5 and the decision log are the record.
 
 ## What changes and what stays
 

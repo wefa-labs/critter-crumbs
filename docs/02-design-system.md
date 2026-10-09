@@ -15,7 +15,7 @@ Upstream: `01-prd.md` (vocabulary §3, rules §5, flows §7). Downstream: `03-ga
 
 ## 1. Direction
 
-**The world.** A burrow: warm earth, sunlight coming in from the entrance, small soft creatures, bread crumbs. Everything visual and audible should be describable with the same six words (§2). This is a tool adults use to move real money, so the charm is in materials and motion, never in cuteness of copy or cartoon UI.
+**The world.** A burrow: warm earth, sunlight coming in from the entrance, small soft creatures, bread crumbs. Everything visual should be describable with the same six words (§2); the sound has had its own brief since October 2026 (Game Design §5.1). This is a tool adults use to move real money, so the charm is in materials and motion, never in cuteness of copy or cartoon UI.
 
 **Palette.** Six named colours carry the identity: **Oat** ground, **Burrow** ink, **Honey** crumbs, **Moss** for done and alive, **Clay** only for errors, **Dusk** only for sleep. Honey is reserved for crumbs, except the gold primary action adopted on 2026-10-06 (D14). The primary action uses ink text and an ink outline.
 
@@ -30,6 +30,8 @@ Upstream: `01-prd.md` (vocabulary §3, rules §5, flows §7). Downstream: `03-ga
 ## 2. Shared palette words — materials, light, and sound
 
 The Game Design document must use exactly these words when describing sound. They are the contract that makes the 3D layer and the audio feel like one world.
+
+**Sound, from 8 October 2026.** The sound no longer follows the last column of this table. Afolabi set a new direction, bright, bouncy and melodic with music (`docs/decisions.md`), and Game Design §5.1 is its brief. The column stays as the record of the first brief. Materials and light still follow the six words.
 
 | Word | In materials and light | In sound |
 |---|---|---|
@@ -462,7 +464,7 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
 | `Sheet` / `Dialog` | Confirmations, settings | native `<dialog>` opened with `showModal()` | — | No hand-rolled focus trap; Esc closes; focus returns to the opener |
-| `SoundControls` | Two toggles | effects switch, ambience switch, still-critters switch, simple-view switch | — | Ambience defaults off, effects on (PRD §9); each persisted |
+| `SoundControls` | Two toggles | effects switch, music switch, still-critters switch, simple-view switch | — | Sounds and Music both default on (decision of 2026-10-08); each persisted |
 | `RerollControl` | Meet your critter | big portrait, re-roll button with remaining count, keep button | 4 → 0 re-rolls left / locked | The portrait swap is announced: "New critter. 3 re-rolls left." |
 | `MemberList` | Burrow critters | list of portrait + name + address | — | `role="list"` restored when styled (Safari) |
 | `BurrowList` | Home | list of burrows with critter counts and the next deadline | empty | — |
@@ -779,8 +781,8 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `settings.title` | Settings |
 | `sound.effects.label` | Sounds |
 | `sound.effects.help` | Little crumb noises. |
-| `sound.ambience.label` | Burrow ambience |
-| `sound.ambience.help` | A soft loop in the background. Off unless you want it. |
+| `sound.music.label` | Music |
+| `sound.music.help` | Tunes in the background. |
 | `motion.still.label` | Still critters |
 | `motion.still.help` | No wobbling or bouncing. |
 | `view.simple.label` | Simple view |
@@ -927,7 +929,7 @@ Reviewed against WCAG 2.2 AA and the current accessibility guidance in this sess
 | A6 | Participation and "closing soon" conveyed by colour | Major | Text and icons; chips never colour-only (§8, `Chip`) |
 | A7 | Carousel snap could fight keyboard focus | Major | Focus never moves on snap; buttons and arrow keys drive it; scroll-state CSS not relied on (§6.4) |
 | A8 | Idle critter animation runs indefinitely | Major | Still critters setting + reduced motion (§12.7) |
-| A9 | Autoplaying ambience | Major | Off by default; starts only on interaction (PRD §9) |
+| A9 | Autoplaying music | Major | On by default by decision (2026-10-08). It starts only after the first interaction, sits low in the mix, stops while the tab is hidden, and the Music toggle in Settings turns it off and stays off |
 | A10 | Forced-disabling the individual-scatters switch silently | Minor | `aria-disabled` with the visible reason (`PrivacyControls`) |
 | A11 | Hand-rolled focus traps in sheets | Minor | Native `<dialog>` + `showModal()` only |
 | A12 | Bark text on Sunken misses 4.5 : 1 | Minor | Forbidden pairing; Soil on Sunken instead (§3.1) |
@@ -942,9 +944,9 @@ Still required in implementation, not resolvable in a document: axe-core in CI o
 
 The Game Design document owns every sound token. This document fixes what is shared:
 
-- The six palette words (§2) are the character brief. A sound that needs a word outside that list is wrong.
-- Two toggles, in this order in settings: **Sounds** (effects, default on) and **Burrow ambience** (default off), followed by **Still critters** and **Simple view**. All four persist per browser.
-- The ambience toggle is where the charm is spent: its label carries the `ambience` leaf icon and the one sentence of help; it is never a bare speaker icon.
+- The character brief is Game Design §5.1: bright, bouncy, melodic and playful, grounded in the burrow. It replaced the six palette words for sound on 8 October 2026.
+- Two toggles, in this order in settings: **Sounds** (effects, stings and the feast cue, default on) and **Music** (the loops, default on), followed by **Still critters** and **Simple view**. All four persist per browser.
+- Each toggle is a labelled checkbox with one sentence of help; neither is a bare speaker icon.
 - Every sound token maps to exactly one DOM state or announcement in §12.6; the Game Design table must carry that column.
 - Under reduced motion or Still critters, effects are damped, never disabled — the user's own toggle is the only thing that disables them.
 
@@ -993,7 +995,7 @@ The Game Design document owns every sound token. This document fixes what is sha
 
 | Document | From here, it must |
 |---|---|
-| **03 Game Design** | Use the §2 words for every sound; give every sound token the DOM state it pairs with (§12.6); define the tap/hold curve, the `fed` compression curve, `bump`, `mood`, the wake moment, the feast sequence from `dusk` to `feast` to `day`, reduced-motion rules at least as strict as §3.6, and the whole-scene performance budget that §5.3's per-critter budget rolls up into |
+| **03 Game Design** | Use the §2 words for every sound (superseded for sound on 8 October 2026; Game Design §5.1 is the brief); give every sound token the DOM state it pairs with (§12.6); define the tap/hold curve, the `fed` compression curve, `bump`, `mood`, the wake moment, the feast sequence from `dusk` to `feast` to `day`, reduced-motion rules at least as strict as §3.6, and the whole-scene performance budget that §5.3's per-critter budget rolls up into |
 | **04 Technical Spec** | Generate `tokens.css` and `tokens.ts` from one source; satisfy the stage contract (§6.3) and confirm the render mechanism (D7); lazy-load the 3D module behind portraits (§11); ship the generator (§5) as a pure, versioned, dependency-free module shared by 3D, 2D, and tests; self-host the display font; wire the two announcers and focus management (§12); reference §10 string IDs from the edge-state table and add `err.*` strings here rather than inline |
 
 ### Phase 3 additions to §10

@@ -1,6 +1,6 @@
 # Critter Crumbs — Game Design
 
-**Document 3 of 4** · Status: draft for review · 2026-09-02
+**Document 3 of 4** · Status: draft for review · 2026-09-02 · §5 rewritten 2026-10-09 for the settled sound set
 Upstream: `01-prd.md` (rules §5, flows §7), `02-design-system.md` (the six words §2, tokens §3, lighting presets §4.2, critter state §5.4, the heap §7.4, screen-reader pairing §12.6). Downstream: `04-technical-spec.md`.
 
 **How to read this document.** Written for coding agents, with a human reviewing.
@@ -24,11 +24,11 @@ Six principles, each with a rule the implementation can be checked against:
 | **Feeding, not filling in** | You never type a number to get started; you give crumbs, and a critter reacts to each one. The number field exists for the person who wants exactly 33, and it also produces a reaction (§2.6). |
 | **Every input gets a physical reply** | A press produces visible motion and a sound on the *same frame* it is received (≤ 16 ms), never after a round trip. Nothing waits for the network to feel real; saving is a separate, later, quiet confirmation. |
 | **Weight without spectacle** | Critters have mass: squash on impact, settle with a small overshoot, breathe at rest. Amplitudes are small (§3). Nothing blinks, flashes, or bounces to get attention. |
-| **Quiet, then one big moment** | Every sound but the feast is under 200 ms and low in the mix. Idle motion is barely there. The feast can be loud, long and warm because nothing else was (§4.2). |
+| **Quiet, then one big moment** | Every effect is about a second or less, the three stings three seconds, and all of them sit under the feast; the music sits under everything (§5.4). Idle motion is barely there. The feast can be loud, long and warm because nothing else was (§4.2). |
 | **No sad critters** | A critter that received few crumbs is calm, not sad. Growth is compressed, expression ranges from calm to delighted, never below calm (§3.4, **G4**). Recognition should never be humiliation. |
 | **The truth is in the DOM** | Motion and sound never carry meaning alone. Every cue in this document names the DOM state it accompanies (Design System §12.6). Turn all of this off and the tool still works. |
 
-What the app should feel like in the hand, in one paragraph: you pick up your phone in a group chat lull, open the link, and the critters are asleep in a warm dusk. You read your friends' statements one at a time. Then you feed: a tap gives a crumb with a small dry tick and the critter squashes and chews; you hold, and the ticks run together into a pour that climbs in pitch while the heap under your thumb visibly dwindles. When it is empty there is a small resolving note. You press *Scatter these* and are told, quietly, that you can change it until Friday. Days later you open the link again and the feast plays: everyone wakes together, crumbs fly, critters chew and grow, the light turns golden, they all give one small hop, and the numbers are right there.
+What the app should feel like in the hand, in one paragraph: you pick up your phone in a group chat lull, open the link, and the critters are asleep in a warm dusk. You read your friends' statements one at a time. Then you feed: a tap gives a crumb with a bright little bip and the critter squashes and chews; you hold, and the bips run together into a pour that climbs in pitch while the heap under your thumb visibly dwindles. When it is empty there is a small rising ta-da. You press *Scatter these* and are told, quietly, that you can change it until Friday. Days later you open the link again and the feast plays: everyone wakes together, crumbs fly, critters chew and grow, the light turns golden, they all give one small hop, and the numbers are right there.
 
 ## 2. Input: tap and hold
 
@@ -66,7 +66,7 @@ Tapping the critter's stage is a press on `+` for that critter (Design System §
 | Moment | Visual reply | Sound | Latency budget |
 |---|---|---|---|
 | Press | Count increments; `bump` on the critter (§3.2); DOM hop leaves the heap; heap loses a glyph if a threshold is crossed | `crumb.add` | Same frame; sound scheduled ≤ 20 ms ahead |
-| Pour starts (300 ms) | Count highlight tints; the crumb stream begins; the critter chews (§3.2) | Discrete ticks crossfade into `pour.hold` after the third crumb | ≤ 1 frame after the timer |
+| Pour starts (300 ms) | Count highlight tints; the crumb stream begins; the critter chews (§3.2) | Discrete bips crossfade into `pour.hold` after the third crumb | ≤ 1 frame after the timer |
 | During pour | Count updates every frame; stream density follows the rate | `pour.hold` pitch climbs with the count | — |
 | Release | Stream stops; one final DOM hop; chew settles to idle over 260 ms | `pour.hold` fades out in 60 ms; one `crumb.add` at the current pitch | Same frame |
 | Wall | Heap jiggles once (2° rotation, 120 ms); the control shows its `aria-disabled` state | `pile.wall` | Same frame |
@@ -74,7 +74,7 @@ Tapping the critter's stage is a press on `+` for that critter (Design System §
 
 ### 2.6 Typed amounts
 
-Committing a number field animates the count from the old value to the new over `min(320 ms, 8 ms × |delta|)` with the digits rolling, plays a single `pour.hold` burst whose length is the same, and gives the critter one `bump` at the end. A typed 33 should feel like a short pour, not like nothing happened, and never like 33 taps.
+Committing a number field animates the count from the old value to the new over `min(320 ms, 8 ms × |delta|)` with the digits rolling, plays `pour.hold` as a short run of bells stepping to the new count (§5.3), and gives the critter one `bump` at the end. A typed 33 should feel like a short pour, not like nothing happened, and never like 33 taps.
 
 ## 3. The critter's body
 
@@ -159,7 +159,7 @@ Both remove idle motion entirely (no breath, no wobble, no blink, no hops), repl
 
 ### 4.1 Statements reveal — scattering opens
 
-The first visit after the gathering deadline. The point is that everyone's writing appears *at once*, and that the burrow visibly wakes up. It is a moment, not a state change; it is also under 200 ms of sound, because the feast must remain the only big one.
+The first visit after the gathering deadline. The point is that everyone's writing appears *at once*, and that the burrow visibly wakes up. It is a moment, not a state change, and its sound is one short sting, because the feast must remain the only big one.
 
 | Time | Canvas | DOM | Sound |
 |---|---|---|---|
@@ -169,6 +169,8 @@ The first visit after the gathering deadline. The point is that everyone's writi
 | ~1.2 s | All awake, idle | *Start reading* has focus | — |
 
 Reduced motion: lights and statements crossfade in 200 ms; no stagger; no wake motion.
+
+Feeding time, the scattering music, comes in as the sting's last second dies away (§5.5).
 
 ### 4.2 The feast
 
@@ -180,11 +182,11 @@ The one big moment. It plays the first time anyone opens the feast after the sca
 
 | Beat | Time | Canvas | DOM | Sound |
 |---|---|---|---|---|
-| **Laid out** | 0.0 s | Critters asleep, `dusk` | The feast heap fills in over 400 ms (glyphs pop in, 20 ms apart); the total counts up beside it | `feast.open` begins (1.2 s swell) |
+| **Laid out** | 0.0 s | Critters asleep, `dusk` | The feast heap fills in over 400 ms (glyphs pop in, 20 ms apart); the total counts up beside it | `feast.open` begins: the feast cue, about three seconds of build and then the burst |
 | **Everyone wakes** | 0.4 – 1.2 s | All critters wake together (§3.3), up to 40 ms stagger in grid order, compressed to fit every 600 ms wake inside this window — a ripple, not a queue | — | — |
-| **The wave** | 1.2 s + 0.45 s × index | Critter *i* chews (§3.2) for 900 ms as its crumbs arrive, then grows to its `fed` scale with one overshoot (+6 % at 600 ms, settled at 900 ms) and lands its expression (§3.4). Lights ease `dusk` → `feast` across the wave | 12–24 hops fly from the feast heap to stage *i* over 600 ms, count ∝ share (min 4 for anyone with crumbs, 0 for none); the cell's count rolls up to its total | `feast.feed` for critter *i*, pitch by share; feeds overlap by half, so the sound layers into a rising texture |
-| **Settle** | wave end + 0.2 s | Every critter gives one small hop together (`scale` 1.05/0.96 → 1, 300 ms); lights ease `feast` → `day` over 800 ms; idle resumes | The feast heap empties to its outlines; the results heading receives focus; *Replay the feast* appears | `feast.settle` |
-| **Readable** | settle + 0.8 s (lighting finishes) | Settled pose; idle resumes | Totals and shares visible in the table; nothing else moves | Silence, then the bed if it was on |
+| **The wave** | 1.2 s + 0.45 s × index | Critter *i* chews (§3.2) for 900 ms as its crumbs arrive, then grows to its `fed` scale with one overshoot (+6 % at 600 ms, settled at 900 ms) and lands its expression (§3.4). Lights ease `dusk` → `feast` across the wave | 12–24 hops fly from the feast heap to stage *i* over 600 ms, count ∝ share (min 4 for anyone with crumbs, 0 for none); the cell's count rolls up to its total | `feast.feed` for critter *i*: a nibble, then a bell pitched by its share; feeds overlap, so the bells layer into a rising texture over the cue |
+| **Settle** | wave end + 0.2 s | Every critter gives one small hop together (`scale` 1.05/0.96 → 1, 300 ms); lights ease `feast` → `day` over 800 ms; idle resumes | The feast heap empties to its outlines; the results heading receives focus; *Replay the feast* appears | `feast.settle`: the fanfare lands and the feast cue fades under it; the critters cheer |
+| **Readable** | settle + 0.8 s (lighting finishes) | Settled pose; idle resumes | Totals and shares visible in the table; nothing else moves | The fanfare's tail, then Everyone is full if *Music* is on (§5.5) |
 
 The results and heading focus are available at Settle; Readable marks completion of its 800 ms lighting transition. This preserves the independent 6.0–6.6 second headless acceptance window. Hop counts scale to the largest received amount: `max(4, round(24 × received / largestReceived))`, with no hops for zero. Equal shares therefore receive equal 24-hop streams; the existing 4/24 bounds and 600 ms stream remain unchanged.
 
@@ -194,7 +196,7 @@ Duration: 8 critters ≈ 1.2 + 7 × 0.45 + 0.9 + 0.2 + 0.8 ≈ **6.3 s**; 4 opti
 
 | Case | What plays |
 |---|---|
-| Replay | From *Everyone wakes*; the table stays; the heap refills first (400 ms) |
+| Replay | From *Everyone wakes*; the table stays; the heap refills first (400 ms); the feast cue plays again |
 | Reduced motion / Still critters | No wave: one 320 ms crossfade from asleep-dusk to the settled state, lights to `day`; `feast.settle` only, at −6 dB |
 | Simple view | The same beats with the Design System §7.3 portraits: chew is a 3 % `scale.y` pulse, growth a CSS scale; the hops are identical |
 | Nobody scattered | *Laid out* and *Everyone wakes* play; no wave; the settle hop is skipped; `feast.settle` plays softly; the DOM says `results.nobody` |
@@ -207,7 +209,7 @@ Duration: 8 critters ≈ 1.2 + 7 × 0.45 + 0.9 + 0.2 + 0.8 ≈ **6.3 s**; 4 opti
 - **Anticipation you can see.** Dusk, sleeping critters, and a heap that fills before anyone moves. The waiting screen before the key arrives uses the same dusk, so the feast is a release from a state you have been looking at.
 - **Fairness before proportion.** Everyone wakes together before anyone is fed. The first thing the sequence says is "we are all here."
 - **Proportion you can feel, not measure.** Chewing length, hop count, pitch, and growth all follow share, so a large share is unmistakable without any critter being made small.
-- **A finale that resolves.** The shared hop and the chord end the sequence on the whole group, then the light goes to day and the numbers are simply there.
+- **A finale that resolves.** The shared hop and the fanfare end the sequence on the whole group, then the light goes to day and the numbers are simply there.
 - **Replay as a gift, not a gate.** The results never wait for the animation; the replay exists because people will want to see it again, especially the person who did the hard work this cycle.
 - **What is deliberately absent:** confetti, a spotlight on the top critter, a leaderboard animation, ranking order, sad faces, tension-building pauses, and any pacing borrowed from loot boxes. Restraint elsewhere is what makes this land, and restraint here is what keeps it a tool.
 
@@ -215,86 +217,131 @@ Duration: 8 critters ≈ 1.2 + 7 × 0.45 + 0.9 + 0.2 + 0.8 ≈ **6.3 s**; 4 opti
 
 ### 5.1 Character
 
-The six words are the brief (Design System §2): **warm, soft, matte, wooden, organic, quiet**. Small percussion, plucked strings, breath, rustle, soft thumps. Nothing metallic, nothing digital, no corporate UI blips. If a sound needs a word outside those six, it is wrong.
+Afolabi's direction of 8 October 2026: "Roller coaster tycoon, Nintendo type vibes", and "a strong auditorial experience". The sound is **bright, bouncy, melodic and playful**, in the manner of a cosy Japanese console game, and grounded in the burrow, its critters and the feast. This replaces the first brief (warm, soft, matte, wooden, organic, quiet), which still governs materials and light (Design System §2). The settled set, its house style and its prompts are in `docs/explorations/sound-direction-2026-10.md`; the files, their processing and their measurements are in `docs/research/audio-assets.md`.
 
-Every UI sound is synthesised with the Web Audio API from one shared vocabulary of five voices, so they cohere the way a set of wooden instruments does. Only the ambient bed is a file.
+There are three kinds of sound:
+
+| Kind | What | Where it plays |
+|---|---|---|
+| **Music** | Four looping tracks, one for each part of the app (§5.5) | The music bus, under the *Music* toggle |
+| **Recordings** | Seven effects, three stings, and the feast cue with its resolve | The effects bus, under the *Sounds* toggle |
+| **Synth voices** | Bells for the crumbs and the chimes, and a stand-in for each recorded cue until its file has loaded | The effects bus, under the *Sounds* toggle |
+
+All the music is in C major, so the crumbs' pentatonic pitches (§5.3) sit inside it. Nothing of anyone else's is used: every file was generated from a written brief that names no game, studio or composer.
+
+The synth voices are made with the Web Audio API:
 
 | Voice | Recipe | Used by |
 |---|---|---|
-| **Tick** (woodblock) | Sine, 620 → 380 Hz over 30 ms; gain attack 2 ms, exponential decay 70 ms; plus a 12 ms noise burst through a band-pass at 2.5 kHz, Q 1.5 | `crumb.add`, `crumb.remove`, the grains of `pour.hold` |
-| **Pluck** | Triangle through a low-pass at 1.8 kHz; attack 4 ms, exponential decay 160 ms; a second voice at +6 cents for warmth | `pile.empty`, `scatter.confirm`, `reroll`, chords |
-| **Thump** | Sine 90 → 60 Hz over 60 ms; attack 3 ms, decay 110 ms | `pile.wall`, `error`, `feast.settle` |
-| **Breath / rustle** | White noise → band-pass sweeping 900 Hz – 2.4 kHz; attack 40 ms, release 120 ms; amplitude-modulated at 12–18 Hz for rustle grains | `connect`, `statement.open`, `statements.reveal`, the bed of `pour.hold`, `feast.open` |
-| **Drone** | Two sines an octave apart at 65 / 130 Hz, slow tremolo 0.3 Hz, very low | `feast.open` only |
+| **Bell** | A struck bar: a sine at the note with partials at 2.76 and 5.4 times it that die away sooner; attack 2 ms, exponential decay up to 220 ms | `crumb.add`, `crumb.remove`, the grains of `pour.hold`, `connect`, `pile.empty`, the bell in `feast.feed`, and the stand-ins for the stings, the spin and the fanfare |
+| **Tick** | Sine, 620 → 380 Hz over 30 ms, scaled to the note; attack 2 ms, decay 70 ms; plus a 12 ms noise burst through a band-pass at 2.5 kHz | The tiny pop on top of `crumb.add`; the stand-in for `ui.tap` |
+| **Thump** | Sine bending down a fifth over 60 ms; attack 3 ms, decay 110 ms | `error`; the stand-ins for `pile.wall` and `feast.settle` |
+| **Breath** | White noise through a band-pass sweeping 900 Hz to 2.4 kHz, amplitude-modulated at 12–18 Hz | The stand-ins for `statement.open`, `feast.open` and the sparkle bed |
+| **Drone** | Two sines an octave apart at 65 and 130 Hz with a slow tremolo | The stand-in for `feast.open` |
 
-Master chain: voices → compressor (threshold −18 dB, ratio 3 : 1, attack 5 ms, release 120 ms) → low-pass at 6 kHz (the "nothing bright" rule, enforced in the signal path) → effects gain (the *Sounds* toggle) → destination. The bed has its own gain (the *Burrow ambience* toggle) into the same low-pass. Micro-variation on every trigger: ± 25 cents on ticks and thumps, ± 10 cents on plucks, ± 8 % gain, ± 10 ms timing. No two crumbs are identical.
+The chain: voices → compressor (threshold −18 dB, ratio 3 : 1, attack 5 ms, release 120 ms) → effects gain (the *Sounds* toggle). Recordings join at the effects gain, past the compressor, so each lands at the level it is given. Music → duck gain → music gain. Effects and music → limiter (threshold −3 dB, ratio 20 : 1, attack 3 ms, release 250 ms) → destination. Nothing is low-passed. Every synth trigger varies a little: ± 25 cents on ticks and thumps, ± 10 cents on bells, ± 8 % gain, ± 10 ms timing. Recordings play as recorded.
 
 ### 5.2 Token table
 
-Levels are peak, relative to full scale, with the effects gain at its default. Everything except the three feast tokens is ≤ 200 ms.
+A level is the peak the cue reaches, relative to full scale, with both toggles on. A recording's length is its file's; the cues that are always synth are under 400 ms.
 
-| Token | Fires when | DOM state it accompanies (DS §12.6) | Character | Duration | Level | Pitch |
+| Token | Fires when | DOM state it accompanies (DS §12.6) | Sound | Source | Length | Level |
 |---|---|---|---|---|---|---|
-| `connect` | Connect succeeds | `ConnectButton` → connected | One soft wooden knock, then a short breath | 180 ms | −16 dB | Fixed, ~D4 knock |
-| `reroll` | Re-roll pressed | New portrait; `critter.reroll.announce` | Two quick plucks, the second a fourth up | 160 ms | −16 dB | Fixed |
-| `ui.tap` | A state-changing button pressed (*Open the feast*, *Scatter these*, *Leave burrow*, *Extend*) — never on navigation | Button `active` | A tiny felt tap | 40 ms | −22 dB | Fixed |
-| `crumb.add` | A crumb given (press) | Count +1; the hop | Tick with a faint pluck tail | 90 ms | −14 dB | Pentatonic step from this critter's count (§5.3) |
-| `crumb.remove` | A crumb taken back | Count −1; reversed hop | The same tick, damped, tail bending down a semitone | 90 ms | −16 dB | One step below the current |
-| `pour.hold` | Pouring (from the 3rd crumb of a hold) | Count highlight; crumb stream / pulse | Tick grains at the crumb rate merging into a pour, a rustle underneath; climbs the scale | Continuous | −14 dB | Follows the count |
-| `pour.reverse` | Pouring in reverse | Same, minus | The same, descending, slightly damped | Continuous | −16 dB | Follows the count, downward |
-| `pile.wall` | A press at the wall (nothing left, or nothing here to take) | Control `aria-disabled`; heap jiggle | A soft low thump on wood | 120 ms | −16 dB | Fixed, low |
-| `pile.empty` | Remaining reaches 0 | *All scattered* chip | Two descending plucks resolving to the tonic, with a breath | 200 ms | −14 dB | Tonic |
-| `statement.open` | A statement expands in a cell | `<details>` open | A page-turn rustle | 120 ms | −20 dB | — |
-| `scatter.confirm` | The scatter is saved (after the signature) | The done line, `scatter.done.*` | A warm two-note pluck (tonic, fifth) and one tiny thump | 200 ms | −12 dB | Tonic |
-| `statements.reveal` | Scattering opens, first visit | The reveal card; `reveal.announce` | A rising rustle into one plucked chord | 200 ms | −12 dB | Tonic chord |
-| `feast.open` | The feast begins | The feast heap fills; lights `dusk` | Breath and the low drone swelling together | 1,200 ms | −10 dB | Drone at C2/C3 |
-| `feast.feed` | Each critter's feeding beat | Its hops; its count rolling up | A short pour crescendo ending on one low, satisfied pluck | 500 ms | −10 dB | By share: pentatonic degree 1–10 |
-| `feast.settle` | The shared hop | Results heading focused; `feast.announce` | A wooden chord (three plucks 40 ms apart) and one deep soft thump; then silence | 1,600 ms | −8 dB | I – III – V |
-| `error` | A blocking error (`role="alert"`) | The error notice | A single muted low knock — dull, not alarming | 150 ms | −16 dB | Fixed, low |
-| `ambience.bed` | Ambience toggled on, after the first gesture | The leaf toggle on | The burrow at rest (§5.5) | Loop | −24 dB RMS | — |
+| `connect` | Connect succeeds | `ConnectButton` → connected | A two-note welcome chime, G5 then C6 | Synth bells | 240 ms | −14 dB |
+| `reroll` | Re-roll pressed | New portrait; `critter.reroll.announce` | A spin whirr ending in a pop and a chime | Recording: spin | 1.2 s | −14 dB |
+| `ui.tap` | A state-changing button pressed (*Open the feast*, *Scatter These*, *Leave burrow*, *Extend*), never on navigation | Button `active` | A soft bubbly pop | Recording: pop | 0.8 s | −20 dB |
+| `crumb.add` | A crumb given (press) | Count +1; the hop | A bright glockenspiel bip on this critter's pentatonic step (§5.3) | Synth bell | 160 ms | −14 dB |
+| `crumb.remove` | A crumb taken back | Count −1; reversed hop | A softer bip, one step below the current | Synth bell | 150 ms | −16 dB |
+| `pour.hold` | Pouring (from the 3rd crumb of a hold); a typed amount | Count highlight; crumb stream / pulse | Rising bell grains over a sparkle bed (§5.3) | Synth bells; recording: sparkle, looped | Continuous | −14 dB |
+| `pour.reverse` | Pouring in reverse; a typed amount downward | Same, minus | The same, descending | Synth bells; recording: sparkle | Continuous | −16 dB |
+| `pile.wall` | A press at the wall (nothing left, or nothing here to take) | Control `aria-disabled`; heap jiggle | A short cartoon boing | Recording: boing | 0.6 s | −16 dB |
+| `pile.empty` | Remaining reaches 0 | *All scattered* chip | A rising three-note "ta-da", C5 E5 G5 | Synth bells | 360 ms | −12 dB |
+| `statement.open` | A statement opens | The statement shown | A storybook page flip | Recording: page | 0.6 s | −10 dB |
+| `scatter.confirm` | The scatter is saved (after the signature) | The done line, `scatter.done.*` | **J1 Scattered:** a xylophone arpeggio, a flute trill and a muted-trumpet button | Sting | 3.0 s | −10 dB |
+| `statements.reveal` | Scattering opens, first visit | The reveal sheet; `reveal.announce` | **J2 Statements open:** a harp glissando and bells into a soft chord | Sting | 3.0 s | −10 dB |
+| `scatter.closed` | Scattering closes with the scatter screen open | The screen at dusk, the circle asleep, the controls dimmed; the `scatter.closed` line | **J3 Dusk:** a slow descending celesta phrase | Sting | 3.0 s | −14 dB |
+| `feast.open` | The feast begins, and each replay | The feast heap fills; lights `dusk` | **M4 The feast:** three seconds of build, then the full-ensemble burst | Feast cue | 9.6 s | −8 dB |
+| `feast.feed` | Each critter's feeding beat | Its hops; its count rolling up | A critter nibbling, then a bell pitched by its share (pentatonic degree 1–10) | Recording: munch; synth bell | 1.4 s | −8 dB |
+| `feast.settle` | The shared hop | Results heading focused; `feast.announce` | **M4r:** the fanfare lands and the feast cue fades under it; a chorus of critters cheers a moment later | Feast resolve; recording: cheer | 3.0 s | −8 dB |
+| `error` | A blocking error (`role="alert"`) | The error notice | A soft, low "bwomp", never alarming | Synth thump | 200 ms | −16 dB |
 
-Silent on purpose: expanding a statement closed, navigation, hover, deadline changes (never a spontaneous sound), saving in progress, offline banners, the own critter's sleep, and the wake motion at the reveal (its sound is `statements.reveal`).
+The music loops are not tokens; §5.5 covers them.
+
+Notes on the table:
+
+- **Until a recording has loaded,** its cue plays a synth version: bells in the sting's place, a tick for the pop, a thump for the boing. A recording that fails to load is asked for again the next time its cue plays.
+- **Levels are peaks, so they are not loudness.** The page flip and the nibble are mostly short clicks and need a high peak to be heard at all; `docs/research/audio-assets.md` gives each recording's loudness at its level.
+- **A synth cue of several notes shares its level between them,** so it peaks under it.
+- **A save refused because scattering has closed** plays the Dusk sting, not `error`: the screen closes exactly as it does when the deadline passes under it, and no error notice is shown.
+
+Silent on purpose: closing a statement, navigation, hover, every deadline change except scattering closing under the open scatter screen, saving in progress, offline banners, the own critter's sleep, and the wake motion at the reveal (its sound is `statements.reveal`). Someone who arrives after scattering has closed hears no sting.
 
 ### 5.3 The hold: crossfade, and pitch as position
 
 A hold must sound like an unbroken pour, never a machine gun.
 
 1. The first three crumbs of a hold play `crumb.add` normally.
-2. From the third crumb, `pour.hold` fades in over 150 ms while discrete ticks stop. `pour.hold` is a grain scheduler: it places tick grains at the current crumb rate; above 12 grains/s the grains drop 6 dB and a continuous rustle bed rises, so the ear hears a pour rather than counting.
+2. From the third crumb, `pour.hold` fades in over 150 ms while discrete bips stop. `pour.hold` is a grain scheduler: it places bell grains at the current crumb rate; above 12 grains/s the grains drop 6 dB and the sparkle bed rises under them, so the ear hears a pour rather than counting. The bed is a 1.7 s recording looped with a crossfade (G8), 10 dB under the grains; until it has loaded, a breath of noise takes its place.
 3. On release, `pour.hold` fades out in 60 ms and one `crumb.add` plays at the current pitch — the sound "lands" where the count did.
 
-**Pitch rises with that critter's total** so you can hear roughly where you are without looking. **G7** — the pitch is quantised to a major pentatonic (C D E G A) over two octaves from C4, one step per 5 % of the issued crumbs, capped at the tenth step (50 % of the pile and above). A critter at 12 crumbs of 100 sounds at step 2; at 30, step 6; the biggest scatter in a feast is always the highest voice. Minus steps down the same scale. Under reduced motion the pour is replaced by discrete soft ticks capped at 8/s, still pitched.
+**Pitch rises with that critter's total** so you can hear roughly where you are without looking. **G7** — the pitch is quantised to a major pentatonic (C D E G A) over two octaves from C4, one step per 5 % of the issued crumbs, capped at the tenth step (50 % of the pile and above). A critter at 12 crumbs of 100 sounds at step 2; at 30, step 6; the biggest scatter in a feast is always the highest voice. Minus steps down the same scale. Under reduced motion the pour is replaced by discrete soft bips capped at 8/s, still pitched.
+
+A typed amount (§2.6) is a short run of up to four bells, 80 ms apart, stepping up to the pitch where the count lands, or down to it when crumbs are taken back.
 
 ### 5.4 Levels and mix
 
-| | Peak / RMS | Note |
+| | Level | Note |
 |---|---|---|
-| Effects master | −12 dB peak | Everything in §5.2 sits under this except the feast |
-| Feast tokens | up to −8 dB peak | The only loud thing in the app |
-| Ambience bed | −24 dB RMS | Ducks a further −4 dB during `feast.open` through `feast.settle`, returns over 2 s |
-| Reduced motion / Still critters | effects −6 dB | Damped, never disabled; only the user's toggle disables |
+| Effects and stings | −20 to −10 dB peak (§5.2) | Each recording lands at its level |
+| Feast tokens | −8 dB peak each | The only loud thing in the app. Its sounds overlap, so a whole feast for eight peaks near −3 dB, where the limiter holds it |
+| Music | −15 dB on files at −16 LUFS: about −31 LUFS | About 8 dB under the stings and the feast cue |
+| Music under an open statement | A further −6 dB | On the phone, while the statement is open. The desktop panel always shows a statement, so there the music does not duck |
+| Reduced motion / Still critters | Effects −6 dB | Damped, never disabled; only the user's toggle disables. The music is unchanged |
+| Limiter | −3 dB, 20 : 1 | Ends the chain |
 
-### 5.5 The ambient bed
+These levels were set from measurement (`docs/research/audio-assets.md`), not yet by ear on the burrow's phones. They are starting values, like every number here: F3 and F10 in §10 are where they are tuned.
 
-One file, the only audio asset: a 45-second seamless loop, Opus at 48 kbps (~270 KB) with an MP3 fallback (~540 KB), loaded only when the toggle is first turned on. Content: wind through dry grass at a distance, an occasional wooden creak, a very slow marimba figure of four notes every ~20 s on the same pentatonic — present enough to be a place, never a tune you could hum. **G8** — playback uses two overlapping buffer sources with a 2 s equal-power crossfade at the loop point, so the file need not be sample-perfect at its seams. Starts only after a user gesture (browser policy), fades in over 1.5 s, pauses while the tab is hidden, resumes with a 1 s fade. Who composes or records it is **GQ1**.
+### 5.5 Music
+
+Music replaces the single quiet bed first specified here. Four loops, each a file at 128 kbps:
+
+| Track | Plays on |
+|---|---|
+| **M1 The burrow** | The arrival page and home; a feast as someone outside the burrow sees it |
+| **M2 The town square** | A burrow, creating one, feast setup, a draft, gathering; a cancelled or void feast |
+| **M3 Feeding time** | Scattering: the reveal, reading, scattering, saving |
+| *Quiet* | From scattering closing until the feast has played: dusk, the wait for the key, and the feast itself, whose cue is its music |
+| **M5 Everyone is full** | After the feast: the results, who gave what, a public result |
+
+- **Nothing before the first gesture.** No sound file is in the first load. The music starts with the first tap, as browsers require, if *Music* is on.
+- **One track at a time.** A track is fetched and decoded when a screen first wants it, and let go when another takes over: a decoded track is about 30 MB. A screen that keeps the same track plays on without a break.
+- **Fades.** In over 1.5 s, out over 1 s.
+- **G8** — a track loops as overlapping passes of the same buffer with a 2 s equal-power crossfade, so the file need not be seam-perfect.
+- **Stings come first.** A track about to start waits for a sting or the feast cue still sounding, and comes in as its last second dies away: Feeding time after the reveal's sting, Everyone is full after the fanfare (§4.2, *Readable*).
+- **Under an open statement** it steps back 6 dB (§5.4).
+- **While the tab is hidden** all sound stops; the music returns over 1 s.
 
 ### 5.6 Toggles and defaults
 
 | Setting | Default | Persisted as | Effect |
 |---|---|---|---|
-| **Sounds** (effects) | on | `cc.sound.effects` = `"1"` | All §5.2 tokens except the bed |
-| **Burrow ambience** | off | `cc.sound.ambience` = `"0"` | The bed; the toggle carries the leaf icon and its one line of help (Design System §13) |
+| **Sounds** | on | `cc.sound.effects` = `"1"` | Every §5.2 token: effects, stings and the feast cue |
+| **Music** | on | `cc.sound.music` = `"1"` | The loops of §5.5 |
 | **Still critters** | off | `cc.motion.still` = `"0"` | §3.5 motion rules and the −6 dB damping |
 | **Simple view** | off | `cc.view.simple` = `"0"` | Design System §11 |
 
-Persistence is per browser (`localStorage`), read before the first render so nothing plays or moves that the person turned off last time. The OS `prefers-reduced-motion` preference applies on top of these and cannot be overridden by them; *Still critters* exists so the choice is also visible in the app.
+Persistence is per browser (`localStorage`), read before the first render so nothing plays or moves that the person turned off last time. The OS `prefers-reduced-motion` preference applies on top of these and cannot be overridden by them; *Still critters* exists so the choice is also visible in the app. The earlier `cc.sound.ambience` key is no longer read: its toggle never played anything.
 
 ### 5.7 Implementation notes for the Technical Spec
 
-- One `AudioContext`, created and resumed on the first user gesture (iOS requires it inside the gesture handler). Nothing is scheduled before that; `connect` is typically the first sound a person hears, and it plays because they clicked.
-- A small voice pool (16 voices) with lookahead scheduling of 20 ms against `AudioContext.currentTime`; the pour scheduler runs on a 25 ms timer, not on `requestAnimationFrame`, so a dropped frame never stutters the sound.
-- Every token is a pure function `(ctx, destination, params) => void`; tokens are unit-testable by rendering into an `OfflineAudioContext` and asserting duration and peak level against §5.2.
-- No audio library; the vocabulary above is about 300 lines.
+- One `AudioContext`, created and resumed on the first user gesture (iOS requires it inside the gesture handler). Nothing is created, fetched or scheduled before that. Which event counts as the gesture depends on the device, so the app listens for all four: a mouse press, a touch as the finger lifts (a touch landing does not count), a click, a key.
+- The effects, stings and feast cue (0.46 MB) load after the first gesture. Each music loop (0.9 to 1.4 MB) loads when a screen first wants it. All are MP3, decoded with `decodeAudioData`.
+- A small voice pool (16 voices) with lookahead scheduling of 20 ms against `AudioContext.currentTime`. The pour scheduler runs on a 25 ms timer and the music's loop scheduler on a 1 s timer, never on `requestAnimationFrame`, so a dropped frame never stutters the sound. One recording plays at most four deep, because a large feast feeds faster than a nibble lasts.
+- A browser's compressor node starts shut: its detector begins at zero, so it ducks the first few hundred milliseconds of the first sound it is ever given. The mix therefore opens itself with 150 ms of inaudible signal when it is made.
+- The compressor node also adds make-up gain of its own. The limiter's is undone by a trim after it, so a sound under the threshold leaves at the level it came in.
+- Leaving a screen stops its effects; a recording still ringing fades over 250 ms and is never cut dead. The music carries on across screens. Two exceptions: a recording stopped before it has begun never sounds at all (a result that opens already skipped), and when the tab is hidden everything ends at once, because a suspended context would keep a fade and play it on return.
+- Three layers of test. The plans, the engine's choices and the music player run headless against a recording stand-in for the Web Audio nodes. Every cue, in its synth version and with its recordings, the pour and a whole feast render in the browser's own `OfflineAudioContext` and are asserted against §5.2's lengths and levels (`tests/e2e/audio.spec.ts`). Which recording plays when is followed through one member's feast (`tests/e2e/sound.spec.ts`). The browser's rule about which gesture may start sound cannot be tested this way: a browser under automation starts audio with no gesture at all, so that part is a check for real phones.
+- No audio library.
 
 ## 6. Performance budget for the 3D scene
 
@@ -349,7 +396,7 @@ Schema traits are Koota's structure-of-arrays kind; callback traits hold objects
 | **Crumb** (3D flight only) | `Flight` `{ t, x, y, z }` + relation `FlyingTo(critter)` (`autoDestroy: 'source'`) | Never more than 64 alive (§6); the instanced mesh reads these |
 | **FeastRun** (one, while the feast plays) | `Feast` `{ beat, startedAt, index, skipped }` | The director's only state |
 | **Event** (transient) | `SoundEvent` `{ token, pitchStep, level }` or `Hop` `{ from, to, reverse }` | Spawned by systems, consumed and destroyed by the sound system or the DOM subscriber in the same tick; a sweep at the end of the tick destroys any that were not consumed |
-| **World traits** (singletons) | `Clock` `{ now, dt }`, `Phase` `{ name, gatheringEndsAt, scatteringEndsAt }`, `Settings` `{ effects, ambience, still, simple, reducedMotion }`, `Viewer` `{ address }` | Written by the ticker and by the app; read by systems. The Technical Spec verifies whether `useTrait` accepts the world for these; if not, they move to a dedicated `App` entity |
+| **World traits** (singletons) | `Clock` `{ now, dt }`, `Phase` `{ name, gatheringEndsAt, scatteringEndsAt }`, `Settings` `{ effects, music, still, simple, reducedMotion }`, `Viewer` `{ address }` | Written by the ticker and by the app; read by systems. The Technical Spec verifies whether `useTrait` accepts the world for these; if not, they move to a dedicated `App` entity |
 
 ### 7.3 Systems, in tick order
 
@@ -425,7 +472,7 @@ Run on the real deployment with the real people, on their own phones. Each line 
 | F7 | No critter ever looks sad at the results |
 | F8 | The feast plays under 8 s for the council's feast, the numbers are readable at the settle, and *Skip to results* works from the first frame |
 | F9 | With *Still critters* on, nothing moves except crossfades, and the feast is a single crossfade |
-| F10 | With *Sounds* off, nothing is confusing; with *Burrow ambience* on, nobody asks how to turn it off |
+| F10 | With *Sounds* off, nothing is confusing; with *Music* on, it sits under the screen without pulling focus, and anyone who wants it off finds the toggle |
 | F11 | 30 fps or better on the slowest phone in the burrow with a pour running |
 | F12 | Nobody notices the moment 3D replaced the portraits |
 
@@ -442,7 +489,7 @@ Run on the real deployment with the real people, on their own phones. Each line 
 | G5 | A small mouth arc is added to the critter (Design System §5.3 addition, ≤ 40 triangles) | Eyes and ears alone cannot read as pleased at grid size |
 | G6 | The feast's crumbs are DOM hops from a large feast heap, not canvas particles | One sequence for 3D and Simple view; the canvas budget is untouched |
 | G7 | Pour pitch is quantised to a major pentatonic, one step per 5 % of the issue, capped at 50 % | Pours sound musical rather than like a siren; the highest voice is the biggest scatter |
-| G8 | The bed loops with a 2 s equal-power crossfade between two buffer sources | The file need not be seam-perfect; no clicks at the loop point |
+| G8 | A loop (the music, and the sparkle bed under a pour) plays as overlapping passes of one buffer with an equal-power crossfade: 2 s, or a quarter of a short loop | The file need not be seam-perfect; no clicks at the loop point |
 | G9 | No haptics in v0 | Android-only and coarse; not worth the inconsistency |
 | G10 | The simulation core is an ECS built on Koota (pmndrs), with the 3D scene and the Simple view as two renderers over the same traits and a ticker with injected time (§7) | Queries, change tracking, relations and React bindings from the renderer's own maintainers for a few kilobytes; deterministic, headless-testable feel; one simulation for both views |
 
@@ -450,7 +497,7 @@ Run on the real deployment with the real people, on their own phones. Each line 
 
 | # | Question |
 |---|---|
-| GQ1 | Who makes the ambient bed: a commissioned 45 s loop, a CC0 field recording with a synthesised marimba figure layered on, or fully synthesised in the browser (which would remove the only audio file but costs a few days)? |
+| GQ1 | Answered 8 October 2026: the single ambient bed is replaced by music, generated from a written brief (§5.5, `docs/decisions.md`). |
 | GQ2 | Whether an options feast should feed by rank rather than grid order. G3 says no for both feast types; a budget split might want the "winner" last. |
 | GQ3 | The device floor (§6). If any council member's phone is older than the floor, the rehearsal should include it and the ladder must be tested there. |
 
@@ -458,9 +505,9 @@ Run on the real deployment with the real people, on their own phones. Each line 
 
 The brief asks for this document to pass through Game Studio in ChatGPT. Paste the following, then attach or paste §1–§6 of this document. Bring the answer back as a table and it can be folded into a revision.
 
-> You are reviewing the game-feel specification for Critter Crumbs, a small 3D web tool a group of adults uses twice a year to decide how money is shared: everyone gets the same handful of crumbs and feeds them to critters (people or budget options); it stays private until a "feast" reveals every allocation at once. It must feel charming, not childish; quiet, with one big moment; and it must never make a person's critter look sad. The visual and sound palette is fixed to six words: warm, soft, matte, wooden, organic, quiet. No confetti, no leaderboards, no reward loops.
+> You are reviewing the game-feel specification for Critter Crumbs, a small 3D web tool a group of adults uses twice a year to decide how money is shared: everyone gets the same handful of crumbs and feeds them to critters (people or budget options); it stays private until a "feast" reveals every allocation at once. It must feel charming, not childish; quiet, with one big moment; and it must never make a person's critter look sad. The visual palette is fixed to six words: warm, soft, matte, wooden, organic, quiet; the sound is bright, bouncy and melodic, like a cosy console game. No confetti, no leaderboards, no reward loops.
 >
-> Review the attached specification and answer only with a table of proposed changes: section, current value, proposed value, one-line reason. Focus on (1) the tap-and-hold pour curve numbers, (2) the squash-and-stretch and expression mapping, (3) the feast sequence pacing and order, (4) the sound token table and the pour crossfade, and (5) anything that would make the feast satisfying that the spec is missing. Respect the six words and the "no sad critters" rule; do not propose new features, scoring, or progression.
+> Review the attached specification and answer only with a table of proposed changes: section, current value, proposed value, one-line reason. Focus on (1) the tap-and-hold pour curve numbers, (2) the squash-and-stretch and expression mapping, (3) the feast sequence pacing and order, (4) the sound token table and the pour crossfade, and (5) anything that would make the feast satisfying that the spec is missing. Respect the six words, the sound direction and the "no sad critters" rule; do not propose new features, scoring, or progression.
 
 ## 13. What the Technical Spec owns from here
 

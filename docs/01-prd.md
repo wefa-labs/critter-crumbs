@@ -279,7 +279,7 @@ Product-level requirements that documents 2–4 elaborate:
 - **Only critters live in the canvas.** All UI chrome — crumb counts, statements, buttons, deadlines, results tables — is DOM overlaid on the canvas, never rendered in WebGL. Text stays selectable, screen readers work, layout stays responsive.
 - **Responsive from the start.** Critter grid: two columns on mobile, three or four on desktop. Not a desktop app that shrinks.
 - **`prefers-reduced-motion`** reduces 3D animation to near-static and damps audio.
-- **Sound never carries state alone.** Every audio cue has a visual counterpart. Two separate toggles: ambient bed (default **off**) and UI effects (default **on**), both persisted. The ambient bed starts only after first interaction — browsers block audio before that, and unexpected background music in a work tool makes people mute everything.
+- **Sound never carries state alone.** Every audio cue has a visual counterpart. Two separate toggles, both persisted: Sounds (effects, default **on**) and Music (default **on** by Afolabi's decision of 8 October 2026; this requirement first specified an ambient bed, default off). Music starts only after the first interaction, because browsers block audio before that, and its toggle is one tap away in Settings for anyone who would rather work in quiet.
 - **Deadlines are unmissable.** Both phase deadlines visible, local time, absolute time one tap away (§6).
 
 ## 10. Scope

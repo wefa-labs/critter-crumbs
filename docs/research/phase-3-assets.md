@@ -17,3 +17,5 @@ Renderer colours use the [CSS Color 4 conversion matrices](https://www.w3.org/TR
 Web Audio implementation reference, checked2026-09-06: the normative [Web Audio specification](https://webaudio.github.io/web-audio-api/) defines scheduled AudioParam automation, compressor nodes and context time; MDN's [OfflineAudioContext.startRendering](https://developer.mozilla.org/en-US/docs/Web/API/OfflineAudioContext/startRendering) documents offline DSP rendering. Sound voices use that rendering path for measured browser checks. No downloaded effects or music library is used.
 
 October 2026: the adopted Inked daylight look uses system sans throughout; the unused Young Serif file and OFL copy were removed (D14). The row above records the historical phase-3 asset.
+
+October 2026: the effects and ambient-bed rows are history too. The settled sound set, with recorded effects, stings, a feast cue and four music loops, is recorded in [audio-assets.md](audio-assets.md).
