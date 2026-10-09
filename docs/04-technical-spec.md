@@ -217,7 +217,7 @@ interface AccountProvider { discover(): Promise<AccountOption[]>; connect(option
 
 - **v0 provider:** EIP-6963 discovery (the `eip6963:announceProvider` handshake is ~30 lines; no library) feeding viem's `createWalletClient({ transport: custom(provider) })`. No wagmi, no connector kits (**T5**).
 - **v1 provider:** an embedded-wallet SDK wrapped to the same interface; `kind: 'embedded'`. The rest of the app never imports a provider directly.
-- **Chains.** Signing needs no chain. Posting the result needs Base (chain id 8453; Base Sepolia 84532 in dev) — the account is asked to switch (`wallet_switchEthereumChain`) only at that moment.
+- **Chains.** Signing in needs no chain. Signing a ballot and posting the result need the EAS chain, Base (chain id 8453; Base Sepolia 84532 in dev and during the testnet period): the account is asked to switch (`wallet_switchEthereumChain`) at those moments, and to add the chain (`wallet_addEthereumChain`) when the wallet does not know it. MetaMask refuses typed data whose domain chainId is not the active chain; a wallet that cannot switch signs as it is (decision of 2026-10-08).
 - **ENS** is resolved server-side against a mainnet RPC (`MAINNET_RPC_URL`, a dependency named in the brief) with a 24-hour cache in Postgres (`profiles.ens_name`, `ens_checked_at`); the client never holds an RPC key. Failure shows addresses (`err.ensUnavailable`).
 - **Sign-in message** (EIP-191), copy in the Design System's voice, never the word wallet:
 

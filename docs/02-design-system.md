@@ -589,6 +589,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 
 | ID | Text |
 |---|---|
+| `connect.injected` | This browser (the connect choice offered when the browser has a provider that does not announce itself, as some phone apps' built-in browsers do) |
 | `name.title` | What should the burrow call you? |
 | `name.help` | There's no ENS name on this address, so pick a name. |
 | `name.label` | Display name |
