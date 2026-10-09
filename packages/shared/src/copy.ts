@@ -82,6 +82,7 @@ export const copy = {
   "dev.mode": "Local rehearsal",
   "connect.title": "Choose how to connect",
   "connect.empty": "No connection is available in this browser yet.",
+  "connect.injected": "This browser",
   "connect.rejected": "Connection wasn't confirmed. Try again when you're ready.",
   "connect.resumed": "Connected. Try that again now — nothing you entered was lost.",
   "app.loading": "Opening the burrow…",

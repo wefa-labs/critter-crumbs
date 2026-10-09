@@ -6,16 +6,21 @@ import { ballotSchema, resultSchema, schemaUID } from '@critter-crumbs/core';
 const args = process.argv.slice(2);
 const execute = args.includes('--execute');
 const target = args.includes('--production') ? 'production' : 'preview';
-if (new Set(args).size !== args.length || args.some(arg => !['--execute', '--production'].includes(arg))) throw new Error('Usage: deploy [--production] [--execute]. Default: print plan only.');
+/* Production runs on testnet until the mainnet Shutter key arrives, and only when the operator says so (docs/decisions.md, 2026-10-08). */
+const testnet = args.includes('--testnet');
+if (new Set(args).size !== args.length || args.some(arg => !['--execute', '--production', '--testnet'].includes(arg))) throw new Error('Usage: deploy [--production [--testnet]] [--execute]. Default: print plan only.');
+if (testnet && target !== 'production') throw new Error('--testnet applies only to --production; preview always uses testnet.');
+const network = target === 'production' && !testnet ? 'mainnet' : 'testnet';
 const steps = ['Confirm Vercel project, target-scoped environment variables and exact APP_ORIGIN.', 'Run the full check and build; review the changes.', 'Run migrations serially against the intended Neon branch.', 'Register missing EAS schemas separately, then run register-schemas --check.', 'Run the read-only Shutter preflight.', 'Generate the document CSP and deploy with the installed Vercel CLI.'];
-if (!execute) console.log(JSON.stringify({ target, steps, execution: 'Add --execute only after the setup guide is complete. This wrapper does not migrate, seed, provision variables or register schemas.' }, null, 2));
+if (!execute) console.log(JSON.stringify({ target, network, steps, execution: 'Add --execute only after the setup guide is complete. This wrapper does not migrate, seed, provision variables or register schemas.' }, null, 2));
 else {
   const required = name => { if (!process.env[name]) throw new Error(`Missing ${name}`); return process.env[name]; };
   for (const name of ['VERCEL_PROJECT_ID', 'VERCEL_ORG_ID', 'APP_ORIGIN']) required(name);
   const origin = new URL(required('APP_ORIGIN'));
   if (origin.protocol !== 'https:' || origin.origin !== process.env.APP_ORIGIN) throw new Error('APP_ORIGIN must be an exact HTTPS origin without a trailing slash.');
-  if (process.env.SHUTTER_MODE !== (target === 'production' ? 'mainnet' : 'chiado')) throw new Error('Use Chiado for preview and verified mainnet settings for production.');
-  if (process.env.EAS_CHAIN_ID !== (target === 'production' ? '8453' : '84532')) throw new Error('EAS_CHAIN_ID does not match the deployment target.');
+  if (testnet && (process.env.SHUTTER_MODE !== 'chiado' || process.env.EAS_CHAIN_ID !== '84532')) throw new Error('Use Chiado and Base Sepolia with --testnet.');
+  if (process.env.SHUTTER_MODE !== (network === 'mainnet' ? 'mainnet' : 'chiado')) throw new Error('Use Chiado for preview and verified mainnet settings for production.');
+  if (process.env.EAS_CHAIN_ID !== (network === 'mainnet' ? '8453' : '84532')) throw new Error('EAS_CHAIN_ID does not match the deployment target.');
   for (const [name, expected] of Object.entries({ EAS_ADDRESS: '0x4200000000000000000000000000000000000021', EAS_BALLOT_SCHEMA_UID: schemaUID(ballotSchema), EAS_RESULT_SCHEMA_UID: schemaUID(resultSchema) })) {
     if (required(name).toLowerCase() !== expected) throw new Error(`${name} does not match the runtime contract.`);
   }

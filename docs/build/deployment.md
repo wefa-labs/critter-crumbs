@@ -1,6 +1,63 @@
+# Deployment
+
+## Live now: production on testnet
+
+From 8 October 2026, production runs on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
+
+| Variable (Production) | Value |
+|---|---|
+| `APP_ORIGIN` | `https://www.crittercrumbs.app`. Writes from any other origin, `critter-crumbs.vercel.app` included, fail the origin check. |
+| `SESSION_SECRET` | Random, stored as a Vercel secret and never printed |
+| `DATABASE_URL` | Neon, through the Vercel integration. It is shared by Production and Preview for the testnet period. |
+| `DEV_ENDPOINTS_ENABLED` | `0` |
+| `SHUTTER_MODE`, `SHUTTER_API_BASE`, `SHUTTER_RPC_URL`, `SHUTTER_REGISTRY_ADDRESS`, `SHUTTER_KEY_BROADCAST_ADDRESS`, `SHUTTER_REGISTRANT_ADDRESS` | The Chiado values in §3. No API key. |
+| `EAS_CHAIN_ID`, `EAS_ADDRESS` | `84532`, `0x4200000000000000000000000000000000000021` |
+| `EAS_BALLOT_SCHEMA_UID` | `0xb8e0cf5878dabf520b1e519ec026c9cc609c6feb255829ada0b6525f9b6ca236` |
+| `EAS_RESULT_SCHEMA_UID` | `0xdff4a02942abf463bbde39bbbab88a243027411763cd63d34ccfc59864614c8f` |
+| `BASE_RPC_URL`, `VITE_BASE_RPC_URL` | `https://sepolia.base.org` |
+| `MAINNET_RPC_URL` | `https://ethereum-rpc.publicnode.com`, a free public RPC for ENS names. It sees the addresses it is asked about. |
+
+Register the two schemas on Base Sepolia from a funded Foundry keystore with `register-schemas --chain 84532 --execute` (§4). The deploy script's check refuses to deploy until both exist. Run migrations with the project's own variables, so no local environment file holds the database password:
+
+```sh
+VERCEL_ORG_ID=team_iQZzdJziDgYWjwBhWcuCWjqD VERCEL_PROJECT_ID=prj_D1SyCEWvO9SpCWY90WjPxDRKILpY vercel env run -e production -- bun run migrate
+```
+
+To deploy, use a clean checkout of `main` on a local branch, for example `live`. The deploy script reads the project's production variables the same way, so its checks see exactly what Vercel will run with:
+
+```sh
+VERCEL_ORG_ID=team_iQZzdJziDgYWjwBhWcuCWjqD VERCEL_PROJECT_ID=prj_D1SyCEWvO9SpCWY90WjPxDRKILpY VERCEL_PLAN=pro VERCEL_REGION=iad1 VERCEL_DEPLOY_BRANCH=live vercel env run -e production -- bun run deploy --production --testnet --execute
+```
+
+Without `--testnet`, the script refuses testnet settings for production.
+
+The Vercel project's Git connection still points at the old `Oba-One/critter-crumbs` repository, so pushes to `wefa-labs/critter-crumbs` do not deploy. Leave it that way until the CSP origins are generated in CI (§5).
+
+### What the Shutter team told us, and what the adapter does
+
+These are Yousra's notes from 8 October.
+
+- **A 200 from `register_identity` means submitted, not included.** The adapter opens a feast only once it reads the registration from the registry at a finalized Chiado block. For the first few minutes, "Open the feast" answers with `err.storeUnreachable`, with a 60-second guard between tries. The creator presses it again (E13).
+- **A 500, or no inclusion after 30 seconds.** Shutter's advice is to treat the registration as lost and retry with a fresh identity prefix. The adapter never registers twice on its own, so a lost registration means cancelling the draft and setting the feast up again. Retrying with a fresh prefix is a possible follow-up.
+- **A 404 between the decryption timestamp and the key release** is treated as "not yet". The waiting screen keeps polling.
+- **Key timing.** The key comes with the first block at or after the scattering deadline. Chiado runs on one node and has had outages of a few hours. A late key delays the feast but loses nothing.
+
+## Moving production to mainnet
+
+1. Get the mainnet API key from the Shutter team. Confirm the active Gnosis registry, key broadcast and registrant ([#18](https://github.com/wefa-labs/critter-crumbs/issues/18); see the eon-key mismatch in [shutter-setup.md](../research/shutter-setup.md)).
+2. Make the app's EAS chain one setting. `packages/app/src/app/app.tsx`, `packages/app/src/crypto/scatter.ts`, `packages/app/src/crypto/feast.ts` and `packages/app/src/app/result-recorder.ts` hard-code Base Sepolia. On mainnet, ballots would be signed for the wrong chain and every scatter rejected.
+3. Register both schemas on Base (`--chain 8453`), and fund whoever records results.
+4. Start production on a fresh Neon database, migrated. Feasts registered on Chiado cannot be released by the mainnet service.
+5. Set the production variables:
+   - `SHUTTER_MODE=mainnet`, with the confirmed mainnet addresses and `SHUTTER_API_KEY`;
+   - `EAS_CHAIN_ID=8453`;
+   - Base RPCs and the ENS RPC from a keyed provider;
+   - a new `SESSION_SECRET`.
+6. Deploy with `bun run deploy --production --execute`, without `--testnet`.
+
 # Set up a rehearsal deployment
 
-Start with a stable Preview deployment on Chiado and Base Sepolia. Production stays pending the mainnet Shutter deployment confirmation. Nothing in this guide has been deployed or funded yet; the scripts have offline fixture coverage, and the service research used public reads only. The core has no usable app UI yet.
+The sections below are the original setup guide for a stable Preview deployment on Chiado and Base Sepolia. They are kept as written, apart from the deployment state above.
 
 Tracked follow-ups: [creator removal #16](https://github.com/wefa-labs/critter-crumbs/issues/16), [Shutter access #17](https://github.com/wefa-labs/critter-crumbs/issues/17), [mainnet deployment #18](https://github.com/wefa-labs/critter-crumbs/issues/18), [live rehearsal #19](https://github.com/wefa-labs/critter-crumbs/issues/19), and [hosting setup #20](https://github.com/wefa-labs/critter-crumbs/issues/20). Q8's authority/visibility decision is recorded; removal itself is not implemented by this tooling change.
 
