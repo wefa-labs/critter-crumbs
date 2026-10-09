@@ -1,4 +1,6 @@
 import type { Feast, FeastClock, FeastKind, Phase, ResultView, Statement, Target } from '@critter-crumbs/shared';
+import type { MusicTrack } from '../audio/index.js';
+import { screenMusic } from './screen-music.js';
 export interface PublicFeast extends FeastClock, Partial<ResultView> { id: string; burrowName: string; title: string; context: string; kind: FeastKind; aggregatePublic: boolean; targets: Target[]; portraits: { targetId: string; variant: number }[]; phase: Phase; serverNow: number }
 export interface MemberFeast extends Feast, ResultView { burrowName: string; portraits: PublicFeast['portraits']; phase: Phase; serverNow: number; statements: Statement[]; participation: { written: string[]; scattered: string[] }; ownBallotUids: string[]; ownReceipts: { uid: string; seq: string }[] }
 export const isMemberFeast = (feast: PublicFeast | MemberFeast): feast is MemberFeast => 'participants' in feast;
@@ -32,6 +34,19 @@ export function scatterFailureOf(copyId: string | undefined, status: number | un
 }
 
 export const resultStates={nobody:'nobody',givers:'givers'} as const;
+
+/**
+ * The music under a feast's pages outside the game: the launcher's for someone who is not in the burrow, the town square
+ * while the feast is set up or gathered for, or was cancelled or void. Undefined leaves playing whatever was: while the
+ * page loads, and wherever a game screen shows, since those name their own (game/composition.ts).
+ */
+export function feastPageMusic(feast: PublicFeast | MemberFeast | null, phase: Phase | undefined, connected: boolean): MusicTrack | undefined {
+  if (!feast || phase !== feast.phase) return undefined;
+  if (phase === 'cancelled' || phase === 'void') return screenMusic.burrow;
+  if (!isMemberFeast(feast)) return phase === 'feast' && feast.aggregatePublic ? undefined : screenMusic.launcher;
+  if (!connected) return screenMusic.launcher;
+  return phase === 'draft' || phase === 'gathering' ? screenMusic.gathering : undefined;
+}
 
 /** Each state by name, for the screens that pick one. */
 export const gameStates = { reveal: 'reveal', scatter: 'scatter', reading: 'reading', done: 'done', scattered: 'scattered', signing: 'signing', saving: 'saving', rejected: 'rejected', failed: 'failed', closed: 'closed', waiting: 'waiting', key: 'key', feast: 'feast', feasted: 'feasted', results: 'results', nobody: 'nobody', tie: 'tie', givers: 'givers', recording: 'recording', recorded: 'recorded', public: 'public' } as const satisfies Record<GameScreenState, GameScreenState>;

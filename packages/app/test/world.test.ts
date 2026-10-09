@@ -1,5 +1,6 @@
 import { afterEach, expect, test } from 'vitest';
 import { Asleep, Bump, Chewing, Clock, Count, Flight, FlyingTo, Hop, Identity, Mesh, Pile, Pouring, Rig, Settings, SoundEvent, createWorld, type SoundCue, type WorldOptions } from '../src/world/index.js';
+import { soundTokens } from '../src/audio/plan.js';
 
 const worlds: ReturnType<typeof createWorld>[] = [];
 afterEach(() => { for (const game of worlds.splice(0)) game.destroy(); });
@@ -28,6 +29,17 @@ test('a held press empties 100 crumbs in 3.3–3.5 seconds', () => {
   expect(emptyAt).toBeGreaterThanOrEqual(3300);
   expect(emptyAt).toBeLessThanOrEqual(3500);
   expect(critter.get(Count)?.given).toBe(100);
+});
+
+/* Game Design §5.2 is one table; the world names a level only where a moment asks for a quieter or damped one. */
+test('each scatter cue leaves the world at the level the token table gives it', () => {
+  const cues: SoundCue[] = [];
+  const game = setup(10, { outputs: { sound: cue => cues.push(cue) } }), critter = game.critters[0]!;
+  game.actions.giveCrumb(critter); game.tick(0);
+  game.actions.takeCrumb(critter); game.tick(16);
+  game.actions.setCount(critter, 10); game.tick(32);
+  expect(cues.map(cue => cue.token)).toEqual(['crumb.add', 'crumb.remove', 'pile.wall', 'pour.hold', 'pile.empty']);
+  for (const cue of cues) expect([cue.token, cue.level]).toEqual([cue.token, soundTokens[cue.token].db]);
 });
 
 test('the wall stops the pour, emits once per press, and leaves no sound events behind', () => {

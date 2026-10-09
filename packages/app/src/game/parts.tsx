@@ -22,6 +22,7 @@ import type { CritterElement } from './icons.js';
 import { faceCrop } from './styles.js';
 import { measureText } from './measure.js';
 import { useScatterInput } from '../app/scatter-input.js';
+import { useAudio, useMusic } from '../audio/context.js';
 
 const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.width, height: r.height });
 
@@ -123,6 +124,10 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
   const { surface, scene: treatment } = composition, gathered = treatment.huddle;
   /* the moment's mood: delighted when statements open, asleep when scattering closes; the feast sets its own */
   useEffect(() => runtime.setMood(treatment.mood), [runtime, treatment.mood]);
+  /* the moment's music, which steps back while a statement is open */
+  const audio = useAudio();
+  useMusic(composition.music);
+  useEffect(() => { audio.duck(reading); return () => audio.duck(false); }, [audio, reading]);
   /* the huddle gathers the critters that were fed; with nothing fed at all, nobody is left out */
   const fedAny = gathered && runtime.critters.some(entity => entity.get(Received)!.crumbs > 0);
   const critters = runtime.critters.map((entity, index) => ({

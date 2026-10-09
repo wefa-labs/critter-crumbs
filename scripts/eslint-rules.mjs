@@ -128,7 +128,7 @@ export default {
             if (argument === 0 && programStates.has(value) && ['setAction', 'setKind'].includes(callee)) return true;
             if (argument === 0 && callee === 'useState' && ['people', 'options'].includes(value) && parent.typeArguments?.params?.[0]?.typeName?.name === 'FeastKind') return true;
             if (callee === 'includes' && programStates.has(value) && parent.callee.object === current) return true;
-            if (callee === 'play' && argument === 0 && ['connect', 'reroll', 'ui.tap', 'crumb.add', 'crumb.remove', 'pour.hold', 'pour.reverse', 'pile.wall', 'pile.empty', 'statement.open', 'scatter.confirm', 'statements.reveal', 'feast.open', 'feast.feed', 'feast.settle', 'error'].includes(value)) return true;
+            if (callee === 'play' && argument === 0 && ['connect', 'reroll', 'ui.tap', 'crumb.add', 'crumb.remove', 'pour.hold', 'pour.reverse', 'pile.wall', 'pile.empty', 'statement.open', 'scatter.confirm', 'statements.reveal', 'scatter.closed', 'feast.open', 'feast.feed', 'feast.settle', 'error'].includes(value)) return true;
             if (callee === 'scrollIntoView' && argument === 0) return true;
             if (['createPortrait', 'paintCritter'].includes(callee) && argument === 2 && node.parent.type === 'Property' && node.parent.key.name === 'size' && value === 'stage') return true;
             if (callee === 'formatCopy' && argument === 0 && copyIds.has(value)) return true;

@@ -80,7 +80,7 @@ Upstream: `01-prd.md` (rules §5, lifecycle §6, privacy §8, edge list, P1–P1
 
 **Untrusted text.** Statements and names render through `textContent`; URLs are auto-linked by one regex on `https?://` and rendered as elements, never as HTML strings (Design System D13). No `innerHTML` anywhere; lint rule.
 
-**Headers** (all responses, per current guidance): `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), geolocation=(), microphone=(), accelerometer=()`, `Cross-Origin-Opener-Policy: same-origin-allow-popups` (wallet popups), `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' <shutter api> <base rpc>; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`. Vite emits no inline scripts, so no nonces are needed; `'wasm-unsafe-eval'` is there for the Shutter SDK (**V1**: confirm it needs WASM). Fonts and the ambient loop are self-hosted; no third-party request is ever made from the page except Shutter and the Base RPC.
+**Headers** (all responses, per current guidance): `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), geolocation=(), microphone=(), accelerometer=()`, `Cross-Origin-Opener-Policy: same-origin-allow-popups` (wallet popups), `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' <shutter api> <base rpc>; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`. Vite emits no inline scripts, so no nonces are needed; `'wasm-unsafe-eval'` is there for the Shutter SDK (**V1**: confirm it needs WASM). Fonts and the sound files are self-hosted; no third-party request is ever made from the page except Shutter and the Base RPC.
 
 **No analytics, no telemetry** (R15): no error reporting service, no logging of behaviour server-side beyond request errors with addresses masked.
 
@@ -365,7 +365,7 @@ Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (
 
 **Vercel Functions**: Node.js runtime, one function per route file under `/api`, region pinned next to the Neon branch. A `vercel.json` rewrites everything except `/api/*` to `index.html` and sets the headers of §2. Preview deployments per branch; the production project is the rehearsal and October deployment.
 
-**Static assets**: the Young Serif subset (OFL), the ambient loop (Opus + MP3), the arrival illustration (WebP), all under `/public`, all same-origin.
+**Static assets**: the Young Serif subset (OFL), the sound set (sixteen MP3 files under `/public/audio`, 5.6 MB, none in the first load; `docs/research/audio-assets.md`), the arrival illustration (WebP), all under `/public`, all same-origin.
 
 ## 11. Dependencies
 

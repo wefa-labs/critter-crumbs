@@ -6,7 +6,8 @@ import { DeadlineStrip, phaseCopy, useTrustedTime } from './deadlines.js';
 import { Link, Page, PendingPage, PortraitImage, shortAddress, useResource, targetLabel } from './ui.js';
 import type { AppApi, Me } from './session.js';
 import type { RunAction } from './burrows.js';
-import { isMemberFeast, portraitVariant, type MemberFeast, type PublicFeast } from './feast-view.js';
+import { feastPageMusic, isMemberFeast, portraitVariant, type MemberFeast, type PublicFeast } from './feast-view.js';
+import { useMusic } from '../audio/context.js';
 import { DraftSummary, FeastActions } from './feast-actions.js';
 import type { GameSettings } from '../world/index.js';
 import { Reveal } from './read.js';
@@ -45,6 +46,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   /* the game's notices are not live regions; a failed refresh is read out through the polite announcer */
   const refreshFailure = resource.error ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
   useEffect(() => { if (refreshFailure) announce(refreshFailure); }, [refreshFailure]);
+  useMusic(feastPageMusic(resource.data, phase, !!me));
   if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} />;
   const feast = resource.data, now = trusted ?? feast.serverNow;
   const props = { api, run, busy, refresh: resource.refresh, announce };

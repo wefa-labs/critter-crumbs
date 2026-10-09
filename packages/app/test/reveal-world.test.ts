@@ -1,15 +1,16 @@
 import { expect, test } from 'vitest';
 import { Asleep, Rig, StatementReveal, createWorld } from '../src/world/index.js';
+import { soundTokens } from '../src/audio/plan.js';
 const critters = Array.from({ length: 49 }, (_, index) => ({ id: String(index), address: `0x${(index + 1).toString(16).padStart(40, '0')}`, ownerAddress: null, name: String(index), variant: 0 }));
 test('reveal is queued and wakes all 49 critters before its focus-ready state', () => {
-  const sounds: string[] = []; const game = createWorld({ issued: 100, critters, asleep: true, outputs: { sound: cue => sounds.push(cue.token) } });
+  const sounds: string[] = [], levels: number[] = []; const game = createWorld({ issued: 100, critters, asleep: true, outputs: { sound: cue => { sounds.push(cue.token); levels.push(cue.level); } } });
   game.actions.beginReveal(); expect(game.world.has(StatementReveal)).toBe(false);
   for (let now = 0; now <= 1200; now += 10) game.tick(now);
   expect(game.world.get(StatementReveal)).toMatchObject({ ready: true, daylight: 1 });
   expect(game.critters.every(critter => !critter.has(Asleep))).toBe(true);
   // Earlier critters may already be blinking independently; the last wake is complete.
   expect(game.critters.at(-1)!.get(Rig)!.lids).toBeGreaterThanOrEqual(.99);
-  expect(sounds).toEqual(['statements.reveal']); game.destroy();
+  expect(sounds).toEqual(['statements.reveal']); expect(levels).toEqual([soundTokens['statements.reveal'].db]); game.destroy();
 });
 test('quiet reveal changes poses in the same tick and becomes ready at 200ms', () => {
   const game = createWorld({ issued: 100, critters: critters.slice(0, 3), asleep: true, settings: { still: true } }); game.actions.beginReveal(); game.tick(0);

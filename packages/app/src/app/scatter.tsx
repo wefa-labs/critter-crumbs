@@ -117,6 +117,9 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   /* the deadline passing with the screen open stops it as a refused save would (flow 41) */
   const shownFailure = closed ? scatterFailure.closed : failure;
   const view = gameView({ phase: feast.phase, remaining, receipt: !!(state.receipt || state.remote), dirty: state.dirty, reading: statementOpen, signing, saving: state.status === 'saving' || state.status === 'verifying', ...(shownFailure ? { failure: shownFailure } : {}) });
+  /* scattering closing under the open screen is the one deadline that makes a sound: the dusk sting, once. Arriving after it has closed is silent. */
+  const shut = view.state === 'closed', dusk = useRef(shut);
+  useEffect(() => { if (shut && !dusk.current) { dusk.current = true; audio.play('scatter.closed'); } }, [audio, shut]);
   const turn = (index: number) => { runtime.actions.stopPour(); runtime.input(false); setFocus(index); };
   const target = feast.targets[focus]!, entity = runtime.critters[focus]!;
   if (!feast.participants.some(address => address.toLowerCase() === me.address.toLowerCase())) return <p>{copy['err.notParticipant']}</p>;
@@ -129,7 +132,8 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
       const coded = error instanceof ApiClientError || error instanceof ValidationError ? error : undefined;
       const kind = scatterFailureOf(coded?.copyId, error instanceof ApiClientError ? error.status : undefined);
       if (kind) { failing.current = true; setFailure(kind); }
-      if (kind === scatterFailure.closed) { announce(copy['scatter.closed']); audio.play('error'); return; }
+      /* the bar says scattering has closed and the screen plays its dusk sting; this is no error notice */
+      if (kind === scatterFailure.closed) { announce(copy['scatter.closed']); return; }
       throw kind === scatterFailure.failed ? new ApiClientError('err.saveFailed', error instanceof ApiClientError ? error.status : 0) : error;
     }
   });

@@ -4,7 +4,7 @@ import { Asleep, IsOwn, Clock, Settings, SoundEvent, StatementReveal } from './t
 export function createReveal(world: World, critters: Entity[]) {
   let start: number | null = null;
   return {
-    begin() { if (start !== null) return; start = world.get(Clock)!.now; world.add(StatementReveal); world.spawn(SoundEvent({ token: 'statements.reveal', level: -12 })); },
+    begin() { if (start !== null) return; start = world.get(Clock)!.now; world.add(StatementReveal); world.spawn(SoundEvent({ token: 'statements.reveal', level: -10 })); },
     tick() {
       if (start === null) return;
       const now = world.get(Clock)!.now - start, settings = world.get(Settings)!, quiet = settings.still || settings.reducedMotion;

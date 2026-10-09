@@ -29,7 +29,7 @@ import { defaultScene } from '../game/art.js';
  * and the results are the live ones; the scattering moments and the feast's still frame are built from the same dock,
  * sheet, statement and dialog pieces over a fixture world. The allocation is the review pages' own (game-fixtures.ts).
  */
-const settings: GameSettings = { effects: false, ambience: false, still: true, simple: true, reducedMotion: true };
+const settings: GameSettings = { effects: false, music: false, still: true, simple: true, reducedMotion: true };
 const quiet = () => {};
 const viewer = members[VIEWER]!;
 
