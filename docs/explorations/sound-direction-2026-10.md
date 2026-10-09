@@ -1,147 +1,129 @@
 # Sound direction, October 2026
 
-Afolabi's direction, 8 October 2026, verbatim: "The type of music and effects I would like is Roller coaster tycoon, Nintendo type vibes", and "we need to have a strong auditorial experience". It is recorded in `docs/decisions.md`.
+Afolabi's direction, 8 October 2026, verbatim: "The type of music and effects I would like is Roller coaster tycoon, Nintendo type vibes", and "we need to have a strong auditorial experience".
 
-This brief turns that direction into music cues with generation prompts, a new voice for each Game Design §5.2 token, the sample sources and the checks to make before anything ships. It replaces Game Design §5.1's character and §5.5's quiet bed. Game Design §5 is rewritten when the sound is implemented.
+Afolabi's review of the first takes, 9 October, verbatim: "Roller coaster park music does match the mood of critter crumbs, it is engaging but it needs to be more grounded in the themes of critter crumbs. We are lacking the Nintendo feel. Feeding time is nice and kid like maybe a little to toddler like but it's nice and calm."
+
+This brief records the settled sound set: the house style, the music and stings with the prompts that made them, a new voice for each Game Design §5.2 token, and what is still to check. It replaces Game Design §5.1's character and §5.5's quiet bed. Game Design §5 is rewritten with the implementation. The decisions are in `docs/decisions.md`.
 
 ## What changes and what stays
 
 **Changes:**
-- the character: bright, bouncy, melodic and playful, a fairground crossed with a cosy console game;
+- the character: bright, bouncy, melodic and playful, in the manner of a cosy Japanese console game, and grounded in the burrow, its critters and the feast. The first round's fairground brief is retired;
 - there is music now;
 - the 6 kHz "nothing bright" filter goes;
 - the levels rise.
 
 **Stays:**
 - every token in Game Design §5.2, and the DOM state each one accompanies;
-- pitch as position on the C major pentatonic (§5.3). A rising ladder of notes as crumbs land suits the new direction;
+- pitch as position on the C major pentatonic (§5.3). A rising ladder of notes as crumbs land suits the direction;
 - sound starts only after the first gesture;
 - the Sounds toggle, and damping under reduced motion;
 - sound pauses while the tab is hidden.
 
-**Not ours to use:** any existing game's music, melodies or sound effects. The prompts describe the feel. They never name a game, a studio or a composer.
+**Not ours to use:** any existing game's music, melodies or sound effects. The prompts describe the feel. They never name a game, a studio or a composer, and the music service refuses prompts that do.
 
 **Key:** all music is in C major, so the effects' pentatonic pitches sit inside it.
 
-## Music
+## The house style
 
-| ID | Plays on | Length | Loop | Tempo | Feel |
+Every music prompt begins with this paragraph:
+
+> Instrumental. Whimsical Japanese console-game soundtrack style from the late 1990s and 2000s: a warm acoustic chamber ensemble of flute, clarinet and bassoon with pizzicato strings, marimba and vibraphone, upright bass and brushed drums; bouncy light swing, jazzy seventh chords, playful staccato phrasing and a memorable, singable melody; clean, polished, cheerful but never childish. The world: tiny elemental forest critters who live in a burrow under the roots of an old tree at the edge of an autumn meadow and share bread crumbs at a feast. Calm, warm and hopeful, like feeding animals in a garden. No fairground organ, no calliope, no nursery-rhyme feel, no electronic beats, no vocals.
+
+## The settled set
+
+Afolabi's picks, 9 October. "Round 2" takes were made with the house style; the two stings from round 1 were kept.
+
+| ID | Name | Plays on | Length | Take | App file |
 |---|---|---|---|---|---|
-| M1 | Launcher and home | 90 s | Yes | 100, 3/4 | A carousel waltz at the park gates |
-| M2 | Burrows, setup, gathering | 90 s | Yes | 92, 4/4 | A cosy town square in the morning |
-| M3 | Scattering | 90 s | Yes | 96, 4/4 | Feeding time: light, curious, sparse enough to read over |
-| M4 | The feast | 9 s plus a 2 s resolve | No | Free | The ride: a build, then a burst |
-| M5 | Results, after the settle | 60 s | Yes | 84, 4/4 | Everyone is full: happy and calm |
-| J1 | Scattered (saved) | 2 s | No | — | A small "you did it" flourish |
-| J2 | Statements open | 3 s | No | — | A reveal sparkle |
-| J3 | Scattering closed at dusk (optional, see Open) | 3 s | No | — | A sleepy evening phrase |
+| M1 | The burrow | Launcher and home | 90 s loop | Round 2, take 2 | `audio/music/burrow.mp3` |
+| M2 | The town square | Burrows, setup, gathering | 90 s loop | Round 2, take 1 | `audio/music/square.mp3` |
+| M3 | Feeding time | Scattering | 90 s loop | Round 2, take 1 | `audio/music/feeding.mp3` |
+| M4 | The feast | The feast sequence | 10 s | Round 2, take 2 | `audio/music/feast.mp3` |
+| M4r | The feast, resolve | The settle | 3 s | Round 2, take 3 | `audio/music/feast-resolve.mp3` |
+| M5 | Everyone is full | Results | 60 s loop | Round 2, take 1 | `audio/music/full.mp3` |
+| J1 | Scattered | Your scatter is saved | 3 s | Round 2, take 1 | `audio/stings/scattered.mp3` |
+| J2 | Statements open | The reveal | 3 s | Round 1, take 2 | `audio/stings/reveal.mp3` |
+| J3 | Dusk | Scattering closes with the scatter screen open | 3 s | Round 1, take 2 | `audio/stings/dusk.mp3` |
 
-### Prompts
+The prompts, after the house style for M1 to J1:
 
-These are for an AI music tool such as Eleven Music.
-- Generate three or four takes of each cue and choose by ear.
-- Export the highest quality the tool offers.
-- Keep the prompt, plan and date with each file you keep.
-
-**M1, the park gates:**
-> Instrumental video game title music, 90 seconds, made to loop seamlessly. A cheerful carousel waltz in 3/4 at 100 BPM in C major. Lead melody on a fairground band organ doubled by glockenspiel, oom-pah-pah tuba and bass drum, brushed snare, a short bright brass fanfare opening each phrase. Nostalgic 1990s theme-park game feel, playful and catchy, a melody you can hum. Bright, clean mix. No vocals, no lyrics, no sound effects. End on the dominant so it flows back to the start.
-
-**M2, the town square:**
-> Instrumental cosy village music for a life-sim game, 90 seconds, made to loop seamlessly. 4/4 at 92 BPM in C major. Ukulele strums and a marimba melody, pizzicato strings, soft upright bass, a light brush kit and a whistled counter-melody. Warm, sunny and gently bouncy, like a morning in a small town square. No vocals.
-
-**M3, feeding time:**
-> Instrumental background music for a calm, playful decision moment in a cosy video game, 90 seconds, made to loop seamlessly. 4/4 at 96 BPM in C major. Kalimba and glockenspiel motifs over a soft round bass and finger snaps, a sparse arrangement with plenty of space, curious and light. It must sit under on-screen reading without pulling focus. No vocals.
-
-**M4, the ride:**
-> Instrumental 9-second video game cue for a big celebration: a snare drumroll and a rising fairground organ run build for 7 seconds with brass stabs climbing in pitch, then a bright cymbal crash and a short triumphant resolve on a C major chord. Theme-park celebration, playful. No vocals.
-
-**M4 resolve:**
-> Instrumental 2-second triumphant resolve: brass and fairground organ land together on a bright C major chord with a cymbal swell. No vocals.
-
-**M5, everyone is full:**
-> Instrumental music for a happy, relaxed end-of-day screen in a cosy game, 60 seconds, made to loop seamlessly. 4/4 at 84 BPM in C major. A music-box melody over nylon-string guitar and soft strings, contented and warm, gently swaying. No vocals.
-
-**J1, scattered:**
-> A 2-second cheerful video game success jingle: a quick rising glockenspiel and brass flourish ending on a bright C major chord. Instrumental.
-
-**J2, statements open:**
-> A 3-second magical reveal sting for a cosy game: a harp glissando and sparkling bells rising into a soft C major chord. Instrumental.
-
-**J3, dusk:**
-> A 3-second gentle evening sting for a cosy game: a slow descending celesta phrase over a soft held C major chord, sleepy and warm. Instrumental.
+- **M1:** Main title theme, made to loop seamlessly. 112 BPM swing in C major. Flute and clarinet carry the melody in unison over a bouncy bassoon and upright-bass line, with marimba and pizzicato answering each phrase; the second half adds a whistled counter-melody and light hand claps, and brief brass swells mark the phrase ends. A small hero's adventure theme for tiny critters: cheerful, curious and confident.
+- **M2:** Daytime music for the burrow's town square, made to loop seamlessly. 96 BPM gentle swing shuffle in C major. Acoustic guitar comping, a walking upright bass, a vibraphone melody answered by clarinet, soft brushes and an occasional whistle. Sunny, neighbourly and relaxed.
+- **M3:** Calm background music for choosing where to give crumbs, made to loop seamlessly. 92 BPM light bossa nova in C major. A vibraphone melody over nylon-string guitar, soft upright bass and brushed drums, with gentle marimba accents and plenty of space. Thoughtful and warm, grown-up rather than babyish; it must sit under on-screen reading without pulling focus.
+- **M4:** A 10-second feast celebration cue: three seconds of tambourine, hand claps and a rising pizzicato-and-woodwind run over a building timpani roll, then a joyful full-ensemble burst with bright trumpets, woodwinds and xylophone, ending ringing on a C major chord. Celebratory and warm, triumphant in a small way.
+- **M4r:** A 3-second victory fanfare: bright trumpets and xylophone over a timpani hit, landing on a C major chord with a short cymbal sparkle.
+- **M5:** Results music after the feast, made to loop seamlessly. 84 BPM slow swing in C major. Music box and vibraphone share a gentle melody over soft acoustic guitar, upright bass and light brushes, with a clarinet answering. Full, sleepy and content: a happy evening.
+- **J1:** A 3-second success jingle for saving a choice: a quick rising xylophone arpeggio, a flute trill and a bright muted-trumpet button on C major, with a tiny cymbal sparkle. Cheerful and satisfying.
+- **J2** (round 1, no house style): A short magical reveal sting for a cosy game: a harp glissando and sparkling bells rising into a soft C major chord. Instrumental.
+- **J3** (round 1, no house style): A short gentle evening sting for a cosy game: a slow descending celesta phrase over a soft held C major chord, sleepy and warm. Instrumental.
 
 ## Effects: a new voice for each token
 
-"Synth" means the existing Web Audio voices, re-tuned brighter. "Sample" means a file from the sources below.
+"Synth" means the Web Audio voices, re-voiced brighter. The samples are the settled effect takes below.
 
 | Token | Was | Becomes | How |
 |---|---|---|---|
-| `connect` | A wooden knock and a breath | A two-note welcome chime, G5 then C6, with a tiny sparkle | Synth |
-| `reroll` | Two plucks | A short spin whirr ending in a pop and a chime | Sample and synth |
-| `ui.tap` | A felt tap | A soft click-pop | Sample |
-| `crumb.add` | A tick, pitched by count | A bright glockenspiel "bip" on the same pentatonic step, with a tiny pop | Synth |
-| `crumb.remove` | The tick, damped and bending down | A softer "boop" one step down | Synth |
-| `pour.hold` | Tick grains and a rustle | Fast rising bell grains over a sparkle bed, like coins pouring | Synth, with a sampled sparkle loop |
-| `pour.reverse` | The pour, descending | The same, descending | Synth and sample |
-| `pile.wall` | A low thump on wood | A short cartoon boing | Sample, or a synth spring |
-| `pile.empty` | Two descending plucks | A three-note "ta-da" chime | Synth |
-| `statement.open` | A page-turn rustle | A paper "fwip" and a soft chime | Sample and synth |
-| `scatter.confirm` | A pluck and a thump | J1 | Music sting |
-| `statements.reveal` | A rustle into a chord | J2 | Music sting |
-| `feast.open` | Breath and a drone | M4's build | Music |
-| `feast.feed` | A pour crescendo and a pluck | A crunchy munch, then a pop pitched by share | Sample and synth |
-| `feast.settle` | A wooden chord and a thump | M4's resolve and a small crowd cheer | Music and sample |
-| `error` | A muted knock | A soft cartoon "bwomp", never alarming | Synth |
-| `ambience.bed` | Grass, wind and a marimba figure | Replaced by music (M1–M5). The toggle becomes Music | Music |
+| `connect` | A wooden knock and a breath | A two-note welcome chime, G5 then C6 | Synth bells |
+| `reroll` | Two plucks | A spin whirr ending in a pop and a chime | Sample: spin |
+| `ui.tap` | A felt tap | A soft bubbly pop | Sample: pop |
+| `crumb.add` | A tick, pitched by count | A bright glockenspiel "bip" on the same pentatonic step | Synth bell |
+| `crumb.remove` | The tick, damped and bending down | A softer bip one step down | Synth bell |
+| `pour.hold` | Tick grains and a rustle | Rising bell grains over a sparkle bed | Synth bells and sample: sparkle |
+| `pour.reverse` | The pour, descending | The same, descending | Synth bells and sample: sparkle |
+| `pile.wall` | A low thump on wood | A short cartoon boing | Sample: boing |
+| `pile.empty` | Two descending plucks | A rising three-note "ta-da" | Synth bells |
+| `statement.open` | A page-turn rustle | A storybook page flip | Sample: page |
+| `scatter.confirm` | A pluck and a thump | J1 | Sting |
+| `statements.reveal` | A rustle into a chord | J2 | Sting |
+| `scatter.closed` (new) | Silent: deadline changes made no sound | J3, once, when scattering closes with the scatter screen open | Sting |
+| `feast.open` | Breath and a drone | M4 | Music |
+| `feast.feed` | A pour crescendo and a pluck | A critter nibbling, then a bip pitched by share | Sample: munch, and synth bell |
+| `feast.settle` | A wooden chord and a thump | M4r and a small chorus of cheering critters | Music and sample: cheer |
+| `error` | A muted knock | A soft, low cartoon "bwomp", never alarming | Synth |
+| `ambience.bed` | Grass, wind and a marimba figure | Replaced by the music loops. The toggle becomes Music | Music |
 
-## Where samples come from
-
-| Source | Licence | Use it for |
+| Effect | Take | App file |
 |---|---|---|
-| [Kenney](https://kenney.nl/assets/category:Audio): UI Audio, Interface Sounds, Impact Sounds, Casino Audio | CC0; credit optional | Clicks, pops, boings, spins |
-| [Sonniss GDC bundles](https://sonniss.com/gameaudiogdc) | Royalty-free, commercial, no credit. No standalone resale and no machine-learning training | A crowd cheer, fairground atmosphere |
-| [Freesound](https://freesound.org), CC0 filter only | Per file. Never use NC or ND files | Munches, crunches, paper |
-| ElevenLabs Sound Effects | Paid plans need no credit; the free plan requires it | Custom munches and boings, if libraries fall short |
+| Munch | Round 2, take 2 | `audio/sfx/munch.mp3` |
+| Cheer | Round 2, take 1 | `audio/sfx/cheer.mp3` |
+| Boing | Round 1, take 1 | `audio/sfx/boing.mp3` |
+| Pop | Round 1, take 1 | `audio/sfx/pop.mp3` |
+| Spin | Round 1, take 1 | `audio/sfx/spin.mp3` |
+| Page | Round 1, take 2 | `audio/sfx/page.mp3` |
+| Sparkle (loop) | Round 1, take 2 | `audio/sfx/sparkle.mp3` |
 
-Each file kept gets a record: its source URL, licence, the date fetched and any edit made.
+## Where the sounds come from
 
-## Checks before generating music
+Every settled file was generated on 9 October 2026 through the ElevenLabs API with Afolabi's key: music with Eleven Music (`music_v2_5`, instrumental), effects with Eleven sound effects (`eleven_text_to_sound_v2`). The implementation adds `docs/research/audio-assets.md`, recording each file's prompt, source take and processing. Kenney (CC0), the Sonniss GDC bundles and Freesound's CC0 files remain options if a future cue needs a recorded sound.
 
-- **Eleven Music's terms**, updated 26 May 2026:
-  - Free, Starter, Creator and Pro are for individuals. An organisation such as WEFA LLC needs Scale (under 10 people) or a higher tier.
-  - The commercial-rights table excludes "Studio Games", defined as monetized video games offered on several platforms. A web app used by burrows probably sits outside that, but confirm the row for the plan you choose before generating final tracks.
-  - Owning a track does not allow reselling it on its own.
-  - [Model terms](https://elevenlabs.io/eleven-music-model-specific-terms).
-- **Other tools with paid commercial use** (Stable Audio, Suno): read their current terms the same way.
+## Still to check
+
+- **The plan's commercial terms**, before the production deploy. Eleven Music's terms (updated 26 May 2026) limit Free, Starter, Creator and Pro to individuals; an organisation such as WEFA LLC needs Scale or a higher tier. The commercial-rights table excludes "Studio Games", defined as monetized video games offered on several platforms. A web app used by burrows probably sits outside that; confirm the row for the plan the key belongs to. [Model terms](https://elevenlabs.io/eleven-music-model-specific-terms).
 - **Copyright:** machine-generated music may not be protected by copyright, so others could reuse a track. This does not stop us using it.
 
 ## Technical notes for the implementation
 
-- **Format:** one format everywhere, AAC in `.m4a`. Music at 128 kbps; samples at 96 kbps, mono.
+- **Format:** MP3 everywhere, because every browser decodes it with `decodeAudioData`. Music and stings at 128 kbps stereo; effects at 96 kbps mono.
 - **Loading:**
+  - effects and stings load after the first gesture;
   - music loads per screen, after the first gesture;
-  - it loops with the existing two-buffer crossfade (G8), so seams need not be perfect;
-  - it pauses while the tab is hidden;
-  - the installable app's service worker caches it;
-  - nothing musical is in the first load. A 90-second track is about 1.4 MB.
+  - loops repeat with a two-buffer equal-power crossfade (G8), so seams need not be perfect;
+  - music pauses while the tab is hidden;
+  - nothing musical is in the first load.
 - **Levels:**
   - music sits about 8 dB under the effects;
-  - it ducks 6 dB while a statement is open;
+  - it ducks 6 dB while a statement is open, and makes way for the feast;
   - M4 rides above everything;
-  - the effects master rises from −12 dB peak;
-  - the 6 kHz low-pass goes, and a limiter stays at the end of the chain.
-- **Toggles:** Sounds (effects) stays. Burrow ambience becomes Music. Music is on by default and starts with the first tap; the choice is remembered (Afolabi, 8 October).
+  - the 6 kHz low-pass goes, and a limiter sits at the end of the chain.
+- **Toggles:** Sounds (effects, stings, the feast cue) stays. Burrow ambience becomes Music, for the loops. Music is on by default and starts with the first tap; the choice is remembered (Afolabi, 8 October).
 
 ## The demo films
 
-Once M1, M3, M4, M5 and the stings exist:
-1. Lay them under the phone and desktop films at the beats listed in `docs/reviews/october-game/demo/README.md`.
-2. Add the key effects as samples at the same moments.
-3. Mux AAC audio at 160 kbps beside the H.264 video, and let the recorder's self-check accept an audio stream.
+With the set settled:
+1. Lay the music under the phone and desktop films at the beats listed in `docs/reviews/october-game/demo/README.md`.
+2. Add the key effects at the same moments.
+3. Mux AAC audio beside the H.264 video, and let the recorder's self-check accept an audio stream.
 
 Playwright cannot capture the app's own Web Audio, so the films' soundtrack is laid in afterwards, matching what the app plays.
-
-## Open for Afolabi
-
-1. Whether scattering closing at dusk gets J3. Today it is silent on purpose: deadline changes never make a sound.
-2. Which tool and plan make the music, and who runs the generations from the prompts above.
