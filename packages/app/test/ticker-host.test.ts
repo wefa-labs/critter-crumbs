@@ -22,8 +22,10 @@ test('one host handles demand, continuous, hidden pause, ownership transfer and 
 test('settings survive storage failure and OS reduced motion always applies', () => {
   const values = new Map([['cc.sound.effects', '0'], ['cc.view.simple', '1']]);
   const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => { values.set(key, value); } };
-  expect(readSettings(storage, true)).toEqual({ effects: false, ambience: false, still: false, simple: true, reducedMotion: true });
+  expect(readSettings(storage, true)).toEqual({ effects: false, music: true, still: false, simple: true, reducedMotion: true });
   saveSetting(storage, 'still', true); expect(values.get('cc.motion.still')).toBe('1');
+  saveSetting(storage, 'music', false); expect(values.get('cc.sound.music')).toBe('0');
+  expect(readSettings(storage, false).music).toBe(false);
   const broken = { getItem: () => { throw Error(); }, setItem: () => { throw Error(); } };
   expect(readSettings(broken, false).effects).toBe(true);
   expect(() => saveSetting(broken, 'effects', false)).not.toThrow();

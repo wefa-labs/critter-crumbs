@@ -9,7 +9,18 @@ describe('core game compositions', () => {
     expect(composeGame('reveal', 'phone')).toEqual({
       surface: { kind: 'sheet', height: 230 },
       scene: { scene: 'window', light: 'day', mood: 'delighted', ownAsleep: true, grown: false, bubbles: 'all', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
+      music: 'feeding',
     });
+  });
+
+  /* docs/explorations/sound-direction-2026-10.md, the settled set: Feeding time while scattering, quiet from dusk while
+     the feast is laid out (the feast plays its own cue), Everyone is full after it */
+  it('names each moment’s music: feeding time while scattering, quiet from dusk to the feast, everyone is full after', () => {
+    for (const device of ['phone', 'desktop'] as const) {
+      for (const state of ['reveal', 'scatter', 'reading', 'done', 'signing', 'saving', 'scattered', 'rejected', 'failed'] as const) expect(composeGame(state, device).music).toBe('feeding');
+      for (const state of ['closed', 'waiting', 'key', 'feast'] as const) expect(composeGame(state, device).music).toBeNull();
+      for (const state of ['feasted', 'nobody', 'results', 'tie', 'givers', 'recording', 'recorded', 'public'] as const) expect(composeGame(state, device).music).toBe('full');
+    }
   });
 
   it('scatters on the dock with the heap, piles and tags; the bubble is the phone’s, the desktop panel always reads', () => {
@@ -31,6 +42,7 @@ describe('core game compositions', () => {
     expect(composeGame('closed', 'phone')).toEqual({
       surface: { kind: 'dock' },
       scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'disabled' },
+      music: null,
     });
     expect(stateControls('closed')).toBe('disabled');
     expect(stateControls('saving')).toBe('live');
@@ -41,6 +53,7 @@ describe('core game compositions', () => {
     for (const state of ['waiting', 'key'] as const) expect(composeGame(state, 'phone')).toEqual({
       surface: { kind: 'sheet', height: 250 },
       scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' },
+      music: null,
     });
   });
 
@@ -49,6 +62,7 @@ describe('core game compositions', () => {
     expect(composeGame('feast', 'phone')).toEqual({
       surface: { kind: 'sheet', height: 144 },
       scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: true, heap: 'remaining', huddle: false, controls: 'none' },
+      music: null,
     });
   });
 
@@ -57,6 +71,7 @@ describe('core game compositions', () => {
     expect(composeGame('feasted', 'phone')).toEqual({
       surface: { kind: 'dock' },
       scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' },
+      music: 'full',
     });
     expect(composeGame('feasted', 'desktop').scene.bubbles).toBe('none');
   });
@@ -69,6 +84,7 @@ describe('core game compositions', () => {
     expect(composeGame('nobody', 'phone')).toEqual({
       surface: { kind: 'sheet', height: 260 },
       scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
+      music: 'full',
     });
   });
 
@@ -76,6 +92,7 @@ describe('core game compositions', () => {
     for (const state of ['results', 'tie', 'givers', 'recording', 'recorded', 'public'] as const) expect(composeGame(state, 'desktop')).toEqual({
       surface: { kind: 'results' },
       scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' },
+      music: 'full',
     });
   });
 });

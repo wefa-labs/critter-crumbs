@@ -13,13 +13,14 @@ export function createDirector(world: World, critters: readonly Entity[]) {
   const hasCrumbs = () => critters.some(critter => critter.isAlive() && critter.get(Received)!.crumbs > 0);
   let transitionFrom = { dusk: 1, feast: 0, day: 0 };
   const still = () => { const settings = world.get(Settings)!; return settings.still || settings.reducedMotion; };
-  function start(replay = false) {
+  function start() {
     transitionFrom = { dusk: 1, feast: 0, day: 0 };
     run()?.destroy();
     world.spawn(Feast({ beat: still() ? 'Crossfade' : 'Laid out', startedAt: world.get(Clock)!.now }));
     for (const critter of critters) { if (!critter.isAlive()) continue; if (still()) critter.remove(Asleep); else critter.add(Asleep); }
     if (still()) world.spawn(SoundEvent({ token: 'feast.settle', level: -8 }));
-    else if (!replay) world.spawn(SoundEvent({ token: 'feast.open', level: -10 }));
+    /* the feast cue is the feast's music, so a replay plays it again */
+    else world.spawn(SoundEvent({ token: 'feast.open', level: -8 }));
   }
   function begin(result: TallyResult) {
     if (result.totals.length !== critters.length || result.totals.some((total, i) => total.targetId !== targetIds[i])) {
@@ -67,7 +68,7 @@ export function createDirector(world: World, critters: readonly Entity[]) {
         if (!critter.isAlive()) continue;
         const received = critter.get(Received)!;
         if (received.crumbs > 0) {
-          world.spawn(SoundEvent({ token: 'feast.feed', pitchStep: Math.min(10, Math.max(1, Math.floor(received.share[0] / received.share[1] / 0.05))), level: -10 }));
+          world.spawn(SoundEvent({ token: 'feast.feed', pitchStep: Math.min(10, Math.max(1, Math.floor(received.share[0] / received.share[1] / 0.05))), level: -8 }));
           world.spawn(Hop({ from: 'feast', to: critter.get(Identity)!.id }));
           critter.add(Chewing({ rate: POUR_RATE_MIN + (POUR_RATE_MAX - POUR_RATE_MIN) * received.share[0] / received.share[1],
             releasedAt: state.startedAt + FEAST.waveStartMs + index * stagger + FEAST.feedMs }));
@@ -116,7 +117,7 @@ export function createDirector(world: World, critters: readonly Entity[]) {
     for (const critter of critters) if (critter.isAlive()) critter.remove(Asleep);
     world.spawn(SoundEvent({ token: 'feast.open', action: 'stop', durationMs: FEAST.skipSoundMs }));
   }
-  function replay() { if (run()) start(true); }
+  function replay() { if (run()) start(); }
   function settleAge() {
     const state = run()?.get(Feast);
     return !state || state.skipped || still() || !hasCrumbs() ? -1 : world.get(Clock)!.now - state.startedAt - timing().settle;

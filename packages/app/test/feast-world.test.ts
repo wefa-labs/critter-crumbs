@@ -2,6 +2,7 @@ import { afterEach, expect, test } from 'vitest';
 import { participantSetHash, tally } from '@critter-crumbs/core';
 import { canonicalJSON, type Hex, type TallyInput } from '@critter-crumbs/shared';
 import { Asleep, Feast, Received, Rig, createWorld, type SoundCue } from '../src/world/index.js';
+import { soundTokens } from '../src/audio/plan.js';
 
 const worlds: ReturnType<typeof createWorld>[] = [];
 afterEach(() => { for (const game of worlds.splice(0)) game.destroy(); });
@@ -41,6 +42,7 @@ test('eight critters reach Readable in 6.0–6.6 seconds, feed in grid order and
   expect([...new Set(feeds)]).toEqual(result.totals.map(total => total.targetId));
   for (const total of result.totals) expect(feeds.filter(id => id === total.targetId)).toHaveLength(24);
   expect(cues.map(cue => cue.token)).toEqual(['feast.open', ...Array(8).fill('feast.feed'), 'feast.settle']);
+  for (const cue of cues) expect([cue.token, cue.level]).toEqual([cue.token, soundTokens[cue.token].db]);
   for (const critter of game.critters) {
     expect(critter.has(Asleep)).toBe(false);
     expect(critter.get(Received)?.fed).toBeCloseTo(0.5029733718731741, 14);
@@ -71,6 +73,8 @@ test('skip reaches Readable within 200 ms, stops sound within 100 ms, and replay
   expect(cues.at(-1)?.durationMs).toBe(100);
   game.actions.replayFeast(); game.tick(232);
   expect(beat(game)).not.toBe('Readable');
+  /* the feast cue is the feast's music, so a replay plays it again */
+  expect(cues.filter(cue => cue.token === 'feast.open' && cue.action === 'trigger')).toHaveLength(2);
   for (let now = 248; now <= 7000; now += 16) game.tick(now);
   expect(beat(game)).toBe('Readable');
   expect(game.critters.map(critter => critter.get(Received)!.crumbs)).toEqual(Array(8).fill(10));

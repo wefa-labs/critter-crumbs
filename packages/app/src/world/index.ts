@@ -13,7 +13,7 @@ export * from './traits.js';
 export interface CritterInput { id: string; address: string; variant: number; name: string; ownerAddress?: string | null }
 export interface SoundCue { token: SoundToken; pitchStep: number; level: number; action: 'trigger' | 'start' | 'update' | 'stop'; durationMs: number; rate?: number }
 export interface HopCue { from: string; to: string; reverse: boolean }
-export interface GameSettings { effects: boolean; ambience: boolean; still: boolean; simple: boolean; reducedMotion: boolean }
+export interface GameSettings { effects: boolean; music: boolean; still: boolean; simple: boolean; reducedMotion: boolean }
 export interface WorldOptions {
   critterVersion?: CritterVersion; asleep?: boolean; issued: number; critters: CritterInput[]; viewer?: string; settings?: Partial<GameSettings>;
   outputs?: { feedback?: (cue: SoundCue) => void; sound?: (cue: SoundCue) => void; hop?: (cue: HopCue) => void; render2d?: (world: World) => void; render3d?: (world: World) => void };
@@ -185,7 +185,7 @@ export function createWorld(options: WorldOptions) {
   }
   function pile() {
     const remaining = heap.get(Pile)!.remaining;
-    if (lastRemaining > 0 && remaining === 0) emit('pile.empty', 0, -14);
+    if (lastRemaining > 0 && remaining === 0) emit('pile.empty', 0, -12);
     lastRemaining = remaining;
   }
   function feast() { reveal.tick(); director.tick(); }

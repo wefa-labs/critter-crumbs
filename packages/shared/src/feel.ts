@@ -44,10 +44,10 @@ export const FEAST = { glyphs: 24, fillMs: 400, glyphStaggerMs: 20, openSoundMs:
 export const FLIGHT = { ms: 380, maxAlive: 64 } as const;
 /** §6 and §8: DOM hop geometry and the live-node budget shared by both views. */
 export const DOM_HOP = { ms:320,ease:[.2,.8,.2,1],maxAlive: 60, apexPx: 70, turnDegrees: 240, fadeAt: 0.8 } as const;
-/** §5.6. Persistence values are strings, as required by localStorage. */
+/** §5.6. Persistence values are strings, as required by localStorage. Music is on by default (decision of 2026-10-08). */
 export const SETTINGS = {
   effects: { key: 'cc.sound.effects', default: '1' },
-  ambience: { key: 'cc.sound.ambience', default: '0' },
+  music: { key: 'cc.sound.music', default: '1' },
   still: { key: 'cc.motion.still', default: '0' },
   simple: { key: 'cc.view.simple', default: '0' },
 } as const;
