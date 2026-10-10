@@ -37,8 +37,8 @@ export default function Results({ feast, api, me, settings, announce, report, ac
     const delayed = setTimeout(() => { if (active) { setError('err.keyUnreachable'); report(new ApiClientError('err.keyUnreachable', 503)); } }, 20000);
     async function load() {
       try {
-        const { openMockFeast } = await import('../crypto/index.js');
-        const value = await openMockFeast(api, feast, browserReceiptBook().read(feast.id, me.address));
+        const { openFeast } = await import('../crypto/index.js');
+        const value = await openFeast(api, feast, browserReceiptBook().read(feast.id, me.address));
         if (!active) return;
         if (value) { clearTimeout(delayed); setOpened(value); setError(null); clearError(); return; }
         setError('feast.keyNotYet');

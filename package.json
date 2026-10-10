@@ -47,6 +47,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
     "@ethereum-attestation-service/eas-sdk": "2.10.0",
+    "@noble/curves": "1.9.1",
     "@types/node": "22.20.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
@@ -86,6 +87,7 @@
   },
   "trustedDependencies": [],
   "patchedDependencies": {
-    "koota@0.6.6": "patches/koota@0.6.6.patch"
+    "koota@0.6.6": "patches/koota@0.6.6.patch",
+    "@shutter-network/shutter-sdk@0.0.2": "patches/@shutter-network%2Fshutter-sdk@0.0.2.patch"
   }
 }

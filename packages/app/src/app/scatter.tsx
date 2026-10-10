@@ -89,7 +89,7 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   const [session] = useState(() => createScatterSession({ api, feast, viewer: me.address, onAccepted: receipt => browserReceiptBook().remember(feast.id, me.address, receipt.uid), sign: async (amounts, now, latest) => {
     const connected = currentAccount.current();
     if (!connected || connected.address.toLowerCase() !== me.address.toLowerCase()) { setSigning(false); throw new ApiClientError('scatter.sign.rejected', 401); }
-    try { const { signScatter } = await import('../crypto/index.js'); return await signScatter(api, connected, latest, amounts, now); }
+    try { const { signScatter } = await import('../crypto/index.js'); return await signScatter(connected, latest, amounts, now); }
     catch (error) { if (error instanceof ApiClientError) throw error; throw new ApiClientError('scatter.sign.rejected', 400); }
   } }));
   const state = useSyncExternalStore(session.subscribe, session.snapshot);

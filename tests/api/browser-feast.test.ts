@@ -46,7 +46,7 @@ test('publication omissions and changed close records fail closed instead of sil
 
 test('the actual browser signer produces the reviewed payload shape and a readable complete scatter',async()=>{
   const f=await fixture(),amounts=f.view.targets.map(target=>target.ownerAddress?.toLowerCase()===f.group.members[0]!.account.address.toLowerCase()?100:0);
-  const signed=await signScatter(f.client(),f.group.owner.account,f.view,amounts,f.server.clock());
+  const signed=await signScatter(f.group.owner.account,f.view,amounts,f.server.clock());
   expect((await f.server.api({method:'POST',path:`${f.group.path}/ballots`,headers:f.group.owner.headers,body:signed})).status).toBe(200);
   const feast=await f.close(),opened=await openFeastResult({api:f.client(),feast,timelock:f.timelock,eas:testEas,yieldToBrowser:async()=>{}});
   expect(opened?.result.rejected).toEqual([]);expect(opened?.result.totalScattered).toBe(100);
