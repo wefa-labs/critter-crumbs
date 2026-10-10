@@ -273,6 +273,12 @@ interface Timelock {
 - `mainnet` and `chiado`: the API + SDK above.
 - `mock`: AES-GCM with a per-feast key derived server-side (`HKDF(MOCK_SECRET, feastId)`); `getKey` returns null until `decryptionTimestamp` has passed on the server clock **or** `POST /api/dev/release-key` has been called, so a whole lifecycle runs in seconds. The client path is byte-for-byte the same code; only the `Timelock` implementation differs. The mock is never enabled in production (`DEV_ENDPOINTS_ENABLED` is unset there).
 
+**Which one a page uses.** The page chooses for itself (`packages/app/src/crypto/timelock.ts`), and the server cannot choose for it. A production build uses Shutter and nothing else. A development build also accepts a registration from the local rehearsal store, which it recognises by its 32-byte key where Shutter's eon key is 96 bytes. Encrypting and decrypting need only the registration and the key, so the network matters to the page in one place, the direct key fetch below; it is Chiado while production is on testnet.
+
+**Proof before use.** Shutter's code reaches the page as a script and a WebAssembly file fetched on first use. Before the page encrypts a scatter or opens a feast it has that code open one known scatter from the SDK's test data. If the code did not arrive or does not run, a scatter is reported as not saved (`err.saveFailed`) and a feast waits (`err.keyUnreachable`); it never opens with every scatter counted as unreadable.
+
+**A local Shutter.** `scripts/local-shutter.ts` stands in for the keypers with real keys made from the local server's secret; `LOCAL_TIMELOCK=shutter` selects it for the local API. The page runs Shutter's own code against it, which is how a production build is taken through a whole feast offline (`tests/api/browser-shutter.test.ts` does the same without a browser).
+
 ## 7. EAS
 
 EAS is not deployed on Gnosis Chain (checked against the EAS deployment list); it is on Base (`EAS 0x4200000000000000000000000000000000000021`, `SchemaRegistry 0x4200000000000000000000000000000000000020`, same addresses on Base Sepolia). **T2** — Base is the attestation chain for both the off-chain ballots' domain and the on-chain results. Gnosis remains the Shutter registry, which nobody in the burrow touches.
@@ -379,11 +385,11 @@ Runtime (10):
 | `@react-three/drei` | `View` (stage contract), `RoundedBox`; imported per-module so only those ship | MIT |
 | `koota` | The simulation core (Game Design G10); React bindings from `koota/react`. Patched (`patches/koota@0.6.6.patch`): it built its store accessors with `new Function`, which the §2 policy forbids | MIT |
 | `viem` | Signing, typed data, contract calls, ENS, EIP-6963 transport; the only web3 library | MIT |
-| `@shutter-network/shutter-sdk` | Threshold encryption client; no substitute | **V1** (license and size) |
+| `@shutter-network/shutter-sdk` | Threshold encryption client; no substitute. Patched (`patches/`): `zip` written out in place of lodash, and the import of a second, Node-only curve library removed | **V1** (license and size) |
 | `@neondatabase/serverless` | The database driver in functions | Apache-2.0 |
 | `@vercel/functions`? — **not used**; plain handlers suffice | — | — |
 
-Dev (build and test only): `vite`, `@vitejs/plugin-react`, `typescript`, `vitest`, `@types/*`, `eslint` with the TypeScript plugin, `@ethereum-attestation-service/eas-sdk` (cross-check tests only, §7), `playwright` (one lifecycle e2e in mock mode).
+Dev (build and test only): `vite`, `@vitejs/plugin-react`, `typescript`, `vitest`, `@types/*`, `eslint` with the TypeScript plugin, `@ethereum-attestation-service/eas-sdk` (cross-check tests only, §7), `playwright` (one lifecycle e2e in mock mode), `@noble/curves` (the local Shutter of §6; already installed through viem).
 
 Rejected, with the reason: `ethers` (duplicate of viem; only reachable via the dev-only EAS SDK), `wagmi` / `rainbowkit` / `connectkit` (connector weight; EIP-6963 + viem is 30 lines), `@tanstack/react-query` (a 60-line fetch cache with `serverNow` handling replaces it), `zustand` (Koota holds real-time state; React state holds the rest), `drizzle`/`prisma` (ten tables of plain SQL), `zod` (hand parsers), `siwe` (depends on ethers; the message is 6 lines), `tailwind` (tokens are CSS custom properties), any markdown, icon, date or animation library (Design System D4, D13; `Intl` for dates; Koota systems for motion).
 
@@ -498,7 +504,7 @@ Two agents, A (core) and B (app), from Wednesday 2026-09-03. Rehearsal-ready bui
 
 ## 17. Performance and loading
 
-- **Chunks.** App shell (React, screens, Koota, portraits, tokens) ≤ 120 KB gzipped; `three` chunk (three + fiber + the drei imports used) ≤ 250 KB gzipped, loaded by `import()` only from the scatter grid and results (Design System D6), from a single entry module to avoid Safari's simultaneous-import pitfall with top-level `await`; `crypto` chunk (shutter-sdk + viem's signing) loaded when scattering opens and again at reveal. It is one chunk on purpose: viem's own dependencies and the account code built on viem are named for it too, because two chunks that import each other cannot load in the order the app asks for them, and the build refuses such a ring (`scripts/build-policy.mjs`). Budgets are enforced in CI by `vite build` size checks.
+- **Chunks.** App shell (React, screens, Koota, portraits, tokens) ≤ 120 KB gzipped; `three` chunk (three + fiber + the drei imports used) ≤ 250 KB gzipped, loaded by `import()` only from the scatter grid and results (Design System D6), from a single entry module to avoid Safari's simultaneous-import pitfall with top-level `await`; `crypto` chunk (shutter-sdk + viem's signing) loaded when scattering opens and again at reveal. It is one chunk on purpose: viem's and Shutter's own dependencies, every part of `packages/core` built on viem, and the module that opens a feast are named for it too, because two chunks that import each other cannot load in the order the app asks for them, and the build refuses such a ring (`scripts/build-policy.mjs`). Shutter's curve library is not in it: the SDK adds `/blst.js` and that fetches `/blst.wasm`, 452 KB together, the first time a page encrypts or opens. Budgets are enforced in CI by `vite build` size checks.
 - **Render loop.** R3F `frameloop` switches per Game Design §6; the canvas pauses when the grid leaves the viewport (`IntersectionObserver`, with `content-visibility` where supported) and when the tab is hidden.
 - **Reveal work.** Decrypting and validating ten ballots is milliseconds; still, the loop yields between ballots (`scheduler.yield()` with a `setTimeout` fallback) so the waiting screen stays responsive on the device floor.
 - **Caching.** Static assets immutable with hashed names; API responses `Cache-Control: no-store` except `GET /feasts/:id` for public feasts after close (`public, max-age=60`).

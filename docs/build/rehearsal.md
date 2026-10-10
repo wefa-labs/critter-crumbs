@@ -66,7 +66,7 @@ Send this before the rehearsal.
 | F7 | No critter looks sad at the results | | |
 | F8 | The feast plays in under 8 s, the numbers are readable at the settle, and Skip to results works from the first frame | | |
 | F9 | With Still critters on, only crossfades move | | |
-| F10 | With Sounds off nothing is confusing; with Burrow ambience on nobody asks how to turn it off | | |
+| F10 | With Sounds off nothing is confusing; with Music on, which is the default, nobody asks how to turn it off | | |
 | F11 | 30 fps or better on the slowest phone with a pour running | | |
 | F12 | Nobody notices the moment 3D replaced the portraits | | |
 
@@ -79,7 +79,8 @@ Send this before the rehearsal.
    - change a scatter after saving;
    - one person on a computer while the rest are on phones;
    - Still critters on;
-   - Sounds off.
+   - Sounds off, and Music off;
+   - on a phone, whether the first tap starts the sound, with the silent switch off and on.
 
 ## 4. After
 
