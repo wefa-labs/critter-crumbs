@@ -65,6 +65,9 @@
       "version": "0.0.0",
     },
   },
+  "patchedDependencies": {
+    "koota@0.6.6": "patches/koota@0.6.6.patch",
+  },
   "overrides": {
     "adm-zip@0.4.16": {
       ".": "0.6.1",

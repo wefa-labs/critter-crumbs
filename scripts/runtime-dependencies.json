@@ -63,7 +63,9 @@
     "sourceNotice": null,
     "noticeSha256": "4aca3373f1677ae2cba83e44f30b313992fbce6727ce2e172907d56ac43b0137",
     "gzipArchiveBytes": 93249,
-    "integrity": "sha512-Fn8lSooH3u9TIP+eAMugFrOju40Ec70+sB7x1eZBB3H0Lki2hyIbFAodk3NDB/RIRzoMs54O4422BVN6SbtWfw=="
+    "integrity": "sha512-Fn8lSooH3u9TIP+eAMugFrOju40Ec70+sB7x1eZBB3H0Lki2hyIbFAodk3NDB/RIRzoMs54O4422BVN6SbtWfw==",
+    "patch": "patches/koota@0.6.6.patch",
+    "patchSha256": "8f465e4c00767ee0dc675a38efb9245e90395f0e6e523bf82e10aed1e296f1d6"
   },
   {
     "name": "viem",

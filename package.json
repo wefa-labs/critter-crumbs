@@ -84,5 +84,8 @@
     "@critter-crumbs/shared": "0.0.0",
     "@critter-crumbs/api": "0.0.0"
   },
-  "trustedDependencies": []
+  "trustedDependencies": [],
+  "patchedDependencies": {
+    "koota@0.6.6": "patches/koota@0.6.6.patch"
+  }
 }
