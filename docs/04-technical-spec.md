@@ -345,6 +345,7 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `POST /burrows/:id/members` | member | Add by address (ENS resolved server-side) |
 | `POST /burrows/:id/join` | session | Join via link: succeeds only if pre-added (P2) |
 | `POST /burrows/:id/leave` | member | R16 |
+| `POST /burrows/:id/removals` | creator | Remove another member; the burrow keeps a visible record of who was removed, by whom and when (decisions of 2026-09-05 and 2026-09-06) |
 | `POST /burrows/:id/feasts` | member | Create draft (validation §3) |
 | `GET /feasts/:id` | phase-aware | Public: title, context, deadlines, targets asleep. Member: plus statements per §4 gates, participation, own ballot UIDs, close record after close, `result_attestation` |
 | `POST /feasts/:id/open` | creator | Registers Shutter identity; sets `opened_at` |
@@ -355,7 +356,8 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `GET /feasts/:id/ballots` | member, after close | Counted ballots' ciphertexts + attestations + the close record |
 | `GET /feasts/:id/key` | member, after close | Cached decryption key; `503 err.keyUnreachable` with `Retry-After` while Shutter has not released it |
 | `POST /feasts/:id/result-attestation` | member, after close, public feasts | Record `{ txHash, attester }` after verifying the tx on Base |
-| `POST /dev/seed`, `POST /dev/time`, `POST /dev/release-key` | dev only | §14 |
+| `GET /dev/config`, `POST /dev/seed`, `POST /dev/time`, `POST /dev/release-key` | dev only | §14; `config` tells the browser whether the rehearsal accounts may be offered |
+| `POST /dev/result-transaction` | dev only, local API only | Stands in for the Base transaction when a result is recorded in the local rehearsal. Only `scripts/local-api.ts` can answer it, so it has no route file |
 
 Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (no schema library). Every write is wrapped in a transaction; every phase gate calls `phaseAt(feast, serverNow)`.
 
@@ -363,7 +365,7 @@ Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (
 
 **Neon Postgres via the Vercel Marketplace (T1).** Checked 2026-09-02: Vercel's first-party storage is Blob and Global Config; KV and Postgres were sunset in favour of Marketplace providers (Upstash for Redis, Neon for Postgres). The data here is relational (burrows → members → feasts → targets, statements, ballots, participants) and must be retained indefinitely (R17); Postgres fits and a KV store would re-invent it. Ciphertexts are under 1 KB, so Vercel Blob is not needed; if a future payload grows past a few KB, ballots move to Blob with the row keeping the pointer. Provision with `vercel install neon`; the driver is `@neondatabase/serverless` over HTTP (no connection pool to manage in functions).
 
-**Vercel Functions**: Node.js runtime, one function per route file under `/api`, region pinned next to the Neon branch. A `vercel.json` rewrites everything except `/api/*` to `index.html` and sets the headers of §2. Preview deployments per branch; the production project is the rehearsal and October deployment.
+**Vercel Functions**: Node.js runtime, one function per route file under `/api`, region pinned next to the Neon branch. Every path the handler answers needs its route file: for any other `/api` path Vercel answers with a 404 of its own and the handler is never asked. The API tests fail on an answer from a path that has none (`tests/api/route-files.ts`). A `vercel.json` rewrites everything except `/api/*` to `index.html` and sets the headers of §2. Preview deployments per branch; the production project is the rehearsal and October deployment.
 
 **Static assets**: the Young Serif subset (OFL), the sound set (sixteen MP3 files under `/public/audio`, 5.6 MB, none in the first load; `docs/research/audio-assets.md`), the arrival illustration (WebP), all under `/public`, all same-origin.
 
