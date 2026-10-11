@@ -6,7 +6,7 @@ import { apiHarness, apiTestTimeout } from './support.js';
 const id = '00000000-0000-4000-8000-000000000001';
 const protectedRoutes = [
   ['DELETE', '/session'], ['GET', '/me'], ['PUT', '/me'], ['POST', '/burrows'], ['GET', `/burrows/${id}`],
-  ...['members', 'join', 'leave', 'feasts'].map(action => ['POST', `/burrows/${id}/${action}`]),
+  ...['members', 'join', 'leave', 'removals', 'feasts'].map(action => ['POST', `/burrows/${id}/${action}`]),
   ...['open', 'cancel', 'extend', 'ballots', 'result-attestation'].map(action => ['POST', `/feasts/${id}/${action}`]),
   ['PUT', `/feasts/${id}/statements/0x${'11'.repeat(32)}`], ['GET', `/feasts/${id}/ballots`], ['GET', `/feasts/${id}/key`],
 ];
