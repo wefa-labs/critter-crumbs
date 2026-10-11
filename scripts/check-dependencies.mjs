@@ -41,4 +41,11 @@ for (const item of runtime) {
 const rootManifest = json('package.json');
 if (JSON.stringify(rootManifest.overrides) !== JSON.stringify(overrides)) fail('Development overrides differ from the reviewed list.');
 if (JSON.stringify(Object.entries(rootManifest.devDependencies).sort()) !== JSON.stringify(Object.entries(dev).sort())) fail('Development dependencies differ from the reviewed list.');
-console.log(`${runtime.length} exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified.`);
+// A patch changes what an archive installs, so it is reviewed evidence like the archive itself.
+const patched = runtime.filter((item) => item.patch);
+const reviewedPatches = Object.fromEntries(patched.map((item) => [`${item.name}@${item.version}`, item.patch]));
+if (JSON.stringify(Object.entries(rootManifest.patchedDependencies ?? {}).sort()) !== JSON.stringify(Object.entries(reviewedPatches).sort())) fail('Patched dependencies differ from the reviewed list.');
+for (const item of patched) {
+  if (createHash('sha256').update(readFileSync(path.resolve(root, item.patch))).digest('hex') !== item.patchSha256) fail(`${item.name}: patch changed; review it again.`);
+}
+console.log(`${runtime.length} exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified; ${patched.length} reviewed ${patched.length === 1 ? 'patch' : 'patches'}.`);

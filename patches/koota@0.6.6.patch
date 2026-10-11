@@ -1,0 +1,240 @@
+diff --git a/dist/chunk-ZWIGMIL4.js b/dist/chunk-ZWIGMIL4.js
+index feb90a85391fc5c3708a46041893e9dda4c8ff47..bc3a2079e04520de5b3ae37d2dc8016dbc134d58 100644
+--- a/dist/chunk-ZWIGMIL4.js
++++ b/dist/chunk-ZWIGMIL4.js
+@@ -676,42 +676,50 @@ function createStore(schema) {
+ }
+ 
+ // ../core/src/storage/accessors.ts
++// Patched for Critter Crumbs: plain closures in place of `new Function`, which the page's Content-Security-Policy
++// forbids (no 'unsafe-eval'). Each one does what the code it replaced did, field by field in schema order.
+ function createSoASetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `if ('${key}' in value) store.${key}[index] = value.${key};`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-		${setFunctionBody}
+-	  `);
+-  return set;
++  return (index, store, value) => {
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      if (key in value) store[key][index] = value[key];
++    }
++  };
+ }
+ function createSoAFastSetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `store.${key}[index] = value.${key};`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-		${setFunctionBody}
+-	  `);
+-  return set;
++  return (index, store, value) => {
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      store[key][index] = value[key];
++    }
++  };
+ }
+ function createSoAFastSetChangeFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `if (store.${key}[index] !== value.${key}) {
+-            store.${key}[index] = value.${key};
+-            changed = true;
+-        }`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-        let changed = false;
+-        ${setFunctionBody}
+-        return changed;
+-        `);
+-  return set;
++  return (index, store, value) => {
++    let changed = false;
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      if (store[key][index] !== value[key]) {
++        store[key][index] = value[key];
++        changed = true;
++      }
++    }
++    return changed;
++  };
+ }
+ function createSoAGetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const objectLiteral = `{ ${keys.map((key) => `${key}: store.${key}[index]`).join(", ")} }`;
+-  const get = new Function("index", "store", `
+-        return ${objectLiteral};
+-        `);
+-  return get;
++  return (index, store) => {
++    const value = {};
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      value[key] = store[key][index];
++    }
++    return value;
++  };
+ }
+ function createAoSSetFunction(_schema) {
+   return (index, store, value) => {
+diff --git a/dist/index.cjs b/dist/index.cjs
+index efa87da67fac554c98a6717b5670ad565ab615ba..4d17f1801687e51f230c08c1c585f15d8762d729 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -1005,42 +1005,50 @@ function createStore(schema) {
+ }
+ 
+ // ../core/src/storage/accessors.ts
++// Patched for Critter Crumbs: plain closures in place of `new Function`, which the page's Content-Security-Policy
++// forbids (no 'unsafe-eval'). Each one does what the code it replaced did, field by field in schema order.
+ function createSoASetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `if ('${key}' in value) store.${key}[index] = value.${key};`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-		${setFunctionBody}
+-	  `);
+-  return set;
++  return (index, store, value) => {
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      if (key in value) store[key][index] = value[key];
++    }
++  };
+ }
+ function createSoAFastSetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `store.${key}[index] = value.${key};`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-		${setFunctionBody}
+-	  `);
+-  return set;
++  return (index, store, value) => {
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      store[key][index] = value[key];
++    }
++  };
+ }
+ function createSoAFastSetChangeFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `if (store.${key}[index] !== value.${key}) {
+-            store.${key}[index] = value.${key};
+-            changed = true;
+-        }`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-        let changed = false;
+-        ${setFunctionBody}
+-        return changed;
+-        `);
+-  return set;
++  return (index, store, value) => {
++    let changed = false;
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      if (store[key][index] !== value[key]) {
++        store[key][index] = value[key];
++        changed = true;
++      }
++    }
++    return changed;
++  };
+ }
+ function createSoAGetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const objectLiteral = `{ ${keys.map((key) => `${key}: store.${key}[index]`).join(", ")} }`;
+-  const get = new Function("index", "store", `
+-        return ${objectLiteral};
+-        `);
+-  return get;
++  return (index, store) => {
++    const value = {};
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      value[key] = store[key][index];
++    }
++    return value;
++  };
+ }
+ function createAoSSetFunction(_schema) {
+   return (index, store, value) => {
+diff --git a/dist/react.cjs b/dist/react.cjs
+index 3117293193406a4f608f0179f5fae8d09eb8ce12..b08cc65d6024a0e34b73e54dfc866c42832863de 100644
+--- a/dist/react.cjs
++++ b/dist/react.cjs
+@@ -832,42 +832,50 @@ function createStore(schema) {
+ }
+ 
+ // ../core/src/storage/accessors.ts
++// Patched for Critter Crumbs: plain closures in place of `new Function`, which the page's Content-Security-Policy
++// forbids (no 'unsafe-eval'). Each one does what the code it replaced did, field by field in schema order.
+ function createSoASetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `if ('${key}' in value) store.${key}[index] = value.${key};`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-		${setFunctionBody}
+-	  `);
+-  return set;
++  return (index, store, value) => {
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      if (key in value) store[key][index] = value[key];
++    }
++  };
+ }
+ function createSoAFastSetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `store.${key}[index] = value.${key};`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-		${setFunctionBody}
+-	  `);
+-  return set;
++  return (index, store, value) => {
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      store[key][index] = value[key];
++    }
++  };
+ }
+ function createSoAFastSetChangeFunction(schema) {
+   const keys = Object.keys(schema);
+-  const setFunctionBody = keys.map((key) => `if (store.${key}[index] !== value.${key}) {
+-            store.${key}[index] = value.${key};
+-            changed = true;
+-        }`).join("\n    ");
+-  const set = new Function("index", "store", "value", `
+-        let changed = false;
+-        ${setFunctionBody}
+-        return changed;
+-        `);
+-  return set;
++  return (index, store, value) => {
++    let changed = false;
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      if (store[key][index] !== value[key]) {
++        store[key][index] = value[key];
++        changed = true;
++      }
++    }
++    return changed;
++  };
+ }
+ function createSoAGetFunction(schema) {
+   const keys = Object.keys(schema);
+-  const objectLiteral = `{ ${keys.map((key) => `${key}: store.${key}[index]`).join(", ")} }`;
+-  const get = new Function("index", "store", `
+-        return ${objectLiteral};
+-        `);
+-  return get;
++  return (index, store) => {
++    const value = {};
++    for (let i = 0; i < keys.length; i++) {
++      const key = keys[i];
++      value[key] = store[key][index];
++    }
++    return value;
++  };
+ }
+ function createAoSSetFunction(_schema) {
+   return (index, store, value) => {
