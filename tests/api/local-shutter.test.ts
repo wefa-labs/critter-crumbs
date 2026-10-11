@@ -23,7 +23,9 @@ test('the key for another identity does not open it, and a second server with th
   const timelock = createLocalShutterTimelock({ secret, clock: () => 5000 });
   const registration = await timelock.register(feast, 2000), other = await timelock.register(another, 2000);
   const ciphertext = await timelock.encrypt(new TextEncoder().encode(text), registration);
-  const opened = await timelock.decrypt(ciphertext, (await timelock.getKey(other.identity))!).then(read, () => null);
+  // The scheme has no check of its own: a wrong key usually leaves padding the SDK refuses, and about one time in eight
+  // leaves bytes it returns, which are not the text and seldom text at all.
+  const opened = await timelock.decrypt(ciphertext, (await timelock.getKey(other.identity))!).then(read).catch(() => null);
   expect(opened).not.toBe(text);
 
   // A restarted server knows the identity only through its lookup, as the store's does.
