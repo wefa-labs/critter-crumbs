@@ -1,8 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
-import { tokens } from '../styles/tokens.js';
 import { defaultScene } from './art.js';
 import { validateScenes, type Scene } from './scene-manifest.js';
-import { sceneLayerStyle } from './styles.js';
+import { sceneFilterStyle, sceneLayerStyle } from './styles.js';
 
 /**
  * The floor the circle stands on, as the scatter review page builds it: one mirrored floor tile repeated on a plane
@@ -15,7 +14,7 @@ export function SceneBackdrop({ id = defaultScene, desktop }: { id?: string; des
   const scene = scenes.find(entry => entry.id === id) ?? scenes[0];
   if (!scene) return <div className="scene-backdrop" aria-hidden="true" />;
   const device = desktop ? scene.devices.desktop : scene.devices.phone;
-  const filter = { '--scene-image-filter': tokens[scene.lookFilter] } as CSSProperties;
+  const filter = sceneFilterStyle(scene.lookFilter);
   if (device.kind === 'plate') return <div className="scene-backdrop scene-plate" aria-hidden="true" style={{ ...filter, backgroundImage: `url(${device.image})` }} />;
   const layers = scene.layers!;
   const style = { ...filter, ...sceneLayerStyle(layers) } as CSSProperties;

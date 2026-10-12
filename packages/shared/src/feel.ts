@@ -52,6 +52,9 @@ export const SETTINGS = {
   simple: { key: 'cc.view.simple', default: '0' },
 } as const;
 
+/** Dark mode has no default of its own: unset, it follows the device (decision of 2026-10-11). Stored as '1' or '0'. */
+export const DARK_SETTING_KEY = 'cc.view.dark';
+
 /** §6: unchanged rendering limits and session degradation timings. */
 export const RENDER_BUDGET = { slowFrameMs: 33, verySlowFrameMs: 50, degradeMs: [2000, 3000, 5000], restoreMs: 2000, desktopDpr: 2, phoneDpr: 1.5, trianglesPerCritter: 3000, sceneTriangles: 30000, callsPerCritter: 4, sceneCalls: 40, degradedCrumbs: 8, blobSize: 128 } as const;
 

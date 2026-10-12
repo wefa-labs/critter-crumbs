@@ -28,9 +28,10 @@ const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w
 
 /**
  * The header over every core state: the burrow and the feast, a line at the right on desktop (the closing day while
- * scattering, the summary at the feast) and your critter's face, or Connect for a visitor (flow page, screen 50).
+ * scattering, the summary at the feast) and your critter's face, or Connect for a visitor (flow page, screen 50). A
+ * screen for someone arriving by link gives its own line above the title and its own control at the right.
  */
-export function GameFrame({ feast, viewer, onProfile, onConnect, when, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; children: ReactNode }) {
+export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLine, aside, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; burrowLine?: string; aside?: ReactNode; children: ReactNode }) {
   useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
   useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
   const face = viewer ? faceCrop(44, portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
@@ -38,13 +39,13 @@ export function GameFrame({ feast, viewer, onProfile, onConnect, when, children 
     <div className="core-game">
       <header className="game-header">
         <div className="game-context">
-          <Link className="game-burrow" href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}>{feast.burrowName}</Link>
+          <Link className="game-burrow" href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}>{burrowLine ?? feast.burrowName}</Link>
           <h1>{feast.title}</h1>
         </div>
         <span className="closing-day" id="game-when">{when}</span>
         {viewer
           ? <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onProfile}><PortraitImage address={viewer.address} variant={viewer.variant} name={copy['scatter.own.short']} size="stage" /></button>
-          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : null}
+          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : aside ?? null}
       </header>
       <div className="game-content">{children}</div>
     </div>

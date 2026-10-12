@@ -3,7 +3,14 @@ import { createRoot } from 'react-dom/client';
 import { createElement } from 'react';
 import { App } from './app/app.js';
 import { copy } from '@critter-crumbs/shared';
+import { readDarkChoice, showDarkChoice } from './app/theme.js';
 document.title = copy['app.name'];
+// A dark or light look someone chose is in place before the first screen is drawn; otherwise the device decides.
+try { showDarkChoice(document.documentElement, readDarkChoice(localStorage)); } catch { /* Storage can be switched off; the device's look stands. */ }
+// The wordmark's face (2 KB) starts on its way now, while the session is read, so the first screen is drawn in it
+// and does not swap to it. A preload link in the page would do the same, but a browser warns about a preloaded file
+// the screen does not use, and the game's screens show no wordmark.
+void document.fonts.load('900 1em Grandstander', copy['app.name']).catch(() => {});
 const root = document.getElementById('root')!;
 if (import.meta.env.DEV && location.pathname === '/dev/screens') {
   const { ScreenGallery } = await import('./dev/screens.js');

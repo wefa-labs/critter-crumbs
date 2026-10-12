@@ -1,6 +1,8 @@
 import { copy, CIRCLE_FEEL, PILE_RULE } from '@critter-crumbs/shared';
 import type { PortraitExtent } from '../portraits/metrics.js';
 import type { SceneTreatment, Surface } from './composition.js';
+import { moundSize } from './mound-size.js';
+export { moundSize };
 
 /**
  * Where everything in the circle goes, ported from the scatter review page (geometry, slotAt, huddleAt, layoutRing)
@@ -48,7 +50,6 @@ export function hitRect(rect: Rect, min = 44): Rect {
 }
 export function shortName(name: string, limit = 10) { return name.length > limit ? name.slice(0, limit - 1) + '…' : name; }
 const nameWidth = (name: string) => [...name].reduce((width, ch) => width + (/[MW@]/.test(ch) ? 11 : /[ilj1 .]/.test(ch) ? 4 : 8), 0);
-export function moundSize(n: number) { let rows = 0; while (rows * (rows + 1) / 2 < n) rows++; return { rows, width: Math.max(1, rows) * 5.2 + 8, height: Math.max(1, rows) * 3.4 + 9 }; }
 
 /**
  * A name tag's type and frame (.spot .tag): 14 px with 11 + 10 px of padding, 12 px and 9 + 8 on a crowded phone,

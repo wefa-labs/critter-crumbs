@@ -2,6 +2,8 @@ import { SETTINGS } from '@critter-crumbs/shared';
 import type { GameSettings } from '../world/index.js';
 export const settingKeys = { effects: SETTINGS.effects.key, music: SETTINGS.music.key, still: SETTINGS.still.key, simple: SETTINGS.simple.key } as const;
 export type StoredSetting = keyof typeof settingKeys;
+/** The setting the Music button turns on and off outside Settings. */
+export const MUSIC_SETTING: StoredSetting = 'music';
 type StorageAccess = Pick<Storage, 'getItem' | 'setItem'>;
 export function readSettings(storage: Pick<StorageAccess, 'getItem'> | undefined, reducedMotion: boolean): GameSettings {
   const read = (key: StoredSetting) => { try { const value = storage?.getItem(settingKeys[key]); return value === '1' ? true : value === '0' ? false : SETTINGS[key].default === '1'; } catch { return SETTINGS[key].default === '1'; } };

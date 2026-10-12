@@ -21,6 +21,7 @@ export function createAudio(initial: GameSettings) {
   let context: AudioContext | null = null, engine: ReturnType<typeof createSoundEngine> | null = null, player: MusicPlayer | null = null, settings = initial, hidden = false, destroyed = false;
   let track: MusicTrack | null = null, ducked = false;
   let timer: ReturnType<typeof setInterval> | null = null, musicTimer: ReturnType<typeof setInterval> | null = null;
+  const listeners = new Set<() => void>(), heard = () => { for (const listener of listeners) listener(); };
   function stopTimer() { if(timer) clearInterval(timer); timer=null; }
   function pump() { if(context && engine) { engine.pump(context.currentTime); if (!engine.inspect().pouring) stopTimer(); } }
   /** The loop's next pass is scheduled from a slow timer of its own; a pass lasts a minute or more. */
@@ -45,7 +46,7 @@ export function createAudio(initial: GameSettings) {
     made.setEffects(settings.effects,created.currentTime); loops.setEnabled(settings.music,created.currentTime); loops.duck(ducked,created.currentTime); loops.play(track,created.currentTime);
   }
   return {
-    unlock() { if(destroyed) return; try { context ??= new AudioContext({ latencyHint:'interactive' }); if(!engine) start(context); if(!hidden) void context.resume().catch(() => {}); watchMusic(); } catch { /* The DOM always carries the complete state if audio is unavailable. */ } },
+    unlock() { if(destroyed) return; try { if(!context) { context = new AudioContext({ latencyHint:'interactive' }); context.addEventListener('statechange',heard); } if(!engine) start(context); if(!hidden) void context.resume().then(heard).catch(() => {}); watchMusic(); } catch { /* The DOM always carries the complete state if audio is unavailable. */ } },
     cue,
     play(token: SoundToken) { cue({ token, pitchStep:0, level:soundTokens[token].db + (settings.still || settings.reducedMotion ? REDUCED_MOTION.dampingDb : 0), action:'trigger', durationMs:0 }); },
     /** The music under the screen now showing, or null for quiet. It starts once sound is unlocked and Music is on. */
@@ -58,10 +59,14 @@ export function createAudio(initial: GameSettings) {
       if(value) { stopTimer(); if(context) { engine?.silence(context.currentTime); void context.suspend().catch(() => {}); } } else if(context) { if(returning) player?.resume(context.currentTime); void context.resume().catch(() => {}); }
       watchMusic();
     },
+    /** Whether sound can be heard now: a browser keeps it shut until the first gesture, and it pauses while the tab is hidden. */
+    running: () => context?.state === 'running',
+    /** Tells a listener whenever `running` may have changed. */
+    subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     /** Stops the effects; the music plays on from screen to screen. */
     stop:clear,
     inspect: () => ({ created:!!context, ...(engine?.inspect() ?? { activeVoices:0, recordings:0, pouring:false }), running:context?.state === 'running', music:player?.inspect() ?? { track:null, wanted:track } }),
-    destroy() { destroyed=true; clear(); watchMusic(); if(context) { player?.dispose(context.currentTime); engine?.dispose(context.currentTime); void context.close().catch(() => {}); } player=null; engine=null; context=null; },
+    destroy() { destroyed=true; clear(); watchMusic(); if(context) { context.removeEventListener('statechange',heard); player?.dispose(context.currentTime); engine?.dispose(context.currentTime); void context.close().catch(() => {}); } player=null; engine=null; context=null; },
   };
 }
 export type Audio = ReturnType<typeof createAudio>;
