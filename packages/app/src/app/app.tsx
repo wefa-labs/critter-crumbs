@@ -120,6 +120,7 @@ export function App() {
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
     <a href="#content" className="skip-link">{copy['skip.content']}</a>
+    <aside className="environment-notice" aria-label={copy['app.environment.label']}><strong>{copy['app.environment.badge']}</strong><span>{copy['app.environment.help']}</span></aside>
     <header><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <><button className="quiet connected-name" onClick={() => dismissOnboarding(false)}><PortraitImage address={me.address} variant={me.variant} name={displayName(me)} />{displayName(me)}</button><button className="quiet" disabled={working} onClick={() => void run(() => session.disconnect())}>{copy['action.disconnect']}</button><button className="secondary" onClick={() => setSettingsOpen(true)}>{copy['action.settings']}</button></>
         : musicButton}

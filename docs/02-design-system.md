@@ -566,6 +566,9 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | ID | Text |
 |---|---|
 | `app.name` | Critter Crumbs |
+| `app.environment.label` | Development status |
+| `app.environment.badge` | Beta · Testnet |
+| `app.environment.help` | Still in development. Rehearsal only. |
 | `app.tagline` | Everyone gets a handful of crumbs to share. |
 | `action.connect` | Connect |
 | `action.disconnect` | Disconnect |
