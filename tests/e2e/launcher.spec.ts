@@ -51,13 +51,17 @@ test('the launcher is a title screen: the wordmark, the tagline once, one Connec
   expect(Math.round(sheet.y + sheet.height)).toBe(812);
 });
 
-test('on desktop the painting fills the screen and the critters gather either side of the card', async ({ page }) => {
+test('on desktop the painting fills the space below the beta notice and the critters gather either side of the card', async ({ page }) => {
   for (const viewport of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 900, height: 700 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeEnabled();
     const scene = await box(page, '.launch-scene'), card = await box(page, '.launch-sheet'), plate = await box(page, '.launch-plate'), critters = await boxes(page, '.launch-scene .floor-critter'), heap = await box(page, '.launch-scene .floor-prop');
-    expect(scene).toEqual({ x: 0, y: 0, ...viewport });
+    const notice = await box(page, '.environment-notice');
+    await expect(page.getByRole('complementary', { name: 'Development status' })).toContainText('Beta · Testnet');
+    expect(scene.x).toBe(0); expect(scene.width).toBe(viewport.width);
+    expect(scene.y).toBe(notice.y + notice.height);
+    expect(scene.y + scene.height).toBe(viewport.height);
     expect(card.width).toBe(420);
     expect(Math.abs(card.x + card.width / 2 - viewport.width / 2)).toBeLessThan(1);
     expect(Math.abs(plate.x + plate.width / 2 - viewport.width / 2)).toBeLessThan(1);

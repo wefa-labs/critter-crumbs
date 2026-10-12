@@ -41,7 +41,7 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
    the wordmark's plate; the sheet holds the two actions. Phone: 375 x 812 in the design. */
 .launcher { --u:clamp(.8px, min(100vw / 375, 100dvh / 812), 1.7px); }
 .launch-scene { position:relative; flex:1; min-height:0; margin-bottom:-24px; overflow:hidden; background:var(--cc-floor-base); }
-.launch-plate { position:absolute; left:50%; top:9%; translate:-50% 0; display:grid; justify-items:center; gap:4px; width:max-content; max-width:calc(100% - 40px); padding:16px 24px 18px; border-radius:24px; background:var(--cc-bg); border:var(--cc-border-strong); box-shadow:var(--cc-shadow-2); text-align:center; }
+.launch-plate { position:absolute; left:50%; top:max(64px, 9%); translate:-50% 0; display:grid; justify-items:center; gap:4px; width:max-content; max-width:calc(100% - 40px); padding:16px 24px 18px; border-radius:24px; background:var(--cc-bg); border:var(--cc-border-strong); box-shadow:var(--cc-shadow-2); text-align:center; }
 .launch-plate .wordmark { font-size:31px; }
 .launch-plate p { color:var(--cc-text-2); text-wrap:balance; }
 .launch-sound { position:absolute; top:max(16px, env(safe-area-inset-top)); right:16px; z-index:2; }
