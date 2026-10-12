@@ -61,6 +61,8 @@ test('copy guard permits protocol syntax and real copy IDs, not wording hidden i
     'const view = <button onClick={() => api.write(`/api/burrows/${id}`, "POST", { name })}>{copy["action.connect"]}</button>;',
     'const resource = useResource(api, `/api/burrows/${id}`); navigate(`/burrows/${id}`); const isHome = path === "/";',
     'const provider = await import("../dev/account-provider.js");',
+    'const view = <option>{devCopy[`preview.game.${state}`]}</option>;',
+    'const view = <p>{formatDevCopy("preview.name", { n: 1 })}</p>;',
   ]) assert.equal(await has(code, 'packages/app/src/probe.tsx', 'copy-ids'), false, code);
   for (const code of [
     'const view = <button onClick={() => alert("Hello")}>{copy["action.connect"]}</button>;',

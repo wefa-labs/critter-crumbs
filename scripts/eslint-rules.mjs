@@ -131,7 +131,7 @@ export default {
             if (callee === 'play' && argument === 0 && ['connect', 'reroll', 'ui.tap', 'crumb.add', 'crumb.remove', 'pour.hold', 'pour.reverse', 'pile.wall', 'pile.empty', 'statement.open', 'scatter.confirm', 'statements.reveal', 'scatter.closed', 'feast.open', 'feast.feed', 'feast.settle', 'error'].includes(value)) return true;
             if (callee === 'scrollIntoView' && argument === 0) return true;
             if (['createPortrait', 'paintCritter'].includes(callee) && argument === 2 && node.parent.type === 'Property' && node.parent.key.name === 'size' && value === 'stage') return true;
-            if (callee === 'formatCopy' && argument === 0 && copyIds.has(value)) return true;
+            if (['formatCopy', 'formatDevCopy'].includes(callee) && argument === 0 && copyIds.has(value)) return true;
             if (['addEventListener', 'removeEventListener', 'PopStateEvent', 'getElementById', 'closest', 'querySelector', 'querySelectorAll', 'matchMedia', 'setProperty'].includes(callee) && argument === 0) return true;
             if (['get', 'write', 'navigate', 'endsWith', 'fetch'].includes(callee) && argument === 0 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
             if (callee === 'useResource' && argument === 1 && (value?.startsWith('/') || node.type === 'TemplateLiteral' && node.quasis[0].value.raw.startsWith('/'))) return true;
@@ -140,7 +140,7 @@ export default {
           }
           if (parent.type === 'Property' && parent.key.name === 'critterVersion' && ['1','2'].includes(value)) return true;
           if (parent.type === 'Property' && parent.key === current && !parent.computed) return true;
-          if (parent.type === 'MemberExpression' && parent.object.name === 'copy' && parent.property === current) return true;
+          if (parent.type === 'MemberExpression' && ['copy', 'devCopy'].includes(parent.object.name) && parent.property === current) return true;
           if (parent.type === 'CallExpression' && parent.callee.name === 'copy') return true;
           if (parent.type === 'JSXAttribute') {
             const name = parent.name.name;
