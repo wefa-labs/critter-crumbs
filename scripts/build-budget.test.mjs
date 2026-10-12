@@ -33,3 +33,23 @@ test('empty chunks pass and crypto is measured without inventing a spec cap', ()
   delete output['crypto.js'];
   assert.throws(() => measureBundle(output), /Missing crypto/);
 });
+
+test('a lazy chunk is not charged for what the chunk that asks for it already holds', () => {
+  const output = bundle();
+  // the game asks for three, and already holds a library both of them use
+  output['game.js'] = { ...chunk('game', '', ['library.js']), isEntry: false, dynamicImports: ['three.js'] };
+  output['library.js'] = { ...chunk('library', randomBytes(20_000).toString('hex')), isEntry: false };
+  output['own.js'] = { ...chunk('own', randomBytes(1_000).toString('hex')), isEntry: false };
+  output['three.js'].imports.push('library.js', 'own.js');
+  const held = measureBundle(output).three;
+  assert.ok(held > 1_000 && held < 3_000, `three counted ${held}`);
+  // asked for by the shell as well, which holds none of it, the library is three's to bring
+  output['app.js'].dynamicImports = ['three.js'];
+  assert.ok(measureBundle(output).three - held > 19_000);
+});
+
+test('a lazy chunk that every chunk asking for it also holds statically is refused', () => {
+  const output = bundle();
+  output['game.js'] = { ...chunk('game', '', ['three.js']), isEntry: false, dynamicImports: ['three.js'] };
+  assert.throws(() => measureBundle(output), /behind import\(\)/);
+});
