@@ -9,10 +9,14 @@ export function useTrustedTime(api: AppApi) {
   return now;
 }
 const deadlineCopy = { gathering: 'deadline.gathering', scattering: 'deadline.scattering' } as const;
+/** "Gathering closes in 2 days", or "Gathering closed yesterday" once it has, at minute granularity. */
+export function deadlineLine(phase: 'gathering' | 'scattering', at: number, now: number) {
+  const relative = relativeTime(at, Math.floor(now / 60000) * 60000);
+  return at - now <= 0 ? formatCopy('deadline.closed', { phase: copy[phaseCopy[phase]], relative }) : formatCopy(deadlineCopy[phase], { relative });
+}
 function Deadline({ phase, at, now }: { phase: 'gathering' | 'scattering'; at: number; now: number }) {
   const [expanded, setExpanded] = useState(false), difference = at - now;
-  const relative = relativeTime(at, Math.floor(now / 60000) * 60000);
-  const text = difference <= 0 ? formatCopy('deadline.closed', { phase: copy[phaseCopy[phase]], relative }) : formatCopy(deadlineCopy[phase], { relative });
+  const relative = relativeTime(at, Math.floor(now / 60000) * 60000), text = deadlineLine(phase, at, now);
   return <div className="deadline"><button className="quiet" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>{text}{difference > 0 && difference < 21600000 ? <small>{formatCopy('deadline.soon', { relative })}</small> : null}</button>{expanded ? <time dateTime={new Date(at).toISOString()}>{absoluteTime(at)}</time> : null}</div>;
 }
 export function DeadlineStrip({ feast, now }: { feast: FeastClock; now: number }) {

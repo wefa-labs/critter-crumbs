@@ -11,7 +11,7 @@ import { GameStage } from '../app/game-stage.js';
 import { Link, PortraitImage, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
-import { HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
+import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
 import { composeGame, deviceFor } from './composition.js';
 import { defaultScene } from './art.js';
 import { presentSleep } from './motion.js';
@@ -28,9 +28,10 @@ const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w
 
 /**
  * The header over every core state: the burrow and the feast, a line at the right on desktop (the closing day while
- * scattering, the summary at the feast) and your critter's face, or Connect for a visitor (flow page, screen 50).
+ * scattering, the summary at the feast) and your critter's face, or Connect for a visitor (flow page, screen 50). A
+ * screen for someone arriving by link gives its own line above the title and its own control at the right.
  */
-export function GameFrame({ feast, viewer, onProfile, onConnect, when, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; children: ReactNode }) {
+export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLine, aside, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; burrowLine?: string; aside?: ReactNode; children: ReactNode }) {
   useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
   useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
   const face = viewer ? faceCrop(44, portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
@@ -38,13 +39,13 @@ export function GameFrame({ feast, viewer, onProfile, onConnect, when, children 
     <div className="core-game">
       <header className="game-header">
         <div className="game-context">
-          <Link className="game-burrow" href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}>{feast.burrowName}</Link>
+          <Link className="game-burrow" href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}>{burrowLine ?? feast.burrowName}</Link>
           <h1>{feast.title}</h1>
         </div>
         <span className="closing-day" id="game-when">{when}</span>
         {viewer
           ? <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onProfile}><PortraitImage address={viewer.address} variant={viewer.variant} name={copy['scatter.own.short']} size="stage" /></button>
-          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : null}
+          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : aside ?? null}
       </header>
       <div className="game-content">{children}</div>
     </div>
@@ -170,7 +171,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
         onPointerDown={event => { if (event.target === event.currentTarget || event.target instanceof Element && event.target.closest('.scene-backdrop')) swipe.current = { x: event.clientX, y: event.clientY }; }}
         onPointerUp={event => { if (!swipe.current) return; const dx = event.clientX - swipe.current.x, dy = event.clientY - swipe.current.y; swipe.current = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) turn(dx < 0 ? 1 : -1); else onClose?.(); }}
         onPointerCancel={() => { swipe.current = null; }}>
-        <SceneBackdrop id={treatment.scene === 'dusk' ? 'dusk' : sceneId} desktop={desktop} />
+        <SceneBackdrop id={treatment.scene === 'dusk' ? 'dusk' : sceneId} desktop={desktop} size={layout.scene} backRow={circleBackRow(viewport, critters.length)} />
         <div className="scene-dusk-light" aria-hidden="true" />
         <div className="scene-feast-light" aria-hidden="true" />
         {layout.slots.map(slot => (

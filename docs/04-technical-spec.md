@@ -373,7 +373,7 @@ Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (
 
 **Vercel Functions**: Node.js runtime, one function per route file under `/api`, region pinned next to the Neon branch. Every path the handler answers needs its route file: for any other `/api` path Vercel answers with a 404 of its own and the handler is never asked. The API tests fail on an answer from a path that has none (`tests/api/route-files.ts`). A `vercel.json` rewrites everything except `/api/*` to `index.html` and sets the headers of §2. Preview deployments per branch; the production project is the rehearsal and October deployment.
 
-**Static assets**: the Young Serif subset (OFL), the sound set (sixteen MP3 files under `/public/audio`, 5.6 MB, none in the first load; `docs/research/audio-assets.md`), the arrival illustration (WebP), all under `/public`, all same-origin.
+**Static assets**: the wordmark’s face (Grandstander Black, OFL, one WOFF2 file under `/public/fonts` holding only the wordmark’s letters, with its licence beside it), the sound set (sixteen MP3 files under `/public/audio`, 5.6 MB, none in the first load; `docs/research/audio-assets.md`), the three paintings, the four plates painted from two of them for the game's floor and the layers cut from the third (`/public/scenes`; `docs/explorations/floor-plates`), all under `/public`, all same-origin.
 
 ## 11. Dependencies
 

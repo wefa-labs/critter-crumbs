@@ -10,10 +10,14 @@ export async function readJson<T>(page: Page, path: string): Promise<{ status: n
     return { status: response.status, body: (await response.json()) as T };
   }, path);
 }
-/** Wait for server profile state before deciding which onboarding dialog exists. */
+/**
+ * Connects through the one way in a screen offers: Connect on the launcher and on a public result, Connect to join on a
+ * feast opened from a link. Waits for server profile state before deciding which onboarding dialog exists.
+ */
 export async function connectLocal(page: Page, index: number, name = 'Avery', click: (target:Locator)=>Promise<void> = target=>target.click()) {
-  await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeEnabled();
-  await click(page.getByRole('button', { name: 'Connect', exact: true }));
+  const connect = page.getByRole('button', { name: /^Connect( to join)?$/ });
+  await expect(connect).toBeEnabled();
+  await click(connect);
   await click(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true }));
   await expect(page.locator('.game-profile').or(page.getByRole('button', { name: 'Disconnect', exact: true }))).toBeVisible();
   await expect(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true })).toHaveCount(0);

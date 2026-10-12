@@ -19,7 +19,7 @@ Upstream: `01-prd.md` (vocabulary §3, rules §5, flows §7). Downstream: `03-ga
 
 **Palette.** Six named colours carry the identity: **Oat** ground, **Burrow** ink, **Honey** crumbs, **Moss** for done and alive, **Clay** only for errors, **Dusk** only for sleep. Honey is reserved for crumbs, except the gold primary action adopted on 2026-10-06 (D14). The primary action uses ink text and an ink outline.
 
-**Type.** The device’s system sans throughout, with bold headings and one 12, 14, 16, 20 and 28 px scale (D14). No font download.
+**Type.** The device’s system sans throughout, with bold headings and one 12, 14, 16, 20 and 28 px scale (D14). The wordmark alone has a face of its own, Grandstander Black (D25): one self-hosted file that holds only the wordmark’s letters.
 
 **Layout.** Mobile-first, one column of content with a grid of critters standing on a shared ground; the pile of crumbs sits under the thumb. Desktop widens the grid and moves the pile to a side rail. Nothing is a shrunken desktop app.
 
@@ -44,7 +44,7 @@ The Game Design document must use exactly these words when describing sound. The
 
 ## 3. Tokens
 
-Tokens are CSS custom properties on `:root`, prefixed `--cc-`. The same values are mirrored in a `tokens.ts` module for the canvas layer (§4) and the 2D critter renderer (§5.7); one source, generated in the build (mechanism: Technical Spec). Single light theme in v0 (**D1**, §14).
+Tokens are CSS custom properties on `:root`, prefixed `--cc-`. The same values are mirrored in a `tokens.ts` module for the canvas layer (§4) and the 2D critter renderer (§5.7); one source, generated in the build (mechanism: Technical Spec). There are two looks, light and dark (**D26**, §14): the dark look gives new values to some of the same tokens (`tokens.dark.json`) and adds none. The values in the tables below are the light look’s.
 
 ### 3.1 Colour
 
@@ -88,7 +88,7 @@ Rules:
 - Text is always Burrow, Soil, Bark, Moss-ink, or Clay-ink. Nothing else is ever text.
 - Honey and Crust appear only on crumbs and the heap (**D5**). The "crumb" is the only thing in the app that is gold.
 - `@media (prefers-contrast: more)`: `--cc-line` → `--cc-line-strong`, `--cc-bark` → `--cc-soil`, and the heap's stroke width doubles.
-- `color-scheme: light` is declared on `:root` so native controls and scrollbars match (**D1**).
+- `color-scheme` is declared on `:root` with the look in use, so native controls and scrollbars match (**D26**).
 
 ### 3.2 Type
 
@@ -513,7 +513,10 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 
 | Screen / state | What shows | Copy (§10) |
 |---|---|---|
-| Arrive, not connected | Feast title, context, burrow line, both deadlines, the grid of critters asleep in `dusk` (portraits until 3D is ready), one explainer, the connect button | `arrive.*` |
+| Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark and the tagline on a plate, four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `action.connect`, `launch.learn` |
+| Arrive by a link, not connected | Header with the burrow line and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer and the one connect button | `arrive.*` |
+| Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
+| First steps (How it works) | Three short screens that can be skipped, open before connecting and again from Settings: the same handful, ten practice crumbs to give, and where they go stays private | `learn.*` |
 | First connect, no ENS | Name prompt dialog | `name.*` |
 | Meet your critter | `RerollControl` | `critter.*` |
 | Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
@@ -540,7 +543,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Feast cancelled | Listed in past feasts with a "Cancelled" chip | `feast.cancelled` |
 | People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
 
-First-run guidance is in-place copy, never a tour: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
+First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27), and it is never shown unasked: it opens from How it works on the launcher and in Settings. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
 
 ## 10. UX copy
 
@@ -586,12 +589,25 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `arrive.explainer` | Everyone here gets the same handful of crumbs to share out. Where they go stays private until the feast. |
 | `arrive.asleep` | The critters are asleep until you connect. |
 | `arrive.cta` | Connect to join |
+| `launch.learn` | How it works |
+| `learn.step` | Step {i} of {n} (the name of the three dots) |
+| `learn.next` | Next |
+| `learn.skip` | Skip |
+| `learn.done` | Got it |
+| `learn.handful.title` | Everyone gets the same handful |
+| `learn.handful.body` | In a feast, everyone has the same crumbs to share out, and gives all of them away. |
+| `learn.tap.body` | Try it: give these ten crumbs away. They are only practice. (The step’s title is `scatter.instruction`.) |
+| `learn.tap.give` | Give a practice crumb (the name of each practice critter’s button) |
+| `learn.private.title` | Where they go stays private |
+| `learn.private.body` | Nobody sees where anyone’s crumbs went until the feast. Then every scatter opens at once. |
 
 **Connect and critter (F2)**
 
 | ID | Text |
 |---|---|
 | `connect.injected` | This browser (the connect choice offered when the browser has a provider that does not announce itself, as some phone apps' built-in browsers do) |
+| `connect.waiting` | Confirm in {name} |
+| `connect.sign.body` | You'll be asked to sign. It costs nothing and nothing goes on-chain. |
 | `name.title` | What should the burrow call you? |
 | `name.help` | There's no ENS name on this address, so pick a name. |
 | `name.label` | Display name |
@@ -787,6 +803,8 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `motion.still.help` | No wobbling or bouncing. |
 | `view.simple.label` | Simple view |
 | `view.simple.help` | Flat critters. Easier on the battery. |
+| `view.dark.label` | Dark mode |
+| `view.dark.help` | Easier on the eyes at night. |
 
 **Simple view and errors**
 
@@ -958,7 +976,7 @@ The Game Design document owns every sound token. This document fixes what is sha
 
 | # | Decision | Why |
 |---|---|---|
-| D1 | One light theme in v0; `color-scheme: light` declared; dark theme is a token swap in v1 | Four weeks to the rehearsal; one theme done well. Tokens are semantic so the swap is mechanical later |
+| D1 | Superseded by D26: a light look and a dark one | Afolabi asked for a dark mode on 11 October 2026 |
 | D2 | Superseded by D14: system sans throughout | October review chose Inked daylight |
 | D3 | Amended by D14: primary actions are gold with ink text and ink outline; honey otherwise belongs to crumbs | October review adopts the gold button; text and meaningful edges retain contrast |
 | D4 | No icon library; one inline SVG sprite of 22 icons | A dependency for 22 shapes is not justified |
@@ -982,14 +1000,22 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D22 | Thought bubble opens fixed-height scrolling statement; phone top, desktop side panel; outside tap/Escape closes | Reading preserves the circle and dock |
 | D23 | Own tag says You; own tap stirs without changing focus or giving | Own critter stays asleep and cannot receive own crumbs |
 | D24 | Phone results grow from dock with playing huddle; desktop results/action bar beside it | Results remain connected to the scene |
+| D25 | The wordmark is set in Grandstander Black (900): on the launcher’s plate at 31 px on the phone and 44 px on desktop, in headers at 22 px, tracking −0.01 em. One self-hosted WOFF2 file holds only the wordmark’s letters; the system’s heaviest sans stands in until it arrives | Afolabi’s pick on the wordmark canvas; amends D14’s "system sans throughout" for the wordmark only, and nothing else downloads a font |
+| D26 | Two looks. Dark follows the device (`prefers-color-scheme`) until someone chooses in Settings; the choice is kept (`cc.view.dark`) and overrides the device either way. Dark gives new values to the page, text, outline, shadow and scene tokens, dims the paintings under a violet wash, and leaves the critters, the crumbs and the drawing ink (`--cc-ink`) as they are | "So it can be used at night easily" (Afolabi, 11 October 2026); answers DQ2. The 3D lighting presets are unchanged for now |
+| D27 | The app opens on a launcher, a title screen with one Connect and How it works; a feast opened from a link shows the invite screen with one Connect to join. Neither shows Settings or a second connect button. How it works opens the first steps, the one tour (§9) | Afolabi’s review of 11 October 2026; the flow page’s launcher, invite and first steps (`docs/explorations/app-screens`) |
+| D28 | Where there is no Settings to open (the launcher, the first steps, a visitor’s header) a Music toggle sits at the top right. It shows music as on only once it can be heard, because a browser lets none play before the first press, and a press that starts the sound leaves the setting on | "Once we add music there should be a toggle" (Afolabi, 11 October 2026) |
+| D29 | The Window and Dusk scenes are painted plates, one for the phone and one for desktop: the room seen from above, its wall arching around the circle and its floor filling the rest, under the look’s wash and grain. The app raises a plate until its wall ends 8 px above the circle’s back row, so no critter stands on a wall at any screen size. Entrance is still drawn from crops | "Better background images for the gameplay that has more of a floor and wall" (Afolabi, 11 October 2026): the painted floor plate the decision of 5 October waited for. How they were painted and the rule a new one follows are in `docs/explorations/floor-plates` |
 
 **October adoption (2026-10-06).** D14–D24 override the earlier grid, type, control, heap and reading descriptions in §1, §3, §6 and §7 for core game screens. The generated token source is normative for Inked daylight values. Other screens inherit these tokens and keep their existing layouts.
+
+**Before connecting (2026-10-11).** D25–D28 bring the flow page’s screens for someone who has not connected into the app: the launcher, arriving by a link, choosing how to connect and the first steps. The screens a connected member sees outside the core game (first name and critter, home, a burrow and its members, setup, gathering, the profile) still keep their earlier layouts and wait for the same treatment.
+
+**Painted floors (2026-10-11).** D29 replaces the cropped, mirrored floor of the core game screens with painted plates for the two scenes the game shows. The launcher’s critters are drawn about 1.4 times the flow page’s, at the height of the painting’s table (`docs/decisions.md`, 2026-10-11).
 
 ### Open — confirm before implementation
 
 | # | Question |
 |---|---|
-| DQ2 | Dark theme deferred to v1 (D1). If it must be v0, budget roughly two days for a second token set and a lighting preset |
 | DQ3 | The signing step's wording avoids "wallet" entirely (`scatter.sign.body`). Confirm this reads clearly to the October council, who all use wallets |
 | DQ5 | When does v2 ship to production, and will it receive a v2 mesh and 3D render style? D16 answers its present definition and development use; future species/flying critters remain undecided |
 

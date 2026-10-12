@@ -12,6 +12,7 @@ export const ICON_PATHS = {
   drop: { box: '0 0 16 16', d: 'M8 1.5C8 1.5 3 7 3 10a5 5 0 0 0 10 0c0-3-5-8.5-5-8.5z', stroke: 0 },
   flame: { box: '0 0 16 16', d: 'M8.5 1.5C9 5 12 6 12 10a4 4 0 0 1-8 0c0-1.5.6-2.5 1.3-3.3.1 1.2.8 1.8 1.5 1.8-.3-2.5.7-5 1.7-7z', stroke: 0 },
   cloud: { box: '0 0 16 16', d: 'M4.5 12.5a3 3 0 0 1-.4-6 4 4 0 0 1 7.6-1 3.5 3.5 0 0 1 .3 7z', stroke: 0 },
+  music: { box: '0 0 20 20', d: 'M7 3.6 16.5 1.8v11a2.6 2.1 0 1 1-1.8-2V5.9L8.8 7v7.6a2.6 2.1 0 1 1-1.8-2z', stroke: 0 },
 } as const;
 export type IconName = keyof typeof ICON_PATHS;
 export const ELEMENT_ICON = { earth: 'leaf', water: 'drop', fire: 'flame', air: 'cloud' } as const;
@@ -28,4 +29,6 @@ export function faceCrop(size: number, headY: number) {
   const width = size * 1.9, height = width * 150 / 120;
   return { '--face-size': `${size}px`, '--face-width': `${width}px`, '--face-top': `${size / 2 - headY * height}px` } as CSSProperties;
 }
+/** A scene's image filter by its token, so the look in use (light or dark) decides it. */
+export const sceneFilterStyle = (token: string) => ({ '--scene-image-filter': `var(--cc-${token})` }) as CSSProperties;
 export const sceneLayerStyle = (layers: { floor: string; wall: string; cornerL: string; cornerR: string }) => ({ '--scene-floor': `url(${layers.floor})`, '--scene-wall': `url(${layers.wall})`, '--scene-corner-left': `url(${layers.cornerL})`, '--scene-corner-right': `url(${layers.cornerR})` }) as CSSProperties;
