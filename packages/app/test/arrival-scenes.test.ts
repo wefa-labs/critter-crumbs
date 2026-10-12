@@ -4,21 +4,28 @@ import { LEARN_SHEET_HEIGHT, LEARN_STEPS } from '../src/app/learn-steps.js';
 import { INVITE_SCENE, LAUNCHER_SCENE, sheetScreenStyle } from '../src/app/painted-scene.js';
 
 /* Expected values are read off the flow page, never off the app (docs/explorations/app-screens/index.html):
-   launcherScene(), circle(), and SCREENS.invite, ['learn-handful'], ['learn-tap'] and ['learn-private']. */
+   launcherScene(), circle(), and SCREENS.invite, ['learn-handful'], ['learn-tap'] and ['learn-private']. The launcher's
+   critters are the one exception: they are drawn about 1.4 times the flow page's and stand further apart, at Afolabi's
+   word (docs/decisions.md, 2026-10-11, "a bit larger in the launch view"). */
 const place = ({ x, y, size }: { x: number; y: number; size: number }) => [x, y, size];
 
 describe('the launcher', () => {
   it('stands four critters around a heap of ten crumbs on the phone, the outer two asleep', () => {
     expect(LAUNCHER_SCENE.painting).toBe('window');
-    expect(LAUNCHER_SCENE.critters.map(place)).toEqual([[26, 90, 88], [41, 94, 98], [61, 93, 100], [77, 89, 84]]);
+    expect(LAUNCHER_SCENE.critters.map(place)).toEqual([[17, 90, 124], [38, 94, 138], [64, 93, 140], [84, 89, 118]]);
     expect(LAUNCHER_SCENE.critters.map(critter => critter.asleep)).toEqual([true, false, false, true]);
     expect(LAUNCHER_SCENE.critters.map(critter => critter.face)).toEqual(['right', null, 'left', 'left']);
-    expect([place(LAUNCHER_SCENE.heap), LAUNCHER_SCENE.heap.crumbs]).toEqual([[51, 95, 70], 10]);
+    expect([place(LAUNCHER_SCENE.heap), LAUNCHER_SCENE.heap.crumbs]).toEqual([[51, 95, 80], 10]);
   });
 
-  it('gathers them either side of the 420 px card on desktop, where the 1280 px frame draws them at 12, 24, 76 and 88 percent', () => {
-    const across = LAUNCHER_SCENE.critters.map(critter => 640 + critter.side * (210 + critter.beside));
-    for (const [index, percent] of [12, 24, 76, 88].entries()) expect(Math.abs(across[index]! - percent * 12.8)).toBeLessThan(1.5);
+  it('gathers them either side of the 420 px card on desktop, each whole drawing clear of the card and inside the 1280 px frame', () => {
+    expect(LAUNCHER_SCENE.critters.map(critter => critter.side)).toEqual([-1, -1, 1, 1]);
+    for (const critter of LAUNCHER_SCENE.critters) {
+      const centre = 640 + critter.side * (210 + critter.beside), halfWidth = critter.size * 1.5 / 2;
+      expect(Math.abs(centre - 640) - halfWidth).toBeGreaterThanOrEqual(210);
+      expect(centre - halfWidth).toBeGreaterThanOrEqual(0);
+      expect(centre + halfWidth).toBeLessThanOrEqual(1280);
+    }
   });
 
   it('keeps the whole heap clear of the card on desktop, where the frame hides half of it', () => {

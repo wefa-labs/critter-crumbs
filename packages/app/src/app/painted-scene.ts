@@ -20,16 +20,20 @@ export interface Beside { side: -1 | 1; beside: number }
 export const MOSS = '0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf', FERN = '0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF';
 export const JUNIPER = '0xF1F6619B38A98d6De0800F1DefC0a6399eB6d30C', CLOVER = '0x1efF47bc3a10a45D4B230B5d10E37751FE6AA718';
 
-/** The launcher: four critters dozing around a heap of ten crumbs; on desktop they gather either side of the card. */
+/**
+ * The launcher: four critters dozing around a heap of ten crumbs; on desktop they gather either side of the card. They
+ * are drawn about 1.4 times the flow page's, which stands them at the height of the painting's table and cushions
+ * (docs/decisions.md, 2026-10-11).
+ */
 export const LAUNCHER_SCENE: { painting: Painting; critters: readonly (SceneCritter & Beside)[]; heap: SceneHeap & Beside } = {
   painting: 'window',
   critters: [
-    { address: MOSS, x: 26, y: 90, size: 88, asleep: true, face: 'right', side: -1, beside: 276 },
-    { address: CLOVER, x: 41, y: 94, size: 98, asleep: false, face: null, side: -1, beside: 123 },
-    { address: JUNIPER, x: 61, y: 93, size: 100, asleep: false, face: 'left', side: 1, beside: 123 },
-    { address: FERN, x: 77, y: 89, size: 84, asleep: true, face: 'left', side: 1, beside: 276 },
+    { address: MOSS, x: 17, y: 90, size: 124, asleep: true, face: 'right', side: -1, beside: 300 },
+    { address: CLOVER, x: 38, y: 94, size: 138, asleep: false, face: null, side: -1, beside: 140 },
+    { address: JUNIPER, x: 64, y: 93, size: 140, asleep: false, face: 'left', side: 1, beside: 140 },
+    { address: FERN, x: 84, y: 89, size: 118, asleep: true, face: 'left', side: 1, beside: 300 },
   ],
-  heap: { crumbs: 10, x: 51, y: 95, size: 70, side: -1, beside: 60 },
+  heap: { crumbs: 10, x: 51, y: 95, size: 80, side: -1, beside: 64 },
 };
 
 /** Arriving by a link: the feast's own critters asleep in a ring, over a sheet 400 pixels tall on the phone. */
