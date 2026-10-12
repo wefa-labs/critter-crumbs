@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { composeGame } from '../src/game/composition.js';
 import { circleBackRow, layoutGame } from '../src/game/layout.js';
 import { PLATE_GAP, plateLift, type PlateShape } from '../src/game/plate.js';
-import { validateScenes } from '../src/game/scene-manifest.js';
+import { sceneReader, validateScenes } from '../src/game/scene-manifest.js';
 
 type Size = { width: number; height: number };
 /* Where a raised plate's wall ends on the screen, worked out as the browser draws it rather than as plateLift reckons it:
@@ -85,5 +85,27 @@ describe('the scene manifest', () => {
     for (const broken of [{ image, kind: 'plate' }, { image, kind: 'plate', aspect: 0.5 }, { image, kind: 'plate', aspect: 0, wallFoot: 0.16 }, { image, kind: 'plate', aspect: 0.5, wallFoot: 1 }]) {
       expect(() => validateScenes(plate(broken)), JSON.stringify(broken)).toThrow(TypeError);
     }
+  });
+
+  it('is read once for the page: every scene after the first has it without waiting', async () => {
+    let reads = 0;
+    const reader = sceneReader(async () => { reads++; return shipped(); });
+    expect(reader.known()).toBeUndefined();
+    const [first, second] = await Promise.all([reader.read(), reader.read()]);
+    expect(second).toBe(first);
+    expect(reader.known()).toBe(first);
+    expect(await reader.read()).toBe(first);
+    expect(reads).toBe(1);
+  });
+
+  it('is asked for again after a read that failed or gave a manifest the app refuses', async () => {
+    const answers = [() => Promise.reject(new Error('offline')), async () => [], async () => shipped()];
+    let reads = 0;
+    const reader = sceneReader(() => answers[reads++]!());
+    expect(await reader.read()).toEqual([]);
+    expect(await reader.read()).toEqual([]);
+    expect(reader.known()).toBeUndefined();
+    expect((await reader.read()).map(scene => scene.id)).toContain('dusk');
+    expect(reads).toBe(3);
   });
 });
