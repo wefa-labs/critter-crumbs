@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useDeferredValue, useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { phaseAt, ApiClientError } from '@critter-crumbs/core';
@@ -42,7 +42,11 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
     closingTimer.current = window.setTimeout(() => setClosing(false), CLOSING_HOLD_MS);
   }, [passedOnScreen]);
   useEffect(() => () => window.clearTimeout(closingTimer.current), []);
-  /* the feast's screens load while scattering, so closing goes straight to the laid-out sheet with no loading flash */
+  /* Leaving the closed screen is deferred: React keeps it on the page until the feast's screens are ready to draw, so
+     the laid-out sheet follows it with no loading heading between, whether the hold or late feast data ends it. The
+     two are one Suspense boundary (the same element in the same place), which is what lets React wait. */
+  const closedOnScreen = passedOnScreen || closing, stillClosed = useDeferredValue(closedOnScreen);
+  /* the feast's screens load while scattering, so that wait is a moment */
   useEffect(() => { if (phase === 'scattering' && me) void import('./results.js'); }, [phase, me]);
   /* the game's notices are not live regions; a failed refresh is read out through the polite announcer */
   const refreshFailure = resource.error ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
@@ -54,7 +58,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   /* one element in one place, so the scatter screen stays mounted as scattering closes under it */
   const scatter = (closed: boolean) => isMemberFeast(feast) && me ? <Suspense fallback={<p>{copy['app.loading']}</p>}><Scatter feast={feast} me={me} {...props} clearError={clearError} settings={settings} account={account} connect={connect} now={now} initialReading={path.endsWith('/read')} closed={closed} /></Suspense> : null;
   let content;
-  if ((passedOnScreen || closing) && isMemberFeast(feast) && me) content = scatter(true);
+  if ((closedOnScreen || stillClosed) && isMemberFeast(feast) && me) content = scatter(true);
   else if (phase !== feast.phase) content = <p>{copy['app.loading']}</p>;
   else if (phase === 'cancelled') content = <p>{copy['feast.cancelled']}</p>;
   else if (phase === 'void') content = <p>{formatCopy('feast.tooFew', { feastTitle: feast.title })}</p>;
