@@ -14,7 +14,7 @@ test('the deadline passing with the scatter screen open stops it at dusk, then l
   // An unsaved allocation on screen: closing stops the same screen, it does not start a fresh one.
   const field = page.locator('.focus-count input'); await field.fill('7'); await field.press('Enter');
   await expect(page.locator('.crumbs-left-count')).toHaveText('93');
-  const gone = await watchGameScreen(page);
+  const lapses = await watchGameScreen(page);
   // The laid-out sheet stays until the key comes, and the local stack sends it within about a quarter of a second: less
   // than the half second an assertion leaves between tries. So the key is held back until the sheet has been seen.
   let keyAsked = false, allowKey = () => {};
@@ -31,7 +31,8 @@ test('the deadline passing with the scatter screen open stops it at dusk, then l
   // With the key, the feast opens: nobody scattered here, so it opens on the results saying so.
   allowKey();
   await expect(page.getByRole('heading', { name: 'Results', exact: true })).toBeVisible({ timeout: 15000 });
-  // Through all of it a game screen stayed on the page: the closed one gives way to the laid-out one with nothing between.
-  expect(await gone()).toEqual([]);
+  // Through all of it a whole game screen stayed on the page: each one gives way to the next with nothing between, and
+  // every one stands on its floor from its first frame.
+  expect(await lapses()).toEqual([]);
   expect(keyAsked, 'the key request was not held back: has its path changed?').toBe(true);
 });

@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { defaultScene } from './art.js';
 import { plateLift } from './plate.js';
-import { validateScenes, type Scene } from './scene-manifest.js';
+import { sceneReader, type Scene } from './scene-manifest.js';
 import { sceneFilterStyle, sceneLayerStyle } from './styles.js';
 
 /**
@@ -42,16 +42,15 @@ export function SceneBackdrop({ id = defaultScene, desktop, size, backRow }: { i
   );
 }
 
+const manifest = sceneReader(() => fetch('/scenes/manifest.json').then(response => response.json() as Promise<unknown>));
+
 export function useScenes() {
-  const [scenes, setScenes] = useState<Scene[]>([]);
+  const [scenes, setScenes] = useState<Scene[]>(() => manifest.known() ?? []);
   useEffect(() => {
+    if (manifest.known()) return;
     let active = true;
-    const controller = new AbortController();
-    void fetch('/scenes/manifest.json', { signal: controller.signal })
-      .then(response => response.json())
-      .then((value: unknown) => { validateScenes(value); if (active) setScenes(value); })
-      .catch(error => { if (error.name !== 'AbortError' && active) setScenes([]); });
-    return () => { active = false; controller.abort(); };
+    void manifest.read().then(read => { if (active) setScenes(read); });
+    return () => { active = false; };
   }, []);
   return scenes;
 }
