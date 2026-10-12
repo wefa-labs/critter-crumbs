@@ -109,7 +109,7 @@ export function App() {
   /* each screen's music; a feast's pages name their own, and loading leaves playing whatever was */
   let content, music: MusicTrack | undefined;
   if (!state.ready) content = <Opening bare />;
-  else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={()=>setSettingsOpen(true)} clearError={() => setAlert('')} key={path + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={path} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
+  else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={()=>setSettingsOpen(true)} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={path} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
   else if (path === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
   else if (setupRoute) { music = screenMusic.setup; content = <SetupRoute announce={announce} key={path} burrowId={setupRoute[1]!} api={api} run={run} busy={working} />; }
