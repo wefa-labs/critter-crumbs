@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { createLocalAccount, type AccountProvider } from '@critter-crumbs/core';
-import { formatCopy, hex } from '@critter-crumbs/shared';
+import { formatDevCopy, hex } from '@critter-crumbs/shared';
 import { markRehearsalAccount } from '../app/rehearsal-accounts.js';
 import type { AppApi } from '../app/session.js';
 
@@ -16,7 +16,7 @@ export function createDevAccountProvider(api: AppApi): AccountProvider {
   }
   return {
     async discover() {
-      return await available() ? Array.from({ length: 8 }, (_, index) => ({ id: `local:${index + 1}`, name: formatCopy('dev.account', { n: index + 1 }) })) : [];
+      return await available() ? Array.from({ length: 8 }, (_, index) => ({ id: `local:${index + 1}`, name: formatDevCopy('dev.account', { n: index + 1 }) })) : [];
     },
     async connect(option) {
       if (!await available() || !/^local:[1-8]$/.test(option.id)) throw new Error('Local account unavailable');

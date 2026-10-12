@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { phaseAt, ApiClientError } from '@critter-crumbs/core';
@@ -17,6 +17,7 @@ import { GameFrame } from '../game/parts.js';
 import { Toast } from '../game/surface.js';
 import { scatteringDeadline } from './time.js';
 import { Gathering } from './gathering.js';
+import { Invite } from './invite.js';
 const PublicResults = lazy(() => import('./public-results.js'));
 const Results = lazy(() => import('./results.js'));
 /** Scattering closed with the scatter screen open: the screen stops and the circle falls asleep (flow 41) for a moment before the feast is laid out. */
@@ -26,7 +27,7 @@ function FeastTop({ feast, now }: { feast: PublicFeast; now: number }) {
   useEffect(() => setHost(document.getElementById('feast-header')), []);
   return host ? createPortal(<div className="feast-top"><p>{formatCopy('arrive.burrow', { burrowName: feast.burrowName, n: feast.targets.length })}</p><span className="chip">{copy[phaseCopy[phaseAt(feast, now)]]}</span><DeadlineStrip feast={feast} now={now} /></div>, host) : null;
 }
-export function FeastRoute({ id, api, me, connect, run, busy, announce, settings, path, account, clearError, onProfile }: { id: string; api: AppApi; me: Me | null; connect: () => void; run: RunAction; busy: boolean; announce: (text: string) => void; settings: GameSettings; path: string; account: () => Account | null; clearError: () => void;onProfile:()=>void }) {
+export function FeastRoute({ id, api, me, connect, run, busy, announce, settings, path, account, clearError, onProfile, sound }: { id: string; api: AppApi; me: Me | null; connect: () => void; run: RunAction; busy: boolean; announce: (text: string) => void; settings: GameSettings; path: string; account: () => Account | null; clearError: () => void;onProfile:()=>void; /** the Music toggle, for someone who has not connected */ sound: ReactNode }) {
   const resource = useResource<PublicFeast | MemberFeast>(api, `/api/feasts/${id}`, (previous, next) => !isMemberFeast(previous) || isMemberFeast(next)), trusted = useTrustedTime(api);
   const phase = resource.data ? phaseAt(resource.data, trusted ?? resource.data.serverNow) : undefined;
   useEffect(() => { if (resource.data && phase !== resource.data.phase) resource.refresh(); }, [phase, resource.data?.phase]);
@@ -47,7 +48,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   const refreshFailure = resource.error ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
   useEffect(() => { if (refreshFailure) announce(refreshFailure); }, [refreshFailure]);
   useMusic(feastPageMusic(resource.data, phase, !!me));
-  if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} />;
+  if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} bare />;
   const feast = resource.data, now = trusted ?? feast.serverNow;
   const props = { api, run, busy, refresh: resource.refresh, announce };
   /* one element in one place, so the scatter screen stays mounted as scattering closes under it */
@@ -58,7 +59,8 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   else if (phase === 'cancelled') content = <p>{copy['feast.cancelled']}</p>;
   else if (phase === 'void') content = <p>{formatCopy('feast.tooFew', { feastTitle: feast.title })}</p>;
   else if (phase === 'feast' && feast.aggregatePublic && !isMemberFeast(feast)) content = <Suspense fallback={<h1>{copy['results.title']}</h1>}><PublicResults feast={feast} settings={settings} announce={announce}/></Suspense>;
-  else if (!isMemberFeast(feast) || !me) content = me ? <section><h2>{copy['burrow.unknown.title']}</h2><p>{formatCopy('burrow.unknown.body', { burrowName: feast.burrowName, shortAddress: shortAddress(me.address) })}</p></section> : <><p>{copy['arrive.explainer']}</p><button onClick={connect}>{copy['arrive.cta']}</button><p>{copy['arrive.asleep']}</p><PortraitGrid feast={feast} /></>;
+  else if (!me) return <Invite feast={feast} now={now} connect={connect} sound={sound} />;
+  else if (!isMemberFeast(feast)) content = <section><h2>{copy['burrow.unknown.title']}</h2><p>{formatCopy('burrow.unknown.body', { burrowName: feast.burrowName, shortAddress: shortAddress(me.address) })}</p></section>;
   else if (phase === 'draft') content = <><DraftSummary feast={feast} /><FeastActions feast={feast} me={me} {...props} />{feast.kind === 'options' ? <Gathering feast={feast} me={me} {...props} /> : <PortraitGrid feast={feast} />}</>;
   else if (phase === 'gathering') content = <><Gathering feast={feast} me={me} {...props} /><FeastActions feast={feast} me={me} {...props} /></>;
   else if (phase === 'scattering') content = scatterScreen ? scatter(false) : <Reveal feast={feast} viewer={me.address} settings={settings} announce={announce} />;

@@ -14,20 +14,7 @@ export function Toast({ children }: { children: ReactNode }) {
   return <div className="game-toast">{children}</div>;
 }
 
-/** In a sheet, pushes what follows it to the foot. */
-export const Grow = () => <div className="sheet-grow" />;
-
-/** A notice inside a sheet: a leaf beside the line, or a cloud when something is not right yet. Not a live region. */
-export function SheetNotice({ trouble = false, children }: { trouble?: boolean; children: ReactNode }) {
-  return trouble
-    ? <div className="sheet-notice"><GameIcon name="cloud" /><span>{children}</span></div>
-    : <div className="sheet-notice"><GameIcon name="leaf" /><span>{children}</span></div>;
-}
-
-/** Three bobbing crumbs while the feast is laid out. */
-export function Loader({ crumb }: { crumb: ReactNode }) {
-  return <div className="sheet-loader" aria-hidden="true">{[0, 1, 2].map(index => <span key={index}>{crumb}</span>)}</div>;
-}
+export { Grow, Loader, SheetNotice } from './sheet-parts.js';
 
 /**
  * The signing step: a sheet from the bottom on the phone, a centred card on desktop. Native <dialog>, opened modally

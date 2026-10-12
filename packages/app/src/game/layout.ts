@@ -1,6 +1,8 @@
 import { copy, CIRCLE_FEEL, PILE_RULE } from '@critter-crumbs/shared';
 import type { PortraitExtent } from '../portraits/metrics.js';
 import type { SceneTreatment, Surface } from './composition.js';
+import { moundSize } from './mound-size.js';
+export { moundSize };
 
 /**
  * Where everything in the circle goes, ported from the scatter review page (geometry, slotAt, huddleAt, layoutRing)
@@ -48,7 +50,6 @@ export function hitRect(rect: Rect, min = 44): Rect {
 }
 export function shortName(name: string, limit = 10) { return name.length > limit ? name.slice(0, limit - 1) + '…' : name; }
 const nameWidth = (name: string) => [...name].reduce((width, ch) => width + (/[MW@]/.test(ch) ? 11 : /[ilj1 .]/.test(ch) ? 4 : 8), 0);
-export function moundSize(n: number) { let rows = 0; while (rows * (rows + 1) / 2 < n) rows++; return { rows, width: Math.max(1, rows) * 5.2 + 8, height: Math.max(1, rows) * 3.4 + 9 }; }
 
 /**
  * A name tag's type and frame (.spot .tag): 14 px with 11 + 10 px of padding, 12 px and 9 + 8 on a crowded phone,
@@ -69,6 +70,15 @@ function geometry(W: number, floor: number, n: number, desktop: boolean, grown: 
   }
   const crowd = (n > 8 ? 0.8 : n > 6 ? 0.94 : 1) * growth;
   return { u: 1, cx: W / 2, cy: floor * (n > 8 ? 0.475 : n > 6 ? 0.455 : 0.45), rx: W * 0.34, ry: floor * (n > 8 ? 0.32 : n > 6 ? 0.29 : 0.28), back: CIRCLE_FEEL.phone.back * crowd, front: CIRCLE_FEEL.phone.front * crowd, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus, ppu: 3.4, maxHeap: 150 };
+}
+
+/**
+ * How far down the scene the scattering circle's back row stands, in pixels from the scene's top: the highest feet a
+ * burrow of this size puts on the floor, grown at the feast or not. A painted plate's wall ends above it (game/plate.ts).
+ */
+export function circleBackRow(viewport: { width: number; height: number }, count: number) {
+  const desktop = viewport.width >= DESKTOP_MIN_WIDTH, W = viewport.width - (desktop ? sidePanelWidth(viewport.width) : 0), floor = viewport.height - HEADER_HEIGHT - DOCK_HEIGHT;
+  return Math.min(...[false, true].map(grown => { const geo = geometry(W, floor, count, desktop, grown); return geo.cy - geo.ry; }));
 }
 
 /** The bottom inset each surface takes from the scene. */

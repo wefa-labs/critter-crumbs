@@ -490,6 +490,29 @@ PR #31 (`phase-4/design-settle`, a draft since 2026-09-24) proposed six design s
 | D19, the signing wording and the heap as a scaled mound | The wording is unchanged and the screens page uses it, but only the council can confirm it reads clearly; the heap question is reopened as Exact or Proportional (§14) | DQ3 kept open; DQ4, reworded |
 | DQ5, when version 2 lands | Its first answer was "before the rehearsal"; the Technical Spec's rehearsal window (28 Sep to 2 Oct) has passed, and nothing in the repository records the rehearsal | DQ5, reworded: before or after the October feast |
 
+## 26. The floor plates, painted (2026-10-11)
+
+Asked for after using the live app: "are we able to generate better background images for the gameplay that has more of a floor and wall at the time building off the background images we currently have? If you are able to use chatgpt/codex image generator that would be great or whichever best image generator you have access to." The Window and Dusk scenes now have a plate for the phone and one for desktop; the recipe, the words sent and the takes shipped are in `docs/explorations/floor-plates`.
+
+**What §22 had wrong.** It gave the wall the top fifth of the scene, straight across (17 % on the phone, 20 % on desktop). The circle was laid out first, and its back row stands about 14 % down the phone's scene and 22 % down the desktop's, so the first plate painted to §22 stood three critters on the wall: one in the round opening, one on the steps, one against the shelf. Two changes came of it:
+
+- **The wall is an arch.** The critters either side of the back row stand lower than it, so a wall that follows the circle can be low in the middle and tall in the corners. That is a round burrow chamber seen from above, which suits the place, and it leaves the corners for the roots, the shelf and the table.
+- **The app raises the plate.** The back row is higher on a short screen than a tall one (a phone inside another app's browser is the common short one), so no single painting fits every screen. Each plate records where its wall ends in the middle (`wallFoot`), and the app raises it until that line is 8 px above the back row (`packages/app/src/game/plate.ts`). More of the top of the wall leaves a short screen; the floor always meets the feet.
+
+**The tool.** §22 put Midjourney first and expected Afolabi to paint. He asked for the Codex image generator, and it did the work: the image tool built into OpenAI's Codex CLI, given the scene's own painting and a rough block-in of the layout drawn with flat shapes. What it showed:
+
+| Observation | Consequence |
+|---|---|
+| One reference painting is enough for it to hold the hand: the ink line, the hatching, the cel shadows, the colours | No style model or second tool was needed |
+| It follows a block-in's arrangement but paints the wall and the props about half as tall again as drawn | Raising the plate absorbs it; words alone ("a tenth of the image") do not |
+| Asked for a 1024 × 2048 portrait it returned 887 × 1774; asked for 1536 × 1024 it returned that | A phone plate is 1 : 2 as §22 has it. A desktop plate is 3 : 2, not §22's 16 : 9, which wastes less on a scene that is 1.2 to 1.5 wide |
+| A take arrives in about a minute | Nine were painted; four ship |
+| Without a block-in the round opening lands in the middle of a tall wall, as in the painting | Every shipped take used one |
+
+**Measured** in Chrome at true size on the scattering screen, by reading the plate's box and every critter's foot line: at 390 × 844, 390 × 664, 375 × 667, 430 × 932, 900 × 700, 1280 × 800 and 1920 × 1080, with 4, 7 and 10 critters, in both scenes, the wall ends at least 7 px above the highest feet and the plate covers the scene (`tests/screens/foundations.spec.ts`). Looked at, not measured: statements open, the feast, the results and the dark look, on the phone and at 1280 × 800.
+
+**Not done.** The Entrance scene, which the live game does not show. The launcher and the screens with a sheet, which still show the whole paintings; their critters stand on the paintings' floors only roughly, as §23 says. A real phone. And §22's condition stands: a paid plan for anything that ships, which is Afolabi's to confirm for the account the plates were painted on.
+
 ## Appendix A — the art direction, verbatim (Afolabi, 2026-10-02)
 
 Given in answer to "Which existing game UIs are closest to the bar you want?". Afolabi also answered yes to standing the critters in the illustrated burrow and yes to redrawing them to match the style.

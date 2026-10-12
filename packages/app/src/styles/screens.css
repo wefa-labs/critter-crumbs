@@ -1,0 +1,117 @@
+/* The screens around the core game, ported from the flow page (docs/explorations/app-screens): the launcher, arriving
+   by a link, the first steps behind "How it works", and choosing how to connect. They stand in the core game's shell
+   (.core-game) and use its controls; sizes written in the design's pixels scale with --u, one design pixel here. */
+
+/* ------------------------------------------------------------------ the wordmark, in its own face (Grandstander Black);
+   until the face arrives, and wherever it cannot, the system's heaviest sans stands in */
+@font-face { font-family:Grandstander; font-weight:900; font-display:swap; src:url(/fonts/grandstander-wordmark.woff2) format('woff2'); }
+.wordmark { margin:0; font-family:var(--cc-font-wordmark); font-weight:900; letter-spacing:-.01em; line-height:1.1; white-space:nowrap; }
+
+/* ------------------------------------------------------------------ a painted floor: the painting under the look's
+   wash, with critters, heaps and pods standing on it by their feet */
+.scene-paint { position:absolute; inset:0; background-size:cover; background-position:center 55%; filter:var(--cc-scene-filter); }
+.scene-paint[data-painting="window"] { background-image:url(/scenes/window.webp); }
+.scene-paint[data-painting="dusk"] { background-image:url(/scenes/dusk.webp); }
+.floor-critter, .floor-prop { position:absolute; left:calc(var(--x) * 1%); top:calc(var(--y) * 1%); width:calc(var(--size) * var(--u)); line-height:0; }
+.floor-critter { translate:-50% -93.3%; }
+.floor-critter[data-face="left"] .stage { transform:scaleX(-1); }
+.floor-prop { translate:-50% -100%; pointer-events:none; }
+.floor-prop svg { display:block; width:100%; height:auto; overflow:visible; }
+.floor-caption { position:absolute; left:50%; bottom:34px; translate:-50% 0; width:max-content; max-width:calc(100% - 40px); padding:6px 12px; border-radius:var(--cc-radius-pill); background:color-mix(in srgb, var(--cc-bg) 90%, transparent); font-size:var(--cc-text-sm); font-weight:700; line-height:1.4; text-align:center; }
+/* Critters breathe and blink, as on the review pages; sleepers breathe slower. The breath scales the finished drawing
+   from its feet, which the browser does without drawing the critter again: a painted critter is costly to draw, and
+   redrawing the launcher's four on every frame took more than a whole processor (docs/decisions.md, 2026-10-11).
+   Only the blink redraws, for a moment. */
+.floor-critter .portrait { transform-origin:50% 93.3%; will-change:scale; animation:floor-breathe 3.8s ease-in-out infinite; }
+.floor-critter .portrait[data-asleep="true"] { animation-duration:5.2s; }
+.floor-critter .portrait__eye { transform-box:fill-box; transform-origin:center; animation:floor-blink 6.5s infinite; }
+.floor-critter:nth-child(odd) .portrait, .floor-critter:nth-child(odd) .portrait__eye { animation-delay:-2.3s; }
+@keyframes floor-breathe { 50% { scale:1.012 1.025; } }
+@keyframes floor-blink { 0%, 93%, 100% { scale:1 1; } 95.5% { scale:1 .08; } }
+@media (prefers-reduced-motion:reduce) { .floor-critter .portrait, .floor-critter .portrait__eye { animation:none; } }
+html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor-critter .portrait__eye { animation:none; }
+
+/* ------------------------------------------------------------------ the Music toggle: a round icon button; off, the
+   note is struck through */
+.music-button { position:relative; width:44px; height:44px; min-height:44px; flex:none; display:grid; place-items:center; padding:0; border-radius:50%; border:var(--cc-border-strong); background:var(--cc-bg); color:var(--cc-text); box-shadow:var(--cc-shadow-1); }
+.music-button[aria-pressed="false"] .game-icon { opacity:.5; }
+.music-button[aria-pressed="false"]::after { content:''; position:absolute; left:50%; top:50%; width:27px; height:2.4px; translate:-50% -50%; rotate:-45deg; border-radius:2px; background:currentColor; box-shadow:0 0 0 1.5px var(--cc-bg); }
+
+/* ------------------------------------------------------------------ the launcher: the painting fills the screen under
+   the wordmark's plate; the sheet holds the two actions. Phone: 375 x 812 in the design. */
+.launcher { --u:clamp(.8px, min(100vw / 375, 100dvh / 812), 1.7px); }
+.launch-scene { position:relative; flex:1; min-height:0; margin-bottom:-24px; overflow:hidden; background:var(--cc-floor-base); }
+.launch-plate { position:absolute; left:50%; top:9%; translate:-50% 0; display:grid; justify-items:center; gap:4px; width:max-content; max-width:calc(100% - 40px); padding:16px 24px 18px; border-radius:24px; background:var(--cc-bg); border:var(--cc-border-strong); box-shadow:var(--cc-shadow-2); text-align:center; }
+.launch-plate .wordmark { font-size:31px; }
+.launch-plate p { color:var(--cc-text-2); text-wrap:balance; }
+.launch-sound { position:absolute; top:max(16px, env(safe-area-inset-top)); right:16px; z-index:2; }
+.launch-sheet { position:relative; z-index:1; flex:none; display:flex; flex-direction:column; align-items:center; gap:14px; padding:22px 20px max(20px, env(safe-area-inset-bottom)); background:var(--cc-bg); border-top:var(--cc-border-strong); border-radius:22px 22px 0 0; box-shadow:0 -6px 16px color-mix(in srgb, var(--cc-burrow) 12%, transparent); }
+.launch-sheet > * { max-width:380px; }
+.launch-sheet .pill, .screen-sheet .pill { min-height:52px; padding:0 24px; }
+.launch-sheet a.quiet { display:inline-flex; align-items:center; }
+/* desktop: the painting is the whole screen, the sheet a card, and the critters gather either side of it.
+   1280 x 800 in the design, its critters half as large again as the phone's. */
+@media (min-width:900px) {
+  .launcher { --u:calc(1.5 * clamp(.7px, min(100vw / 1280, 100dvh / 800), 1.5px)); --card:420px; }
+  .launch-scene { position:absolute; inset:0; margin:0; }
+  .launch-plate { top:12%; padding:22px 36px 24px; }
+  .launch-plate .wordmark { font-size:44px; }
+  .launch-sound { top:20px; right:28px; }
+  .launch-sheet { position:absolute; left:50%; bottom:56px; translate:-50% 0; width:var(--card); padding:24px; border:var(--cc-border-strong); border-radius:24px; box-shadow:var(--cc-shadow-2), 0 18px 40px color-mix(in srgb, var(--cc-burrow) 22%, transparent); }
+  /* each stands at its distance from the card's edge, and never nearer the screen's edge than 4 px */
+  .launch-scene .floor-critter, .launch-scene .floor-prop { --half:calc(var(--size) * var(--u) / 2 + 4px); left:clamp(var(--half), calc(50% + var(--side) * (var(--card) / 2 + var(--beside) * var(--u) / 1.5)), calc(100% - var(--half))); }
+}
+
+/* ------------------------------------------------------------------ a screen whose words are in a sheet: under the 64 px
+   header, the painted floor and the sheet rising 24 px over its foot; on desktop the sheet is the side panel. The
+   screen gives the sheet's height (--sheet-h) and the height that leaves the floor on the design's phone (--floor-h);
+   a short phone gets a shorter sheet. Desktop: the floor is 860 x 732 in the design. */
+.sheet-screen { --sheet:min(var(--sheet-h), 58dvh); --u:clamp(.6px, min(100vw / 375, (100dvh - 40px - var(--sheet)) / var(--floor-h)), 1.7px); position:relative; flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; }
+.screen-floor { position:relative; flex:1; min-height:0; margin-bottom:-24px; overflow:hidden; background:var(--cc-floor-base); }
+.screen-sheet { position:relative; z-index:1; flex:none; height:var(--sheet); display:flex; flex-direction:column; gap:14px; padding:22px 20px max(20px, env(safe-area-inset-bottom)); background:var(--cc-bg); border-top:var(--cc-border-strong); border-radius:22px 22px 0 0; box-shadow:0 -6px 16px color-mix(in srgb, var(--cc-burrow) 12%, transparent); overflow-y:auto; overscroll-behavior:contain; }
+.screen-sheet > * { flex:none; }
+.screen-sheet h1 { margin:0; font-size:var(--cc-text-xl); line-height:1.25; letter-spacing:-.01em; }
+@media (min-width:900px) {
+  .sheet-screen { --panel:clamp(400px, 25vw, 480px); --u:calc(1.5 * clamp(.6px, min((100vw - var(--panel)) / 860, (100dvh - 64px) / 732), 1.5px)); flex-direction:row; }
+  .screen-floor { margin:0; }
+  .screen-floor .floor-caption { bottom:24px; }
+  .screen-sheet { width:var(--panel); height:auto; gap:16px; padding:32px 32px 28px; border-top:0; border-left:1px solid var(--cc-line); border-radius:0; box-shadow:none; }
+}
+
+/* ------------------------------------------------------------------ arriving by a link: what the feast is for, both
+   deadlines, and one way in */
+.invite-context { font-weight:700; }
+.invite-deadlines > div { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:10px; min-height:40px; padding-block:4px; }
+.invite-deadlines > div + div { border-top:1px solid var(--cc-line); }
+.invite-deadlines b { font-size:var(--cc-text-sm); line-height:1.3; text-wrap:balance; }
+.invite-deadlines time { font-size:var(--cc-text-xs); color:var(--cc-text-2); white-space:nowrap; }
+
+/* ------------------------------------------------------------------ the first steps: the wordmark in the header, three
+   dots, and on the second step practice crumbs */
+.learn .game-header .wordmark { flex:1; font-size:22px; color:inherit; text-decoration:none; }
+.learn-dots { display:flex; gap:6px; align-items:center; }
+.learn-dots i { width:8px; height:8px; border-radius:4px; background:var(--cc-line); }
+.learn-dots i[data-on="true"] { width:22px; background:var(--cc-text); }
+.learn-count { display:flex; align-items:baseline; gap:8px; min-height:28px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.learn-count b { font-size:var(--cc-text-2xl); line-height:1; color:var(--cc-text); font-variant-numeric:tabular-nums; }
+.learn-actions { display:flex; gap:10px; align-items:center; }
+.learn-actions .pill { flex:1; }
+/* practice: each critter is a button the size of its drawing; a crumb hops to it from the heap */
+.practice-hit { position:absolute; inset:0; width:100%; min-width:44px; min-height:44px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; touch-action:manipulation; }
+.practice-hit:active { translate:none; }
+.core-game .practice-hit:focus-visible { outline:2px solid var(--cc-text); outline-offset:2px; box-shadow:none; border-radius:50%; }
+.practice-crumb { position:absolute; left:0; top:0; z-index:3; width:20px; height:20px; margin:-10px 0 0 -10px; line-height:0; pointer-events:none; }
+.practice-crumb svg { width:100%; height:100%; overflow:visible; }
+
+/* ------------------------------------------------------------------ choosing how to connect: the game's dialog, with
+   one row for each app the browser offers */
+.connect-option { display:grid; grid-template-columns:36px minmax(0, 1fr) auto; gap:12px; align-items:center; justify-content:normal; width:100%; min-height:60px; padding:8px 14px; border:var(--cc-border-strong); border-radius:16px; background:var(--cc-bg); color:var(--cc-text); box-shadow:none; font-weight:700; text-align:left; }
+.connect-option .game-icon { color:var(--cc-text-2); }
+.connect-glyph { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--cc-text); color:var(--cc-bg); font-weight:800; object-fit:cover; }
+.connect-sheet .quiet { justify-self:center; }
+/* a long list of apps scrolls inside the sheet and never pushes its title off the screen */
+dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
+
+/* ------------------------------------------------------------------ while the session is read, a screen's code arrives
+   or a route's data is on its way: three bobbing crumbs, filling the screen or waiting under the page's header */
+.opening { display:flex; min-height:40dvh; align-items:center; justify-content:center; }

@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { generateCritter, ApiClientError } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
+import { CrumbGlyph } from '../game/mound.js';
+import { Loader } from '../game/sheet-parts.js';
 import { disposePortrait } from '../portraits/index.js';
 import { paintCritter } from '../portraits/painter.js';
 import { critterVersion } from '../portraits/version.js';
@@ -20,9 +22,17 @@ export function Page({ title, children, context, screen, primary = true }: { tit
   useEffect(() => { document.title = context ? formatCopy('app.contextTitle', { screen: screen ?? title, burrow: context }) : formatCopy('app.pageTitle', { title }); document.getElementById('content')?.focus(); document.querySelector<HTMLElement>('[data-initial-focus="true"]')?.focus(); }, [title, context, screen]);
   return <>{primary ? <h1>{title}</h1> : <p className="feast-title">{title}</p>}{children}</>;
 }
-/** A route whose data has not arrived: the loading title, or the outage notice with a retry. Error copy never becomes a page title. */
-export function PendingPage({ error, retry }: { error: unknown; retry: () => void }) {
-  return <Page title={error ? copy['app.unavailable'] : copy['app.loading']}>{error ? <><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></> : null}</Page>;
+/**
+ * While the session is read, a screen's code arrives or a route's data is on its way: three bobbing crumbs. `bare`
+ * fills the screen, for a moment when it is not yet known what the screen will be; otherwise the crumbs wait under the
+ * page's own header.
+ */
+export function Opening({ bare = false }: { bare?: boolean }) {
+  return <div className={bare ? 'core-game opening' : 'opening'}><Loader crumb={<CrumbGlyph />} /><p className="sr-only">{copy['app.loading']}</p></div>;
+}
+/** A route whose data has not arrived: the bobbing crumbs, or the outage notice with a retry. Error copy never becomes a page title. */
+export function PendingPage({ error, retry, bare = false }: { error: unknown; retry: () => void; bare?: boolean }) {
+  return error ? <Page title={copy['app.unavailable']}><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></Page> : <Opening bare={bare} />;
 }
 export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0 }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number }) {
   const host = useRef<HTMLDivElement>(null);
