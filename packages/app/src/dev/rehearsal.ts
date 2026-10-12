@@ -14,5 +14,5 @@ export async function scatterRehearsal(index:number,feastId:string){
  const eligible=feast.targets.map((target,i)=>({target,i})).filter(({target})=>target.ownerAddress?.toLowerCase()!==account.address.toLowerCase());
  const amounts=feast.targets.map(()=>0);let left=feast.crumbsPerCritter;
  eligible.forEach(({i},position)=>{amounts[i]=position===eligible.length-1?left:Math.floor(feast.crumbsPerCritter/eligible.length);left-=amounts[i]!;});
- const scatter=createScatterSession({api,feast,viewer:account.address,sign:(amounts,now,latest)=>signScatter(api,account,latest,amounts,now)});scatter.edit(amounts);await scatter.submit();return scatter.snapshot().receipt;
+ const scatter=createScatterSession({api,feast,viewer:account.address,sign:(amounts,now,latest)=>signScatter(account,latest,amounts,now)});scatter.edit(amounts);await scatter.submit();return scatter.snapshot().receipt;
 }

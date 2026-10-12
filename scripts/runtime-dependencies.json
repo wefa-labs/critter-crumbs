@@ -87,7 +87,9 @@
     "sourceNotice": null,
     "noticeSha256": "a9906885a9ec1c991ee23d5978d9d7b4329f94c98217575f215d359d7e05ab4c",
     "gzipArchiveBytes": 286989,
-    "integrity": "sha512-xqfIa+hiYUE2VpeFeTvRmCZBPxkmmc1Qyl508Qg3hEkqLjL3qxuaciinYuFM3I5KJXjYBnySzY8DA5yNvHZwFw=="
+    "integrity": "sha512-xqfIa+hiYUE2VpeFeTvRmCZBPxkmmc1Qyl508Qg3hEkqLjL3qxuaciinYuFM3I5KJXjYBnySzY8DA5yNvHZwFw==",
+    "patch": "patches/@shutter-network%2Fshutter-sdk@0.0.2.patch",
+    "patchSha256": "449f9cd040f0fc931cb3f134039c7ed6c5e7bccff91132299800dcdfa340352b"
   },
   {
     "name": "@neondatabase/serverless",

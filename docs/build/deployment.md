@@ -1,8 +1,8 @@
 # Deployment
 
-## Live now: production on testnet
+## Production on testnet
 
-From 8 October 2026, production runs on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
+Production is set up to run on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). **It has not been deployed yet.** On 10 October 2026 the project's only deployment was the old repository's first commit, and the address answered 404. Until that day the app could not have run there either: the production bundle was blank under the page policy, could not connect, and could not scatter or open a feast (`docs/decisions.md`, 9 and 10 October). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
 
 | Variable (Production) | Value |
 |---|---|
@@ -45,7 +45,7 @@ These are Yousra's notes from 8 October.
 ## Moving production to mainnet
 
 1. Get the mainnet API key from the Shutter team. Confirm the active Gnosis registry, key broadcast and registrant ([#18](https://github.com/wefa-labs/critter-crumbs/issues/18); see the eon-key mismatch in [shutter-setup.md](../research/shutter-setup.md)).
-2. Make the app's EAS chain one setting. `packages/app/src/app/app.tsx`, `packages/app/src/crypto/scatter.ts`, `packages/app/src/crypto/feast.ts` and `packages/app/src/app/result-recorder.ts` hard-code Base Sepolia. On mainnet, ballots would be signed for the wrong chain and every scatter rejected.
+2. Make the app's EAS chain one setting. `packages/app/src/app/app.tsx`, `packages/app/src/crypto/scatter.ts`, `packages/app/src/crypto/feast.ts` and `packages/app/src/app/result-recorder.ts` hard-code Base Sepolia. On mainnet, ballots would be signed for the wrong chain and every scatter rejected. `packages/app/src/crypto/timelock.ts` names Shutter's Chiado network in the same way; it decides only where the page asks for the key when the store is down.
 3. Register both schemas on Base (`--chain 8453`), and fund whoever records results.
 4. Start production on a fresh Neon database, migrated. Feasts registered on Chiado cannot be released by the mainnet service.
 5. Set the production variables:

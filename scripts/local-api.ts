@@ -9,8 +9,16 @@ import { readFile, writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createLocalResultChain, type LocalResultTransaction } from './local-result-chain.js';
 import { localData } from './local-data.js';
+import { createLocalShutterTimelock } from './local-shutter.js';
 const data = await localData(), clock = createServerClock(data.offset, data.saveOffset);
-const timelock = mockServerTimelock(data.db, clock.now, data.mockSecret);
+// LOCAL_TIMELOCK=shutter puts local keypers with real keys in Shutter's place, so a production build, which never
+// uses the mock, can run a whole feast offline. The default is the mock the development build rehearses on.
+const timelock = process.env.LOCAL_TIMELOCK === 'shutter'
+  ? createLocalShutterTimelock({ secret: data.mockSecret, clock: clock.now, async lookup(identity) {
+    const [row] = await data.db.query('select id,scattering_ends_at from feasts where shutter_identity=$1', [Buffer.from(identity.slice(2), 'hex')]);
+    return row ? { feastId: String(row.id), decryptionTimestamp: new Date(row.scattering_ends_at as string | number | Date).getTime() } : null;
+  } })
+  : mockServerTimelock(data.db, clock.now, data.mockSecret);
 const eas: EasConfig = { chainId: 84532, address: '0x4200000000000000000000000000000000000021', ballotSchemaUid: schemaUID(ballotSchema) };
 const resultPath=join(data.directory,'result-transactions.json');
 let records:LocalResultTransaction[]=[];

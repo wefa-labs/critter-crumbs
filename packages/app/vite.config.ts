@@ -58,10 +58,13 @@ export default defineConfig(({ command }) => ({
         manualChunks(id) {
           const file = id.replaceAll('\\', '/');
           if (/\/src\/three\//.test(file) || /\/node_modules\/(?:three\/|@react-three\/)/.test(file)) return 'three';
-          // viem's own dependencies and the account code built on viem stay in viem's chunk. Left to Rollup they share
-          // a second chunk that viem imports and that imports viem back, and that pair cannot load in the order the app
-          // asks for it: connecting threw before the wallet was ever asked (scripts/build-policy.mjs refuses such a ring).
-          if (/\/src\/crypto\//.test(file) || /\/packages\/core\/(?:src|dist)\/account\//.test(file) || /\/node_modules\/(?:viem|@shutter-network|abitype|ox|@noble)\//.test(file)) return 'crypto';
+          // viem's and Shutter's own dependencies, and every part of core built on viem, stay in one chunk with the
+          // code that calls them. Left to Rollup, the parts in between land in a second chunk that the first imports
+          // and that imports it back, and that pair cannot load in the order the app asks for it: connecting threw
+          // before the wallet was ever asked (scripts/build-policy.mjs refuses such a ring). The module that opens a
+          // feast is loaded only from here too. What the shell needs from core (the generator, phases, the API
+          // client) uses none of it and stays out.
+          if (/\/src\/(?:crypto\/|app\/feast-session\.)/.test(file) || /\/packages\/core\/(?:src|dist)\/(?:account\/|timelock\/|eas\/|tally\/|publication\.|target-id\.)/.test(file) || /\/node_modules\/(?:viem|@shutter-network|abitype|ox|@noble|buffer|base64-js|ieee754|browser-or-node)\//.test(file)) return 'crypto';
         },
       },
     },

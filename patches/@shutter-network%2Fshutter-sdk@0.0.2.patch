@@ -1,0 +1,59 @@
+diff --git a/node_modules/@shutter-network/shutter-sdk/.bun-tag-e99bbb5144fdee5e b/.bun-tag-e99bbb5144fdee5e
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/index.js b/dist/index.js
+index ef3f74923ff46d98e67571da62f79d3f727e57be..856e8eade425e7da5893a766b27dbed00f043b2f 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2716,7 +2716,6 @@ module.exports = __toCommonJS(index_exports);
+ // src/crypto/crypto.ts
+ var import_buffer = require("buffer");
+ var import_viem = require("viem");
+-var import_lodash = __toESM(require("lodash"));
+ 
+ // src/crypto/get-blst.ts
+ var import_browser_or_node = require("browser-or-node");
+@@ -2744,7 +2743,9 @@ if (import_browser_or_node.isBrowser) {
+ }
+ 
+ // src/crypto/crypto.ts
+-var { zip } = import_lodash.default;
++// Patched for Critter Crumbs: the one lodash function used here, written out. Importing lodash brought all of it into
++// the page, with a `Function('return this')` that the page's Content-Security-Policy forbids.
++var zip = (first, second) => Array.from({ length: Math.max(first.length, second.length) }, (_, index) => [first[index], second[index]]);
+ var blsSubgroupOrderBytes = [
+   115,
+   237,
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 114d51992116d2d67641836cc12b4d25b2c3edfa..0e284c3befc36ef2dd186018efcf062d35c7116e 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -3,7 +3,6 @@ import "./chunk-3GDQP6AS.mjs";
+ // src/crypto/crypto.ts
+ import { Buffer } from "buffer";
+ import { hexToBytes, keccak256, bytesToBigInt, bytesToHex, numberToBytes } from "viem";
+-import pkg from "lodash";
+ 
+ // src/crypto/get-blst.ts
+ import { isBrowser, isNode } from "browser-or-node";
+@@ -25,13 +24,18 @@ if (isBrowser) {
+     return window.blst;
+   };
+ } else if (isNode) {
+-  getBlst = () => import("./blst-PVOSOVMN.mjs").then((module) => module.default);
++  // Patched for Critter Crumbs: this branch imported a second copy of the curve library, built for Node. It could not
++  // load there (it needs require, which a module build lacks), and a bundler that followed the import put the copy in
++  // the page, where it ran as soon as the chunk loaded and looked for its WebAssembly file beside the page's address.
++  getBlst = async () => { throw new Error("In Node, load shutter-sdk through its CommonJS build."); };
+ } else {
+   throw new Error("platform not supported.");
+ }
+ 
+ // src/crypto/crypto.ts
+-var { zip } = pkg;
++// Patched for Critter Crumbs: the one lodash function used here, written out. Importing lodash brought all of it into
++// the page, with a `Function('return this')` that the page's Content-Security-Policy forbids.
++var zip = (first, second) => Array.from({ length: Math.max(first.length, second.length) }, (_, index) => [first[index], second[index]]);
+ var blsSubgroupOrderBytes = [
+   115,
+   237,
