@@ -120,7 +120,7 @@ The custom install command pins and verifies Bun 1.4.2 and disables dependency i
 
 The committed install/build/output settings are authoritative. Vercel manages Node patch versions; local verification uses 22.22.1 and Bun 1.4.2. [Build configuration](https://vercel.com/docs/builds/configure-a-build), [Node versions](https://vercel.com/docs/functions/runtimes/node-js/node-js-versions)
 
-**Plan decision:** the current plain API layout has 20 function entrypoints; Hobby permits 12. Current deployment tooling therefore requires Pro. If using Hobby, consolidate API packaging in a separate reviewed change before deployment. No paid plan has been selected or purchased here. [Function limits](https://vercel.com/docs/functions/runtimes)
+**Plan decision:** the current plain API layout has 22 function entrypoints; Hobby permits 12. Current deployment tooling therefore requires Pro. If using Hobby, consolidate API packaging in a separate reviewed change before deployment. No paid plan has been selected or purchased here. [Function limits](https://vercel.com/docs/functions/runtimes)
 
 Choose a stable staging branch URL or domain, and set `APP_ORIGIN` to that exact HTTPS origin, without a trailing slash. Use that URL for browser access. Arbitrary generated deployment URLs will fail mutation-origin checks when they differ. Automatic per-PR origins need their own reviewed configuration; do not add a wildcard. [Branch-specific variables](https://vercel.com/docs/environment-variables)
 
