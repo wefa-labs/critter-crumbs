@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { measureBundle } from '../../scripts/build-budget.mjs';
-import { refuseChunkCycles, refuseCodeFromStrings } from '../../scripts/build-policy.mjs';
+import { refuseChunkCycles, refuseCodeFromStrings, refuseGameInShell } from '../../scripts/build-policy.mjs';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -42,6 +42,7 @@ export default defineConfig(({ command }) => ({
       generateBundle(_options, bundle) {
         refuseCodeFromStrings(bundle);
         refuseChunkCycles(bundle);
+        refuseGameInShell(bundle);
         const sizes = measureBundle(bundle);
         console.log(`Gzip bytes: shell=${sizes.shell}/120000; three=${sizes.three}/250000; crypto=${sizes.crypto} (no numeric cap in §17).`);
       },

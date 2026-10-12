@@ -7,16 +7,6 @@ export const copy = {
   "gathering.assistant.copied": "Prompt copied.",
   "gathering.assistant.select": "Copying is unavailable. Select the prompt and copy it yourself.",
   "gathering.assistant.prompt": "Help me draft my statement for this feast.\nTitle: {title}\nContext: {context}\nType: {kind}\nGathering ends: {gathering}\nScattering ends: {scattering}\n\nUse only the notes I provide below. Find concrete contributions, work completed, and who benefited. Ask about anything unclear; do not invent achievements. Draft in the first person, in plain text, with at most 2,000 characters. Keep it clear and specific so the burrow can understand what I contributed. I will review and edit it before saving.\n\nMy notes:",
-  "preview.render.title": "Renderer rehearsal",
-  "preview.render.count": "Critters",
-  "preview.render.limit": "Keep at most ten meshes active",
-  "preview.render.critter": "Critter {n}",
-  "preview.render.metrics": "Renderer measurements",
-  "preview.render.pour": "Hold a pour",
-  "preview.render.stop": "Release the pour",
-  "preview.render.loss": "Lose the 3D context",
-  "preview.render.restore": "Restore the 3D context",
-  "preview.render.expand": "Expand statement",
   'results.local.cta': 'Record the rehearsal result',
   'results.local.help': 'Local Base Sepolia fixture. This exercises recording without gas or a real transaction. Any burrow member can do it.',
   'results.local.done': 'Rehearsal result recorded by {name}.',
@@ -33,21 +23,6 @@ export const copy = {
   'results.received': '{n} crumbs received',
   'results.verification': 'Result fingerprint',
   'err.publicationChanged': 'The published scatters do not match the close record, so the feast did not open on this device. Nothing of yours changed. Try again and tell the burrow if this continues.',
-  'preview.audio.title': 'Sound workshop',
-  'preview.audio.help': 'Render the sound cues silently to check their duration and peak level, then play any cue or track to hear it in the mix.',
-  'preview.audio.run': 'Check sound cues',
-  'preview.audio.pass': 'Pass',
-  'preview.audio.fail': 'Needs attention',
-  'preview.audio.pending': 'Ready to check',
-  'preview.audio.caption': 'Offline audio measurements',
-  'preview.audio.token': 'Cue',
-  'preview.audio.duration': 'Duration (ms)',
-  'preview.audio.peak': 'Peak (dB)',
-  'preview.audio.limit': 'Peak limit (dB)',
-  'preview.audio.status': 'Status',
-  'preview.audio.cues': 'Cues',
-  'preview.audio.quiet': 'Quiet',
-  'preview.audio.duck': 'Statement open',
   'err.sessionExpired': 'Connect again to save. Your changes are still here.',
   'scatter.savedWithChanges': 'Scattered. Your newer edits still need to be saved.',
   'app.contextTitle': '{screen} · {burrow} · Critter Crumbs',
@@ -61,13 +36,6 @@ export const copy = {
   "setup.option.remove": "Remove option",
   "setup.saved": "Draft saved. Review the details, then open the feast when you're ready.",
   "setup.saved.help": "These details are fixed in this draft. To change them, cancel it and start a new feast.",
-  "preview.trait.title": "World subscription workshop",
-  "preview.trait.on": "Still critters on",
-  "preview.trait.off": "Still critters off",
-  "preview.trait.absent": "Setting removed",
-  "preview.trait.change": "Change world setting",
-  "preview.trait.remove": "Remove world setting",
-  "preview.trait.mount": "Show or hide subscriber",
   "burrow.remove": "Remove from burrow",
   "burrow.remove.label": "Remove from burrow: {name}",
   "burrow.remove.title": "Remove {name}?",
@@ -80,8 +48,6 @@ export const copy = {
   "err.membershipChanged": "This membership has changed. Refresh the burrow before trying again.",
   "app.pageTitle": "{title} · Critter Crumbs",
   "app.navigation": "Main navigation",
-  "dev.account": "Rehearsal critter {n}",
-  "dev.mode": "Local rehearsal",
   "connect.title": "Choose how to connect",
   "connect.empty": "No connection is available in this browser yet.",
   "connect.injected": "This browser",
@@ -96,13 +62,6 @@ export const copy = {
   "burrow.join": "Join this burrow",
   "burrow.historical": "Past members",
   "burrow.preAdded": "Ready to join",
-  "preview.sizes": "List, reading and dialog sizes",
-  "preview.title": "Portrait workshop",
-  "preview.name": "Critter {n}",
-  "preview.body": "The same critters, from their first portrait to the feast.",
-  "preview.wake": "Wake the critters",
-  "preview.sleep": "Let the critters rest",
-  "preview.grow": "Show the feast pose",
   "session.message": "Critter Crumbs\n\nConnect as {address}\n\nNonce: {nonce}\nIssued: {issued}\nExpires: {expires}",
   "app.name": "Critter Crumbs",
   "app.tagline": "Everyone gets a handful of crumbs to share.",
@@ -343,6 +302,54 @@ export const copy = {
   "game.profile": "Your critter and settings",
   "game.share.separator": " · ",
   "game.sleep.symbol": "z",
+} as const;
+
+/**
+ * The workshops' and the local rehearsal's own strings. Nothing a member is shown draws them, so they are kept apart from
+ * `copy`: only development pages import them, and a production build leaves them out.
+ */
+export const devCopy = {
+  "preview.render.title": "Renderer rehearsal",
+  "preview.render.count": "Critters",
+  "preview.render.limit": "Keep at most ten meshes active",
+  "preview.render.critter": "Critter {n}",
+  "preview.render.metrics": "Renderer measurements",
+  "preview.render.pour": "Hold a pour",
+  "preview.render.stop": "Release the pour",
+  "preview.render.loss": "Lose the 3D context",
+  "preview.render.restore": "Restore the 3D context",
+  "preview.render.expand": "Expand statement",
+  'preview.audio.title': 'Sound workshop',
+  'preview.audio.help': 'Render the sound cues silently to check their duration and peak level, then play any cue or track to hear it in the mix.',
+  'preview.audio.run': 'Check sound cues',
+  'preview.audio.pass': 'Pass',
+  'preview.audio.fail': 'Needs attention',
+  'preview.audio.pending': 'Ready to check',
+  'preview.audio.caption': 'Offline audio measurements',
+  'preview.audio.token': 'Cue',
+  'preview.audio.duration': 'Duration (ms)',
+  'preview.audio.peak': 'Peak (dB)',
+  'preview.audio.limit': 'Peak limit (dB)',
+  'preview.audio.status': 'Status',
+  'preview.audio.cues': 'Cues',
+  'preview.audio.quiet': 'Quiet',
+  'preview.audio.duck': 'Statement open',
+  "preview.trait.title": "World subscription workshop",
+  "preview.trait.on": "Still critters on",
+  "preview.trait.off": "Still critters off",
+  "preview.trait.absent": "Setting removed",
+  "preview.trait.change": "Change world setting",
+  "preview.trait.remove": "Remove world setting",
+  "preview.trait.mount": "Show or hide subscriber",
+  "dev.account": "Rehearsal critter {n}",
+  "dev.mode": "Local rehearsal",
+  "preview.sizes": "List, reading and dialog sizes",
+  "preview.title": "Portrait workshop",
+  "preview.name": "Critter {n}",
+  "preview.body": "The same critters, from their first portrait to the feast.",
+  "preview.wake": "Wake the critters",
+  "preview.sleep": "Let the critters rest",
+  "preview.grow": "Show the feast pose",
   "preview.game.title": "October game screens",
   "preview.game.state": "Screen state",
   "preview.game.size": "Critters in the burrow",
@@ -374,6 +381,7 @@ export const copy = {
   "preview.game.public": "Public result",
   "preview.game.recorded": "Result recorded",
 } as const;
+export type DevCopyId = keyof typeof devCopy;
 
 export type CopyId = keyof typeof copy;
 type Slots<Text extends string> = Text extends `${string}{${infer Slot}}${infer Rest}` ? Slot | Slots<Rest> : never;
@@ -389,9 +397,10 @@ const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
   'pile.remaining': { slot: 'n', one: '1 to go' },
   'err.clockSkew': { slot: 'minutes', one: "Your device clock is off by about 1 minute. Deadlines here use the feast's clock, not yours." },
 };
+const fill = (template: string, params: Record<string, string | number>) => template.replace(/\{([^}]+)\}/g, (_, key: string) => String(params[key]));
 export function formatCopy<Id extends CopyId>(id: Id, ...args: keyof CopyParams<Id> extends never ? [] : [CopyParams<Id>]): string {
   const params = (args[0] ?? {}) as Record<string, string | number>;
   const plural = plurals[id];
-  const template = plural && new Intl.PluralRules('en').select(Number(params[plural.slot])) === 'one' ? plural.one : copy[id];
-  return template.replace(/\{([^}]+)\}/g, (_, key: string) => String(params[key]));
+  return fill(plural && new Intl.PluralRules('en').select(Number(params[plural.slot])) === 'one' ? plural.one : copy[id], params);
 }
+export const formatDevCopy = (id: DevCopyId, params: Record<string, string | number>) => fill(devCopy[id], params);
