@@ -11,7 +11,7 @@ import { GameStage } from '../app/game-stage.js';
 import { Link, PortraitImage, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
-import { HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
+import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
 import { composeGame, deviceFor } from './composition.js';
 import { defaultScene } from './art.js';
 import { presentSleep } from './motion.js';
@@ -171,7 +171,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
         onPointerDown={event => { if (event.target === event.currentTarget || event.target instanceof Element && event.target.closest('.scene-backdrop')) swipe.current = { x: event.clientX, y: event.clientY }; }}
         onPointerUp={event => { if (!swipe.current) return; const dx = event.clientX - swipe.current.x, dy = event.clientY - swipe.current.y; swipe.current = null; if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) turn(dx < 0 ? 1 : -1); else onClose?.(); }}
         onPointerCancel={() => { swipe.current = null; }}>
-        <SceneBackdrop id={treatment.scene === 'dusk' ? 'dusk' : sceneId} desktop={desktop} />
+        <SceneBackdrop id={treatment.scene === 'dusk' ? 'dusk' : sceneId} desktop={desktop} size={layout.scene} backRow={circleBackRow(viewport, critters.length)} />
         <div className="scene-dusk-light" aria-hidden="true" />
         <div className="scene-feast-light" aria-hidden="true" />
         {layout.slots.map(slot => (

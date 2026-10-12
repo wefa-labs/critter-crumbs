@@ -72,6 +72,15 @@ function geometry(W: number, floor: number, n: number, desktop: boolean, grown: 
   return { u: 1, cx: W / 2, cy: floor * (n > 8 ? 0.475 : n > 6 ? 0.455 : 0.45), rx: W * 0.34, ry: floor * (n > 8 ? 0.32 : n > 6 ? 0.29 : 0.28), back: CIRCLE_FEEL.phone.back * crowd, front: CIRCLE_FEEL.phone.front * crowd, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus, ppu: 3.4, maxHeap: 150 };
 }
 
+/**
+ * How far down the scene the scattering circle's back row stands, in pixels from the scene's top: the highest feet a
+ * burrow of this size puts on the floor, grown at the feast or not. A painted plate's wall ends above it (game/plate.ts).
+ */
+export function circleBackRow(viewport: { width: number; height: number }, count: number) {
+  const desktop = viewport.width >= DESKTOP_MIN_WIDTH, W = viewport.width - (desktop ? sidePanelWidth(viewport.width) : 0), floor = viewport.height - HEADER_HEIGHT - DOCK_HEIGHT;
+  return Math.min(...[false, true].map(grown => { const geo = geometry(W, floor, count, desktop, grown); return geo.cy - geo.ry; }));
+}
+
 /** The bottom inset each surface takes from the scene. */
 function surfaceHeight(surface: Surface, desktop: boolean, H: number) {
   if (surface.kind === 'dock') return DOCK_HEIGHT;

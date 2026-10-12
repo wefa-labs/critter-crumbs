@@ -3,46 +3,19 @@
     "id": "window",
     "devices": {
       "phone": {
-        "image": "/scenes/window.webp",
-        "kind": "crops"
+        "image": "/scenes/window-plate-phone.webp",
+        "kind": "plate",
+        "aspect": 0.5,
+        "wallFoot": 0.16
       },
       "desktop": {
-        "image": "/scenes/window.webp",
-        "kind": "crops"
+        "image": "/scenes/window-plate-desktop.webp",
+        "kind": "plate",
+        "aspect": 1.5,
+        "wallFoot": 0.215
       }
     },
-    "floor": {
-      "x": 0.22,
-      "y": 0.72,
-      "w": 0.56,
-      "h": 0.28
-    },
-    "wall": {
-      "x": 0,
-      "y": 0.2,
-      "w": 1,
-      "h": 0.52
-    },
-    "cornerL": {
-      "x": 0,
-      "y": 0,
-      "w": 0.32,
-      "h": 0.55
-    },
-    "cornerR": {
-      "x": 0.66,
-      "y": 0,
-      "w": 0.34,
-      "h": 0.62
-    },
-    "lookFilter": "scene-filter",
-    "aspect": 1.7837235228539576,
-    "layers": {
-      "floor": "/scenes/window-floor.jpg",
-      "wall": "/scenes/window-wall.jpg",
-      "cornerL": "/scenes/window-corner-left.jpg",
-      "cornerR": "/scenes/window-corner-right.jpg"
-    }
+    "lookFilter": "scene-filter"
   },
   {
     "id": "entrance",
@@ -93,45 +66,18 @@
     "id": "dusk",
     "devices": {
       "phone": {
-        "image": "/scenes/dusk.webp",
-        "kind": "crops"
+        "image": "/scenes/dusk-plate-phone.webp",
+        "kind": "plate",
+        "aspect": 0.5,
+        "wallFoot": 0.135
       },
       "desktop": {
-        "image": "/scenes/dusk.webp",
-        "kind": "crops"
+        "image": "/scenes/dusk-plate-desktop.webp",
+        "kind": "plate",
+        "aspect": 1.5,
+        "wallFoot": 0.22
       }
     },
-    "floor": {
-      "x": 0.1,
-      "y": 0.75,
-      "w": 0.8,
-      "h": 0.25
-    },
-    "wall": {
-      "x": 0,
-      "y": 0.1,
-      "w": 1,
-      "h": 0.64
-    },
-    "cornerL": {
-      "x": 0,
-      "y": 0,
-      "w": 0.4,
-      "h": 0.55
-    },
-    "cornerR": {
-      "x": 0.6,
-      "y": 0,
-      "w": 0.4,
-      "h": 0.4
-    },
-    "lookFilter": "scene-filter",
-    "aspect": 1.7837235228539576,
-    "layers": {
-      "floor": "/scenes/dusk-floor.jpg",
-      "wall": "/scenes/dusk-wall.jpg",
-      "cornerL": "/scenes/dusk-corner-left.jpg",
-      "cornerR": "/scenes/dusk-corner-right.jpg"
-    }
+    "lookFilter": "scene-filter"
   }
 ]
