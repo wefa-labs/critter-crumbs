@@ -127,7 +127,8 @@ dd { margin-inline-start:0; }
 .receipt-evidence { overflow-wrap:anywhere; }
 
 
-.critter-canvas { position:fixed!important;inset:0;pointer-events:none!important;z-index:var(--cc-z-canvas); }
+.critter-canvas { position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:var(--cc-z-canvas); }
+.critter-canvas canvas { display:block; }
 
 .stage > .portrait { transition:opacity var(--cc-dur-3) var(--cc-ease-out); }
 .stage[data-mesh="ready"] > .portrait { opacity:0; }
