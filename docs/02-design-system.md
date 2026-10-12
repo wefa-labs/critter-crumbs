@@ -821,6 +821,8 @@ Simple view is a first-class mode, not an error page. It is the same app with th
 
 **Mid-session loss.** On `webglcontextlost` without restore, the canvas hides, portraits show (they were never removed from the DOM, only visually covered), `fallback.midSession` appears once as a polite notice, and every control keeps working because the controls never lived in the canvas. Scatter state is untouched.
 
+**On the game screens.** The notice lies over the top of the floor, outside the game's own layout, so nothing moves when it appears, and its retry is a quiet link. A development build draws version 2 critters, which have no 3D, so none of this shows there as served: open a development page with `?critters=1` and it is drawn as production draws it, version 1 with 3D and this fallback (`tests/e2e/fallback.spec.ts`).
+
 | Aspect | 3D | Simple view |
 |---|---|---|
 | Identity | Mesh from parameters | Portrait from the same parameters |
