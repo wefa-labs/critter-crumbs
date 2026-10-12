@@ -3,7 +3,7 @@ import { createAudio } from '../audio/index.js';
 import { useScenes } from '../game/scenes.js';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { WorldProvider, useTrait } from 'koota/react';
-import { copy, FEAST, type CopyId } from '@critter-crumbs/shared';
+import { copy, devCopy, FEAST, type DevCopyId } from '@critter-crumbs/shared';
 import { Feast, Pile, type GameSettings } from '../world/index.js';
 import { createStageRuntime, type StageRuntime } from '../sim/stage-runtime.js';
 import { GameFrame, GameScene } from '../game/parts.js';
@@ -115,12 +115,12 @@ function GalleryBody() {
   return (
     <>
       <div className="gallery-toolbar">
-        <h1>{copy['preview.game.title']}</h1>
-        <label>{copy['preview.game.state']}<select value={state} onChange={event => setState(event.target.value as GameScreenState)}>{screenStates.map(value => <option key={value} value={value}>{copy[`preview.game.${value}`]}</option>)}</select></label>
-        <label>{copy['preview.game.size']}<select value={count} onChange={event => setCount(Number(event.target.value))}>{[4, 6, 8, 10].map(n => <option key={n}>{n}</option>)}</select></label>
-        <label>{copy['preview.game.scene']}<select value={scene} onChange={event => setScene(event.target.value)}>{scenes.map(entry => <option key={entry.id} value={entry.id}>{copy[`preview.game.${entry.id}` as CopyId] ?? entry.id}</option>)}</select></label>
+        <h1>{devCopy['preview.game.title']}</h1>
+        <label>{devCopy['preview.game.state']}<select value={state} onChange={event => setState(event.target.value as GameScreenState)}>{screenStates.map(value => <option key={value} value={value}>{devCopy[`preview.game.${value}`]}</option>)}</select></label>
+        <label>{devCopy['preview.game.size']}<select value={count} onChange={event => setCount(Number(event.target.value))}>{[4, 6, 8, 10].map(n => <option key={n}>{n}</option>)}</select></label>
+        <label>{devCopy['preview.game.scene']}<select value={scene} onChange={event => setScene(event.target.value)}>{scenes.map(entry => <option key={entry.id} value={entry.id}>{devCopy[`preview.game.${entry.id}` as DevCopyId] ?? entry.id}</option>)}</select></label>
       </div>
-      <div className="gallery-frame"><div className="gallery-previews"><iframe className="gallery-phone" title={copy['preview.game.phone']} src={source} /><div className="gallery-desktop"><iframe title={copy['preview.game.desktop']} src={source} /></div></div></div>
+      <div className="gallery-frame"><div className="gallery-previews"><iframe className="gallery-phone" title={devCopy['preview.game.phone']} src={source} /><div className="gallery-desktop"><iframe title={devCopy['preview.game.desktop']} src={source} /></div></div></div>
     </>
   );
 }

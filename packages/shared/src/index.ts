@@ -1,7 +1,7 @@
 export { canonicalJSON } from './canonical.js';
 export { MAX_FEAST_TARGETS, MAX_CIPHERTEXT_BYTES } from './limits.js';
 export type * from './types.js';
-export { copy, formatCopy, type CopyId, type CopyParams } from './copy.js';
+export { copy, devCopy, formatCopy, formatDevCopy, type CopyId, type CopyParams, type DevCopyId } from './copy.js';
 export * from './feel.js';
 export { ValidationError, record, text, integer, boolean, hex, parseFeastSetup } from './validate.js';
 export { parseAddress, parseUuid, parseProfileUpdate, parseStatement, parseAllocationPayload } from './validate.js';
