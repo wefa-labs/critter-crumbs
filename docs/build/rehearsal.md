@@ -8,7 +8,7 @@ PRD §10 asks for a full dry run, start to finish, with fake critters and fake s
 
 The hosted testnet is available for rehearsal. Read-only checks confirmed the public page and session API respond, all eight database migrations are applied, the Chiado API eon key matches its finalized contract state, and both EAS schemas exist on Base Sepolia. Production uses `SHUTTER_MODE=chiado`, `EAS_CHAIN_ID=84532` and `DEV_ENDPOINTS_ENABLED=0`.
 
-Run the solo smoke feast below before inviting the group: these checks do not prove a new live registration, encrypted scatter, timed key release or result transaction. Browser rehearsal tests use the local mock stack; they cannot supply that live proof. Use fake statements and a test allocation, with at least three connected members for the people feast. Scattering needs no funds; only the public-result recorder needs Base Sepolia test ETH.
+Run the solo smoke feast below before inviting the group: these checks do not prove a new live registration, encrypted scatter or timed key release. Browser rehearsal tests use the local mock stack; they cannot supply that live proof. Use fake statements and a test allocation, with at least three connected members for the people feast. Keep “Who sees the result?” on “Burrow only”: hosted public-result recording is disabled in this build. Connecting and scattering need no funds.
 
 The app shows “Beta · Testnet” and “Still in development. Rehearsal only.” on every route. Mainnet remains blocked on the Shutter setup and coordinated chain configuration described in [moving production to mainnet](deployment.md#moving-production-to-mainnet). Keep the beta notice aligned with that migration.
 
