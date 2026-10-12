@@ -307,7 +307,7 @@ Music replaces the single quiet bed first specified here. Four loops, each a fil
 
 | Track | Plays on |
 |---|---|
-| **M1 The burrow** | The arrival page and home; a feast as someone outside the burrow sees it |
+| **M1 The burrow** | The launcher, the first steps and home; a feast as someone outside the burrow sees it |
 | **M2 The town square** | A burrow, creating one, feast setup, a draft, gathering; a cancelled or void feast |
 | **M3 Feeding time** | Scattering: the reveal, reading, scattering, saving |
 | *Quiet* | From scattering closing until the feast has played: dusk, the wait for the key, and the feast itself, whose cue is its music |
@@ -329,8 +329,11 @@ Music replaces the single quiet bed first specified here. Four loops, each a fil
 | **Music** | on | `cc.sound.music` = `"1"` | The loops of §5.5 |
 | **Still critters** | off | `cc.motion.still` = `"0"` | §3.5 motion rules and the −6 dB damping |
 | **Simple view** | off | `cc.view.simple` = `"0"` | Design System §11 |
+| **Dark mode** | the device’s | `cc.view.dark` = `"1"` or `"0"`; unset while it follows the device | Design System D26 |
 
 Persistence is per browser (`localStorage`), read before the first render so nothing plays or moves that the person turned off last time. The OS `prefers-reduced-motion` preference applies on top of these and cannot be overridden by them; *Still critters* exists so the choice is also visible in the app. The earlier `cc.sound.ambience` key is no longer read: its toggle never played anything.
+
+The toggles live in Settings, which opens once someone has connected. Before that, on the launcher, the first steps and a visitor’s header, *Music* is a button at the top right (Design System D28). It shows music as on only once it can be heard: music is on by default, but nothing plays before the first press, so a first press on the button starts the music and leaves the setting on, and only a press while sound is playing switches it off.
 
 ### 5.7 Implementation notes for the Technical Spec
 

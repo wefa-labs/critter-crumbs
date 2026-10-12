@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { refuseChunkCycles, refuseCodeFromStrings } from './build-policy.mjs';
+import { refuseChunkCycles, refuseCodeFromStrings, refuseGameInShell } from './build-policy.mjs';
 
 const chunk = (fileName, code) => ({ type: 'chunk', fileName, code });
 const asset = (fileName, source) => ({ type: 'asset', fileName, source });
@@ -33,4 +33,15 @@ test('two chunks that import each other are refused, because one of them loads b
 test('a longer ring is found, and chunks that only share a dependency pass', () => {
   assert.throws(() => refuseChunkCycles({ 'a.js': linked('a.js', ['b.js']), 'b.js': linked('b.js', ['c.js']), 'c.js': linked('c.js', ['a.js']) }), /a\.js -> b\.js -> c\.js -> a\.js/);
   refuseChunkCycles({ 'a.js': linked('a.js', ['c.js']), 'b.js': linked('b.js', ['c.js']), 'c.js': linked('c.js', []), 'style.css': asset('style.css', '') });
+});
+
+test('the game\'s runtime is refused in the app shell and welcome in a chunk a feast loads', () => {
+  const koota = { '/repo/node_modules/koota/dist/chunk-ZWIGMIL4.js': { renderedLength: 45109 } }, traits = { '/repo/packages/app/src/world/traits.ts': { renderedLength: 1283 } };
+  const entry = (imports, dynamicImports = []) => ({ type: 'chunk', name: 'index', fileName: 'index.js', isEntry: true, code: '', imports, dynamicImports, modules: {} });
+  const shared = modules => ({ type: 'chunk', name: 'shared', fileName: 'shared.js', isEntry: false, code: '', imports: [], modules });
+  assert.throws(() => refuseGameInShell({ 'index.js': entry(['shared.js']), 'shared.js': shared({ ...traits, ...koota }) }), /Koota is in the app shell \(shared\.js\)/);
+  // loaded by import() from the shell, it is the feast's to bring
+  refuseGameInShell({ 'index.js': entry([], ['shared.js']), 'shared.js': shared({ ...traits, ...koota }) });
+  // a module the bundler kept none of is not there
+  refuseGameInShell({ 'index.js': entry(['shared.js']), 'shared.js': shared({ '/repo/node_modules/koota/dist/chunk-ZWIGMIL4.js': { renderedLength: 0 } }) });
 });

@@ -2,7 +2,7 @@
 
 ## Production on testnet
 
-Production is set up to run on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). **It has not been deployed yet.** On 10 October 2026 the project's only deployment was the old repository's first commit, and the address answered 404. Until that day the app could not have run there either: the production bundle was blank under the page policy, could not connect, and could not scatter or open a feast (`docs/decisions.md`, 9 and 10 October). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
+Production runs on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). **It was first deployed on 11 October 2026, from `main` at `c86d8b1`.** Until that day the project's only deployment was the old repository's first commit, and the address answered 404. The app could not have run there before either: the production bundle was blank under the page policy, could not connect, and could not scatter or open a feast (`docs/decisions.md`, 9 and 10 October; `docs/reviews/october-qa`). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
 
 | Variable (Production) | Value |
 |---|---|
@@ -30,6 +30,17 @@ VERCEL_ORG_ID=team_iQZzdJziDgYWjwBhWcuCWjqD VERCEL_PROJECT_ID=prj_D1SyCEWvO9SpCW
 ```
 
 Without `--testnet`, the script refuses testnet settings for production.
+
+The first deployment showed two things about the command. The upload can stop part-way with `fetch failed`. Nothing is published when it does, and running the same command again sends only the files that are missing. And the build log shows `vercel-build` running again for each of the 22 function entrypoints, after the one run for the page, so a deployment takes about four minutes to build.
+
+That deployment was then checked from outside, signed out:
+
+- the page starts under its policy in Chromium and WebKit, with no breach and no request to another origin, and the policy names the real Shutter and Base origins;
+- all 22 route files answer as functions, `POST /api/burrows/:id/removals` among them;
+- a sign-in nonce is issued, so the functions reach the database, where all eight migrations are applied;
+- the development routes answer 404, and a write from another origin is refused.
+
+Nothing that needs an account was checked. The solo smoke feast in the run sheet is the first signed-in use, and the first time Shutter's keypers are asked to release a key for a feast.
 
 The Vercel project's Git connection still points at the old `Oba-One/critter-crumbs` repository, so pushes to `wefa-labs/critter-crumbs` do not deploy. Leave it that way until the CSP origins are generated in CI (§5).
 

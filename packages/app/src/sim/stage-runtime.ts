@@ -1,7 +1,7 @@
 import { critterVersion } from '../portraits/version.js';
 import type { World } from 'koota';
 import { Asleep, Delight, Identity, Mesh, Clock, Settings, createWorld, type WorldOptions, type GameSettings } from '../world/index.js';
-import { renderPortraits } from '../portraits/index.js';
+import { renderPortraits } from '../portraits/pose.js';
 import { createTickerHost } from './ticker-host.js';
 /** Long enough for a change of mood (lids, mouth, cheeks) to settle on the Clock. */
 const MOOD_CHANGE_MS = 400;

@@ -64,7 +64,9 @@ main:has(.core-game) { width:100%; max-width:none; padding:0; }
 .scene-corner.right { right:0; background-image:var(--scene-corner-right); mask-image:radial-gradient(130% 120% at 100% 0, var(--cc-text) 40%, transparent 70%); }
 .scene-wash { position:absolute; inset:0; background:var(--cc-scene-wash); }
 .scene-grain { position:absolute; inset:0; background-image:var(--cc-scene-grain); opacity:var(--cc-floor-grain-opacity); mix-blend-mode:multiply; }
-.scene-plate { background-size:cover; background-position:center top; background-repeat:no-repeat; filter:var(--scene-image-filter); }
+/* a plate is fitted from its top, so a scene of another shape loses its sides or its foot; the app raises it (an inline
+   top) until its wall ends above the circle's back row (game/plate.ts) */
+.scene-plate { position:absolute; inset:0; background-size:cover; background-position:center top; background-repeat:no-repeat; filter:var(--scene-image-filter); }
 .scene-dusk-light, .scene-feast-light { position:absolute; inset:0; pointer-events:none; }
 .scene-dusk-light { background:color-mix(in srgb, var(--cc-dusk) 40%, transparent); opacity:var(--scene-dusk, 0); }
 .scene-feast-light { background:radial-gradient(60% 50% at 50% 40%, color-mix(in srgb, var(--cc-crumb-highlight) 50%, transparent), transparent 70%); mix-blend-mode:screen; opacity:var(--scene-feast, 0); }

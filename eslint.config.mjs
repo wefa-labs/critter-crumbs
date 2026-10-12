@@ -23,4 +23,10 @@ export default [
     files: ['packages/app/src/**/*.{tsx,jsx}', 'packages/app/src/{components,screens}/**/*.{ts,js}'],
     rules: { 'critter-crumbs/copy-ids': 'error' },
   },
+  {
+    // fiber's <Canvas> registers every export of three so that any can be written as an element, and a library named
+    // whole cannot be trimmed: it put all of three in the 3D chunk (docs/decisions.md, 2026-10-12).
+    files: ['packages/app/src/**/*.{ts,tsx}'],
+    rules: { 'no-restricted-imports': ['error', { paths: [{ name: '@react-three/fiber', importNames: ['Canvas'], message: 'Mount the scene through createRoot, as three/scene.tsx does: <Canvas> keeps all of three in the 3D chunk.' }] }] },
+  },
 ];
