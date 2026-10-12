@@ -1,58 +1,58 @@
 [
   {
     "name": "react",
-    "version": "19.2.8",
+    "version": "19.3.0",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93",
-    "gzipArchiveBytes": 24799,
-    "integrity": "sha512-PWaYA1L/q9u2u7xYQi+Y3L3Yfnie7XyLeaJICV1MGD6LprsBxcAqGjYyr0eY3p+QdsA+x/Irkt4Qif8D63+Sbw=="
+    "gzipArchiveBytes": 26394,
+    "integrity": "sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog=="
   },
   {
     "name": "react-dom",
-    "version": "19.2.8",
+    "version": "19.3.0",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93",
-    "gzipArchiveBytes": 1276383,
-    "integrity": "sha512-rVprimfGBG3DR+Tq0IQG2DT5PxKth1WIGDmj5yPmlzr4YBe7uyE+Du4oVqTDXZSHGGGXRtTJEGSSePyQCMBglQ=="
+    "gzipArchiveBytes": 1409226,
+    "integrity": "sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q=="
   },
   {
     "name": "three",
-    "version": "0.185.1",
+    "version": "0.186.1",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
-    "gzipArchiveBytes": 5320348,
-    "integrity": "sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg=="
+    "gzipArchiveBytes": 4648523,
+    "integrity": "sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA=="
   },
   {
     "name": "@react-three/fiber",
-    "version": "9.7.0",
+    "version": "9.8.1",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": null,
     "sourceNotice": "docs/research/licenses/react-three-fiber-LICENSE",
     "noticeSha256": "9c35b5de7b7493a707fffe4eb23bd2f7f449153c1911f7c6eefb4e591fd5349a",
-    "gzipArchiveBytes": 508147,
-    "integrity": "sha512-EWm9FwcaOZQu/ExFW5rggoCMM1NJet5YbxVxKaOE+KSncrjU0Wx7017qSyGFvupviK89nMYGCWU3BIK4dI1clw=="
+    "gzipArchiveBytes": 555765,
+    "integrity": "sha512-GbNP4r6F/gpclFKkLGHzXcuwFWAzLyKsmrQGcDuwK3wQnwLH6F1TfGtEYjHy8OQoGsajwT19B9jtVLLjjfH09w=="
   },
   {
     "name": "@react-three/drei",
-    "version": "10.7.8",
+    "version": "10.7.9",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "2e36b208b403882158daf95cae207087bbb830db4d434a79ebafffca177244c8",
-    "gzipArchiveBytes": 472446,
-    "integrity": "sha512-rJXyuzLm2Xq0kafHuR47ajDGbOe/pEhzIr4m8E8zwzQs0iNjloFDqBwRhrXmP/w+onLeYyN3EYPFW/cwWK/4yA=="
+    "gzipArchiveBytes": 473422,
+    "integrity": "sha512-wP4Y6o58KFi+hT1zCfjJarRtPCT6WW/lo53WMiA/aCORuUvBzW916XsCtadnIB1KB+3IQNcDU5JeVh/gYb8MYw=="
   },
   {
     "name": "koota",
@@ -93,13 +93,13 @@
   },
   {
     "name": "@neondatabase/serverless",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "52d77cad9a5d509fed860399f75f0798b24d27c49be5616f8ff15a42bd98c249",
-    "gzipArchiveBytes": 131636,
-    "integrity": "sha512-r3ZZhRjEcfEdKIZnoB1RusNgvHuaBRqfCzV4Gi+5A9yUX0S4HTws/ASWqt13wL4y4I+0rqsWGdA2w7EQXHi3+Q=="
+    "gzipArchiveBytes": 135513,
+    "integrity": "sha512-tnaqgixUengZQNd9ZrS3ytQfamJzLKY8QxgqWQTNHHtB+KrFQWk77JTbbpg4RD+J3qE4eO2lVytvGDX5Kj6FdQ=="
   }
 ]

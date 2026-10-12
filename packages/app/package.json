@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",
-    "@react-three/drei": "10.7.8",
-    "@react-three/fiber": "9.7.0",
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.1",
     "koota": "0.6.6",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "three": "0.185.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "three": "0.186.1",
     "@critter-crumbs/shared": "0.0.0"
   }
 }

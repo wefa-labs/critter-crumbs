@@ -34,3 +34,16 @@ export function validateScenes(value: unknown): asserts value is Scene[] {
     if (!layers || ![layers.floor, layers.wall, layers.cornerL, layers.cornerR].every(isScenePath)) throw new TypeError('A crops scene needs its rendered layers');
   }
 }
+
+/**
+ * Reads the scenes once for the page. The first scene to draw waits on the read; every scene after it has them at its
+ * first render, so it stands on its floor from its first frame. A read that fails, or gives a manifest the app refuses,
+ * is forgotten, so the next scene to mount asks again.
+ */
+export function sceneReader(read: () => Promise<unknown>) {
+  let known: Scene[] | undefined, reading: Promise<Scene[]> | undefined;
+  return {
+    known: () => known,
+    read: () => reading ??= read().then(value => { validateScenes(value); return known = value; }).catch(() => { reading = undefined; return []; }),
+  };
+}
