@@ -47,7 +47,6 @@ const manifest = sceneReader(() => fetch('/scenes/manifest.json').then(response 
 export function useScenes() {
   const [scenes, setScenes] = useState<Scene[]>(() => manifest.known() ?? []);
   useEffect(() => {
-    if (manifest.known()) return;
     let active = true;
     void manifest.read().then(read => { if (active) setScenes(read); });
     return () => { active = false; };
