@@ -11,10 +11,11 @@ import { Launcher } from './launcher.js';
 import { MusicButton } from './music-button.js';
 import { createPressWatch } from './music-choice.js';
 import { screenMusic } from './screen-music.js';
-import { SetupRoute } from './setup.js';
 import { readDarkChoice, saveDarkChoice, showDarkChoice } from './theme.js';
 const FeastRoute=lazy(()=>import('./feast.js').then(module=>({default:module.FeastRoute})));
 const LearnRoute=lazy(()=>import('./learn.js').then(module=>({default:module.Learn})));
+/* starting a feast is a creator's occasional page, so its code arrives when it is opened */
+const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.SetupRoute})));
 import { Burrow, CreateBurrow, Home } from './burrows.js';
 import { Dialog, Field, Link, Opening, PortraitImage, displayName } from './ui.js';
 
@@ -112,7 +113,7 @@ export function App() {
   else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={()=>setSettingsOpen(true)} clearError={() => setAlert('')} key={path + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={path} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
   else if (path === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
-  else if (setupRoute) { music = screenMusic.setup; content = <SetupRoute announce={announce} key={path} burrowId={setupRoute[1]!} api={api} run={run} busy={working} />; }
+  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={path} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
   else if (path === '/burrows/new') { music = screenMusic.burrow; content = <CreateBurrow api={api} session={session} run={run} busy={working} />; }
   else if (burrow) { music = screenMusic.burrow; content = <Burrow key={path} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} announce={announce} />; }
   else { music = screenMusic.home; content = <Home me={me} api={api} />; }
