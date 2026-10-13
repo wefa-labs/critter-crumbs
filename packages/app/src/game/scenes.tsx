@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { defaultScene } from './art.js';
 import { plateLift } from './plate.js';
-import { sceneReader, type Scene } from './scene-manifest.js';
+import { otherPlateImages, sceneReader, type Scene } from './scene-manifest.js';
 import { sceneFilterStyle, sceneLayerStyle } from './styles.js';
 
 /**
@@ -15,8 +15,17 @@ import { sceneFilterStyle, sceneLayerStyle } from './styles.js';
 export function SceneBackdrop({ id = defaultScene, desktop, size, backRow }: { id?: string; desktop: boolean; size: { width: number; height: number }; backRow: number }) {
   const scenes = useScenes();
   const scene = scenes.find(entry => entry.id === id) ?? scenes[0];
-  if (!scene) return <div className="scene-backdrop" aria-hidden="true" />;
-  const device = desktop ? scene.devices.desktop : scene.devices.phone;
+  const device = scene && (desktop ? scene.devices.desktop : scene.devices.phone);
+  const floorImage = device?.kind === 'plate' ? device.image : scene?.layers?.floor;
+  useEffect(() => {
+    if (!floorImage) return;
+    let active = true;
+    void painting(floorImage).then(() => {
+      if (active) for (const image of otherPlateImages(scenes, desktop, floorImage)) void painting(image).catch(() => {});
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [scenes, desktop, floorImage]);
+  if (!scene || !device) return <div className="scene-backdrop" aria-hidden="true" />;
   const filter = sceneFilterStyle(scene.lookFilter);
   if (device.kind === 'plate') {
     return (
@@ -52,4 +61,19 @@ export function useScenes() {
     return () => { active = false; };
   }, []);
   return scenes;
+}
+
+/** Retain each image for this page, sharing in-flight loads and retrying a failed warm-up on another scene. */
+const paintings = new Map<string, { image: HTMLImageElement; ready: Promise<void> }>();
+function painting(source: string): Promise<void> {
+  const known = paintings.get(source);
+  if (known) return known.ready;
+  const image = new Image();
+  const ready = new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error());
+    image.src = source;
+  }).catch(error => { paintings.delete(source); throw error; });
+  paintings.set(source, { image, ready });
+  return ready;
 }

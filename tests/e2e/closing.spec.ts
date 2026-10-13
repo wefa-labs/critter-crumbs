@@ -15,11 +15,24 @@ async function holdKey(page: Page, feastId: string) {
   return { allow: () => allow(), asked: () => asked };
 }
 
+/** Watch the actual device painting requests before opening the game. */
+function watchPaintings(page: Page) {
+  const requested: string[] = [];
+  page.on('request', request => { const path = new URL(request.url()).pathname; if (path.startsWith('/scenes/')) requested.push(path); });
+  return async () => {
+    await expect.poll(() => requested.includes('/scenes/dusk-plate-phone.webp')).toBe(true);
+    expect(requested).toContain('/scenes/window-plate-phone.webp');
+    expect(requested.indexOf('/scenes/window-plate-phone.webp')).toBeLessThan(requested.indexOf('/scenes/dusk-plate-phone.webp'));
+    expect(requested).not.toContain('/scenes/dusk-plate-desktop.webp');
+  };
+}
+
 /* Flow page 41: "The deadline passed with the screen open: the critters fall asleep and the controls stop." Then the
    feast is laid out (flow 42) and, with the key, opens. The server clock is set a few seconds short of the deadline, so
    the screen's trusted clock reaches it while the screen is open, as it would in a real session. */
 test('the deadline passing with the scatter screen open stops it at dusk, then lays the feast out', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  const duskRequested = watchPaintings(page);
   const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'scattering' } }); expect(seed.ok()).toBe(true);
   const { feasts } = await seed.json(), feast = feasts[0];
   await page.goto(`/feasts/${feast.id}/scatter`); await connectLocal(page, 1);
@@ -27,6 +40,7 @@ test('the deadline passing with the scatter screen open stops it at dusk, then l
   // An unsaved allocation on screen: closing stops the same screen, it does not start a fresh one.
   const field = page.locator('.focus-count input'); await field.fill('7'); await field.press('Enter');
   await expect(page.locator('.crumbs-left-count')).toHaveText('93');
+  await duskRequested();
   const screen = await watchGameScreen(page), key = await holdKey(page, feast.id);
   expect((await page.request.post('/api/dev/time', { data: { now: feast.scatteringEndsAt - 4000 } })).ok()).toBe(true);
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
@@ -50,11 +64,13 @@ test('the deadline passing with the scatter screen open stops it at dusk, then l
    (docs/decisions.md, 2026-10-12). */
 test('the deadline passing with the reveal open leaves it as it is until the feast is laid out', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  const duskRequested = watchPaintings(page);
   const { played } = await listen(page);
   const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'scattering' } }); expect(seed.ok()).toBe(true);
   const { feasts } = await seed.json(), feast = feasts[0];
   await page.goto(`/feasts/${feast.id}`); await connectLocal(page, 1);
   await expect(page.getByRole('heading', { name: 'Statements are open', exact: true })).toBeVisible();
+  await duskRequested();
   const screen = await watchGameScreen(page), key = await holdKey(page, feast.id);
   expect((await page.request.post('/api/dev/time', { data: { now: feast.scatteringEndsAt - 4000 } })).ok()).toBe(true);
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));

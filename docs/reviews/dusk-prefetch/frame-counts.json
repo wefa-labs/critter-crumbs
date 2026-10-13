@@ -1,0 +1,211 @@
+{
+  "baselineCommit": "56709c8b87f799dd106e9a00ec4b52afa47382a0",
+  "implementationCommit": "e77cd2f",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "counts": [
+    {
+      "label": "baseline-scatter",
+      "run": 1,
+      "closedFlatFrames": 1,
+      "closedFlatAt": [
+        28
+      ],
+      "firstClosedPaintedAt": 101,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 33
+    },
+    {
+      "label": "baseline-scatter",
+      "run": 2,
+      "closedFlatFrames": 1,
+      "closedFlatAt": [
+        29
+      ],
+      "firstClosedPaintedAt": 97,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 36
+    },
+    {
+      "label": "baseline-scatter",
+      "run": 3,
+      "closedFlatFrames": 1,
+      "closedFlatAt": [
+        36
+      ],
+      "firstClosedPaintedAt": 109,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 35
+    },
+    {
+      "label": "baseline-cached-reveal",
+      "run": 1,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": null,
+      "laidOutFlatFrames": 4,
+      "laidOutFlatAt": [
+        19,
+        35,
+        66,
+        82
+      ],
+      "firstLaidOutPaintedAt": 87
+    },
+    {
+      "label": "baseline-cached-reveal",
+      "run": 2,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": null,
+      "laidOutFlatFrames": 2,
+      "laidOutFlatAt": [
+        38,
+        68
+      ],
+      "firstLaidOutPaintedAt": 71
+    },
+    {
+      "label": "baseline-cached-reveal",
+      "run": 3,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": null,
+      "laidOutFlatFrames": 3,
+      "laidOutFlatAt": [
+        36,
+        52,
+        83
+      ],
+      "firstLaidOutPaintedAt": 89
+    },
+    {
+      "label": "final-scatter",
+      "run": 1,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": 95,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 31
+    },
+    {
+      "label": "final-scatter",
+      "run": 2,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": 84,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 42
+    },
+    {
+      "label": "final-scatter",
+      "run": 3,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": 99,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 28
+    },
+    {
+      "label": "final-reveal",
+      "run": 1,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": null,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 61
+    },
+    {
+      "label": "final-reveal",
+      "run": 2,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": null,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 61
+    },
+    {
+      "label": "final-reveal",
+      "run": 3,
+      "closedFlatFrames": 0,
+      "closedFlatAt": [],
+      "firstClosedPaintedAt": null,
+      "laidOutFlatFrames": 0,
+      "laidOutFlatAt": [],
+      "firstLaidOutPaintedAt": 62
+    }
+  ],
+  "finalResources": [
+    {
+      "label": "final-scatter",
+      "run": 1,
+      "windowCompletedBeforeDuskMs": 2,
+      "duskRequests": 1,
+      "duskTransferBytes": [
+        218468
+      ],
+      "pageErrors": []
+    },
+    {
+      "label": "final-scatter",
+      "run": 2,
+      "windowCompletedBeforeDuskMs": 2,
+      "duskRequests": 1,
+      "duskTransferBytes": [
+        218468
+      ],
+      "pageErrors": []
+    },
+    {
+      "label": "final-scatter",
+      "run": 3,
+      "windowCompletedBeforeDuskMs": 5,
+      "duskRequests": 1,
+      "duskTransferBytes": [
+        218468
+      ],
+      "pageErrors": []
+    },
+    {
+      "label": "final-reveal",
+      "run": 1,
+      "windowCompletedBeforeDuskMs": 1,
+      "duskRequests": 1,
+      "duskTransferBytes": [
+        218468
+      ],
+      "pageErrors": []
+    },
+    {
+      "label": "final-reveal",
+      "run": 2,
+      "windowCompletedBeforeDuskMs": 1,
+      "duskRequests": 1,
+      "duskTransferBytes": [
+        218468
+      ],
+      "pageErrors": []
+    },
+    {
+      "label": "final-reveal",
+      "run": 3,
+      "windowCompletedBeforeDuskMs": 1,
+      "duskRequests": 1,
+      "duskTransferBytes": [
+        218468
+      ],
+      "pageErrors": []
+    }
+  ],
+  "resourceTimingRounding": "Nearest whole millisecond, with half milliseconds rounded up, matching the JavaScript measurement summary."
+}

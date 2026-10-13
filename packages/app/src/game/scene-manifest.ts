@@ -47,3 +47,10 @@ export function sceneReader(read: () => Promise<unknown>) {
     read: () => reading ??= read().then(value => { validateScenes(value); return known = value; }).catch(() => { reading = undefined; return []; }),
   };
 }
+
+/** Other plate paintings for the layout's device; crops keep their existing rendered layers. */
+export function otherPlateImages(scenes: readonly Scene[], desktop: boolean, shown: string): string[] {
+  const images = scenes.map(scene => desktop ? scene.devices.desktop : scene.devices.phone)
+    .filter(device => device.kind === 'plate' && device.image !== shown).map(device => device.image);
+  return [...new Set(images)];
+}
