@@ -179,7 +179,7 @@
     {
       "label": "final-reveal",
       "run": 1,
-      "windowCompletedBeforeDuskMs": 0,
+      "windowCompletedBeforeDuskMs": 1,
       "duskRequests": 1,
       "duskTransferBytes": [
         218468
@@ -206,5 +206,6 @@
       ],
       "pageErrors": []
     }
-  ]
+  ],
+  "resourceTimingRounding": "Nearest whole millisecond, with half milliseconds rounded up, matching the JavaScript measurement summary."
 }
