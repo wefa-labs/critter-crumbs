@@ -1,6 +1,6 @@
 # Dusk painting readiness — 2026-10-12
 
-The proposed change fetches the other plate paintings for the current layout after the current floor has loaded, and retains each native image for the page. It belongs to workstream B. Shipping is pending Afolabi’s approval of the extra download.
+The proposed change fetches the other plate paintings for the current layout after the current floor has loaded, and retains each native image for the page. It belongs to workstream B. Afolabi approved the extra download on 2026-10-12 and requested merging PR #55 after green CI and deploying to the existing production testnet site.
 
 The scene list comes from `sceneReader`; the existing layout supplies the phone/desktop choice (`DESKTOP_MIN_WIDTH`, 900 px). The selector excludes the current image and crops, and deduplicates paths. An unsuccessful load is forgotten so a later scene can retry. Scene rendering and deadlines keep their existing behavior.
 
@@ -56,7 +56,7 @@ The selector test covers phone, desktop, current-image exclusion, deduplication 
 - `mise exec node@22.22.1 -- bun run e2e` passed all **29 tests** with one worker (3.7 minutes).
 - Both before-deadline request checks were red on the unchanged implementation and green with prefetching; the selector test was likewise red before the helper was added.
 
-Read-only two-axis review of `56709c8…e77cd2f` found **0 actionable Standards findings** and **0 actionable Spec findings**. The measured Window response completed 4, 4 and 1 ms before the Dusk request in the load-only reveal experiment. After bandwidth approval, the accepted tradeoff will be appended to `docs/decisions.md`.
+Read-only two-axis review of `56709c8…e77cd2f` found **0 actionable Standards findings** and **0 actionable Spec findings**. The measured Window response completed 4, 4 and 1 ms before the Dusk request in the load-only reveal experiment. The approved tradeoff is recorded in `docs/decisions.md` (2026-10-12).
 
 ## Reproduce
 
