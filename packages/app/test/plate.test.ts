@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { composeGame } from '../src/game/composition.js';
 import { circleBackRow, layoutGame } from '../src/game/layout.js';
 import { PLATE_GAP, plateLift, type PlateShape } from '../src/game/plate.js';
-import { sceneReader, validateScenes } from '../src/game/scene-manifest.js';
+import { otherPlateImages, sceneReader, validateScenes } from '../src/game/scene-manifest.js';
 
 type Size = { width: number; height: number };
 /* Where a raised plate's wall ends on the screen, worked out as the browser draws it rather than as plateLift reckons it:
@@ -96,6 +96,15 @@ describe('the scene manifest', () => {
     expect(reader.known()).toBe(first);
     expect(await reader.read()).toBe(first);
     expect(reads).toBe(1);
+  });
+
+  it('warms only the other plate paintings for this device, once per image', () => {
+    const manifest = shipped();
+    validateScenes(manifest);
+    const repeated = [...manifest, manifest[0]!];
+    expect(otherPlateImages(repeated, false, '/scenes/window-plate-phone.webp')).toEqual(['/scenes/dusk-plate-phone.webp']);
+    expect(otherPlateImages(repeated, true, '/scenes/window-plate-desktop.webp')).toEqual(['/scenes/dusk-plate-desktop.webp']);
+    expect(otherPlateImages(repeated, false, '/scenes/dusk-plate-phone.webp')).toEqual(['/scenes/window-plate-phone.webp']);
   });
 
   it('is asked for again after a read that failed or gave a manifest the app refuses', async () => {
