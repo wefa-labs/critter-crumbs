@@ -2,6 +2,7 @@
 @import './portraits.css';
 @import './game.css';
 @import './screens.css';
+@import './shell.css';
 /* dark follows the device unless someone has chosen for themselves, as the tokens do (tokens.css) */
 :root { color-scheme:light; }
 @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) { color-scheme:dark; } }

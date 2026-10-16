@@ -71,7 +71,8 @@ test('a member hears the settled set in order: music by screen, each sting on it
 
   // Music off in Settings stops the loop and is remembered; on brings the screen's track back.
   const loops = heard.filter(file => file === 'music/full').length;
-  await page.locator('.game-profile').click();
+  await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Your critter', exact: true }).getByRole('button', { name: 'Settings', exact: true }).click();
   const music = page.getByRole('dialog', { name: 'Settings' }).getByRole('checkbox', { name: /^Music/ });
   await expect(music).toBeChecked();
   await music.uncheck();

@@ -1,6 +1,6 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { copy } from '@critter-crumbs/shared';
-import { useModalDialog } from '../app/ui.js';
+import { Dialog } from '../app/ui.js';
 import { StatementText } from '../app/gathering.js';
 import { ElementChip, GameIcon, type CritterElement } from './icons.js';
 
@@ -21,17 +21,13 @@ export { Grow, Loader, SheetNotice } from './sheet-parts.js';
  * and announced; Cancel and Escape both close it.
  */
 export function GameDialog({ title, children, cancel, action, busy = false }: { title: string; children: ReactNode; cancel: () => void; action: ReactNode; busy?: boolean }) {
-  const ref = useRef<HTMLDialogElement>(null), id = useId();
-  useModalDialog(ref);
   return (
-    <dialog ref={ref} className="game-dialog" aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) cancel(); }}>
-      <h2 id={id}>{title}</h2>
-      {children}
-      <div className="game-dialog-actions">
+    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} actions={<>
         <button className="quiet" type="button" disabled={busy} onClick={cancel}>{copy['action.cancel']}</button>
         {action}
-      </div>
-    </dialog>
+      </>}>
+      {children}
+    </Dialog>
   );
 }
 

@@ -6,6 +6,8 @@ import { Loader } from '../game/sheet-parts.js';
 import { disposePortrait } from '../portraits/index.js';
 import { paintCritter } from '../portraits/painter.js';
 import { critterVersion } from '../portraits/version.js';
+import { portraitMetrics } from '../portraits/metrics.js';
+import { faceCrop } from '../game/styles.js';
 import { useModalAnnouncements } from './announcements.js';
 import type { AppApi } from './session.js';
 
@@ -19,7 +21,7 @@ export function Link({ href, children, className }: { href: string; children: Re
   return <a href={href} className={className} onClick={event => { if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); navigate(href); } }}>{children}</a>;
 }
 export function Page({ title, children, context, screen, primary = true }: { title: string; context?: string; screen?: string; primary?: boolean; children: ReactNode }) {
-  useEffect(() => { document.title = context ? formatCopy('app.contextTitle', { screen: screen ?? title, burrow: context }) : formatCopy('app.pageTitle', { title }); document.getElementById('content')?.focus(); document.querySelector<HTMLElement>('[data-initial-focus="true"]')?.focus(); }, [title, context, screen]);
+  useEffect(() => { document.title = context ? formatCopy('app.contextTitle', { screen: screen ?? title, burrow: context }) : formatCopy('app.pageTitle', { title }); const content = document.getElementById('content'); if (content) { content.scrollTop = 0; content.focus(); } document.querySelector<HTMLElement>('[data-initial-focus="true"]')?.focus(); }, [title, context, screen]);
   return <>{primary ? <h1>{title}</h1> : <p className="feast-title">{title}</p>}{children}</>;
 }
 /**
@@ -43,16 +45,25 @@ export function PortraitImage({ address, variant, name, size = 40, asleep = fals
   }, [address, variant, name, size, asleep, decorative, fed]);
   return <div className={size === 'stage' ? 'stage' : 'portrait-slot'} ref={host} />;
 }
+/** The same face and 44 px target open the profile navigation on every screen. */
+export function ProfileButton({ address, variant, onClick }: { address: string; variant: number; onClick: (() => void) | undefined }) {
+  const face = faceCrop(44, portraitMetrics(generateCritter(address, variant, critterVersion)).extent.headY);
+  return <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onClick}><PortraitImage address={address} variant={variant} name={copy['scatter.own.short']} size="stage" /></button>;
+}
 /** A native modal dialog: opened on mount, announced, and focus returned where it was when it closes. */
 export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
   const announceWithin = useModalAnnouncements();
-  useEffect(() => { const dialog = ref.current!; const previous = document.activeElement; dialog.showModal(); announceWithin(dialog); dialog.querySelector<HTMLElement>('input, textarea')?.focus(); return () => { announceWithin(null); dialog.close(); if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); else document.getElementById('content')?.focus(); }; }, [announceWithin]);
+  useEffect(() => { const dialog = ref.current!; const previous = document.activeElement; dialog.showModal(); announceWithin(dialog.querySelector<HTMLElement>('.dialog-feedback') ?? dialog); dialog.querySelector<HTMLElement>('input, textarea')?.focus(); return () => { announceWithin(null); dialog.close(); if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); else document.getElementById('content')?.focus(); }; }, [announceWithin]);
 }
-export function Dialog({ title, children, onClose, busy = false }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean }) {
+/** One stable frame for dialogs and phone sheets; only its body scrolls as content changes. */
+export function Dialog({ title, children, onClose, busy = false, actions, className = '' }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null), id = useId();
   useModalDialog(ref);
-  return <dialog ref={ref} aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
-    <div className="dialog-heading"><h2 id={id}>{title}</h2><button className="secondary" disabled={busy} onClick={onClose}>{copy['action.close']}</button></div>{children}
+  return <dialog ref={ref} className={`app-dialog ${className}`} aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
+    <div className="dialog-heading"><h2 id={id}>{title}</h2><button type="button" className="secondary dialog-close" disabled={busy} onClick={onClose}>{copy['action.close']}</button></div>
+    <div className="dialog-body">{children}</div>
+    <div className="dialog-feedback" />
+    {actions ? <div className="dialog-actions">{actions}</div> : null}
   </dialog>;
 }
 export function Field({ label, children, help }: { label: CopyId; children: ReactNode; help?: CopyId }) {

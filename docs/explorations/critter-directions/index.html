@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Critter Directions</title>
+<style>
+:root { --bg:#F6F0E4; --raised:#FBF7EF; --ink:#2E2226; --soft:#6B5B5E; --line:rgb(46 34 38 / .14); --gold:#D9A441; color-scheme:light; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header.page { position:sticky; top:0; z-index:100; display:flex; gap:16px; align-items:center; justify-content:space-between; padding:12px 20px; background:color-mix(in srgb, var(--bg) 92%, transparent); border-bottom:1px solid var(--line); backdrop-filter:blur(6px); }
+header.page h1 { margin:0; font-size:20px; }
+header.page nav { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:14px; }
+header.page a { color:inherit; }
+button { font:inherit; font-size:14px; min-height:36px; padding:4px 14px; border-radius:999px; border:1.5px solid var(--ink); background:var(--raised); color:var(--ink); cursor:pointer; box-shadow:2px 2px 0 var(--ink); }
+button[aria-pressed="true"] { background:var(--gold); }
+button:focus-visible, a:focus-visible { outline:3px solid var(--ink); outline-offset:2px; }
+main { padding:8px 20px 80px; }
+section { margin:28px 0 40px; }
+h2 { font-size:22px; margin:0 0 4px; }
+h3 { font-size:16px; margin:14px 0 4px; } h3 span { font-weight:400; color:var(--soft); margin-left:10px; font-size:14px; }
+.lede { margin:0 0 10px; max-width:90ch; color:var(--soft); }
+.block { background:var(--raised); border:1.5px solid var(--ink); border-radius:20px; padding:8px 16px 12px; margin:12px 0; box-shadow:3px 3px 0 var(--ink); }
+.strip { display:flex; flex-wrap:wrap; align-items:flex-end; gap:6px 14px; padding:8px 0; border-top:1px solid var(--line); }
+.strip::before { content:attr(data-label); width:110px; flex:none; align-self:center; font-size:13px; color:var(--soft); }
+figure { margin:0; } figcaption { font-size:11px; color:var(--soft); text-align:center; line-height:1.25; }
+.mini { display:grid; justify-items:center; gap:2px; min-width:52px; }
+.mini svg { display:block; overflow:visible; }
+.body svg { display:block; overflow:visible; height:auto; }
+.floor .body { border-bottom:1.5px solid rgb(46 34 38 / .25); padding-bottom:0; }
+.sil .body svg { filter:brightness(0) opacity(.85); }
+.sil .body svg .portrait__shadow, .sil .body svg .cr-shadow { display:none; }
+.face { position:relative; display:inline-block; width:var(--face-size); height:var(--face-size); overflow:hidden; border-radius:50%; background:#EADFD2; border:2px solid var(--raised); box-shadow:0 0 0 1.5px var(--ink); }
+.face svg { position:absolute; left:50%; top:var(--face-top); width:var(--face-width); height:auto; translate:calc(-50% + var(--face-dx, 0px)) 0; }
+
+/* the app's portrait pose classes, as packages/app/src/styles/portraits.css has them */
+.portrait { --scale-x:1; --scale-y:1; --head-tilt:0deg; --lean-z:0deg; --lift-y:0px; --lids:1; --ear-l:0deg; --ear-r:0deg; --pupil-x:0px; --pupil-y:0px; }
+.portrait__figure { transform-origin:60px 140px; transform:translateY(calc(-1 * var(--lift-y))) rotate(var(--lean-z)) scale(var(--scale-x), var(--scale-y)); }
+.portrait__head { transform:rotate(var(--head-tilt)); }
+.portrait__ear { transform:rotate(var(--ear-base)); }
+.portrait__ear--l { transform:rotate(calc(var(--ear-base) + var(--ear-l))); }
+.portrait__ear--r { transform:rotate(calc(var(--ear-base) - var(--ear-r))); }
+.portrait__eye { scale:1 var(--lids); }
+.portrait__sleep-eye { opacity:0; }
+.portrait[data-asleep="true"] .portrait__eye { opacity:0; }
+.portrait[data-asleep="true"] .portrait__sleep-eye { opacity:1; }
+.portrait__cheek { scale:var(--cheeks); }
+.portrait-v2 .p-calm { opacity:calc(1 - var(--mouth)); }
+.portrait-v2 .portrait__mouth { opacity:var(--mouth); }
+
+/* scenes in the app's layouts, shown at a fraction of their size */
+.frames { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--line); }
+.frames::before { content:attr(data-label); width:100%; font-size:13px; color:var(--soft); }
+.framed { --s:.42; --fw:390px; --fh:844px; position:relative; width:calc(var(--fw) * var(--s)); height:calc(var(--fh) * var(--s) + 22px); }
+.frames.desktop .framed { --s:.3; --fw:1440px; --fh:900px; }
+.framed > .frame { position:absolute; left:0; top:0; transform:scale(var(--s)); transform-origin:0 0; }
+.framed > figcaption { position:absolute; left:0; right:0; bottom:0; }
+html[data-true] .frames .framed { --s:1; }
+.frame { position:relative; overflow:hidden; background:var(--bg); border:1.5px solid var(--ink); border-radius:18px; }
+.fake-header { position:absolute; left:0; right:0; top:0; height:64px; padding:10px 16px; display:grid; align-content:center; background:var(--bg); border-bottom:1px solid var(--line); }
+.fake-header b { font-size:13px; color:var(--soft); font-weight:600; } .fake-header span { font-size:18px; font-weight:800; }
+.stage-area { position:absolute; left:0; overflow:hidden; }
+.plate { position:absolute; left:0; right:0; bottom:0; background-size:cover; background-position:center top; background-repeat:no-repeat; filter:saturate(.82) brightness(1.05) sepia(.1); }
+.wash { position:absolute; inset:0; background:linear-gradient(to bottom, rgb(246 240 228 / .05), rgb(246 240 228 / .2) 55%, rgb(246 240 228 / .42)); }
+.spot { position:absolute; }
+.spot svg { display:block; width:100%; height:auto; overflow:visible; transform-origin:50% 93.3%; }
+.tag { position:absolute; z-index:60; display:flex; align-items:center; justify-content:center; gap:6px; padding:0 10px; border-radius:999px; background:var(--bg); border:1.5px solid var(--ink); font-size:14px; font-weight:800; white-space:nowrap; box-shadow:2px 2px 0 rgb(46 34 38 / .9); }
+.tag i { font-style:normal; font-weight:800; }
+.heap { position:absolute; z-index:5; } .heap svg { display:block; width:100%; height:100%; overflow:visible; }
+.dock { position:absolute; z-index:70; display:grid; place-items:center; background:var(--bg); border-top:1.5px solid var(--ink); border-radius:24px 24px 0 0; font-size:18px; }
+.dock.results-card { align-content:start; padding-top:14px; }
+.side-panel { position:absolute; z-index:70; padding:24px; background:var(--bg); border-left:1px solid var(--line); font-size:18px; }
+
+/* motion: breath and blink scale the finished drawing (as the app's floor critters do); fliers bob; wings beat */
+@keyframes breathe { 50% { scale:1.012 1.028; } }
+@keyframes breathe-slow { 50% { scale:1.016 1.034; } }
+@keyframes blink { 0%, 92%, 100% { scale:1 1; } 94.5% { scale:1 .08; } }
+@keyframes bob { 50% { translate:0 -3.5px; } }
+@keyframes flap { 50% { scale:.86 1; } }
+/* a 2.4 s loop: the crumb hops in over 200 ms (--cc-dur-2) and the bump of Game Design §3.2 plays from its landing:
+   1.08 / 0.92 at impact, 0.97 / 1.04 at 90 ms, 1.01 / 0.995 at 180 ms, rest at 260 ms */
+@keyframes bump { 0%, 8.3% { scale:1 1; } 8.34% { scale:1.08 .92; } 12.08% { scale:.97 1.04; } 15.83% { scale:1.01 .995; } 19.17%, 100% { scale:1 1; } }
+@keyframes hop { 0% { translate:-70px 30px; opacity:0; } .5% { opacity:1; } 4.2% { translate:-35px -40px; } 8.3% { translate:0 -8px; opacity:1; } 9.5%, 100% { translate:0 -8px; opacity:0; } }
+@keyframes play { 0%, 70%, 100% { translate:0 0; scale:1 1; } 76% { translate:0 0; scale:1.05 .95; } 83% { translate:0 -9%; scale:.97 1.03; } 90% { translate:0 0; scale:1.03 .97; } }
+@keyframes zz { 0% { translate:0 0; opacity:0; } 20% { opacity:.8; } 100% { translate:14px -30px; opacity:0; } }
+.state svg, .spot svg { animation:breathe 3.8s ease-in-out infinite; animation-delay:calc(var(--k, 0) * -.7s); }
+.state.sleep svg { animation-name:breathe-slow; animation-duration:5.4s; }
+.state svg .portrait__eye, .spot svg .portrait__eye { transform-box:fill-box; transform-origin:center; animation:blink 6.2s infinite; animation-delay:calc(var(--k, 0) * -1.3s); }
+.state svg.flier .cr-hover, .spot svg.flier .cr-hover { animation:bob 2.6s ease-in-out infinite; }
+.state.sleep svg.flier .cr-hover { animation:none; }
+.state svg .cr-wing, .spot svg .cr-wing { transform-box:fill-box; transform-origin:0% 50%; }
+.state.receive { position:relative; }
+.state.receive svg { animation:bump 2.4s linear infinite; }
+.hop { position:absolute; left:50%; top:52%; width:14px; height:14px; margin:-7px 0 0 -7px; border-radius:3px 6px 4px 7px; background:#CFA552; border:1.5px solid var(--ink); animation:hop 2.4s linear infinite; pointer-events:none; }
+.zz { position:absolute; right:22%; top:12%; font-weight:800; font-size:16px; color:#7C7A94; animation:zz 2.6s ease-out infinite; }
+.state { position:relative; }
+.spot.play svg { animation:play 2.6s ease-in-out infinite; animation-delay:calc(var(--k) * -.47s); }
+html[data-still="true"] *, html[data-still="true"] *::before { animation:none !important; }
+html[data-still="true"] .hop, html[data-still="true"] .zz { display:none; }
+@media (prefers-reduced-motion:reduce) { *, *::before { animation:none !important; } .hop, .zz { display:none; } }
+
+table { border-collapse:collapse; width:100%; font-size:13px; background:var(--raised); border:1.5px solid var(--ink); }
+th, td { text-align:left; vertical-align:top; padding:6px 8px; border-top:1px solid var(--line); }
+thead th { background:#EADFD2; }
+.mono { font-family:ui-monospace, "SF Mono", Menlo, monospace; font-size:11px; word-break:break-all; }
+</style>
+</head>
+<body>
+<header class="page">
+  <h1>Critter directions</h1>
+  <nav aria-label="Sections"><a href="#faces">Faces</a><a href="#sizes">Scene sizes</a><a href="#silhouettes">Silhouettes</a><a href="#groups">Groups</a><a href="#states">States</a><a href="#data">Data</a><a href="README.md">Notes</a></nav>
+  <button type="button" id="still" aria-pressed="false">Still</button>
+</header>
+<main id="main"></main>
+<script src="lib/directions.js"></script>
+</body>
+</html>

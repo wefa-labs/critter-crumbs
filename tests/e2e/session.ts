@@ -19,14 +19,19 @@ export async function connectLocal(page: Page, index: number, name = 'Avery', cl
   await expect(connect).toBeEnabled();
   await click(connect);
   await click(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true }));
-  await expect(page.locator('.game-profile').or(page.getByRole('button', { name: 'Disconnect', exact: true }))).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Your critter and settings', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true })).toHaveCount(0);
   const { status, body: profile } = await readJson<{ ensName: string | null; displayName: string | null; critterLocked: boolean }>(page, '/api/me');
   expect(status).toBe(200);
   if (!profile.ensName && !profile.displayName) {
     await page.getByRole('textbox', { name: 'Display name', exact: true }).fill(name);
-    await click(page.getByRole('button', { name: 'Save name', exact: true }));
+    if (profile.critterLocked) await click(page.getByRole('button', { name: 'Save name', exact: true }));
   }
   if (!profile.critterLocked) await click(page.getByRole('button', { name: 'Keep this one', exact: true }));
   await expect(page.getByRole('dialog')).toHaveCount(0);
+}
+
+export async function openSettings(page: Page) {
+  await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
+  await page.getByRole('dialog', { name: 'Your critter', exact: true }).getByRole('button', { name: 'Settings', exact: true }).click();
 }

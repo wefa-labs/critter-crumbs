@@ -1,5 +1,6 @@
 import { bytesToHex, getAddress } from 'viem';
-import { hex, type Feast, type Hex, type Target } from '@critter-crumbs/shared';
+import { hex, type Feast, type FeastPortrait, type Hex, type Target } from '@critter-crumbs/shared';
+import { identityFromRow } from './store.js';
 import type { FeastClock, FeastStatus } from '@critter-crumbs/shared';
 import type { Row } from './database.js';
 export const milliseconds = (value: unknown): number => new Date(value as string | number).getTime();
@@ -10,6 +11,12 @@ export function feastClock(row: Row): FeastClock {
 export const dbHex = (value: unknown): Hex => value instanceof Uint8Array ? bytesToHex(value) : hex(String(value).replace(/^\\x/, '0x'));
 export function targetFromRow(row: Row): Target {
   return { id: dbHex(row.target_id), ownerAddress: row.owner_address ? getAddress(String(row.owner_address)) : null, name: String(row.name), position: Number(row.position), kind: row.kind as Target['kind'] };
+}
+export function portraitFromRow(row: Row): FeastPortrait {
+  const source = row.portrait_source;
+  if (source !== 'creation' && source !== 'freeze' && source !== 'legacy-baseline') throw new Error('Invalid feast portrait source');
+  return { targetId: dbHex(row.target_id), ...identityFromRow({ ...row, variant: row.portrait_variant }), source,
+    capturedAt: row.portrait_captured_at === null ? null : milliseconds(row.portrait_captured_at) };
 }
 export function feastFromRow(row: Row, targets: Target[], participants: string[]): Feast {
   return { ...feastClock(row), id: String(row.id), burrowId: String(row.burrow_id), createdBy: getAddress(String(row.created_by)),

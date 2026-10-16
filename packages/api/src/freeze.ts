@@ -14,7 +14,7 @@ export function pendingFreezes(snapshot: BurrowSnapshot, now: number, bind: (val
     const addresses = bind(JSON.stringify(members.map(member => member.address)));
     sql.push(`insert into feast_participants (feast_id,address) select ${id},member.address from gate cross join jsonb_array_elements_text(${addresses}::jsonb) member(address) on conflict do nothing`);
     if (feast.kind !== 'people') continue;
-    sql.push(...freezePeopleTargets(members, String(feast.id), bind));
+    sql.push(...freezePeopleTargets(members, String(feast.id), bind, now));
   }
   return sql;
 }

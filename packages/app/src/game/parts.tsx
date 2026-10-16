@@ -4,11 +4,9 @@ import { copy, formatCopy, CIRCLE_FEEL } from '@critter-crumbs/shared';
 import { useTrait } from 'koota/react';
 import type { Entity } from 'koota';
 import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
-import { generateCritter } from '@critter-crumbs/core';
-import { critterVersion } from '../portraits/version.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameStage } from '../app/game-stage.js';
-import { Link, PortraitImage, targetLabel } from '../app/ui.js';
+import { Link, ProfileButton, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
 import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
@@ -19,7 +17,6 @@ import { SceneBackdrop } from './scenes.js';
 import { CrumbMound, ThoughtBubble } from './mound.js';
 import { Dock } from './dock.js';
 import type { CritterElement } from './icons.js';
-import { faceCrop } from './styles.js';
 import { measureText } from './measure.js';
 import { useScatterInput } from '../app/scatter-input.js';
 import { useAudio, useMusic } from '../audio/context.js';
@@ -34,7 +31,6 @@ const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w
 export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLine, aside, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; burrowLine?: string; aside?: ReactNode; children: ReactNode }) {
   useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
   useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
-  const face = viewer ? faceCrop(44, portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
   return (
     <div className="core-game">
       <header className="game-header">
@@ -44,7 +40,7 @@ export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLin
         </div>
         <span className="closing-day" id="game-when">{when}</span>
         {viewer
-          ? <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onProfile}><PortraitImage address={viewer.address} variant={viewer.variant} name={copy['scatter.own.short']} size="stage" /></button>
+          ? <ProfileButton address={viewer.address} variant={viewer.variant} onClick={onProfile} />
           : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : aside ?? null}
       </header>
       <div className="game-content">{children}</div>

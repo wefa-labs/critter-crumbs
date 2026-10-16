@@ -1,0 +1,4 @@
+{
+  "extends": "../critter-directions/tsconfig.json",
+  "include": ["src/**/*.ts"]
+}

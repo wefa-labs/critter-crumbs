@@ -56,6 +56,8 @@ export function parseUuid(value: unknown): string {
 }
 export function parseProfileUpdate(value: unknown): { displayName?: string; variant?: number; keepCritter?: true } {
   const input = record(value), result: { displayName?: string; variant?: number; keepCritter?: true } = {};
+  // Version adoption needs its own reviewed opt-in operation, never an ordinary edit.
+  if ('generatorVersion' in input || 'rendererVersion' in input) throw new ValidationError();
   if (input.displayName !== undefined) result.displayName = text(input.displayName, 1, 80, 'name.label', true);
   if (input.variant !== undefined) result.variant = integer(input.variant, 0, 4);
   if (input.keepCritter !== undefined) { if (input.keepCritter !== true) throw new ValidationError(); result.keepCritter = true; }

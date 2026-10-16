@@ -1,0 +1,224 @@
+{
+  "sampleRate": 44100,
+  "source": "Existing shipped mixed MP3 files",
+  "validation": "Measured candidates; listening review pending",
+  "sources": [
+    {
+      "file": "packages/app/public/audio/music/burrow.mp3",
+      "bytes": 1381772,
+      "sha256": "e1aa1103e0bb9e385b047b0c69229af9fcc269a325926865929bd66bbd60de35"
+    },
+    {
+      "file": "packages/app/public/audio/music/square.mp3",
+      "bytes": 1441540,
+      "sha256": "c6ee1495482cb3abb10b5f75719e500c8661b9f7168de90d7836db9cb31c1c06"
+    },
+    {
+      "file": "packages/app/public/audio/music/feeding.mp3",
+      "bytes": 1386787,
+      "sha256": "ff9352df417d44360dee8111dc4c83fff4f9042704d0cffd4275f71d8728d226"
+    },
+    {
+      "file": "packages/app/public/audio/music/full.mp3",
+      "bytes": 921181,
+      "sha256": "9f1d000bda2ed83d986106d9c792206bd6dea400a72592372e3d8ea94c4917b0"
+    }
+  ],
+  "reviews": [
+    {
+      "file": "docs/explorations/music-loops/media/auditions/burrow-alternative-bars21-37-x4.mp3",
+      "bytes": 4043956,
+      "sha256": "fdd730437dbccf7e470e3427a390ca4b37e3539560ac9e09df1a6c1ec4da6ed3"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/burrow-current-x4.mp3",
+      "bytes": 7704772,
+      "sha256": "45d6a6314c9a4a99ccf034365d90cbea9ed99005377021556a5ea62586854cce"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/burrow-proposed-bars17-33-x4.mp3",
+      "bytes": 3822007,
+      "sha256": "6048006fdf05bf9a4713728611720f732847774d51855fd908eeb99ac99f013c"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/feeding-alternative-bars5-26-x4.mp3",
+      "bytes": 5240029,
+      "sha256": "84b089a8468208d1e825056b7b8c89bf15569fc529aafc8f3e424e944f84836d"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/feeding-current-x4.mp3",
+      "bytes": 7848715,
+      "sha256": "3fae2bdf318e2d2d1e61669459aeb12c975ce98d277a6cf169167da442463a28"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/feeding-proposed-bars7-28-x4.mp3",
+      "bytes": 5350440,
+      "sha256": "cd26927ada37b1f0c54233f403d01095c2b52f2e76ee59b9f32d3c8340867008"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/full-alternative-bars6-18-x4.mp3",
+      "bytes": 3437877,
+      "sha256": "e6c2c10ca1881dea2637e2a685a6a18c06c36cb7971240ee5da1ca62336b4a28"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/full-current-x4.mp3",
+      "bytes": 5083231,
+      "sha256": "eb717b8dc3a76d1d6c21964357c2a1895018cf1b9e7dce32fec476b9e65e15a9"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/full-proposed-bars5-17-x4.mp3",
+      "bytes": 3381727,
+      "sha256": "22576c713157af51c5593bfad7fd049a767c274ae55057a864992d2272927813"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/manifest.json",
+      "bytes": 8535,
+      "sha256": "1d3d20a8e4b1501cd9884257f126c06bd8c9c2a5e0af2f0c3f43731d9d8c2dd2"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/square-alternative-bars7-31-x4.mp3",
+      "bytes": 5755756,
+      "sha256": "1fa0eb0bb903266a2ff221d293dd74ac05f507d66ccd9e9fa114438034658864"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/square-current-x4.mp3",
+      "bytes": 8007798,
+      "sha256": "db5d5a5c65c976ec2524f12cb9501ea166cd98cba120544dc8a6ed8fde57987c"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/square-proposed-bars9-33-x4.mp3",
+      "bytes": 5853981,
+      "sha256": "1ae46f6ebd057170111241739f61e9914656206306bec67afa05c42f544ff1c9"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/auditions/verify.json",
+      "bytes": 6037,
+      "sha256": "96ea5202a0c170eca8a34eff8d25886b0246d04fbd31e9c5d8329acd8967cc3b"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-a-bar17-41.mp3",
+      "bytes": 381482,
+      "sha256": "a91f52491a94e189647ebaea3a77b19b7eaba9debdd304b89301490c9812cbc0"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-b-bar9-41.mp3",
+      "bytes": 379138,
+      "sha256": "cf4ffdcdc9895cc0898c4a16494105b2ca37b9e43ac6117ce79df9f9e675f5b1"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-c-bar25-41.mp3",
+      "bytes": 389326,
+      "sha256": "4f1a6a391c5a9f585215639708b12f0b47cc3e3823c1376e95566a0bf7d48a7a"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-current.mp3",
+      "bytes": 379210,
+      "sha256": "238c744fd014de081397932a93ef5a1d3a7260473dc6b1630724baf571b22620"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-d-bar17-33.mp3",
+      "bytes": 381593,
+      "sha256": "7567b448d1be269db824323482cc7b81ecc86cc0bc526c9138786d7ad7a9b0e0"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-e-bar21-37.mp3",
+      "bytes": 384764,
+      "sha256": "de9f3cb76abde335afac224e00f79a64b7805363cbf531e32d1ccf998b43c97a"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/burrow-seam-f-bar9-33.mp3",
+      "bytes": 378886,
+      "sha256": "095525aca39a2d837e34be1b0f770f8cdbea9049d3546501a6f56d9ad121ab6e"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/feeding-seam-a-bar7-28.mp3",
+      "bytes": 385271,
+      "sha256": "065e757df539d7418d4b34a8a9e4d86e40c6925c580a7bcdb6d7c8b42c09aed2"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/feeding-seam-b-bar5-26.mp3",
+      "bytes": 380208,
+      "sha256": "69c156e6136ece322ead5a370d0f47a34bccd0e1290231b43a2a4a392ad72020"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/feeding-seam-c-bar6-27.mp3",
+      "bytes": 384323,
+      "sha256": "5721a6041bd9fb6e5bf5bc518eda4a5ebe2e5f7f6187a39492a30af0baafdd23"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/feeding-seam-current.mp3",
+      "bytes": 386416,
+      "sha256": "8fd7dfa670bc932167752e16795f1166a7a7f756dfd651fa9f246d0c5729be71"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/feeding-seam-d-bar8-29.mp3",
+      "bytes": 387354,
+      "sha256": "cd7be76cf07fb94f6a42a28193df5c77a006b16dad73aa1e72575e14206410c3"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/feeding-seam-e-bar10-27.mp3",
+      "bytes": 381666,
+      "sha256": "51b5fb00aad6f7f9b6272a821cf869d492c999306fb0f534326253b27971acf9"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/full-seam-a-bar5-17.mp3",
+      "bytes": 379251,
+      "sha256": "738820d82377b10cedf00c425926b9260e10375905589be9cb45160e2da34dd2"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/full-seam-b-bar6-18.mp3",
+      "bytes": 375307,
+      "sha256": "b2f3fb7eabf0821eb94532dddd288fa72bdd08f16f814f7c514c886c19efd28c"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/full-seam-c-bar7-19.mp3",
+      "bytes": 375348,
+      "sha256": "46dd5aed483e644d20642eef6d769cbebb4a69f664cb397c2cf1435005abe85c"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/full-seam-current.mp3",
+      "bytes": 372014,
+      "sha256": "2389f4db42fb46b60e09fb9825437f1160bd43eaab82029f5bc72b45ba6d3769"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/full-seam-d-bar8-20.mp3",
+      "bytes": 377484,
+      "sha256": "bb9c2b6f2598c558df95dd3110010778d61217c7c35716f8d061beabca950d63"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/full-seam-e-bar9-17.mp3",
+      "bytes": 378986,
+      "sha256": "6f90015fa4fcf60c05b651f0c892a94805af7aa76fdf4d8aa8ad295023e88cc0"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/square-seam-a-bar9-33.mp3",
+      "bytes": 372165,
+      "sha256": "b45248b3249926c3e9d9babe6170579f65949aae827e43ddfaae5ae72b793f4b"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/square-seam-b-bar5-29.mp3",
+      "bytes": 372685,
+      "sha256": "7e777316858dea0939e8f42cbfb82eb9445c583e7ca055aaad5a6ef915767607"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/square-seam-c-bar7-31.mp3",
+      "bytes": 370031,
+      "sha256": "cc545ed3143e05bafb13d61819b76b596321da829b7c617f1007474c2c788e8e"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/square-seam-current.mp3",
+      "bytes": 374137,
+      "sha256": "bfcbaf5672e694ba7483ac1ffb43f2f430603e1c30590d61bf5497d846096ff1"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/square-seam-d-bar17-33.mp3",
+      "bytes": 370445,
+      "sha256": "81bfbc747411e142f8daecf81cb69ff8529696576bebee88e23f020acc4f40ed"
+    },
+    {
+      "file": "docs/explorations/music-loops/media/seams/square-seam-e-bar1-25.mp3",
+      "bytes": 375809,
+      "sha256": "5526d50f345160ee55da30c56e48f8eb354f2b43e36fff152029364f38cffdc0"
+    }
+  ]
+}

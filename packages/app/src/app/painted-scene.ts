@@ -4,6 +4,7 @@ import type { CSSProperties } from 'react';
  * A screen's painted floor, as the flow page draws it (docs/explorations/app-screens, sceneLayer): one of the project's
  * paintings, and critters, heaps and pods standing on it by their feet. Every position is the feet, in percent of the
  * scene; every size is the drawing's width in the design's phone pixels, which the stylesheet scales to the screen.
+ * A room-scene instead uses the 1600 × 897 painting's coordinates and pixels (learn-steps.ts).
  */
 export type Painting = 'window' | 'dusk';
 export type Facing = 'left' | 'right' | null;

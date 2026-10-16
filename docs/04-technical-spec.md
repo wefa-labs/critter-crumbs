@@ -91,6 +91,8 @@ Postgres on Neon, provisioned through the Vercel Marketplace (**T1**, §10). Pla
 ```sql
 create table profiles (
   address        text primary key,          -- lowercase 0x…
+  generator_version text not null default '1',
+  renderer_version  text not null default '1',
   variant        smallint not null default 0 check (variant between 0 and 4),
   rerolls_used   smallint not null default 0 check (rerolls_used between 0 and 4),
   display_name   text,                       -- used when no ENS name
@@ -148,6 +150,11 @@ create table targets (
   owner_address  text,                                         -- null for options
   name           text not null,
   position       smallint not null,
+  portrait_variant smallint not null default 0,
+  generator_version text not null default '1',
+  renderer_version text not null default '1',
+  portrait_source text not null default 'legacy-baseline',
+  portrait_captured_at timestamptz,
   primary key (feast_id, target_id)
 );
 
@@ -188,6 +195,16 @@ create table result_attestations (
 Rules the schema enforces: crumb bounds (P9), deadline order, the invalid privacy combination (PRD §8), one statement per target, one profile per address across burrows (P10), left members keep history (R16, R17). Rules the server enforces: minimum three people-critters at creation and at scattering open (P8, P11), the single extension (R13), phase gates on every write (§4), membership on every read.
 
 **Derived target ids.** People: `keccak256(lowercaseAddress)`; options: `keccak256(feastId ‖ uint8(index))`. The generator seeds from the string `targetId` for options and from the address for people (Design System §5.1), so an option's critter is stable for the feast's life and a person's is stable for theirs.
+
+### 3.1 Versioned critter appearances (16 October 2026)
+
+A critter appearance is `{ generatorVersion, rendererVersion, variant }`; the address or option target ID supplies its seed input. The supported stored pairs are currently `1/1` and `2/2`. Migration `0009_critter_identity_versions.sql` backfills production profiles as `1/1`, preserving variants, reroll counts, locks and names. New profiles, including pre-added members, continue to default to `1/1`. These fields are authoritative stored metadata; the existing development art preview is not evidence of a persisted v2 selection.
+
+Profile responses from sign-in, `/me` and burrow membership include the versions. Ordinary `/me` edits reject version fields. No adoption operation or new-version selection allowance is enabled in this pass. Afolabi selected painted Garden Spirits, eight species, portraits first, and opt-in migration; finished art and its integration still require review (ADR 0005).
+
+Feast `portraits` are ordered with targets and return `{ targetId, generatorVersion, rendererVersion, variant, source, capturedAt }`. During people-feast draft/gathering they use the current profile (`source: 'profile'`, `capturedAt: null`). The participant-freeze transaction also saves the appearance into each target (`source: 'freeze'`, server capture time); later profile changes do not rewrite that saved appearance. Cancellation captures people appearances too. Option appearances are saved at creation (`source: 'creation'`) and are independent of the creator's profile. Target IDs, positions, frozen participants and all tally/signature inputs retain their existing contracts.
+
+Existing target records receive the current-known v1/profile-variant baseline with `source: 'legacy-baseline'` and no capture time. This does not reconstruct an earlier appearance. The migration is intended for the v1 production lineage; audit any development-only v2 data separately before rollout. Freeze remains a first-request server transaction as described in §4, not an event executed at the deadline. Later consent integration must pin affected active feasts before changing a profile's version and retain previous choices. The current renderer continues to use its existing build selection until that integration is reviewed; these storage fields alone do not enable mixed-version rendering or publish provenance.
 
 ## 4. Time and phase
 

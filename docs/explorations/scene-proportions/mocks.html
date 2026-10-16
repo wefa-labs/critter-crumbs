@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scene Mocks</title>
+<style>
+:root { --bg:#F6F0E4; --ink:#2E2226; --soft:#6B5B5E; --gold:#D9A441; --line:rgb(46 34 38 / .14); color-scheme:light; }
+* { box-sizing:border-box; }
+body { margin:0; background:#EDE6DA; color:var(--ink); font:15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { padding:20px; } h1 { font-size:22px; margin:0 0 6px; } main > p { max-width:90ch; color:var(--soft); margin:0 0 12px; }
+section > h2 { font-size:18px; margin:22px 0 10px; }
+.row-frames { display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; }
+figure { margin:0; } figcaption { font-size:12px; color:var(--soft); text-align:center; margin-top:6px; }
+.frame { position:relative; overflow:hidden; background:var(--bg); border:1.5px solid var(--ink); border-radius:22px; display:flex; flex-direction:column; }
+.bar { flex:none; height:64px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; background:var(--bg); border-bottom:1px solid var(--line); }
+.wordmark { font-family:Grandstander, system-ui; font-weight:900; font-size:22px; letter-spacing:-.01em; }
+.music { width:44px; height:44px; display:grid; place-items:center; border-radius:50%; border:1.5px solid var(--ink); }
+.floor { position:relative; flex:none; overflow:hidden; }
+.frame.phone .floor { margin-bottom:-24px; }
+.body.desktop { flex:1; display:flex; } .body.desktop .floor { flex:1; }
+.room { position:relative; overflow:hidden; }
+.paint { position:absolute; inset:0; background-repeat:no-repeat; background-position:center bottom; filter:saturate(.82) brightness(1.05) sepia(.1); }
+.light-feast .paint { filter:saturate(.95) brightness(1.08) sepia(.22); }
+.wash { position:absolute; inset:0; background:linear-gradient(to bottom, rgb(246 240 228 / .05), rgb(246 240 228 / .2) 55%, rgb(246 240 228 / .42)); }
+.crit, .prop { position:absolute; line-height:0; }
+.crit { translate:-50% -93.3%; } .prop { translate:-50% -100%; }
+.crit svg, .prop svg { display:block; width:100%; height:auto; overflow:visible; }
+.portrait { --scale-x:1; --scale-y:1; --head-tilt:0deg; --lean-z:0deg; --lift-y:0px; --lids:1; --ear-l:0deg; --ear-r:0deg; }
+.portrait__figure { transform-origin:60px 140px; transform:translateY(calc(-1 * var(--lift-y))) rotate(var(--lean-z)) scale(var(--scale-x), var(--scale-y)); }
+.portrait__head { transform:rotate(var(--head-tilt)); } .portrait__ear { transform:rotate(var(--ear-base)); }
+.portrait__ear--l { transform:rotate(calc(var(--ear-base) + var(--ear-l))); } .portrait__ear--r { transform:rotate(calc(var(--ear-base) - var(--ear-r))); }
+.portrait__eye { scale:1 var(--lids); } .portrait__sleep-eye { opacity:0; }
+.portrait[data-asleep="true"] .portrait__eye { opacity:0; } .portrait[data-asleep="true"] .portrait__sleep-eye { opacity:1; }
+.portrait__cheek { scale:var(--cheeks); } .portrait-v2 .p-calm { opacity:calc(1 - var(--mouth)); } .portrait-v2 .portrait__mouth { opacity:var(--mouth); }
+.sheet { position:relative; z-index:2; flex:none; display:flex; flex-direction:column; gap:12px; padding:22px 20px 20px; background:var(--bg); border-top:1.5px solid var(--ink); border-radius:22px 22px 0 0; box-shadow:0 -6px 16px rgb(46 34 38 / .12); overflow:hidden; }
+.mock-content { min-height:0; overflow:auto; display:flex; flex-direction:column; gap:12px; }
+.mock-actions { flex:none; margin-top:auto; padding:2px; }
+.panel { flex:none; display:flex; flex-direction:column; gap:14px; padding:32px; background:var(--bg); border-left:1px solid var(--line); }
+.sheet h2, .panel h2 { margin:0; font-size:20px; line-height:1.25; }
+.sheet p, .panel p { margin:0; }
+.help { color:var(--soft); font-size:14px; }
+.between { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+.chip { font-size:12px; font-weight:700; padding:3px 10px; border-radius:999px; background:#DEF5DA; color:#156152; }
+.field { display:grid; gap:6px; font-size:14px; font-weight:700; }
+.input { display:flex; justify-content:space-between; align-items:center; min-height:48px; padding:0 14px; border:1.5px solid var(--ink); border-radius:14px; background:#FBF7EF; font-weight:600; font-size:16px; }
+.input i { font-style:normal; font-size:12px; color:var(--soft); font-weight:400; }
+.grow { flex:1; }
+.actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+button { font:inherit; font-weight:700; min-height:52px; border-radius:999px; border:1.5px solid var(--ink); color:var(--ink); box-shadow:2px 3px 0 var(--ink); }
+button.soft { background:#EADFD2; } button.pill { background:var(--gold); } button.wide { width:100%; }
+.dots { display:flex; gap:6px; } .dots i { width:8px; height:8px; border-radius:4px; background:var(--line); } .dots i[data-on] { width:22px; background:var(--ink); }
+.mini-results { display:grid; gap:4px; }
+.mini-results .row { display:grid; grid-template-columns:1fr auto 52px; gap:10px; align-items:baseline; padding:4px 10px; border-radius:12px; background:#FBF7EF; font-variant-numeric:tabular-nums; }
+.mini-results .share { color:var(--soft); text-align:right; font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Scene mocks</h1>
+<p>Two screens that do not exist yet, drawn on the room rule of the README: the painting at the launcher's zoom with its foot on the floor's foot, critters placed in painting coordinates. Version 2 critters (the art direction is a separate choice). Copy shown is a proposal; the behaviour is Codex's.</p>
+<div id="mocks"></div>
+</main>
+<script src="lib/mocks.js"></script>
+</body>
+</html>

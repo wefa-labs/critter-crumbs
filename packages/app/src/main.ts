@@ -34,6 +34,7 @@ if (import.meta.env.DEV && location.pathname === '/dev/screens') {
   reactRoot.render(createElement(WorldTraitWorkshop));
   import.meta.hot?.dispose(() => reactRoot.unmount());
 } else {
+  root.classList.add('app-shell');
   const reactRoot = createRoot(root);
   reactRoot.render(createElement(App));
   import.meta.hot?.dispose(() => reactRoot.unmount());

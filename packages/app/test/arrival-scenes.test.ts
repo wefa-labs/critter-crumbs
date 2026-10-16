@@ -6,7 +6,8 @@ import { INVITE_SCENE, LAUNCHER_SCENE, sheetScreenStyle } from '../src/app/paint
 /* Expected values are read off the flow page, never off the app (docs/explorations/app-screens/index.html):
    launcherScene(), circle(), and SCREENS.invite, ['learn-handful'], ['learn-tap'] and ['learn-private']. The launcher's
    critters are the one exception: they are drawn about 1.4 times the flow page's and stand further apart, at Afolabi's
-   word (docs/decisions.md, 2026-10-11, "a bit larger in the launch view"). */
+   word (docs/decisions.md, 2026-10-11, "a bit larger in the launch view"). The tutorial's room coordinates now follow
+   docs/explorations/scene-proportions/README.md and the approved 16 October QA scope. */
 const place = ({ x, y, size }: { x: number; y: number; size: number }) => [x, y, size];
 
 describe('the launcher', () => {
@@ -67,27 +68,30 @@ describe('arriving by a link', () => {
 });
 
 describe('the first steps', () => {
-  const [handful, tap, hidden] = LEARN_STEPS;
+  const [handful, tap, hidden, opened] = LEARN_STEPS;
 
   it('shows the same handful at each of four critters’ feet', () => {
     expect(handful!.painting).toBe('window');
-    expect(handful!.critters.map(place)).toEqual([[18, 78, 95], [40, 84, 105], [62, 84, 105], [83, 78, 95]]);
-    expect(handful!.heaps.map(heap => [...place(heap), heap.crumbs])).toEqual([[27, 81, 34, 6], [50, 87, 34, 6], [72, 87, 34, 6], [92, 81, 34, 6]]);
+    expect(handful!.critters.map(place)).toEqual([[39.4, 90, 165], [46.1, 94, 190], [54.5, 93, 190], [61, 89, 165]]);
+    expect(handful!.heaps.map(heap => [...place(heap), heap.crumbs])).toEqual([[43, 91.5, 52, 6], [50, 95.5, 52, 6], [58.5, 95, 52, 6], [64.5, 90.5, 52, 6]]);
   });
 
   it('gives ten practice crumbs to three critters on the second step, and only there', () => {
-    expect(tap!.critters.map(place)).toEqual([[24, 80, 110], [50, 64, 95], [76, 80, 110]]);
-    expect([place(tap!.practice!), tap!.practice!.crumbs]).toEqual([[50, 90, 64], 10]);
-    expect([handful!.practice, hidden!.practice]).toEqual([undefined, undefined]);
+    expect(tap!.critters.map(place)).toEqual([[40, 91.5, 190], [50, 85, 170], [60, 91.5, 190]]);
+    expect([place(tap!.practice!), tap!.practice!.crumbs]).toEqual([[50, 95.5, 88], 10]);
+    expect([handful!.practice, hidden!.practice, opened!.practice]).toEqual([undefined, undefined, undefined]);
   });
 
-  it('ends at dusk with everyone asleep and a closed pod where each handful was', () => {
+  it('shows privacy at dusk with everyone asleep and a closed pod where each handful was', () => {
     expect(hidden!.painting).toBe('dusk');
     expect(hidden!.critters.every(critter => critter.asleep)).toBe(true);
-    expect(hidden!.pods.map(place)).toEqual([[27, 80, 26], [50, 86, 26], [72, 86, 26], [92, 80, 26]]);
+    expect(hidden!.pods.map(place)).toEqual([[43, 91, 40], [50, 95, 40], [58.5, 94.5, 40], [64.5, 90, 40]]);
   });
 
-  it('keeps one sheet height for all three, so the floor does not move between steps', () => {
-    expect(sheetScreenStyle(LEARN_SHEET_HEIGHT)).toEqual({ '--sheet-h': '300px', '--floor-h': 472 });
+  it('keeps one sheet height for all four, returning to an awake group at the feast', () => {
+    expect(LEARN_STEPS).toHaveLength(4);
+    expect(opened!.painting).toBe('window');
+    expect(opened!.critters.every(critter => !critter.asleep)).toBe(true);
+    expect(sheetScreenStyle(LEARN_SHEET_HEIGHT)).toEqual({ '--sheet-h': '410px', '--floor-h': 362 });
   });
 });
