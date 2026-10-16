@@ -8,7 +8,8 @@ const NS = 'http://www.w3.org/2000/svg';
 export const UNIT = 46;
 const FOOT = 140, CENTER = 60;
 /** What a drawing remembers: its measures, and the pose the simulation last showed it in (portraits/pose.ts). */
-export interface PortraitState { eyeRadius: number; headRadius: number; asleep?: boolean; scale?: number; cleanup?: () => void }
+export interface PortraitRig { scaleX: number; scaleY: number; liftY: number; leanZ: number; headTilt: number; earL: number; earR: number; lids: number; mouth: number; cheeks: number; pupilX: number; pupilY: number }
+export interface PortraitState { eyeRadius: number; headRadius: number; asleep?: boolean; scale?: number; cleanup?: () => void; applyRig?: (state: { rig: PortraitRig; now: number; asleep: boolean; quiet: boolean }) => void }
 const state = new WeakMap<SVGSVGElement, PortraitState>();
 export const portraitState = (svg: SVGSVGElement) => state.get(svg);
 export interface PortraitOptions { name: string; decorative?: boolean; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; fed?: number }
@@ -88,6 +89,6 @@ export function createPortrait(document: Document, params: CritterParameters, op
   return svg;
 }
 
-export function rememberPortrait(svg: SVGSVGElement, radii: { eyeRadius: number; headRadius: number }) { state.set(svg, radii); }
+export function rememberPortrait(svg: SVGSVGElement, radii: PortraitState) { state.set(svg, radii); }
 
 export function disposePortrait(svg: SVGSVGElement) { state.get(svg)?.cleanup?.(); state.delete(svg); }

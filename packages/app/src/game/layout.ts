@@ -68,8 +68,12 @@ function geometry(W: number, floor: number, n: number, desktop: boolean, grown: 
     const frontY = floor * 0.95, backY = Math.max(floor * 0.22, back * 1.04 + 40), ry = Math.min((frontY - backY) / (1 + beside), floor * 0.4);
     return { u, cx: W / 2, cy: backY + ry, rx: W * (n > 8 ? 0.44 : 0.42), ry, back, front: CIRCLE_FEEL.desktop.front * u * room, focusY: floor - 14 * u, focusSize: CIRCLE_FEEL.desktop.focus * u * growth, ppu: 4.2 * u, maxHeap: 210 * u };
   }
-  const crowd = (n > 8 ? 0.8 : n > 6 ? 0.94 : 1) * growth;
-  return { u: 1, cx: W / 2, cy: floor * (n > 8 ? 0.475 : n > 6 ? 0.455 : 0.45), rx: W * 0.34, ry: floor * (n > 8 ? 0.32 : n > 6 ? 0.29 : 0.28), back: CIRCLE_FEEL.phone.back * crowd, front: CIRCLE_FEEL.phone.front * crowd, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus, ppu: 3.4, maxHeap: 150 };
+  // Short phone floors need smaller bodies as well as closer feet; otherwise the focused head blocks the tags.
+  const compact = Math.min(1, floor / 550), crowd = (n > 8 ? 0.8 : n > 6 ? 0.94 : 1) * growth * compact;
+  const cy = floor * (n > 8 ? 0.475 : n > 6 ? 0.455 : 0.45), ry = floor * (n > 8 ? 0.32 : n > 6 ? 0.29 : 0.28);
+  // Reserve two rows of tag space above the back row instead of compressing it into the header.
+  const backRow = Math.max(cy - ry, compact < 1 ? Math.min(120, floor * .34) : 0), frontRow = cy + ry;
+  return { u: 1, cx: W / 2, cy: (backRow + frontRow) / 2, rx: W * 0.34, ry: (frontRow - backRow) / 2, back: CIRCLE_FEEL.phone.back * crowd, front: CIRCLE_FEEL.phone.front * crowd, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus * compact, ppu: 3.4 * compact, maxHeap: 150 * compact };
 }
 
 /**
@@ -186,14 +190,26 @@ export function layoutGame(input: LayoutInput) {
 
   /* the tags, centred above each head and solved together so a tall back critter leaves room (layoutRing) */
   const visible = slots.filter(it => !it.tag.hidden), tolerance = desktop ? (input.viewport.width === 1280 ? 161 : 0) : n > 8 ? 123 : 0;
+  // On short floors portrait bounds are soft obstacles; readable tags, crumbs and controls retain priority.
+  const compactLabels = !desktop && H - dockH < 550;
   const choices = visible.map(it => {
+    const seen = new Set<string>();
     const above = it.figure.y - 4 - it.tag.height, widths = it.shortWidth < it.fullWidth && !(it.slot === 0 && desktop) ? [it.fullWidth, it.shortWidth] : [it.fullWidth];
-    const options = widths.flatMap((width, shortIndex) => Array.from({ length: 65 }, (_, i) => {
-      const box: Rect = { x: Math.min(Math.max(it.foot.x - width / 2, 6), W - 6 - width), y: Math.max(2, above - i * 4), width, height: it.tag.height };
+    const positions = Array.from({ length: 65 }, (_, i) => above - i * 4);
+    if (compactLabels) {
+      const below = Math.max(it.foot.y + 6, it.pile.y + it.pile.height + 6);
+      positions.push(...Array.from({ length: 9 }, (_, i) => below + i * 4));
+    }
+    const options = widths.flatMap((width, shortIndex) => positions.map(y => {
+      const box: Rect = { x: Math.min(Math.max(it.foot.x - width / 2, 6), W - 6 - width), y: Math.max(2, y), width, height: it.tag.height };
       const hit = slots.reduce((maximum, other) => other === it ? maximum : Math.max(maximum, overlapArea(box, other.figure)), 0);
       const blocked = (showHeap && overlapArea(box, { x: heap.x - 2, y: heap.y - 2, width: heap.width + 4, height: heap.height + 4 }) > 0) || obstacles.some(other => overlapArea(box, other) > 0) || box.y + box.height > dock.y;
-      return { box, short: shortIndex > 0, cost: i + shortIndex * 20 + hit, valid: width <= W - 12 && !blocked && hit <= tolerance };
-    })).filter(option => option.valid).sort((a, b) => a.cost - b.cost);
+      return { box, short: shortIndex > 0, cost: Math.abs(y - above) / 4 + (y > above ? 10 : 0) + shortIndex * 20 + hit, valid: width <= W - 12 && !blocked && (hit <= tolerance || compactLabels) };
+    })).filter(option => {
+      const key = `${option.box.x},${option.box.y},${option.box.width}`;
+      if (!option.valid || seen.has(key)) return false;
+      seen.add(key); return true;
+    }).sort((a, b) => a.cost - b.cost);
     return { it, candidates: options };
   }).sort((a, b) => a.candidates.length - b.candidates.length);
   const assigned: Rect[] = [], selected = new Map<number, { box: Rect; short: boolean }>();
@@ -201,7 +217,12 @@ export function layoutGame(input: LayoutInput) {
   function fit(index: number): boolean {
     if (index === choices.length) return true;
     if (++attempts > 12000) return false;
-    const { it, candidates: options } = choices[index]!;
+    // Re-evaluate the tightest remaining tag after each placement. A fixed order exhausts the search on short floors.
+    const remaining = choices.filter(choice => !selected.has(choice.it.index)).map(choice => ({
+      it: choice.it, candidates: choice.candidates.filter(candidate => !assigned.some(other => overlapArea(candidate.box, other) > 0)),
+    })).sort((a, b) => a.candidates.length - b.candidates.length);
+    const { it, candidates: options } = remaining[0]!;
+    if (!options.length) return false;
     for (const candidate of options) {
       if (assigned.some(other => overlapArea(candidate.box, other) > 0)) continue;
       assigned.push(candidate.box); selected.set(it.index, candidate);

@@ -25,9 +25,10 @@ export const NAME_SIZES = ['20', '16', '14'] as const;
 
 export const elementStyle = (element: CritterElement) => ({ '--element-soft': `var(--cc-element-${element}-soft)`, '--element-shadow': `var(--cc-element-${element}-shadow)` }) as CSSProperties;
 /** A face cropped to the head at any size, as the flow page's face(): the drawing 1.9 times the circle. */
-export function faceCrop(size: number, headY: number) {
-  const width = size * 1.9, height = width * 150 / 120;
-  return { '--face-size': `${size}px`, '--face-width': `${width}px`, '--face-top': `${size / 2 - headY * height}px` } as CSSProperties;
+export function faceCrop(size: number, headY: number, headX = .5, headRadius?: number) {
+  const scale = headRadius === undefined ? 1.9 : Math.max(1.7, Math.min(3.2, .4 / headRadius));
+  const width = size * scale, height = width * 150 / 120;
+  return { '--face-size': `${size}px`, '--face-width': `${width}px`, '--face-top': `${size / 2 - headY * height}px`, '--face-left': `${size / 2 - headX * width}px` } as CSSProperties;
 }
 /** A scene's image filter by its token, so the look in use (light or dark) decides it. */
 export const sceneFilterStyle = (token: string) => ({ '--scene-image-filter': `var(--cc-${token})` }) as CSSProperties;

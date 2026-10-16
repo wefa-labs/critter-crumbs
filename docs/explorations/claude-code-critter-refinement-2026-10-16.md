@@ -1,5 +1,7 @@
 # Claude Code brief: refine painted Garden Spirits
 
+> Update, 16 October: Afolabi subsequently asked Codex to execute this brief and integrate a reversible review preview. See [the completed package](garden-refinement/README.md) and the later decision in `docs/decisions.md`. The original scope below is retained as the starting brief; its app-import restriction is superseded. Personal adoption and production release remain pending.
+
 ## Outcome and approved direction
 
 Refine **painted Garden Spirits, eight species, portraits first** into a concrete art package for Afolabi to review. The direction is approved; the finished drawings and their integration are not. Existing people will retain their critters unless they explicitly adopt the new version.

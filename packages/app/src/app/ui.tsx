@@ -47,7 +47,8 @@ export function PortraitImage({ address, variant, name, size = 40, asleep = fals
 }
 /** The same face and 44 px target open the profile navigation on every screen. */
 export function ProfileButton({ address, variant, onClick }: { address: string; variant: number; onClick: (() => void) | undefined }) {
-  const face = faceCrop(44, portraitMetrics(generateCritter(address, variant, critterVersion)).extent.headY);
+  const extent = portraitMetrics(generateCritter(address, variant, critterVersion)).extent;
+  const face = faceCrop(44, extent.headY, extent.headX, extent.headX === undefined ? undefined : extent.headRadius);
   return <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onClick}><PortraitImage address={address} variant={variant} name={copy['scatter.own.short']} size="stage" /></button>;
 }
 /** A native modal dialog: opened on mount, announced, and focus returned where it was when it closes. */
