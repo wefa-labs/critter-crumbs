@@ -1,0 +1,955 @@
+{
+ "browser": "Chromium 151.0.7922.34 (Playwright 1.62.1, headless)",
+ "reducedMotion": true,
+ "results": [
+  {
+   "version": "v1",
+   "viewport": [
+    1440,
+    900
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 826,
+   "deepestFigure": 15.4,
+   "deepestShadow": 21.8,
+   "figuresBelowEdge": 6,
+   "highestHead": 576.8,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 99.6,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 361.1,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 96.5,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    1440,
+    900
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 826,
+   "deepestFigure": 17.5,
+   "deepestShadow": 24.7,
+   "figuresBelowEdge": 5,
+   "highestHead": 524.5,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 203.9,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 571.3,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 207.8,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    1280,
+    720
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 646,
+   "deepestFigure": 11.5,
+   "deepestShadow": 16.2,
+   "figuresBelowEdge": 6,
+   "highestHead": 443.9,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    1280,
+    720
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 646,
+   "deepestFigure": 12.8,
+   "deepestShadow": 18.2,
+   "figuresBelowEdge": 5,
+   "highestHead": 405.5,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 29.8,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 70.7,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 29,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    390,
+    844
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 260,
+   "deepestFigure": 5.6,
+   "deepestShadow": 8,
+   "figuresBelowEdge": 6,
+   "highestHead": 126.3,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    390,
+    844
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 260,
+   "deepestFigure": 6.4,
+   "deepestShadow": 9.1,
+   "figuresBelowEdge": 5,
+   "highestHead": 106.7,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    320,
+    568
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 260,
+   "deepestFigure": 5.6,
+   "deepestShadow": 8,
+   "figuresBelowEdge": 6,
+   "highestHead": 126.3,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v1",
+   "viewport": [
+    320,
+    568
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 260,
+   "deepestFigure": 6.4,
+   "deepestShadow": 9.1,
+   "figuresBelowEdge": 5,
+   "highestHead": 106.7,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    1440,
+    900
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 826,
+   "deepestFigure": 25.9,
+   "deepestShadow": null,
+   "figuresBelowEdge": 6,
+   "highestHead": 574.3,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 652.7,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 1225.4,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 491.3,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    1440,
+    900
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 826,
+   "deepestFigure": 28.9,
+   "deepestShadow": null,
+   "figuresBelowEdge": 5,
+   "highestHead": 543,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 810.2,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 1506.9,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 518.6,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    1280,
+    720
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 646,
+   "deepestFigure": 19.3,
+   "deepestShadow": null,
+   "figuresBelowEdge": 6,
+   "highestHead": 442,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 339.2,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 421.5,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 351.8,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    1280,
+    720
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 646,
+   "deepestFigure": 21.3,
+   "deepestShadow": null,
+   "figuresBelowEdge": 5,
+   "highestHead": 419.2,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 446.4,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 704.2,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 229,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    390,
+    844
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 260,
+   "deepestFigure": 9.6,
+   "deepestShadow": null,
+   "figuresBelowEdge": 6,
+   "highestHead": 125.3,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    390,
+    844
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 260,
+   "deepestFigure": 10.7,
+   "deepestShadow": null,
+   "figuresBelowEdge": 5,
+   "highestHead": 113.6,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    320,
+    568
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 260,
+   "deepestFigure": 9.6,
+   "deepestShadow": null,
+   "figuresBelowEdge": 6,
+   "highestHead": 125.3,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "v2",
+   "viewport": [
+    320,
+    568
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 260,
+   "deepestFigure": 10.7,
+   "deepestShadow": null,
+   "figuresBelowEdge": 5,
+   "highestHead": 113.6,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 826,
+   "deepestFigure": 17.6,
+   "deepestShadow": 23.2,
+   "figuresBelowEdge": 1,
+   "highestHead": 584,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 347.2,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 250.2,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 826,
+   "deepestFigure": 20,
+   "deepestShadow": 26.3,
+   "figuresBelowEdge": 1,
+   "highestHead": 560.6,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 24.1,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 383.7,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    1280,
+    720
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 646,
+   "deepestFigure": 13.1,
+   "deepestShadow": 17.3,
+   "figuresBelowEdge": 1,
+   "highestHead": 449.2,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 85.5,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    1280,
+    720
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 646,
+   "deepestFigure": 14.7,
+   "deepestShadow": 19.4,
+   "figuresBelowEdge": 1,
+   "highestHead": 432.4,
+   "controls": [
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": false
+    },
+    {
+     "name": "Results",
+     "overlap": 88,
+     "reachable": false
+    },
+    {
+     "name": "Next",
+     "overlap": 128.5,
+     "reachable": false
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 260,
+   "deepestFigure": 6.4,
+   "deepestShadow": 8.5,
+   "figuresBelowEdge": 1,
+   "highestHead": 129,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 260,
+   "deepestFigure": 7.3,
+   "deepestShadow": 9.7,
+   "figuresBelowEdge": 1,
+   "highestHead": 120.2,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    320,
+    568
+   ],
+   "count": 10,
+   "critters": 10,
+   "dockTop": 260,
+   "deepestFigure": 6.4,
+   "deepestShadow": 8.5,
+   "figuresBelowEdge": 1,
+   "highestHead": 129,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  },
+  {
+   "version": "garden",
+   "viewport": [
+    320,
+    568
+   ],
+   "count": 8,
+   "critters": 8,
+   "dockTop": 260,
+   "deepestFigure": 7.3,
+   "deepestShadow": 9.7,
+   "figuresBelowEdge": 1,
+   "highestHead": 120.2,
+   "controls": [
+    {
+     "name": "Close",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Replay Feast",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Download CSV",
+     "overlap": 0,
+     "reachable": null
+    },
+    {
+     "name": "Previous",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Results",
+     "overlap": 0,
+     "reachable": true
+    },
+    {
+     "name": "Next",
+     "overlap": 0,
+     "reachable": true
+    }
+   ],
+   "errors": []
+  }
+ ],
+ "method": "/dev/screens?capture&state=results&count=N&scene=window with ?critters=1 (v1), no query (v2) or ?critters=garden; reduced motion so the huddle is at rest; device pixel ratio 1. Distances are from the dock's top edge in CSS px (positive: below it). A control is reachable when a press 3 px inside its top edge reaches it; controls scrolled out of view are not tested (null)."
+}
