@@ -45,10 +45,18 @@ export function PortraitImage({ address, variant, name, size = 40, asleep = fals
   }, [address, variant, name, size, asleep, decorative, fed]);
   return <div className={size === 'stage' ? 'stage' : 'portrait-slot'} ref={host} />;
 }
+/** A face crop around the head; the review art supplies its own head centre and radius (game/styles.ts). */
+function faceStyle(address: string, variant: number, size: number) {
+  const extent = portraitMetrics(generateCritter(address, variant, critterVersion)).extent;
+  return faceCrop(size, extent.headY, extent.headX, extent.headX === undefined ? undefined : extent.headRadius);
+}
+/** A critter's face cropped to the head, as the flow page draws the givers' table (face()). */
+export function CritterFace({ address, variant, name, size }: { address: string; variant: number; name: string; size: number }) {
+  return <span className="critter-face" style={faceStyle(address, variant, size)} aria-hidden="true"><PortraitImage address={address} variant={variant} name={name} size="stage" /></span>;
+}
 /** The same face and 44 px target open the profile navigation on every screen. */
 export function ProfileButton({ address, variant, onClick }: { address: string; variant: number; onClick: (() => void) | undefined }) {
-  const extent = portraitMetrics(generateCritter(address, variant, critterVersion)).extent;
-  const face = faceCrop(44, extent.headY, extent.headX, extent.headX === undefined ? undefined : extent.headRadius);
+  const face = faceStyle(address, variant, 44);
   return <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onClick}><PortraitImage address={address} variant={variant} name={copy['scatter.own.short']} size="stage" /></button>;
 }
 /** A native modal dialog: opened on mount, announced, and focus returned where it was when it closes. */

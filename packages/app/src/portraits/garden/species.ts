@@ -71,6 +71,13 @@ function ear(pen: Pen, head: SVGGElement, side: -1 | 1, at: [number, number], an
   if (inner) pen.patch(mirror, d, inner, 0.85, { transform: 'translate(0 -1) scale(.55 .7)' });
   return rot;
 }
+/**
+ * A wing group whose origin is the wing's root on the body. The placement lives on a parent group, so the sleep fold
+ * in style.css (`scale` on `.cr-wing`) pivots at the root and the mirrored wing stays on its own side.
+ */
+function wingAt(pen: Pen, parent: SVGGElement, root: string, side: number, fold: number) {
+  return pen.g(pen.g(parent, { transform: root }), { class: `cr-wing cr-wing-${side < 0 ? 'l' : 'r'}`, transform: `scale(${f(side * fold)} 1)` });
+}
 const roundEar = (w: number, L: number) => `M${f(-w)} 0C${f(-w * 1.15)} ${f(-L * 0.62)} ${f(-w * 0.45)} ${f(-L * 1.02)} 0 ${f(-L)}C${f(w * 0.5)} ${f(-L * 1.02)} ${f(w * 1.15)} ${f(-L * 0.6)} ${f(w)} 0Z`;
 const pointEar = (w: number, L: number) => `M${f(-w)} 0C${f(-w * 0.9)} ${f(-L * 0.45)} ${f(-w * 0.25)} ${f(-L * 0.9)} ${f(-w * 0.05)} ${f(-L)}Q0 ${f(-L * 1.04)} ${f(w * 0.08)} ${f(-L * 0.98)}C${f(w * 0.35)} ${f(-L * 0.85)} ${f(w * 0.95)} ${f(-L * 0.42)} ${f(w)} 0Z`;
 /** A small wind-blown wisp, for cloud tails and drifting edges. */
@@ -136,7 +143,7 @@ function moth(d: GardenDraw): Species {
   return { geo: { top: cy - R - 22, left: CENTER - span - 4, right: CENTER + span + 4, headX: CENTER, headY: cy, headR: R, hover }, draw(pen, g, s) {
     const rand = stream(d.seed), fold = s.asleep ? 0.62 : 1;
     for (const side of [-1, 1] as const) {
-      const wingG = pen.g(g, { class: `cr-wing cr-wing-${side < 0 ? 'l' : 'r'}`, transform: `translate(${f(CENTER)} ${f(cy)}) scale(${f(side * fold)} 1)` });
+      const wingG = wingAt(pen, g, `translate(${f(CENTER)} ${f(cy)})`, side, fold);
       const upper = blob([[R * 0.42, -R * 0.4], [R * 0.75, -R * 1.02], [span * 0.72, -R * 1.25], [span * 1.02, -R * 0.95], [span * 0.95, -R * 0.2], [span * 0.68, R * 0.05], [R * 0.55, R * 0.08]], 0.85);
       const lower = blob([[R * 0.45, R * 0.02], [span * 0.6, R * 0.12], [span * 0.74, R * 0.55], [span * 0.52, R * 0.95], [span * 0.38, R * 0.78], [R * 0.55, R * 0.62]], 0.85);
       pen.form(wingG, lower, toneOf(mix(wing.base, CREAM, 0.38)), { size: R * 0.5, weight: 0.8, grain: true });
@@ -234,7 +241,7 @@ function koi(d: GardenDraw): Species {
     if (pattern === 0) { spot(cx + rx * 0.35, cy - ry * 0.55, rx * 0.42, patchA); spot(cx - rx * 0.45, cy - ry * 0.75, rx * 0.26, patchB); }
     else if (pattern === 1) spot(cx - 1, cy - ry * 0.88, rx * 0.24, patchB);
     else for (let k = 0; k < 5; k++) spot(cx + rx * (-0.55 + 1.25 * rand()), cy - ry * (0.15 + 0.65 * rand()), rx * (0.1 + 0.08 * rand()), k % 2 ? patchA : patchB);
-    for (const side of [-1, 1]) pen.form(g, `M${f(cx + side * rx * 0.55)} ${f(cy + ry * 0.45)}c${f(side * 6)} ${f(2)} ${f(side * 12)} ${f(8)} ${f(side * 11)} ${f(14)}c${f(-side * 5)} ${f(-1)} ${f(-side * 10)} ${f(-5)} ${f(-side * 11)} ${f(-14)}Z`, finTone, { weight: 0.45, size: 4, attrs: { opacity: 0.9, class: `cr-wing cr-wing-${side < 0 ? 'l' : 'r'}` } });
+    for (const side of [-1, 1]) pen.form(pen.g(g, { transform: `translate(${f(cx + side * rx * 0.55)} ${f(cy + ry * 0.45)})` }), `M0 0c${f(side * 6)} ${f(2)} ${f(side * 12)} ${f(8)} ${f(side * 11)} ${f(14)}c${f(-side * 5)} ${f(-1)} ${f(-side * 10)} ${f(-5)} ${f(-side * 11)} ${f(-14)}Z`, finTone, { weight: 0.45, size: 4, attrs: { opacity: 0.9, class: `cr-wing cr-wing-${side < 0 ? 'l' : 'r'}` } });
     const anchor = pen.g(g, { transform: `translate(${f(cx - 2)} ${f(cy - 1)})` }), head = pen.g(anchor, { class: 'portrait__head' });
     const r = Math.max(rx, ry) * 0.88;
     for (const side of [-1, 1]) pen.stroke(head, `M${f(side * r * 0.2)} ${f(r * 0.48)}q${f(side * 4)} ${f(3)} ${f(side * 3)} ${f(7)}q${f(-side * 1)} ${f(2)} ${f(side * 1.5)} ${f(3)}`, pen.lw * 0.5, { opacity: 0.7 });
@@ -291,7 +298,7 @@ function phoenix(d: GardenDraw): Species {
     }
     // wings: broad autumn leaves raised from the shoulders, their edges glowing like embers
     for (const side of [-1, 1]) {
-      const wg = pen.g(g, { class: `cr-wing cr-wing-${side < 0 ? 'l' : 'r'}`, transform: `translate(${f(CENTER + side * R * 0.7)} ${f(cy + R * 0.1)}) rotate(${side * (s.asleep ? 80 : 42)}) scale(${f(side * fold)} 1)` });
+      const wg = wingAt(pen, g, `translate(${f(CENTER + side * R * 0.7)} ${f(cy + R * 0.1)}) rotate(${side * (s.asleep ? 80 : 42)})`, side, fold);
       const L = wingL, leaf = `M0 0C${f(L * 0.28)} ${f(-L * 0.4)} ${f(L * 0.62)} ${f(-L * 0.8)} ${f(L * 0.38)} ${f(-L * 1.05)}C${f(L * 0.3)} ${f(-L * 0.9)} ${f(L * 0.12)} ${f(-L * 0.95)} ${f(L * 0.02)} ${f(-L * 0.82)}C${f(-L * 0.12)} ${f(-L * 0.85)} ${f(-L * 0.35)} ${f(-L * 0.7)} ${f(-L * 0.25)} ${f(-L * 0.5)}C${f(-L * 0.42)} ${f(-L * 0.42)} ${f(-L * 0.4)} ${f(-L * 0.18)} ${f(-L * 0.18)} ${f(-L * 0.05)}Z`;
       pen.el('path', { d: leaf, fill: 'none', stroke: ELEMENT.fire.light, 'stroke-width': 4.5, opacity: 0.6 }, wg);
       pen.form(wg, leaf, leafTones[(1 + (side > 0 ? 1 : 0) + Math.floor(u[13]! * 2)) % 3]!, { size: L * 0.4, weight: 0.75, grain: true });
@@ -331,7 +338,7 @@ function lemur(d: GardenDraw): Species {
     pen.stroke(tail, curve(pts), 5.2, { stroke: fur.shadow, filter: null, 'stroke-dasharray': '3.4 4', 'stroke-linecap': 'butt' });
     wisp(pen, tail, CENTER + 38, by + 1, 9, { light: '#FFFFFF', base: '#F7F4FA', shadow: membrane.shadow });
     for (const side of [-1, 1]) {
-      const wg = pen.g(g, { class: `cr-wing cr-wing-${side < 0 ? 'l' : 'r'}`, transform: `translate(${CENTER} ${f(by)}) scale(${f(side * fold)} 1)` });
+      const wg = wingAt(pen, g, `translate(${CENTER} ${f(by)})`, side, fold);
       const wing = `M6 -16C${f(reach * 0.45)} -23 ${f(reach * 0.85)} -25 ${f(reach)} -19C${f(reach * 1.05)} -7 ${f(reach * 0.92)} 2 ${f(reach * 0.78)} 6C${f(reach * 0.62)} 12 ${f(reach * 0.4)} 10 ${f(reach * 0.28)} 17C${f(reach * 0.2)} 18 10 15 6 10Z`;
       pen.form(wg, wing, membrane, { size: 14, weight: 0.6, shadowOpacity: 0.35, attrs: { opacity: 0.9 } });
       for (let k = 0; k < 4; k++) pen.stroke(wg, `M8 ${f(-8 + k * 3)}Q${f(reach * 0.45)} ${f(-14 + k * 6)} ${f(reach * (0.95 - k * 0.12))} ${f(-14 + k * 6.5)}`, pen.lw * 0.3, { opacity: 0.3 });
@@ -409,6 +416,8 @@ export function paintGarden(document: Document, p: CritterV2, state: { size?: nu
   svg.setAttribute('viewBox', `0 0 120 ${BOX_H}`);
   svg.setAttribute('class', `portrait portrait-v2 critter garden garden-refined finish-${d.finish} species-${d.species} element-${d.element}${FLIERS.has(d.species) ? ' flier' : ''}`);
   svg.dataset.direction = 'garden-refined'; svg.dataset.species = d.species; svg.dataset.element = d.element; svg.dataset.asleep = String(!!state.asleep);
+  // as the other painters: the app's .portrait[data-size] rules hold a 40, 64 or 96 px portrait at its size
+  svg.dataset.size = String(state.size ?? 'stage');
   for (const [k, v] of Object.entries(extent)) svg.dataset[k === 'headY' ? 'hy' : k === 'headRadius' ? 'hr' : k] = v.toFixed(3);
   svg.style.setProperty('--d', `${(p.idlePhase * 5).toFixed(2)}s`);
   svg.style.setProperty('--cheeks', state.delighted ? '1' : '0');

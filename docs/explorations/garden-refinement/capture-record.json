@@ -1,0 +1,357 @@
+{
+ "date": "2026-10-16",
+ "browser": "Chromium 151.0.7922.34 (Playwright, headless)",
+ "deviceScaleFactor": 1,
+ "method": "Captured from the working tree after the completion fixes with a local Playwright harness (not part of the package). Each capture was checked for wings on opposite sides of every body and for console errors other than a visitor's expected 401.",
+ "assets": {
+  "files": 24,
+  "parse": true,
+  "uniqueIds": true,
+  "referencesResolve": true
+ },
+ "captures": [
+  {
+   "file": "images/eight-species-desktop.jpg",
+   "route": "docs/explorations/garden-refinement/index.html",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 146,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/three-foxes-comparison.jpg",
+   "route": "docs/explorations/garden-refinement/index.html",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 146,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/faces-desktop.jpg",
+   "route": "docs/explorations/garden-refinement/index.html",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 146,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/silhouettes-desktop.jpg",
+   "route": "docs/explorations/garden-refinement/index.html",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 146,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/expressions-desktop.jpg",
+   "route": "docs/explorations/garden-refinement/index.html",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 146,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/launcher-phone.jpg",
+   "route": "/?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/launcher-desktop.jpg",
+   "route": "/?critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-1-phone.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-2-phone.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "dark",
+   "portraits": 3,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-3-phone.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-4-phone.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-1-desktop.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-2-desktop.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "dark",
+   "portraits": 3,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-3-desktop.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/tutorial-4-desktop.jpg",
+   "route": "/how-it-works?critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "dark",
+   "portraits": 4,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/scattering-phone.jpg",
+   "route": "/dev/screens?capture&state=scatter&count=10&scene=window&critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "light",
+   "portraits": 11,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "focus": "Moss"
+  },
+  {
+   "file": "images/scattering-desktop.jpg",
+   "route": "/dev/screens?capture&state=scatter&count=10&scene=window&critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 11,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "focus": "Moss"
+  },
+  {
+   "file": "images/scattering-compact.jpg",
+   "route": "/dev/screens?capture&state=scatter&count=10&scene=window&critters=garden",
+   "viewport": [
+    320,
+    568
+   ],
+   "scheme": "light",
+   "portraits": 11,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "focus": "Clover"
+  },
+  {
+   "file": "images/scattering-dusk-720.jpg",
+   "route": "/dev/screens?capture&state=scatter&count=8&scene=dusk&critters=garden",
+   "viewport": [
+    1280,
+    720
+   ],
+   "scheme": "light",
+   "portraits": 9,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "focus": "Moss"
+  },
+  {
+   "file": "images/results-desktop.jpg",
+   "route": "/dev/screens?capture&state=results&count=10&scene=window&critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 21,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/results-phone.jpg",
+   "route": "/dev/screens?capture&state=results&count=10&scene=window&critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "light",
+   "portraits": 21,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/results-compact.jpg",
+   "route": "/dev/screens?capture&state=results&count=10&scene=window&critters=garden",
+   "viewport": [
+    320,
+    568
+   ],
+   "scheme": "light",
+   "portraits": 21,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0
+  },
+  {
+   "file": "images/onboarding-phone.jpg",
+   "route": "/?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "light",
+   "portraits": 3,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "identity": "Fresh local identity signed in through an injected test wallet (fixed key, address 0x06F093A1e484E49e66F03e2423786B6439A664f2, a phoenix chick); nothing kept, rerolled or saved."
+  },
+  {
+   "file": "images/onboarding-desktop.jpg",
+   "route": "/?critters=garden",
+   "viewport": [
+    1440,
+    900
+   ],
+   "scheme": "light",
+   "portraits": 3,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "identity": "Fresh local identity signed in through an injected test wallet (fixed key, address 0x06F093A1e484E49e66F03e2423786B6439A664f2, a phoenix chick); nothing kept, rerolled or saved."
+  },
+  {
+   "file": "images/onboarding-compact.jpg",
+   "route": "/?critters=garden",
+   "viewport": [
+    320,
+    568
+   ],
+   "scheme": "light",
+   "portraits": 3,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "identity": "Fresh local identity signed in through an injected test wallet (fixed key, address 0x06F093A1e484E49e66F03e2423786B6439A664f2, a phoenix chick); nothing kept, rerolled or saved."
+  },
+  {
+   "file": "images/members-phone.jpg",
+   "route": "/burrows/af760547-556c-40ef-a936-cb537575c89f?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "light",
+   "portraits": 9,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "identity": "Local rehearsal account 1 on a seeded local burrow."
+  },
+  {
+   "file": "images/profile-phone.jpg",
+   "route": "/burrows/af760547-556c-40ef-a936-cb537575c89f?critters=garden",
+   "viewport": [
+    390,
+    844
+   ],
+   "scheme": "light",
+   "portraits": 10,
+   "wingsOnOppositeSides": true,
+   "consoleErrors": 0,
+   "identity": "Local rehearsal account 1 on a seeded local burrow."
+  },
+  {
+   "file": "images/wing-fix-before-after.jpg",
+   "route": "composite",
+   "viewport": [
+    1440,
+    508
+   ],
+   "scheme": "light",
+   "note": "The cast row from eight-species-desktop.jpg at the review commit (6815240) above the same row after the fixes."
+  }
+ ]
+}

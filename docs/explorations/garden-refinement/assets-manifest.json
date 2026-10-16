@@ -5,123 +5,123 @@
   "files": [
     {
       "path": "assets/fox-0.svg",
-      "bytes": 19333,
-      "sha256": "70b0463dccc15ad8e1a286fe30f5ebb7420a87113c74f1a6867d8347d6c892c1"
+      "bytes": 19501,
+      "sha256": "d89702d22f485b2ce955dd2a416e3c7829dff154d91750c9c33ee09688ad99a1"
     },
     {
       "path": "assets/fox-1.svg",
-      "bytes": 20611,
-      "sha256": "28aec873649b17962dfb6b51fae1cb2ed2ff49f4cf44780083467e76a74c203f"
+      "bytes": 20795,
+      "sha256": "a9adfe600c7cafb45955cacfdae35b70871bddcac03d909dbb93271b54c9ad93"
     },
     {
       "path": "assets/fox-2.svg",
-      "bytes": 20721,
-      "sha256": "3468de868b08fa1c13115bbc0632a347ab07c96a0c6847071beb314adaee1a00"
+      "bytes": 20905,
+      "sha256": "477253ccff72387a28fd2c27f3d5d84c42b643ced783099883fcdf81f1506ba8"
     },
     {
       "path": "assets/koi-0.svg",
-      "bytes": 15644,
-      "sha256": "d18e492ec9a5f30f1429f027f7ce50429a91e93d21f563202371c3d8876d3286"
+      "bytes": 15848,
+      "sha256": "af11035c9731dee8ebb6067f988e8e177c3f73b7945e166a51d86521509ea9b1"
     },
     {
       "path": "assets/koi-1.svg",
-      "bytes": 15634,
-      "sha256": "5523bcc016f8387c9933b944df0e3bd6833d4f28fc3297420bb3b5f7a72f95f3"
+      "bytes": 15838,
+      "sha256": "d8988c09324b692cbf4286fa2af49dc4a9e79f8b461e27aca43d12248b0a8680"
     },
     {
       "path": "assets/koi-2.svg",
-      "bytes": 15714,
-      "sha256": "3e96fc749920661ce6d0de85efef0f067563f909083b9e1606bede5ae8d40799"
+      "bytes": 15922,
+      "sha256": "ba5fee12e32e7221484113fce0a34ec56b7fcc0920b2aa2df7abe1eb9cb7811e"
     },
     {
       "path": "assets/lamb-0.svg",
-      "bytes": 26134,
-      "sha256": "36500fc307d33a15de8c2715d95db404d68e20b9de75c1c26f769355591b7f18"
+      "bytes": 26286,
+      "sha256": "65a4d42ce9a440bff45f69abc1a8830f90d073607d8c0704958854bbc7fbae7c"
     },
     {
       "path": "assets/lamb-1.svg",
-      "bytes": 26001,
-      "sha256": "8f5b40953cac794c15aa0b98a16827bd68073c247480a020164dcc94197cbac1"
+      "bytes": 26153,
+      "sha256": "a7a135f0a63af16a0177063ab6572591165402a89193e4b820a61167cfa52331"
     },
     {
       "path": "assets/lamb-2.svg",
-      "bytes": 25993,
-      "sha256": "4bed877c6c25f98e22dbc405839fb964c310d9ceae731dc7e051230ce1269769"
+      "bytes": 26145,
+      "sha256": "362b8a69525ee362d0d7e4875eca64d358cf72d9d50ffc423cd94ae5270a1bd7"
     },
     {
       "path": "assets/lemur-0.svg",
-      "bytes": 22454,
-      "sha256": "acc573a8a91fed86ebfa6af751261b49ea2dafdb9a6a81b4185dc795961b2311"
+      "bytes": 22676,
+      "sha256": "9ec8ab5bf09df6fafa33d387070a7186789f1953548296d8b4edaf5caf266592"
     },
     {
       "path": "assets/lemur-1.svg",
-      "bytes": 22312,
-      "sha256": "c5aa22d9ce19b141f700e7490f2beb81125d51795beaa13b74e1d4429a282945"
+      "bytes": 22534,
+      "sha256": "dc331a138a47dfeff55c58fbf3ccbd9250d780934cb49ca7596ac2bdefb1f789"
     },
     {
       "path": "assets/lemur-2.svg",
-      "bytes": 22425,
-      "sha256": "9192c49bac58c8a4b0155d16855d4c529013143e8b2eab6d2f40df6318ecba84"
+      "bytes": 22647,
+      "sha256": "218199eb477bf6fa10acdd8d996d154432cfb1dd16672a6a3247dcec179e1377"
     },
     {
       "path": "assets/moth-0.svg",
-      "bytes": 25318,
-      "sha256": "2a0bfce2ff5f0a507099b80aa030cdda82dfa61cf5acd1cb93725e30fda6f899"
+      "bytes": 25508,
+      "sha256": "735b7ec2de2ec93bde06203b9195429573aebebdbc4f881bb2f05b350a748b54"
     },
     {
       "path": "assets/moth-1.svg",
-      "bytes": 26184,
-      "sha256": "ca65e918a11d96b825a7d4d35c893ee19a6aadff9c50691e43e3d2af39d15e46"
+      "bytes": 26406,
+      "sha256": "15588d5b2ef653bcefe5691f92d1b4999ebfc8b2d4da74929d0d826789afda50"
     },
     {
       "path": "assets/moth-2.svg",
-      "bytes": 26077,
-      "sha256": "229b297edaff29ac3ed873dd03f2dca629a74399efb496ac6e0cd0d142583cef"
+      "bytes": 26299,
+      "sha256": "c7b2e7116b7893695cfc8c4791a2ab09572f9ae36a4330b29f10aa56653a4d91"
     },
     {
       "path": "assets/phoenix-0.svg",
-      "bytes": 31315,
-      "sha256": "f3fea270ad15eddb0f123ad8228e66eb146b16ec3a4ae2019394e5fcb570e4ed"
+      "bytes": 31569,
+      "sha256": "1113b508578eb6e909f85b19d714deff2ce59629e47779a03e5242ae0071c72f"
     },
     {
       "path": "assets/phoenix-1.svg",
-      "bytes": 31355,
-      "sha256": "b3db697b1f259afe4a187f4670a4f1bf08b58b00a30a15e9c4bb20981732c46d"
+      "bytes": 31609,
+      "sha256": "fd0f1aec6ac1ab5e716ad4c63dcbd3472b8c71848825c64a0934cffecd929805"
     },
     {
       "path": "assets/phoenix-2.svg",
-      "bytes": 28990,
-      "sha256": "cfebb364db2153e9c62ca851f6f6af309d40265c669109c1f4a59429261a9317"
+      "bytes": 29292,
+      "sha256": "9a05bf9e0657fc9487169893756397f397598bd3173b1bb634b539d7e460b62d"
     },
     {
       "path": "assets/squirrel-0.svg",
-      "bytes": 35598,
-      "sha256": "74fb3c35c6228083639aa39f62fb78b1458931416e46796fcae43c29c6fd70f9"
+      "bytes": 35798,
+      "sha256": "0bc450c2c33d1c20c52b5fd315c532e6edb2589851cbee4985b236e7adf1fc47"
     },
     {
       "path": "assets/squirrel-1.svg",
-      "bytes": 35173,
-      "sha256": "e27665e560270e3491bc7161b57f136245f32694c3b1cd0f6036f4f4bfd2d15c"
+      "bytes": 35373,
+      "sha256": "64c00c7b08c157b039a770899008d9de46633e41072e6eb526617f2deeca13f6"
     },
     {
       "path": "assets/squirrel-2.svg",
-      "bytes": 35760,
-      "sha256": "6ed1482273eb6755c9474e5587e6d002b8b86ca85c0202f8fbacdf2ef59513f3"
+      "bytes": 35960,
+      "sha256": "2f10191f41e944324ba60d21eec7c83cff05175ad39c9c9be7b7ebee9b8791c1"
     },
     {
       "path": "assets/turtle-0.svg",
-      "bytes": 28098,
-      "sha256": "96de40ca9440083b73ea60507ee32ba6ceaf461a423104d242f3ff2ac5e0c794"
+      "bytes": 28266,
+      "sha256": "df51f2e9c021eebfae475a1c1445ab376cb1dd02a41ab077a4f49eeba8fccd5a"
     },
     {
       "path": "assets/turtle-1.svg",
-      "bytes": 29433,
-      "sha256": "b3e5b3699c6d9d33aef488bfedbc905cb278e2c56cb1b94bdf95d0ed5f405b2b"
+      "bytes": 29601,
+      "sha256": "e8d29ee2c9a420f9312488157ea8e70af143cbb95f9a77f124efa8886dc44afc"
     },
     {
       "path": "assets/turtle-2.svg",
-      "bytes": 28174,
-      "sha256": "6f6b56b6f3b8d683055735570d7c4e0edf77feb20410e7f537bb51175d04e37f"
+      "bytes": 28342,
+      "sha256": "5925822c55bfe451b8c6f7d369a5858a6f9bc8da9f1ba5333e1178f9cfbb7462"
     }
   ]
 }

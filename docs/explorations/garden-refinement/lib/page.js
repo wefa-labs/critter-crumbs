@@ -990,7 +990,7 @@
       return this.el("path", { d, fill: "none", stroke: "#2E2226", "stroke-width": width, "stroke-linecap": "round", "stroke-linejoin": "round", ...attrs }, parent);
     }
     glow(parent, x, y, r, colour, strength = 0.75) {
-      return this.el("circle", { cx: x, cy: y, r, fill: this.radial([[0, colour, strength], [1, colour, 0]], 0.5, 0.5, 0.5) }, parent);
+      return this.el("circle", { cx: x, cy: y, r, fill: this.radial([[0, colour, strength], [1, colour, 0]], 0.5, 0.5, 0.5), class: "cr-glow" }, parent);
     }
   }
   var ellipsePath2 = (cx, cy, rx, ry) => `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`, f2 = (n) => +n.toFixed(2);
@@ -1106,6 +1106,9 @@
       pen.patch(mirror, d, inner, 0.85, { transform: "translate(0 -1) scale(.55 .7)" });
     return rot;
   }
+  function wingAt(pen, parent, root, side, fold) {
+    return pen.g(pen.g(parent, { transform: root }), { class: `cr-wing cr-wing-${side < 0 ? "l" : "r"}`, transform: `scale(${f2(side * fold)} 1)` });
+  }
   var roundEar2 = (w, L) => `M${f2(-w)} 0C${f2(-w * 1.15)} ${f2(-L * 0.62)} ${f2(-w * 0.45)} ${f2(-L * 1.02)} 0 ${f2(-L)}C${f2(w * 0.5)} ${f2(-L * 1.02)} ${f2(w * 1.15)} ${f2(-L * 0.6)} ${f2(w)} 0Z`, pointEar2 = (w, L) => `M${f2(-w)} 0C${f2(-w * 0.9)} ${f2(-L * 0.45)} ${f2(-w * 0.25)} ${f2(-L * 0.9)} ${f2(-w * 0.05)} ${f2(-L)}Q0 ${f2(-L * 1.04)} ${f2(w * 0.08)} ${f2(-L * 0.98)}C${f2(w * 0.35)} ${f2(-L * 0.85)} ${f2(w * 0.95)} ${f2(-L * 0.42)} ${f2(w)} 0Z`;
   function wisp2(pen, parent, x, y, s, tone) {
     let d = `M${f2(x)} ${f2(y)}c${f2(s * 0.4)} ${f2(-s * 0.55)} ${f2(s * 1.2)} ${f2(-s * 0.5)} ${f2(s * 1.35)} ${f2(-s * 0.05)}c${f2(-s * 0.45)} ${f2(-s * 0.15)} ${f2(-s * 0.85)} ${f2(s * 0.05)} ${f2(-s * 1)} ${f2(s * 0.32)}c${f2(-s * 0.12)} ${f2(s * 0.12)} ${f2(-s * 0.3)} ${f2(s * 0.02)} ${f2(-s * 0.35)} ${f2(-s * 0.27)}Z`;
@@ -1154,7 +1157,7 @@
     return { geo: { top: cy - R - 22, left: CENTER2 - span - 4, right: CENTER2 + span + 4, headX: CENTER2, headY: cy, headR: R, hover }, draw(pen, g, s) {
       let rand = stream2(d.seed), fold = s.asleep ? 0.62 : 1;
       for (let side of [-1, 1]) {
-        let wingG = pen.g(g, { class: `cr-wing cr-wing-${side < 0 ? "l" : "r"}`, transform: `translate(${f2(CENTER2)} ${f2(cy)}) scale(${f2(side * fold)} 1)` }), upper = blob2([[R * 0.42, -R * 0.4], [R * 0.75, -R * 1.02], [span * 0.72, -R * 1.25], [span * 1.02, -R * 0.95], [span * 0.95, -R * 0.2], [span * 0.68, R * 0.05], [R * 0.55, R * 0.08]], 0.85), lower = blob2([[R * 0.45, R * 0.02], [span * 0.6, R * 0.12], [span * 0.74, R * 0.55], [span * 0.52, R * 0.95], [span * 0.38, R * 0.78], [R * 0.55, R * 0.62]], 0.85);
+        let wingG = wingAt(pen, g, `translate(${f2(CENTER2)} ${f2(cy)})`, side, fold), upper = blob2([[R * 0.42, -R * 0.4], [R * 0.75, -R * 1.02], [span * 0.72, -R * 1.25], [span * 1.02, -R * 0.95], [span * 0.95, -R * 0.2], [span * 0.68, R * 0.05], [R * 0.55, R * 0.08]], 0.85), lower = blob2([[R * 0.45, R * 0.02], [span * 0.6, R * 0.12], [span * 0.74, R * 0.55], [span * 0.52, R * 0.95], [span * 0.38, R * 0.78], [R * 0.55, R * 0.62]], 0.85);
         pen.form(wingG, lower, toneOf2(mix2(wing.base, CREAM2, 0.38)), { size: R * 0.5, weight: 0.8, grain: !0 }), pen.form(wingG, upper, wing, { size: R * 0.75, weight: 0.85, grain: !0 });
         let inside = pen.g(wingG, { "clip-path": pen.clip(upper) });
         pen.stroke(inside, curve2([[span * 0.42, -R * 1.25], [span * 0.55, -R * 0.65], [span * 0.48, R * 0.1]]), 3.2, { stroke: band, opacity: 0.45, filter: null });
@@ -1253,7 +1256,7 @@
         for (let k = 0;k < 5; k++)
           spot(cx + rx * (-0.55 + 1.25 * rand()), cy - ry * (0.15 + 0.65 * rand()), rx * (0.1 + 0.08 * rand()), k % 2 ? patchA : patchB);
       for (let side of [-1, 1])
-        pen.form(g, `M${f2(cx + side * rx * 0.55)} ${f2(cy + ry * 0.45)}c${f2(side * 6)} ${f2(2)} ${f2(side * 12)} ${f2(8)} ${f2(side * 11)} ${f2(14)}c${f2(-side * 5)} ${f2(-1)} ${f2(-side * 10)} ${f2(-5)} ${f2(-side * 11)} ${f2(-14)}Z`, finTone, { weight: 0.45, size: 4, attrs: { opacity: 0.9, class: `cr-wing cr-wing-${side < 0 ? "l" : "r"}` } });
+        pen.form(pen.g(g, { transform: `translate(${f2(cx + side * rx * 0.55)} ${f2(cy + ry * 0.45)})` }), `M0 0c${f2(side * 6)} ${f2(2)} ${f2(side * 12)} ${f2(8)} ${f2(side * 11)} ${f2(14)}c${f2(-side * 5)} ${f2(-1)} ${f2(-side * 10)} ${f2(-5)} ${f2(-side * 11)} ${f2(-14)}Z`, finTone, { weight: 0.45, size: 4, attrs: { opacity: 0.9, class: `cr-wing cr-wing-${side < 0 ? "l" : "r"}` } });
       let anchor = pen.g(g, { transform: `translate(${f2(cx - 2)} ${f2(cy - 1)})` }), head = pen.g(anchor, { class: "portrait__head" }), r = Math.max(rx, ry) * 0.88;
       for (let side of [-1, 1])
         pen.stroke(head, `M${f2(side * r * 0.2)} ${f2(r * 0.48)}q${f2(side * 4)} ${f2(3)} ${f2(side * 3)} ${f2(7)}q${f2(-side * 1)} ${f2(2)} ${f2(side * 1.5)} ${f2(3)}`, pen.lw * 0.5, { opacity: 0.7 });
@@ -1297,7 +1300,7 @@
         pen.form(tail, `M${f2(x0)} ${f2(y0 - 2)}Q${f2(x1 - 4)} ${f2(y1 - 8)} ${f2(x1)} ${f2(y1)}Q${f2(x1 - 9)} ${f2(y1 - 2)} ${f2(x0)} ${f2(y0 + 2)}Z`, leafTones[k], { weight: 0.5, size: 4 }), pen.glow(tail, x1 + 1.5, y1 + 1, 5, ELEMENT2.fire.glow, 0.65), pen.el("circle", { cx: x1 + 1.5, cy: y1 + 1, r: 1.7, fill: ELEMENT2.fire.light, stroke: INK2, "stroke-width": pen.lw * 0.3 }, tail);
       }
       for (let side of [-1, 1]) {
-        let wg = pen.g(g, { class: `cr-wing cr-wing-${side < 0 ? "l" : "r"}`, transform: `translate(${f2(CENTER2 + side * R * 0.7)} ${f2(cy + R * 0.1)}) rotate(${side * (s.asleep ? 80 : 42)}) scale(${f2(side * fold)} 1)` }), L = wingL, leaf = `M0 0C${f2(L * 0.28)} ${f2(-L * 0.4)} ${f2(L * 0.62)} ${f2(-L * 0.8)} ${f2(L * 0.38)} ${f2(-L * 1.05)}C${f2(L * 0.3)} ${f2(-L * 0.9)} ${f2(L * 0.12)} ${f2(-L * 0.95)} ${f2(L * 0.02)} ${f2(-L * 0.82)}C${f2(-L * 0.12)} ${f2(-L * 0.85)} ${f2(-L * 0.35)} ${f2(-L * 0.7)} ${f2(-L * 0.25)} ${f2(-L * 0.5)}C${f2(-L * 0.42)} ${f2(-L * 0.42)} ${f2(-L * 0.4)} ${f2(-L * 0.18)} ${f2(-L * 0.18)} ${f2(-L * 0.05)}Z`;
+        let wg = wingAt(pen, g, `translate(${f2(CENTER2 + side * R * 0.7)} ${f2(cy + R * 0.1)}) rotate(${side * (s.asleep ? 80 : 42)})`, side, fold), L = wingL, leaf = `M0 0C${f2(L * 0.28)} ${f2(-L * 0.4)} ${f2(L * 0.62)} ${f2(-L * 0.8)} ${f2(L * 0.38)} ${f2(-L * 1.05)}C${f2(L * 0.3)} ${f2(-L * 0.9)} ${f2(L * 0.12)} ${f2(-L * 0.95)} ${f2(L * 0.02)} ${f2(-L * 0.82)}C${f2(-L * 0.12)} ${f2(-L * 0.85)} ${f2(-L * 0.35)} ${f2(-L * 0.7)} ${f2(-L * 0.25)} ${f2(-L * 0.5)}C${f2(-L * 0.42)} ${f2(-L * 0.42)} ${f2(-L * 0.4)} ${f2(-L * 0.18)} ${f2(-L * 0.18)} ${f2(-L * 0.05)}Z`;
         pen.el("path", { d: leaf, fill: "none", stroke: ELEMENT2.fire.light, "stroke-width": 4.5, opacity: 0.6 }, wg), pen.form(wg, leaf, leafTones[(1 + (side > 0 ? 1 : 0) + Math.floor(u[13] * 2)) % 3], { size: L * 0.4, weight: 0.75, grain: !0 }), pen.stroke(wg, `M${f2(L * 0.02)} ${f2(-L * 0.05)}L${f2(L * 0.22)} ${f2(-L * 0.85)}`, pen.lw * 0.45, { opacity: 0.55 });
         for (let k = 0;k < 3; k++)
           pen.stroke(wg, `M${f2(L * (0.07 + k * 0.05))} ${f2(-L * (0.25 + k * 0.2))}l${f2(L * 0.2)} ${f2(-L * 0.08)}M${f2(L * (0.07 + k * 0.05))} ${f2(-L * (0.25 + k * 0.2))}l${f2(-L * 0.18)} ${f2(-L * 0.12)}`, pen.lw * 0.32, { opacity: 0.45 });
@@ -1333,7 +1336,7 @@
       let fold = s.asleep ? 0.55 : 1, tail = pen.g(g, { class: "cr-tail" }), pts = [[CENTER2 + 6, by + 14], [CENTER2 + 20, by + 22], [CENTER2 + 36, by + 16], [CENTER2 + 40, by + 2]];
       pen.stroke(tail, curve2(pts), 7, { stroke: INK2, filter: null }), pen.stroke(tail, curve2(pts), 5.2, { stroke: fur.base, filter: null }), pen.stroke(tail, curve2(pts), 5.2, { stroke: fur.shadow, filter: null, "stroke-dasharray": "3.4 4", "stroke-linecap": "butt" }), wisp2(pen, tail, CENTER2 + 38, by + 1, 9, { light: "#FFFFFF", base: "#F7F4FA", shadow: membrane.shadow });
       for (let side of [-1, 1]) {
-        let wg = pen.g(g, { class: `cr-wing cr-wing-${side < 0 ? "l" : "r"}`, transform: `translate(${CENTER2} ${f2(by)}) scale(${f2(side * fold)} 1)` }), wing = `M6 -16C${f2(reach * 0.45)} -23 ${f2(reach * 0.85)} -25 ${f2(reach)} -19C${f2(reach * 1.05)} -7 ${f2(reach * 0.92)} 2 ${f2(reach * 0.78)} 6C${f2(reach * 0.62)} 12 ${f2(reach * 0.4)} 10 ${f2(reach * 0.28)} 17C${f2(reach * 0.2)} 18 10 15 6 10Z`;
+        let wg = wingAt(pen, g, `translate(${CENTER2} ${f2(by)})`, side, fold), wing = `M6 -16C${f2(reach * 0.45)} -23 ${f2(reach * 0.85)} -25 ${f2(reach)} -19C${f2(reach * 1.05)} -7 ${f2(reach * 0.92)} 2 ${f2(reach * 0.78)} 6C${f2(reach * 0.62)} 12 ${f2(reach * 0.4)} 10 ${f2(reach * 0.28)} 17C${f2(reach * 0.2)} 18 10 15 6 10Z`;
         pen.form(wg, wing, membrane, { size: 14, weight: 0.6, shadowOpacity: 0.35, attrs: { opacity: 0.9 } });
         for (let k = 0;k < 4; k++)
           pen.stroke(wg, `M8 ${f2(-8 + k * 3)}Q${f2(reach * 0.45)} ${f2(-14 + k * 6)} ${f2(reach * (0.95 - k * 0.12))} ${f2(-14 + k * 6.5)}`, pen.lw * 0.3, { opacity: 0.3 });
@@ -1411,7 +1414,7 @@
   }
   function paintGarden2(document2, p, state = {}) {
     let d = gardenDraw2(p, state.finish), fed = state.fed ?? 0, { sp, fit, grow, extent } = gardenLayout2(d, fed), svg = document2.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", `0 0 120 ${BOX_H2}`), svg.setAttribute("class", `portrait portrait-v2 critter garden garden-refined finish-${d.finish} species-${d.species} element-${d.element}${FLIERS2.has(d.species) ? " flier" : ""}`), svg.dataset.direction = "garden-refined", svg.dataset.species = d.species, svg.dataset.element = d.element, svg.dataset.asleep = String(!!state.asleep);
+    svg.setAttribute("viewBox", `0 0 120 ${BOX_H2}`), svg.setAttribute("class", `portrait portrait-v2 critter garden garden-refined finish-${d.finish} species-${d.species} element-${d.element}${FLIERS2.has(d.species) ? " flier" : ""}`), svg.dataset.direction = "garden-refined", svg.dataset.species = d.species, svg.dataset.element = d.element, svg.dataset.asleep = String(!!state.asleep), svg.dataset.size = String(state.size ?? "stage");
     for (let [k, v] of Object.entries(extent))
       svg.dataset[k === "headY" ? "hy" : k === "headRadius" ? "hr" : k] = v.toFixed(3);
     if (svg.style.setProperty("--d", `${(p.idlePhase * 5).toFixed(2)}s`), svg.style.setProperty("--cheeks", state.delighted ? "1" : "0"), svg.style.setProperty("--mouth", state.delighted ? "1" : "0"), typeof state.size === "number")

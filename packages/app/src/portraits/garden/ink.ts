@@ -92,9 +92,9 @@ export class Pen {
   patch(parent: SVGElement, d: string, fill: string, opacity = 1, attrs: Attrs = {}) { return this.el('path', { d, fill, opacity, ...attrs }, parent); }
   /** A loose ink stroke (whiskers, veins, a mouth). */
   stroke(parent: SVGElement, d: string, width: number, attrs: Attrs = {}) { return this.el('path', { d, fill: 'none', stroke: INK, 'stroke-width': width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', ...attrs }, parent); }
-  /** One soft glow point (the creature research's "light from within"). */
+  /** One soft glow point (the creature research's "light from within"). Light, not body: silhouettes leave it out. */
   glow(parent: SVGElement, x: number, y: number, r: number, colour: string, strength = 0.75) {
-    return this.el('circle', { cx: x, cy: y, r, fill: this.radial([[0, colour, strength], [1, colour, 0]], 0.5, 0.5, 0.5) }, parent);
+    return this.el('circle', { cx: x, cy: y, r, fill: this.radial([[0, colour, strength], [1, colour, 0]], 0.5, 0.5, 0.5), class: 'cr-glow' }, parent);
   }
 }
 

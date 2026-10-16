@@ -3,7 +3,8 @@ import { ApiClientError, phaseAt } from '@critter-crumbs/core';
 import { copy, formatCopy, type FeastClock, type Profile, type MemberRemoval } from '@critter-crumbs/shared';
 import { absoluteTime } from './time.js';
 import { phaseCopy } from './deadlines.js';
-import { Dialog, Field, Link, Page, PendingPage, PortraitImage, displayName, memberLabel, navigate, shortAddress, useResource } from './ui.js';
+import { CritterFace, Dialog, Field, Link, Page, PendingPage, PortraitImage, displayName, memberLabel, navigate, shortAddress, useResource } from './ui.js';
+import { gardenReview } from '../portraits/version.js';
 import type { AppApi, Me, Session } from './session.js';
 import { useNotification } from './announcements.js';
 import { copyBurrowLink } from './clipboard.js';
@@ -44,7 +45,7 @@ export function Burrow({ id, api, me, session, run, busy }: { id: string; api: A
   const burrow = resource.data, active = burrow.members.filter(member => member.leftAt === null), historical = burrow.members.filter(member => member.leftAt !== null);
   const self = active.find(member => member.address.toLowerCase() === me.address.toLowerCase());
   function members(list: BurrowView['members']) { return <ul role="list" className="member-list">{list.map(member => <li key={member.address}>
-    <PortraitImage address={member.address} variant={member.variant} name={displayName(member)} /><div><strong>{displayName(member)}</strong><span className="address">{member.address}</span>{member.joinedAt === null && member.leftAt === null ? <small>{copy['burrow.preAdded']}</small> : null}</div>{burrow.createdBy.toLowerCase() === me.address.toLowerCase() && member.address.toLowerCase() !== me.address.toLowerCase() && member.leftAt === null ? <button className="quiet" aria-label={formatCopy('burrow.remove.label', { name: displayName(member) })} disabled={busy} onClick={() => setRemoval({ member, operationId: crypto.randomUUID() })}>{copy['burrow.remove']}</button> : null}
+    {gardenReview ? <CritterFace address={member.address} variant={member.variant} name={displayName(member)} size={40} /> : <PortraitImage address={member.address} variant={member.variant} name={displayName(member)} />}<div><strong>{displayName(member)}</strong><span className="address">{member.address}</span>{member.joinedAt === null && member.leftAt === null ? <small>{copy['burrow.preAdded']}</small> : null}</div>{burrow.createdBy.toLowerCase() === me.address.toLowerCase() && member.address.toLowerCase() !== me.address.toLowerCase() && member.leftAt === null ? <button className="quiet" aria-label={formatCopy('burrow.remove.label', { name: displayName(member) })} disabled={busy} onClick={() => setRemoval({ member, operationId: crypto.randomUUID() })}>{copy['burrow.remove']}</button> : null}
   </li>)}</ul>; }
   return <Page title={burrow.name} context={burrow.name} screen={copy['app.burrowScreen']}>
     <div className="actions"><button className="secondary" onClick={() => { void run(async () => { await copyBurrowLink(burrow.id); announce(copy['burrow.link.copied']); }); }}>{copy['burrow.link.copy']}</button>
