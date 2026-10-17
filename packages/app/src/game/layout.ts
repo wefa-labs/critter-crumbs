@@ -235,12 +235,14 @@ export function layoutGame(input: LayoutInput) {
   };
   /** Spots within `reach` tag heights of the tag's own critter: centred above it or under its feet, and with `nudge`
    *  also shifted sideways or beside the body. Sitting over a neighbour costs less than drifting away from its own. */
-  const near = (it: typeof visible[number], reach: number, nudge: boolean) => distinct(widthsOf(it).flatMap((width, shortIndex) => {
+  const near = (it: typeof visible[number], reach: number, nudge: boolean, strict: boolean) => distinct(widthsOf(it).flatMap((width, shortIndex) => {
     const height = it.tag.height, limit = height * reach, centre = it.foot.x - width / 2, above = it.figure.y - 4 - height, options: Candidate[] = [];
     const place = (x: number, y: number, preference: number) => {
       const box: Rect = { x: Math.min(Math.max(x, 6), W - 6 - width), y: Math.max(2, y), width, height }, distance = rectGap(box, it.figure);
       if (distance > limit || width > W - 12 || blocked(box)) return;
       const others = slots.reduce((sum, other) => other === it ? sum : sum + overlapArea(box, other.figure), 0);
+      // strict: no more over a neighbour than the scatter page allows (its tolerance), as long as that keeps tags near
+      if (strict && !compactLabels && slots.some(other => other !== it && overlapArea(box, other.figure) > tolerance)) return;
       options.push({ box, short: shortIndex > 0, cost: distance / 2 + preference + shortIndex * 20 + others / 40 + overlapArea(box, it.figure) / 8 });
     };
     for (let lift = 0; lift <= limit; lift += 4) for (const shift of nudge ? [0, -0.25, 0.25, -0.5, 0.5] : [0]) place(centre + shift * width, above - lift, lift / 4 + Math.abs(shift) * 12);
@@ -289,12 +291,14 @@ export function layoutGame(input: LayoutInput) {
     return { fitted: fit(0), selected };
   }
   /* Near first, widening only as far as it must: centred (the review page's tags) within one tag height, then one and
-     a half, then nudged sideways or beside; still stuck, the wide search's spots, far dearer, join for the tags that
+     a half, then nudged sideways or beside, all clear of other critters as the review page asks; then over part of a
+     neighbour rather than away from its own; still stuck, the wide search's spots, far dearer, join for the tags that
      need them, so only those drift */
   let choices: { it: typeof visible[number]; candidates: Candidate[] }[] = [], fitted = false, selected = new Map<number, Candidate>();
   // each stage gets a search budget; a strict stage that would take long to fail gives way to the next, which is cheap
-  for (const [candidatesOf, budget] of [[(it: typeof visible[number]) => near(it, 1, false), 300], [(it: typeof visible[number]) => near(it, 1.5, false), 1000],
-    [(it: typeof visible[number]) => near(it, 1.5, true), 2000], [(it: typeof visible[number]) => distinct([...near(it, 1.5, true), ...wide(it).map(option => ({ ...option, cost: option.cost + 100 }))]), 4000]] as const) {
+  for (const [candidatesOf, budget] of [[(it: typeof visible[number]) => near(it, 1, false, true), 300], [(it: typeof visible[number]) => near(it, 1.5, false, true), 1000],
+    [(it: typeof visible[number]) => near(it, 1.5, true, true), 1000], [(it: typeof visible[number]) => near(it, 1.5, true, false), 2000],
+    [(it: typeof visible[number]) => distinct([...near(it, 1.5, true, false), ...wide(it).map(option => ({ ...option, cost: option.cost + 100 }))]), 4000]] as const) {
     choices = visible.map(it => ({ it, candidates: candidatesOf(it) }));
     ({ fitted, selected } = solve(choices, budget));
     if (fitted) break;
