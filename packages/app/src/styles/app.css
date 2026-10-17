@@ -90,7 +90,7 @@ ul.critter-grid { list-style:none; padding:0; }
 .history-list { padding-inline-start:var(--cc-space-6); }
 .history-list li { margin-block:var(--cc-space-5); }
 .history-list p { margin-block:var(--cc-space-1); overflow-wrap:anywhere; }
-fieldset { min-width:0; border:1px solid var(--cc-line); border-radius:var(--cc-radius-md); padding:var(--cc-space-5); margin:0; }
+fieldset { min-width:0; border:1px solid var(--cc-line); border-radius:var(--cc-radius-lg); padding:var(--cc-space-5); margin:0; }
 fieldset label { display:block; margin-block:var(--cc-space-3); }
 fieldset input[type="radio"], fieldset input[type="checkbox"] { width:24px; height:24px; vertical-align:middle; margin-inline-end:var(--cc-space-3); }
 fieldset label small { display:block; color:var(--cc-text-2); }
