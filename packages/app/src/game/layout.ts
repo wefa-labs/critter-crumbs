@@ -42,6 +42,8 @@ export const sidePanelWidth = (width: number) => Math.min(480, Math.max(400, wid
 /** Phone: an open statement is a bubble across the top of the scene (.panel.bubble). */
 const STATEMENT = { inset: 12, height: 378 };
 
+/** How far apart two rectangles are, in px; 0 when they touch or overlap. */
+export const rectGap = (a: Rect, b: Rect) => Math.hypot(Math.max(0, a.x - (b.x + b.width), b.x - (a.x + a.width)), Math.max(0, a.y - (b.y + b.height), b.y - (a.y + a.height)));
 export const overlapArea = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 /** A target at least `min` square around a smaller drawing, centred on it, so a small one still takes a finger. */
 export function hitRect(rect: Rect, min = 44): Rect {
@@ -190,50 +192,89 @@ export function layoutGame(input: LayoutInput) {
   const trailFrom = { x: focused.foot.x + headR * 0.8, y: headY - headR - 6 }, trailTo = { x: Math.min(focused.foot.x + headR + 36, W - 40), y: statement.y + statement.height + 6 };
   const trail: Rect[] = !desktop && input.reading ? [0.18, 0.5, 0.8].map((along, i) => { const size = [8, 11, 15][i]!; return { x: trailFrom.x + (trailTo.x - trailFrom.x) * along - size / 2, y: trailFrom.y + (trailTo.y - trailFrom.y) * along - size / 2, width: size, height: size }; }) : [];
 
-  /* the tags, centred above each head and solved together so a tall back critter leaves room (layoutRing) */
+  /* the tags, centred above each head and solved together so a tall back critter leaves room (layoutRing). Each tag
+     first looks for room near its own critter rather than drifting up the room to find it, which left tags naming
+     nobody on short phones and on 1280 px desktops (QA lifecycle-03) */
   const visible = slots.filter(it => !it.tag.hidden), tolerance = desktop ? (input.viewport.width === 1280 ? 161 : 0) : n > 8 ? 123 : 0;
   // On short floors portrait bounds are soft obstacles; readable tags, crumbs and controls retain priority.
   const compactLabels = !desktop && H - dockH < 550;
-  const choices = visible.map(it => {
+  const blocked = (box: Rect) => (showHeap && overlapArea(box, { x: heap.x - 2, y: heap.y - 2, width: heap.width + 4, height: heap.height + 4 }) > 0) || obstacles.some(other => overlapArea(box, other) > 0) || box.y + box.height > dock.y;
+  const widthsOf = (it: typeof visible[number]) => it.shortWidth < it.fullWidth && !(it.slot === 0 && desktop) ? [it.fullWidth, it.shortWidth] : [it.fullWidth];
+  type Candidate = { box: Rect; short: boolean; cost: number };
+  const distinct = (options: (Candidate & { valid?: boolean })[]) => {
     const seen = new Set<string>();
-    const above = it.figure.y - 4 - it.tag.height, widths = it.shortWidth < it.fullWidth && !(it.slot === 0 && desktop) ? [it.fullWidth, it.shortWidth] : [it.fullWidth];
+    return options.filter(option => {
+      const key = `${option.box.x},${option.box.y},${option.box.width}`;
+      if (option.valid === false || seen.has(key)) return false;
+      seen.add(key); return true;
+    }).sort((a, b) => a.cost - b.cost);
+  };
+  /** Spots within `reach` tag heights of the tag's own critter: centred above it or under its feet, and with `nudge`
+   *  also shifted sideways or beside the body. Sitting over a neighbour costs less than drifting away from its own. */
+  const near = (it: typeof visible[number], reach: number, nudge: boolean) => distinct(widthsOf(it).flatMap((width, shortIndex) => {
+    const height = it.tag.height, limit = height * reach, centre = it.foot.x - width / 2, above = it.figure.y - 4 - height, options: Candidate[] = [];
+    const place = (x: number, y: number, preference: number) => {
+      const box: Rect = { x: Math.min(Math.max(x, 6), W - 6 - width), y: Math.max(2, y), width, height }, distance = rectGap(box, it.figure);
+      if (distance > limit || width > W - 12 || blocked(box)) return;
+      const others = slots.reduce((sum, other) => other === it ? sum : sum + overlapArea(box, other.figure), 0);
+      options.push({ box, short: shortIndex > 0, cost: distance / 2 + preference + shortIndex * 20 + others / 40 + overlapArea(box, it.figure) / 8 });
+    };
+    for (let lift = 0; lift <= limit; lift += 4) for (const shift of nudge ? [0, -0.25, 0.25, -0.5, 0.5] : [0]) place(centre + shift * width, above - lift, lift / 4 + Math.abs(shift) * 12);
+    if (nudge) for (const along of [0, 0.25, 0.5]) {
+      const y = it.figure.y + it.figure.height * along;
+      place(it.figure.x - width - 4, y, 8 + along * 8); place(it.figure.x + it.figure.width + 4, y, 8 + along * 8);
+    }
+    const below = Math.max(it.foot.y + 6, it.pile.y + it.pile.height + 6);
+    for (let drop = 0; drop <= limit; drop += 4) place(centre, below + drop, 12 + drop / 4);
+    return options;
+  })).slice(0, 24);
+  const wide = (it: typeof visible[number]) => {
+    const above = it.figure.y - 4 - it.tag.height;
     const positions = Array.from({ length: 65 }, (_, i) => above - i * 4);
     if (compactLabels) {
       const below = Math.max(it.foot.y + 6, it.pile.y + it.pile.height + 6);
       positions.push(...Array.from({ length: 9 }, (_, i) => below + i * 4));
     }
-    const options = widths.flatMap((width, shortIndex) => positions.map(y => {
+    return distinct(widthsOf(it).flatMap((width, shortIndex) => positions.map(y => {
       const box: Rect = { x: Math.min(Math.max(it.foot.x - width / 2, 6), W - 6 - width), y: Math.max(2, y), width, height: it.tag.height };
       const hit = slots.reduce((maximum, other) => other === it ? maximum : Math.max(maximum, overlapArea(box, other.figure)), 0);
-      const blocked = (showHeap && overlapArea(box, { x: heap.x - 2, y: heap.y - 2, width: heap.width + 4, height: heap.height + 4 }) > 0) || obstacles.some(other => overlapArea(box, other) > 0) || box.y + box.height > dock.y;
-      return { box, short: shortIndex > 0, cost: Math.abs(y - above) / 4 + (y > above ? 10 : 0) + shortIndex * 20 + hit, valid: width <= W - 12 && !blocked && (hit <= tolerance || compactLabels) };
-    })).filter(option => {
-      const key = `${option.box.x},${option.box.y},${option.box.width}`;
-      if (!option.valid || seen.has(key)) return false;
-      seen.add(key); return true;
-    }).sort((a, b) => a.cost - b.cost);
-    return { it, candidates: options };
-  }).sort((a, b) => a.candidates.length - b.candidates.length);
-  const assigned: Rect[] = [], selected = new Map<number, { box: Rect; short: boolean }>();
-  let attempts = 0;
-  function fit(index: number): boolean {
-    if (index === choices.length) return true;
-    if (++attempts > 12000) return false;
-    // Re-evaluate the tightest remaining tag after each placement. A fixed order exhausts the search on short floors.
-    const remaining = choices.filter(choice => !selected.has(choice.it.index)).map(choice => ({
-      it: choice.it, candidates: choice.candidates.filter(candidate => !assigned.some(other => overlapArea(candidate.box, other) > 0)),
-    })).sort((a, b) => a.candidates.length - b.candidates.length);
-    const { it, candidates: options } = remaining[0]!;
-    if (!options.length) return false;
-    for (const candidate of options) {
-      if (assigned.some(other => overlapArea(candidate.box, other) > 0)) continue;
-      assigned.push(candidate.box); selected.set(it.index, candidate);
-      if (fit(index + 1)) return true;
-      assigned.pop(); selected.delete(it.index);
+      return { box, short: shortIndex > 0, cost: Math.abs(y - above) / 4 + (y > above ? 10 : 0) + shortIndex * 20 + hit, valid: width <= W - 12 && !blocked(box) && (hit <= tolerance || compactLabels) };
+    })));
+  };
+  /* the tightest tag is placed first, every choice re-checked against the tags already placed, backing off when stuck */
+  function solve(choices: { it: typeof visible[number]; candidates: Candidate[] }[], budget: number) {
+    const assigned: Rect[] = [], selected = new Map<number, Candidate>();
+    let attempts = 0;
+    function fit(index: number): boolean {
+      if (index === choices.length) return true;
+      if (++attempts > budget) return false;
+      // Re-evaluate the tightest remaining tag after each placement. A fixed order exhausts the search on short floors.
+      const remaining = choices.filter(choice => !selected.has(choice.it.index)).map(choice => ({
+        it: choice.it, candidates: choice.candidates.filter(candidate => !assigned.some(other => overlapArea(candidate.box, other) > 0)),
+      })).sort((a, b) => a.candidates.length - b.candidates.length);
+      const { it, candidates: options } = remaining[0]!;
+      if (!options.length) return false;
+      for (const candidate of options) {
+        if (assigned.some(other => overlapArea(candidate.box, other) > 0)) continue;
+        assigned.push(candidate.box); selected.set(it.index, candidate);
+        if (fit(index + 1)) return true;
+        assigned.pop(); selected.delete(it.index);
+      }
+      return false;
     }
-    return false;
+    return { fitted: fit(0), selected };
   }
-  const fitted = fit(0);
+  /* Near first, widening only as far as it must: centred (the review page's tags) within one tag height, then one and
+     a half, then nudged sideways or beside; still stuck, the wide search's spots, far dearer, join for the tags that
+     need them, so only those drift */
+  let choices: { it: typeof visible[number]; candidates: Candidate[] }[] = [], fitted = false, selected = new Map<number, Candidate>();
+  // each stage gets a search budget; a strict stage that would take long to fail gives way to the next, which is cheap
+  for (const [candidatesOf, budget] of [[(it: typeof visible[number]) => near(it, 1, false), 300], [(it: typeof visible[number]) => near(it, 1.5, false), 1000],
+    [(it: typeof visible[number]) => near(it, 1.5, true), 2000], [(it: typeof visible[number]) => distinct([...near(it, 1.5, true), ...wide(it).map(option => ({ ...option, cost: option.cost + 100 }))]), 4000]] as const) {
+    choices = visible.map(it => ({ it, candidates: candidatesOf(it) }));
+    ({ fitted, selected } = solve(choices, budget));
+    if (fitted) break;
+  }
   for (const it of visible) {
     const choice = selected.get(it.index) ?? choices.find(entry => entry.it === it)?.candidates[0];
     if (choice) it.tag = { ...choice.box, short: choice.short, hidden: !!input.reading && !desktop && overlapArea(choice.box, statement) > 0 };
