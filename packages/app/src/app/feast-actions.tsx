@@ -8,10 +8,12 @@ import { Dialog, Field } from './ui.js';
 export function FeastActions({ feast, me, api, run, busy, refresh, announce }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void }) {
   const [action, setAction] = useState<'open' | 'extend' | 'cancel' | null>(null), [deadline, setDeadline] = useState(() => localDateTime(feast.gatheringEndsAt + 3600000));
   const formId = useId();
+  /* a draft whose gathering deadline has passed can never open (QA copy-08): say so instead of offering Open */
+  const late = feast.phase === 'draft' && (api.now() ?? feast.serverNow) >= feast.gatheringEndsAt;
   if (feast.createdBy.toLowerCase() !== me.address.toLowerCase() || !['draft', 'gathering'].includes(feast.phase)) return null;
   const title = action === 'open' ? formatCopy('setup.open.title', { feastTitle: feast.title }) : action === 'cancel' ? formatCopy('gathering.cancel.title', { feastTitle: feast.title }) : copy['gathering.extend.title'];
   return <div className="actions">
-    {feast.phase === 'draft' ? <button data-sound="ui.tap" disabled={busy} onClick={() => setAction('open')}>{copy['setup.open']}</button> : !feast.gatheringExtended ? <button data-sound="ui.tap" className="secondary" disabled={busy} onClick={() => setAction('extend')}>{copy['gathering.extend']}</button> : null}
+    {feast.phase === 'draft' ? late ? <p>{copy['setup.open.late']}</p> : <button data-sound="ui.tap" disabled={busy} onClick={() => setAction('open')}>{copy['setup.open']}</button> : !feast.gatheringExtended ? <button data-sound="ui.tap" className="secondary" disabled={busy} onClick={() => setAction('extend')}>{copy['gathering.extend']}</button> : null}
     <button className="quiet" disabled={busy} onClick={() => setAction('cancel')}>{copy['gathering.cancel']}</button>
     {action ? <Dialog title={title} onClose={() => setAction(null)} busy={busy} actions={<><button form={formId} disabled={busy}>{action === 'open' ? copy['setup.open.cta'] : action === 'cancel' ? copy['gathering.cancel.cta'] : copy['gathering.extend.cta']}</button><button type="button" className="secondary" disabled={busy} onClick={() => setAction(null)}>{copy['action.cancel']}</button></>}>
       <p>{action === 'open' ? formatCopy('setup.open.body', { gatheringDeadline: absoluteTime(feast.gatheringEndsAt) }) : action === 'cancel' ? copy['gathering.cancel.body'] : formatCopy('gathering.extend.body', { scatteringDeadline: absoluteTime(feast.scatteringEndsAt) })}</p>

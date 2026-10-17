@@ -40,12 +40,12 @@ export function parseFeastSetup(value: unknown): FeastSetup {
     if (!Array.isArray(input.options) || input.options.length === 0) throw new ValidationError('setup.options.title');
     if (input.options.length > MAX_FEAST_TARGETS) throw new ValidationError('err.feastCapacity');
     for (const option of input.options) {
-      const item = record(option), name = text(item.name, 1, 80, 'setup.option.name', true);
-      if (options.some(existing => existing.name.toLowerCase() === name.toLowerCase())) throw new ValidationError('setup.option.name');
+      const item = record(option), name = text(item.name, 1, 80, 'setup.option.unnamed', true);
+      if (options.some(existing => existing.name.toLowerCase() === name.toLowerCase())) throw new ValidationError('setup.option.duplicate');
       options.push({ name, statement: text(item.statement ?? '', 0, 2000, 'gathering.limit') });
     }
   }
-  return { title: text(input.title, 1, 80, 'setup.field.title', true), context: text(input.context ?? '', 0, 140), kind,
+  return { title: text(input.title, 1, 80, 'setup.title.missing', true), context: text(input.context ?? '', 0, 140), kind,
     crumbsPerCritter: integer(input.crumbsPerCritter ?? 100, 10, 1000, 'setup.crumbs.help'),
     gatheringEndsAt, scatteringEndsAt, aggregatePublic, individualOpen, options };
 }

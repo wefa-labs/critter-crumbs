@@ -681,6 +681,10 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.field.scattering` | Scattering closes |
 | `setup.deadline.help` | Everyone sees these in their own time zone. Yours is {tz}. |
 | `setup.deadline.order` | Scattering has to close after gathering. |
+| `setup.deadline.past` | That gathering deadline has already passed. Choose a later time. |
+| `setup.title.missing` | The feast needs a title, up to 80 characters. |
+| `setup.option.unnamed` | Every option needs a name, up to 80 characters. |
+| `setup.option.duplicate` | Two options have the same name. Give each one its own. |
 | `setup.privacy.title` | Who sees the result? |
 | `setup.privacy.aggregate.label` | The result |
 | `setup.privacy.aggregate.public` | Public — anyone with the link, and recorded on-chain |
@@ -695,6 +699,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.open.title` | Open {feastTitle}? |
 | `setup.open.body` | Gathering starts now and closes {gatheringDeadline}. You can extend that once. |
 | `setup.open.cta` | Open the feast |
+| `setup.open.late` | This draft's gathering deadline has passed, so it can't open. Cancel it and start a new feast with later times. (In place of Open on a draft past its gathering deadline.) |
 
 **Gathering (F5)**
 
