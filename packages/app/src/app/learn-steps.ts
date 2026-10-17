@@ -1,4 +1,4 @@
-import { CLOVER, FERN, JUNIPER, MOSS, type Painting, type SceneCritter, type SceneHeap, type Standing } from './painted-scene.js';
+import { CLOVER, FERN, JUNIPER, MOSS, openingVariant, type Painting, type SceneCritter, type SceneHeap, type Standing } from './painted-scene.js';
 
 /** The sheet's height on the phone, the same on every step so the floor does not move between them. */
 export const LEARN_SHEET_HEIGHT = 410;
@@ -19,10 +19,10 @@ export interface LearnStep {
  * the room, at the same size against the table, on every screen. The four stand where the launcher stands them.
  */
 const QUARTET = [
-  { address: MOSS, x: 39.4, y: 90, size: 165, face: 'right' },
-  { address: CLOVER, x: 46.1, y: 94, size: 190, face: null },
-  { address: JUNIPER, x: 54.5, y: 93, size: 190, face: 'left' },
-  { address: FERN, x: 61, y: 89, size: 165, face: 'left' },
+  { address: MOSS, variant: openingVariant(MOSS), x: 39.4, y: 90, size: 165, face: 'right' },
+  { address: CLOVER, variant: openingVariant(CLOVER), x: 46.1, y: 94, size: 190, face: null },
+  { address: JUNIPER, variant: openingVariant(JUNIPER), x: 54.5, y: 93, size: 190, face: 'left' },
+  { address: FERN, variant: openingVariant(FERN), x: 61, y: 89, size: 165, face: 'left' },
 ] as const;
 /** Each of the quartet's own handful, and later its pod, lies at its feet. */
 const AT_FEET = [{ x: 43, y: 91.5 }, { x: 50, y: 95.5 }, { x: 58.5, y: 95 }, { x: 64.5, y: 90.5 }] as const;
@@ -33,10 +33,10 @@ export const LEARN_STEPS: readonly LearnStep[] = [
   {
     painting: 'window', heaps: [], pods: [], practice: { crumbs: 10, x: 50, y: 95.5, size: 88 },
     critters: [
-      { address: MOSS, x: 40, y: 91.5, size: 190, asleep: false, face: 'right' },
+      { address: MOSS, variant: openingVariant(MOSS), x: 40, y: 91.5, size: 190, asleep: false, face: 'right' },
       // in front of the cushions, not on the table (the flow page stood it at 64 %, on the table top)
-      { address: CLOVER, x: 50, y: 85, size: 170, asleep: false, face: null },
-      { address: FERN, x: 60, y: 91.5, size: 190, asleep: false, face: 'left' },
+      { address: CLOVER, variant: openingVariant(CLOVER), x: 50, y: 85, size: 170, asleep: false, face: null },
+      { address: FERN, variant: openingVariant(FERN), x: 60, y: 91.5, size: 190, asleep: false, face: 'left' },
     ],
   },
   { painting: 'dusk', critters: QUARTET.map(critter => ({ ...critter, asleep: true })), heaps: [], pods: AT_FEET.map(spot => ({ x: spot.x, y: spot.y - 0.5, size: 40 })) },

@@ -34,7 +34,7 @@ Left as they are, for review rather than as art defects:
 
 - The desktop result huddle stands on the dock's top edge, and its front critter overlaps the dock border. This is the existing huddle layout, shared by every critter version.
 - At 320 × 568 no two name tags overlap, but some sit well away from their critter with nothing linking them. The short-phone solver gives readable names priority over placement.
-- Two critters of one species and coat can look alike. Moss and Juniper, both pale lichen moths, sit side by side in the launcher and tutorial; their names tell them apart.
+- Two critters of one species and coat can look alike; their names tell them apart. The opening screens avoid it: Moss's first drawing is a pale lichen moth like Juniper's, so under the review art the launcher and How it works draw Moss's third, an ember fox, and show one critter of each element (`openingVariant` in `packages/app/src/app/painted-scene.ts`).
 
 ## Package and provenance
 

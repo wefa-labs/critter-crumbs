@@ -67,10 +67,11 @@ test('an invited first-time member keeps their destination, draft name and critt
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
-test('all first-step actions stay in place on short phones and desktops in either critter version', async ({ page }) => {
+test('all first-step actions stay in place on short phones and desktops in every critter version', async ({ page }) => {
   for (const viewport of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
-    for (const query of ['', '?critters=1']) {
+    // development drawings, production version 1 and the Garden Spirits review art, whose opening cast differs
+    for (const query of ['', '?critters=1', '?critters=garden']) {
       await page.goto(`/how-it-works${query}`);
       await expect(page.getByRole('heading', { name: 'Everyone gets the same handful', exact: true })).toBeFocused();
       await page.evaluate(() => document.fonts.ready);
