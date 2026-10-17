@@ -15,6 +15,8 @@ export interface LayoutCritter {
   name: string; own: boolean; count: number; extent: PortraitExtent;
   /** Left out of the huddle: it received no crumbs (flow page 46 gathers only the critters that were fed). */
   away?: boolean;
+  /** At the feast, the scale its growth draws it at (Game Design §3.4, 1 to 1.35); the huddle spaces critters by it. */
+  growth?: number;
 }
 export interface LayoutInput {
   viewport: { width: number; height: number };
@@ -109,17 +111,39 @@ export function layoutGame(input: LayoutInput) {
      that runs 24 px under the sheet's rounded top on the phone, the critters 1.5 times larger on desktop */
   const ring = input.surface.kind === 'sheet', ringFloor = desktop ? H : H - dockH + 24, ringScale = desktop ? 1.5 * geo.u : 1;
   /* the huddle counts only the critters gathered on the edge */
-  const huddled = input.critters.map((critter, index) => ({ critter, index })).filter(entry => !entry.critter.away), rankOf = new Map(huddled.map((entry, rank) => [entry.index, rank]));
+  const huddled = input.critters.map((critter, index) => ({ critter, index })).filter(entry => !entry.critter.away);
+  /* The huddle on the results' top edge (huddleAt): one row shoulder to shoulder when everyone fits, else a front row
+     and a smaller back row looking out from the gaps. Each critter is spaced by the width the feast grew it to, so the
+     ones that received more stand out and nobody hides behind a neighbour; the burrow's own order is kept, never a
+     ranking (Game Design G3). A phone lets a small group grow into the room it has. */
+  const places = new Map<number, { x: number; y: number; size: number; depth: number }>();
+  if (gathered && huddled.length) {
+    const m = huddled.length, base = (desktop ? CIRCLE_FEEL.huddle.desktop * geo.u : CIRCLE_FEEL.huddle.phone) * (m > 8 ? 0.88 : 1), room = W - 24;
+    const drawn = (entry: typeof huddled[number], size: number) => (entry.critter.extent.right - entry.critter.extent.left) * size * (entry.critter.growth ?? 1);
+    // neighbours' drawings meet by no more than this share of their mean width
+    const SHOULDER = 0.82;
+    const step = (row: typeof huddled, i: number, size: number) => (drawn(row[i - 1]!, size) + drawn(row[i]!, size)) / 2 * SHOULDER;
+    const span = (row: typeof huddled, size: number) => row.slice(1).reduce((sum, _, i) => sum + step(row, i + 1, size), 0) + (drawn(row[0]!, size) + drawn(row.at(-1)!, size)) / 2;
+    // the size a row reaches: up to 1.3 times the base on a phone with room to spare, never wider than the scene
+    const fit = (row: typeof huddled) => Math.min(base * (desktop ? 1 : 1.3), base * room / span(row, base));
+    // one row when everyone fits at full size, so nobody stands behind anybody; else the scatter page's two
+    const single = fit(huddled) >= base, front = single ? m : m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, row = huddled.slice(0, front), size = fit(row);
+    let x = W / 2 - span(row, size) / 2 + drawn(row[0]!, size) / 2;
+    const frontX = row.map((entry, i) => (x += i ? step(row, i, size) : 0));
+    row.forEach((entry, rank) => places.set(entry.index, { x: frontX[rank]!, y: dock.y + size * 0.1, size, depth: 3200 + rank }));
+    huddled.slice(front).forEach((entry, i) => {
+      const gap = Math.max(0, Math.min(front - 2, Math.floor((front - 1 - back) / 2) + i));
+      // stood far enough back that a face shows over the front row's heads
+      places.set(entry.index, { x: (frontX[gap]! + frontX[gap + 1]!) / 2, y: dock.y - size * 0.4, size: size * 0.9, depth: 3100 + front + i });
+    });
+  }
   const slots = input.critters.map((critter, index) => {
     const slot = (index - input.focus + n) % n, away = gathered && !!critter.away;
     let x = geo.cx, y = geo.focusY, size = geo.focusSize, depth = 999, face: 'left' | 'right' | 'front' = 'front', ringSize = 0;
     if (gathered) {
-      /* the huddle on the results' top edge (huddleAt) */
-      const m = huddled.length, rank = rankOf.get(index) ?? 0, front = m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, crowd = m > 8 ? 0.88 : 1;
-      size = (desktop ? CIRCLE_FEEL.huddle.desktop * geo.u : CIRCLE_FEEL.huddle.phone) * crowd;
-      const step = size * 0.58, frontX = (j: number) => W / 2 + (j - (front - 1) / 2) * step;
-      if (rank < front) { x = frontX(rank); y = dock.y + size * 0.1; depth = 3200 + rank; }
-      else { const gap = Math.floor((front - 1 - back) / 2) + (rank - front); x = (frontX(gap) + frontX(gap + 1)) / 2; y = dock.y - size * 0.26; size *= 0.9; depth = 3100 + rank; }
+      /* a critter left out of the huddle keeps the first place, unseen, as it always has */
+      const place = places.get(index) ?? places.get(huddled[0]?.index ?? index) ?? { x: W / 2, y: dock.y, size: CIRCLE_FEEL.huddle.phone, depth: 3200 };
+      ({ x, y, size, depth } = place);
       face = x < W / 2 ? 'right' : 'left';
     } else if (ring) {
       const angle = (90 - slot * 360 / n) * Math.PI / 180, sin = Math.sin(angle), cos = Math.cos(angle);
