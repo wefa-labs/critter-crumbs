@@ -506,8 +506,8 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 ## 8. Time and deadlines
 
 - Relative first, absolute one tap away: "Gathering closes in 2 days" · tap → "Tue 14 Oct, 18:00 (BST)". Relative strings come from `Intl.RelativeTimeFormat`; absolute from `Intl.DateTimeFormat` with `timeZoneName: "short"` in the viewer's zone.
-- Both deadlines are always visible in the top bar during gathering and scattering; the past one is shown as "closed {relative}" so the timeline stays legible.
-- "Closing soon" (< 6 h) changes the item's text prefix and adds the `clock` icon; never colour alone.
+- Both deadlines are always visible in the top bar during gathering and scattering; the past one is shown as "closed {relative}" so the timeline stays legible. A cancelled or void feast shows neither.
+- "Closing soon" (< 6 h) replaces the next deadline's line with `deadline.soon`, said once rather than beside it; the later deadline keeps its own line so the two stay apart. It adds the `clock` icon; never colour alone.
 - Countdown text refreshes every minute with `aria-live="off"`; deadlines are never announced spontaneously.
 - All times come from the trusted timestamp (PRD R13). If the device clock disagrees by more than 5 minutes, `err.clockSkew` shows once per session as a polite notice.
 
