@@ -9,7 +9,8 @@ import { GameStage } from '../app/game-stage.js';
 import { Link, ProfileButton, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
-import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
+import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName } from './layout.js';
+import { rectStyle } from './styles.js';
 import { composeGame, deviceFor } from './composition.js';
 import { defaultScene } from './art.js';
 import { presentSleep } from './motion.js';
@@ -21,7 +22,6 @@ import { measureText } from './measure.js';
 import { useScatterInput } from '../app/scatter-input.js';
 import { useAudio, useMusic } from '../audio/context.js';
 
-const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.width, height: r.height });
 
 /**
  * The header over every core state: the burrow and the feast, a line at the right on desktop (the closing day while
