@@ -73,7 +73,9 @@ function geometry(W: number, floor: number, n: number, desktop: boolean, grown: 
   const cy = floor * (n > 8 ? 0.475 : n > 6 ? 0.455 : 0.45), ry = floor * (n > 8 ? 0.32 : n > 6 ? 0.29 : 0.28);
   // Reserve two rows of tag space above the back row instead of compressing it into the header.
   const backRow = Math.max(cy - ry, compact < 1 ? Math.min(120, floor * .34) : 0), frontRow = cy + ry;
-  return { u: 1, cx: W / 2, cy: (backRow + frontRow) / 2, rx: W * 0.34, ry: (frontRow - backRow) / 2, back: CIRCLE_FEEL.phone.back * crowd, front: CIRCLE_FEEL.phone.front * crowd, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus * compact, ppu: 3.4 * compact, maxHeap: 150 * compact };
+  // However crowded or short the floor, the back row stays large enough to read a face (CIRCLE_FEEL.phone.backMin).
+  const back = Math.max(CIRCLE_FEEL.phone.backMin, CIRCLE_FEEL.phone.back * crowd), front = Math.max(back, CIRCLE_FEEL.phone.front * crowd);
+  return { u: 1, cx: W / 2, cy: (backRow + frontRow) / 2, rx: W * 0.34, ry: (frontRow - backRow) / 2, back, front, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus * compact, ppu: 3.4 * compact, maxHeap: 150 * compact };
 }
 
 /**
