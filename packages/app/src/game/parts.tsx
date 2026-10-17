@@ -113,7 +113,12 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
   const previous = useRef<ReturnType<typeof layoutGame> | null>(null), from = useRef<ReturnType<typeof layoutGame> | null>(null);
   useLayoutEffect(() => {
     const host = body.current!;
-    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; setViewport({ width: box.width, height: box.height + HEADER_HEIGHT }); });
+    const fit = (width: number, height: number) => setViewport(current => current.width === width && current.height === height + HEADER_HEIGHT ? current : { width, height: height + HEADER_HEIGHT });
+    /* measured before the first paint: an update made here is drawn in the same frame, so a game screen never shows
+       the phone layout it was first rendered with (QA lifecycle-12); the observer follows later changes */
+    const box = host.getBoundingClientRect();
+    fit(box.width, box.height);
+    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; fit(box.width, box.height); });
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
