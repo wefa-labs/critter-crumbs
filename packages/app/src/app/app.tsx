@@ -49,7 +49,7 @@ export function App() {
   async function run(action: () => Promise<void>) {
     if (running.current) return;
     running.current = true; setBusy(true); setAlert('');
-    try { await action(); } catch (error) { if (error instanceof ApiClientError && error.status === 401) { resumeAfterConnect.current = true; setConnectReason(error.copyId === 'err.generic' ? '' : message(error)); void connect(); } else { setAlert(message(error)); audio.play('error'); } }
+    try { await action(); } catch (error) { if (error instanceof ApiClientError && error.status === 401) { resumeAfterConnect.current = true; setConnectReason(error.copyId === 'err.generic' ? copy['err.sessionExpired'] : message(error)); void connect(); } else { setAlert(message(error)); audio.play('error'); } }
     finally { running.current = false; setBusy(false); }
   }
   useEffect(() => { void session.restore().catch(error => setAlert(message(error))); }, [session]);
