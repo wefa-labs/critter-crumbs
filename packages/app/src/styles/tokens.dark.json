@@ -22,5 +22,7 @@
   "ground-glow": "radial-gradient(120% 60% at 15% -10%, #383148 0%, transparent 60%)",
   "floor-base": "#3A3346",
   "scene-filter": "saturate(.88) brightness(.6)",
-  "scene-wash": "linear-gradient(to bottom, rgb(43 38 56 / .34), rgb(43 38 56 / .14) 45%, rgb(43 38 56 / .5))"
+  "scene-wash": "linear-gradient(to bottom, rgb(43 38 56 / .34), rgb(43 38 56 / .14) 45%, rgb(43 38 56 / .5))",
+  "critter-filter": "brightness(.84) saturate(.9)",
+  "critter-light": "radial-gradient(closest-side, rgb(255 214 150 / .3), rgb(255 214 150 / .1) 60%, transparent)"
 }

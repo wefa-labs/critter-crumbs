@@ -42,6 +42,11 @@ main:focus { outline:none; }
 .critter-cell h2 { margin:var(--cc-space-2) 0; font-family:var(--cc-font-display); font-size:var(--cc-text-lg); font-weight:400; }
 .stage { position:relative; width:100%; aspect-ratio:4/5; isolation:isolate; }
 .stage > .portrait { position:absolute; inset:0; width:100%; height:100%; }
+/* Critters stand in the room's light. The dark look grades them with its painting and stands each in a small pool
+   of lamplight at its feet, so a cream critter neither glows against the dim room nor floats off its dark floor; the
+   light look leaves both alone (tokens critter-filter, critter-light). Faces in the interface are not in the room. */
+.floor-critter .portrait, .circle-spot .stage > .portrait, .critter-canvas canvas { filter:var(--cc-critter-filter); }
+.floor-critter .stage::before, .circle-spot .stage::before { content:''; position:absolute; left:6%; right:6%; top:89%; height:9%; border-radius:50%; background:var(--cc-critter-light); pointer-events:none; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
 .skip-link { position:fixed; top:var(--cc-space-3); left:var(--cc-space-3); z-index:var(--cc-z-sheet); transform:translateY(-150%); background:var(--cc-bg-raised); padding:var(--cc-space-3); }
 .skip-link:focus { transform:none; }
