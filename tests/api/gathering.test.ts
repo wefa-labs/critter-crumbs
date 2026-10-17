@@ -69,7 +69,7 @@ test('API options statements are editable by the creator in draft and hidden fro
   expect((await api({ method: 'GET', path, headers: members[0]!.headers })).body.statements).toEqual([]);
   expect((await api({ method: 'PUT', path: `${path}/statements/${target.id}`, headers: members[0]!.headers, body: { body: 'Changed.' } })).status).toBe(403);
 });
-test.each([['overlong', 0, 'x'.repeat(2001), 'gathering.limit'], ['late', 1000, 'Late', 'scatter.closed']] as const)('API statements reject %s edits', async (_, elapsed, body, error) => {
+test.each([['overlong', 0, 'x'.repeat(2001), 'gathering.limit'], ['late', 1000, 'Late', 'gathering.closed']] as const)('API statements reject %s edits', async (_, elapsed, body, error) => {
   const { api, createFeast, close, advance } = await apiHarness(); disposals.push(close);
   const { path, owner, created } = await createFeast({ kind: 'options', open: true });
   const target = (created.body.targets as { id: string }[])[0]!;

@@ -26,3 +26,16 @@ test('statements remain private, cap safely, then reveal and read without WebGL 
   expect(errors).toEqual([]); expect(requests.some(url => /(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(false);
   await second.close();
 });
+
+/* The page turns to the statements the second gathering closes. Words still being written there are not saved, and the
+   member is told so rather than finding them gone (QA edge-states-03). */
+test('words still unsaved when gathering closes are not lost without a word', async ({ page }) => {
+  const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'gathering' } }); expect(seed.ok()).toBe(true);
+  const { feasts } = await seed.json(), feast = feasts[0];
+  await page.goto(`/feasts/${feast.id}`); await connectLocal(page, 1);
+  await page.locator('.statement-editor textarea').first().fill('Fixed the tool shed door, unsaved.');
+  expect((await page.request.post('/api/dev/time', { data: { now: feast.gatheringEndsAt - 1500 } })).ok()).toBe(true);
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  await expect(page.locator('.statement-editor')).toHaveCount(0, { timeout: 15000 });
+  await expect(page.locator('.app-toast')).toContainText('Gathering closed before your latest words were saved. Anything you saved earlier still stands.');
+});

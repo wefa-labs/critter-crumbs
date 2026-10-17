@@ -711,6 +711,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `gathering.limit` | That's the limit — 2,000 characters. |
 | `gathering.save` | Save statement |
 | `gathering.saved` | Saved. |
+| `gathering.closed` | Gathering closed before your latest words were saved. Anything you saved earlier still stands. (A statement saved too late, and words left unsaved when gathering closes.) |
 | `gathering.hidden` | Nobody sees this until scattering opens. |
 | `gathering.participation` | {written} of {total} statements written |
 | `gathering.notYet` | Not yet: {names} |

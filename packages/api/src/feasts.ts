@@ -118,7 +118,8 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
         requireMember(snapshot, actor);
         const row = snapshot.feasts.find(row => row.id === id)!;
         const phase = phaseAt(feastClock(row), now);
-        if (phase !== 'gathering' && !(phase === 'draft' && row.kind === 'options')) throw new HttpError(400, 'scatter.closed');
+        // a statement that arrives once gathering has closed is refused (PRD R13) and says so, not that scattering closed
+        if (phase !== 'gathering' && !(phase === 'draft' && row.kind === 'options')) throw new HttpError(400, phase === 'scattering' || phase === 'feast' ? 'gathering.closed' : 'scatter.closed');
         const targets = row.kind === 'people' ? peopleTargets(snapshot.members) : snapshot.targets.filter(target => target.feast_id === id).map(targetFromRow);
         const target = targets.find(target => target.id === targetId);
         if (!target || !sameAddress(target.ownerAddress ?? String(row.created_by), actor)) throw new HttpError(403, 'err.generic');

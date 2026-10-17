@@ -201,6 +201,7 @@ export const copy = {
   "gathering.limit": "That's the limit — 2,000 characters.",
   "gathering.save": "Save statement",
   "gathering.saved": "Saved.",
+  "gathering.closed": "Gathering closed before your latest words were saved. Anything you saved earlier still stands.",
   "gathering.hidden": "Nobody sees this until scattering opens.",
   "gathering.participation": "{written} of {total} statements written",
   "gathering.notYet": "Not yet: {names}",
