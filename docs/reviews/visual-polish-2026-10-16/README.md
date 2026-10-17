@@ -1,11 +1,11 @@
 # Visual polish batch, 16 October 2026
 
-This batch addresses four items from the Garden Spirits polish list that a recording would show. Each is one commit on `claude/visual-polish`, on top of `codex/shared-shell` (#56):
+This batch addresses four items from the Garden Spirits polish list that a recording would show. Each is a commit on `claude/visual-polish`, on top of `codex/shared-shell` (#56):
 
 | Commit | Change |
 |---|---|
 | `27565be` | A phone's back row never draws narrower than a 56 px stage. |
-| `715381a` | Each name tag stays beside the critter it names. |
+| `715381a`, `e678ba5` | Each name tag stays beside the critter it names, clear of its neighbours wherever it can be. |
 | `91b9209` | The results huddle shows each critter as the feast grew it. |
 | `7879b26` | The dark look grades critters with the room and stands each in a pool of lamplight. |
 
@@ -21,7 +21,7 @@ The tag solver used to move a tag straight up the room until it touched no other
 2. The same, within one and a half.
 3. Nudged sideways or beside the body.
 
-A tag may now sit over part of a neighbour rather than drift away. The old wide search remains for a tag that still has no room. The heap, the thought bubble, the piles and the dock stay clear, as before.
+Every stage keeps Design pass §21's limits on covering another critter (161 px² at 1280 px, 123 px² at ten critters on a phone). Only when no spot within one and a half tag heights is clear does a tag sit over part of a neighbour, rather than drift away. The old wide search remains for a tag that still has no room. The heap, the thought bubble, the piles and the dock stay clear, as before.
 
 | Phone, ten critters | Furthest tag from its critter | Smallest back-row stage |
 |---|---|---|
@@ -30,7 +30,7 @@ A tag may now sit over part of a neighbour rather than drift away. The old wide 
 | 320 × 568, Garden Spirits | 173 → 5 px | 36 → 56 px |
 | 375 × 667, eight Garden Spirits | 112 → 20 px | 53 → 56 px |
 
-These figures are measured in the captured pages. Across the test matrix, tags were up to 256 px away. Every tag now stays within one and a half tag heights of its own critter, for eight and ten critters, at every focus, in both drawing versions, on three phones and two desktops. Layout time, measured after a warm-up on this Mac: every size now has a median under 0.6 ms, with one outlier of 15.6 ms (ten critters, 320 × 568). The old solver, given the larger back row, had medians up to 1.8 ms and outliers up to 92 ms. These are single-run timings on a busy machine.
+These figures are measured in the captured pages. Across the test matrix, tags were up to 256 px away. Every tag now stays within one and a half tag heights of its own critter, for eight and ten critters, at every focus, in both drawing versions, on three phones and two desktops. Layout time, measured after a warm-up on this Mac: every size has a median under 0.5 ms, and the worst of three runs was under 4 ms. The old solver, given the larger back row, had medians up to 1.8 ms and outliers up to 92 ms.
 
 ## The results huddle
 
@@ -58,7 +58,7 @@ Faces in the interface, such as the profile button, are left alone. The light lo
 
 ## Calls for Afolabi
 
-- **Tag placement.** On a crowded phone a tag may now sit over part of a neighbouring critter, and may be nudged off-centre when a pile or the bubble takes its centred spot. The review page always centred tags; the old centred-tag test now allows a tag to shift beside its critter instead.
+- **Tag placement.** A tag may now be nudged off-centre, or sit beside the body, when a pile or the bubble takes its centred spot; the review page always centred tags, and the old centred-tag test now allows a tag to shift beside its critter. On a crowded short phone a tag may sit over part of a neighbour where §21 already treats bodies as soft obstacles.
 - **One-row huddle.** The review page always used two rows for more than five critters. One row shows everyone whole, but it is a change to that design.
 - **Dark grade strength.** The grade is deliberately subtle: .84 brightness, and a pool at 30% opacity at its centre. It could go further.
 
@@ -68,7 +68,8 @@ Faces in the interface, such as the profile button, are left alone. The light lo
   - `circle-legibility.test.ts`: back row at least 56 px.
   - `name-tags.test.ts`: every tag beside its critter and clear of every other tag.
   - `results-huddle.test.ts`: no neighbour hidden, order kept, inside the scene, and a small phone huddle at least 84 px.
-- Each new test failed before its change. The other app and shared tests pass, as do the token check and the dark-token contrast tests.
+- Each new test failed before its change. All 228 app and shared tests pass, as do the token check and the dark-token contrast tests.
+- Browser suites on this branch's stack: tests/e2e passes 47 of 47. tests/screens, the review page's composition and §21 checks, passes 110 of 111, the same as #56; its one failure, capturing the review page's reference, fails on #56 too.
 - Captures: 19 before and 19 after, with no page errors.
 - Not verified:
   - Safari/WebKit, physical phones and screen readers.
