@@ -2,7 +2,7 @@
 
 ## Production on testnet
 
-Production runs on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). **It was first deployed on 11 October 2026, from `main` at `c86d8b1`.** Until that day the project's only deployment was the old repository's first commit, and the address answered 404. The app could not have run there before either: the production bundle was blank under the page policy, could not connect, and could not scatter or open a feast (`docs/decisions.md`, 9 and 10 October; `docs/reviews/october-qa`). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
+Production runs on testnet until the mainnet Shutter API key arrives: Shutter on Chiado and EAS on Base Sepolia (decision of 2026-10-08). **It was first deployed on 11 October 2026, from `main` at `c86d8b1`;** later deployments are listed in the [deployment record](#deployment-record). Until that day the project's only deployment was the old repository's first commit, and the address answered 404. The app could not have run there before either: the production bundle was blank under the page policy, could not connect, and could not scatter or open a feast (`docs/decisions.md`, 9 and 10 October; `docs/reviews/october-qa`). The address is https://www.crittercrumbs.app, and the apex redirects there. It is the Vercel project `critter-crumbs` in the Greenpill Dev Guild team (Pro), with functions in `iad1`, next to the Neon database in AWS `us-east-1`. The rehearsal run sheet is [rehearsal.md](rehearsal.md).
 
 | Variable (Production) | Value |
 |---|---|
@@ -41,6 +41,29 @@ That deployment was then checked from outside, signed out:
 - the development routes answer 404, and a write from another origin is refused.
 
 Nothing that needs an account was checked. The solo smoke feast in the run sheet is the first signed-in use, and the first time Shutter's keypers are asked to release a key for a feast.
+
+### Deployment record
+
+Vercel keeps no commit for a deployment made from the command line, so each production deployment is recorded here. The last row is live. To roll back, promote the row above it in Vercel.
+
+| Live from (PDT) | `main` | Deployment | What changed |
+|---|---|---|---|
+| 11 October, 18:38 | `c86d8b1` | `dpl_Eug5pKjnjHNUiQBsMJP19vGWqVeK` | The first deployment, checked as above. |
+| 12 October, 17:48 | Not recorded | `dpl_5A3gRP65NuLCcH1GDkeztwkpgkBR` | Made from the command line 49 seconds after #55 merged, so probably `b908f4a`. |
+| 17 October, 22:52 | `a8277cb` | `dpl_D2ngWuHJik5XGGLmiqVphqD8NnG7` | #56 with #57 and #59: the Garden Spirits groundwork, the demo-path fixes and the visual polish. Migration 0009 was applied first, as its [release order](../reviews/versioned-identity-2026-10-16.md#release-order-and-remaining-integration) requires. |
+| 18 October, 01:00 | `cce4c2c` | `dpl_9fGNtBK3KyMAhC9Y59LFj34YXgEG` | #60: a feast or burrow link that leads nowhere now says so. No migration. |
+
+Before migration 0009 the database held no feasts and no targets, only two profiles, so there were no writes to drain. Afterwards all nine migrations were applied, and both profiles were still on version 1 with their critters locked. Its columns have defaults, so the API that was live before it still runs on the migrated schema. Production draws version 1 critters. Garden Spirits stays behind its review switch, which production builds do not turn on.
+
+The 17 and 18 October deployments were checked from outside, signed out, as the first one was:
+- all 22 route files answer, and a nonce is issued;
+- the development routes are closed;
+- the page starts in Chromium and WebKit with no breach of its policy;
+- Vercel reported no runtime errors.
+
+Nothing signed in has been checked yet.
+
+The upload sends every tracked file, documents included. On 17 October it was 88.2 MB and stopped at 66.1 MB with `fetch failed`; the same command then sent the missing 6.9 MB. On 18 October Vercel already held everything else, so it sent 134.8 KB and went through the first time.
 
 The Vercel project's Git connection still points at the old `Oba-One/critter-crumbs` repository, so pushes to `wefa-labs/critter-crumbs` do not deploy. Leave it that way until the CSP origins are generated in CI (§5).
 
