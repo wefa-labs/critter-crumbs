@@ -40,6 +40,9 @@ export function Burrow({ id, api, me, session, run, busy }: { id: string; api: A
       const detail = resource.error.detail as { burrowName?: string } | undefined;
       return <Page title={copy['burrow.unknown.title']}><p>{formatCopy('burrow.unknown.body', { burrowName: detail?.burrowName ?? copy['app.name'], shortAddress: shortAddress(me.address) })}</p><Link href="/">{copy['action.back']}</Link></Page>;
     }
+    /* A link that leads to no burrow: the store has no burrow by that id (404), or the id is not one at all, as when a
+       link is cut short in copying (400). Trying again cannot help, so the page says so in place of Try again. */
+    if (resource.error instanceof ApiClientError && (resource.error.status === 404 || resource.error.status === 400)) return <Page title={copy['burrow.missing.title']}><p>{copy['burrow.missing.body']}</p><Link href="/">{copy['action.back']}</Link></Page>;
     return <PendingPage error={resource.error} retry={resource.refresh} />;
   }
   const burrow = resource.data, active = burrow.members.filter(member => member.leftAt === null), historical = burrow.members.filter(member => member.leftAt !== null);
