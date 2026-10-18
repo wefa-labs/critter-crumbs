@@ -6,7 +6,7 @@ This batch addresses four items from the Garden Spirits polish list that a recor
 |---|---|
 | `27565be` | A phone's back row never draws narrower than a 56 px stage. |
 | `715381a`, `e678ba5` | Each name tag stays beside the critter it names, clear of its neighbours wherever it can be. |
-| `91b9209` | The results huddle shows each critter as the feast grew it. |
+| `91b9209`, `8d2622a` | The results huddle shows each critter as the feast grew it, standing on the desktop bar as #57 has it. |
 | `7879b26` | The dark look grades critters with the room and stands each in a pool of lamplight. |
 
 The before and after captures come from the same local stack and the same fixture states, with the same critters and the same results. `/dev/screens` gives the game states. Captures use reduced motion so frames are comparable, and Garden Spirits (`?critters=garden`) unless a caption says version 2.
@@ -42,7 +42,7 @@ The huddle spaced every critter by one fixed step, about half a drawing. The fea
 
 Each critter is now spaced by the width the feast grew it to, and neighbours overlap by no more than 18% of their width. The group stands in one row whenever everyone fits at full size, as all ten do on desktop and up to eight on a phone. Otherwise the back row stands far enough back that its faces show. On a phone, a small group grows into the room it has, up to 1.3 times.
 
-The burrow's own order is kept; the huddle is never ranked (Game Design G3: the results list carries the ranking). Growth stays the spec's compressed range, so an even split still looks even, as the four-option fixture shows.
+On desktop the huddle stands on the folded dock's bar, so no portrait covers Previous, Results or Next. That rule is #57's, carried into this code when #57 was merged into this branch (`8d2622a`). The burrow's own order is kept; the huddle is never ranked (Game Design G3: the results list carries the ranking). Growth stays the spec's compressed range, so an even split still looks even, as the four-option fixture shows.
 
 ## Dark grading
 
