@@ -115,7 +115,10 @@ export function layoutGame(input: LayoutInput) {
   /* The huddle on the results' top edge (huddleAt): one row shoulder to shoulder when everyone fits, else a front row
      and a smaller back row looking out from the gaps. Each critter is spaced by the width the feast grew it to, so the
      ones that received more stand out and nobody hides behind a neighbour; the burrow's own order is kept, never a
-     ranking (Game Design G3). A phone lets a small group grow into the room it has. */
+     ranking (Game Design G3). A phone lets a small group grow into the room it has. On the phone the front row stands a
+     tenth of its size into the results' rounded top. On desktop the folded dock is only its bar of controls, so the
+     huddle stands on the bar: each front portrait's box, 10 of its 150 units under the feet, ends at the edge instead
+     of covering the buttons (#57). */
   const places = new Map<number, { x: number; y: number; size: number; depth: number }>();
   if (gathered && huddled.length) {
     const m = huddled.length, base = (desktop ? CIRCLE_FEEL.huddle.desktop * geo.u : CIRCLE_FEEL.huddle.phone) * (m > 8 ? 0.88 : 1), room = W - 24;
@@ -130,11 +133,12 @@ export function layoutGame(input: LayoutInput) {
     const single = fit(huddled) >= base, front = single ? m : m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, row = huddled.slice(0, front), size = fit(row);
     let x = W / 2 - span(row, size) / 2 + drawn(row[0]!, size) / 2;
     const frontX = row.map((entry, i) => (x += i ? step(row, i, size) : 0));
-    row.forEach((entry, rank) => places.set(entry.index, { x: frontX[rank]!, y: dock.y + size * 0.1, size, depth: 3200 + rank }));
+    const underFeet = Math.round(size * 1.25) * 10 / 150, frontY = desktop ? dock.y - underFeet : dock.y + size * 0.1;
+    row.forEach((entry, rank) => places.set(entry.index, { x: frontX[rank]!, y: frontY, size, depth: 3200 + rank }));
     huddled.slice(front).forEach((entry, i) => {
       const gap = Math.max(0, Math.min(front - 2, Math.floor((front - 1 - back) / 2) + i));
-      // stood far enough back that a face shows over the front row's heads
-      places.set(entry.index, { x: (frontX[gap]! + frontX[gap + 1]!) / 2, y: dock.y - size * 0.4, size: size * 0.9, depth: 3100 + front + i });
+      // half a critter behind the front row, far enough back that a face shows over its heads
+      places.set(entry.index, { x: (frontX[gap]! + frontX[gap + 1]!) / 2, y: frontY - size * 0.5, size: size * 0.9, depth: 3100 + front + i });
     });
   }
   const slots = input.critters.map((critter, index) => {

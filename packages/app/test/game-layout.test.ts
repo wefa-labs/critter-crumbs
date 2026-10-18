@@ -71,6 +71,21 @@ describe('October surfaces', () => {
     expect(at('scatter', { width: 375, height: 812 }).trail).toEqual([]);
     expect(layoutGame({ viewport: { width: 1440, height: 900 }, critters: critters(8), focus: 0, reading: true, issued: 100, ...scattering('desktop') }).trail).toEqual([]);
   });
+  it('stands the desktop results huddle on the folded dock, every portrait clear of its controls', () => {
+    for (const viewport of [{ width: 1280, height: 720 }, { width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }]) for (const n of [4, 6, 8, 10]) {
+      const layout = at('results', viewport, n);
+      for (const slot of layout.slots) {
+        /* the portrait's whole box (feet, shadow and the margin under them) ends at the bar: nothing covers its buttons */
+        expect(slot.stage.y + slot.stage.height, JSON.stringify({ viewport, n, slot: slot.index })).toBeLessThanOrEqual(layout.dock.y + 1e-9);
+        expect(slot.figure.y).toBeGreaterThanOrEqual(0);
+      }
+    }
+    /* the phone keeps its front row standing on the results' rounded top, as the flow page draws it; when everyone fits
+       in one row (the results huddle's one-row rule), the front row is everyone */
+    const phone = at('results', { width: 390, height: 844 }, 10), front = phone.slots.filter(slot => slot.depth >= 3200);
+    expect(front.length).toBeGreaterThanOrEqual(6);
+    for (const slot of front) expect(slot.foot.y).toBeGreaterThan(phone.dock.y);
+  });
   it('huddles only the critters that were fed, as the one-scatterer result gathers its two', () => {
     const { surface, scene } = composeGame('tie', 'phone');
     const fed = critters(8).map((critter, index) => ({ ...critter, away: index !== 0 && index !== 3 }));
