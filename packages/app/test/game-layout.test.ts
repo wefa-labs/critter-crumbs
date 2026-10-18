@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { generate2 } from '@critter-crumbs/core';
 import members from '../src/dev/game-members.js';
 import { portraitMetrics } from '../src/portraits/metrics.js';
-import { hitRect, layoutGame, overlapArea } from '../src/game/layout.js';
+import { hitRect, layoutGame, overlapArea, rectGap } from '../src/game/layout.js';
 import { composeGame } from '../src/game/composition.js';
 /* the scattering composition, as the scatter page draws it */
 const scattering = (device: 'phone' | 'desktop') => { const { surface, scene } = composeGame('scatter', device); return { surface, scene }; };
@@ -24,11 +24,13 @@ describe('October circle layout',()=>{
    for(const slot of layout.slots)if(!slot.tag.hidden){expect(slot.tag.x).toBeGreaterThanOrEqual(0);expect(slot.tag.y).toBeGreaterThanOrEqual(0);expect(slot.tag.y+slot.tag.height).toBeLessThanOrEqual(layout.dock.y);expect(overlapArea(slot.tag,heap)).toBe(0);}
   }
  });
- it('keeps centred review tags clear of the thought bubble and piles',()=>{
+ // Tags are centred over their critter (the review page) unless a pile or the bubble takes that spot, when they shift
+ // just enough to stay beside it rather than climbing the room (QA lifecycle-03).
+ it('keeps review tags clear of the thought bubble and piles, centred over their critter or beside it',()=>{
   for(const viewport of [{width:375,height:812},{width:1280,height:800},{width:1440,height:900}])for(const count of [4,6,8,10])for(let focus=0;focus<count;focus++){
    const critters=members.slice(0,count).map((member,i)=>({name:member.name,own:i===2,count:i===2?0:12,extent:portraitMetrics(generate2(member.address,0)).extent}));
    const layout=layoutGame({viewport,critters,focus,issued:100,...scattering(deviceOf(viewport.width))});
-   for(const slot of layout.slots)if(!slot.tag.hidden){expect(overlapArea(slot.tag,layout.bubble),JSON.stringify({viewport,count,focus,slot:slot.index})).toBe(0);for(const other of layout.slots)if(other.slot!==0)expect(overlapArea(slot.tag,other.pile)).toBe(0);const desired=slot.foot.x-slot.tag.width/2;expect(slot.tag.x).toBe(Math.min(Math.max(desired,6),layout.scene.width-6-slot.tag.width));}
+   for(const slot of layout.slots)if(!slot.tag.hidden){expect(overlapArea(slot.tag,layout.bubble),JSON.stringify({viewport,count,focus,slot:slot.index})).toBe(0);for(const other of layout.slots)if(other.slot!==0)expect(overlapArea(slot.tag,other.pile)).toBe(0);const desired=Math.min(Math.max(slot.foot.x-slot.tag.width/2,6),layout.scene.width-6-slot.tag.width);if(slot.tag.x!==desired)expect(rectGap(slot.tag,slot.figure)).toBeLessThanOrEqual(slot.tag.height*1.5);}
   }
  });
 
@@ -78,9 +80,11 @@ describe('October surfaces', () => {
         expect(slot.figure.y).toBeGreaterThanOrEqual(0);
       }
     }
-    /* the phone keeps its front row standing on the results' rounded top, as the flow page draws it */
-    const phone = at('results', { width: 390, height: 844 }, 10);
-    expect(phone.slots.filter(slot => slot.foot.y > phone.dock.y)).toHaveLength(6);
+    /* the phone keeps its front row standing on the results' rounded top, as the flow page draws it; when everyone fits
+       in one row (the results huddle's one-row rule), the front row is everyone */
+    const phone = at('results', { width: 390, height: 844 }, 10), front = phone.slots.filter(slot => slot.depth >= 3200);
+    expect(front.length).toBeGreaterThanOrEqual(6);
+    for (const slot of front) expect(slot.foot.y).toBeGreaterThan(phone.dock.y);
   });
   it('huddles only the critters that were fed, as the one-scatterer result gathers its two', () => {
     const { surface, scene } = composeGame('tie', 'phone');

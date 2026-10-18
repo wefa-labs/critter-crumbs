@@ -15,6 +15,8 @@ export interface LayoutCritter {
   name: string; own: boolean; count: number; extent: PortraitExtent;
   /** Left out of the huddle: it received no crumbs (flow page 46 gathers only the critters that were fed). */
   away?: boolean;
+  /** At the feast, the scale its growth draws it at (Game Design §3.4, 1 to 1.35); the huddle spaces critters by it. */
+  growth?: number;
 }
 export interface LayoutInput {
   viewport: { width: number; height: number };
@@ -42,6 +44,8 @@ export const sidePanelWidth = (width: number) => Math.min(480, Math.max(400, wid
 /** Phone: an open statement is a bubble across the top of the scene (.panel.bubble). */
 const STATEMENT = { inset: 12, height: 378 };
 
+/** How far apart two rectangles are, in px; 0 when they touch or overlap. */
+export const rectGap = (a: Rect, b: Rect) => Math.hypot(Math.max(0, a.x - (b.x + b.width), b.x - (a.x + a.width)), Math.max(0, a.y - (b.y + b.height), b.y - (a.y + a.height)));
 export const overlapArea = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 /** A target at least `min` square around a smaller drawing, centred on it, so a small one still takes a finger. */
 export function hitRect(rect: Rect, min = 44): Rect {
@@ -73,7 +77,9 @@ function geometry(W: number, floor: number, n: number, desktop: boolean, grown: 
   const cy = floor * (n > 8 ? 0.475 : n > 6 ? 0.455 : 0.45), ry = floor * (n > 8 ? 0.32 : n > 6 ? 0.29 : 0.28);
   // Reserve two rows of tag space above the back row instead of compressing it into the header.
   const backRow = Math.max(cy - ry, compact < 1 ? Math.min(120, floor * .34) : 0), frontRow = cy + ry;
-  return { u: 1, cx: W / 2, cy: (backRow + frontRow) / 2, rx: W * 0.34, ry: (frontRow - backRow) / 2, back: CIRCLE_FEEL.phone.back * crowd, front: CIRCLE_FEEL.phone.front * crowd, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus * compact, ppu: 3.4 * compact, maxHeap: 150 * compact };
+  // However crowded or short the floor, the back row stays large enough to read a face (CIRCLE_FEEL.phone.backMin).
+  const back = Math.max(CIRCLE_FEEL.phone.backMin, CIRCLE_FEEL.phone.back * crowd), front = Math.max(back, CIRCLE_FEEL.phone.front * crowd);
+  return { u: 1, cx: W / 2, cy: (backRow + frontRow) / 2, rx: W * 0.34, ry: (frontRow - backRow) / 2, back, front, focusY: floor - 14, focusSize: CIRCLE_FEEL.phone.focus * compact, ppu: 3.4 * compact, maxHeap: 150 * compact };
 }
 
 /**
@@ -105,19 +111,43 @@ export function layoutGame(input: LayoutInput) {
      that runs 24 px under the sheet's rounded top on the phone, the critters 1.5 times larger on desktop */
   const ring = input.surface.kind === 'sheet', ringFloor = desktop ? H : H - dockH + 24, ringScale = desktop ? 1.5 * geo.u : 1;
   /* the huddle counts only the critters gathered on the edge */
-  const huddled = input.critters.map((critter, index) => ({ critter, index })).filter(entry => !entry.critter.away), rankOf = new Map(huddled.map((entry, rank) => [entry.index, rank]));
+  const huddled = input.critters.map((critter, index) => ({ critter, index })).filter(entry => !entry.critter.away);
+  /* The huddle on the results' top edge (huddleAt): one row shoulder to shoulder when everyone fits, else a front row
+     and a smaller back row looking out from the gaps. Each critter is spaced by the width the feast grew it to, so the
+     ones that received more stand out and nobody hides behind a neighbour; the burrow's own order is kept, never a
+     ranking (Game Design G3). A phone lets a small group grow into the room it has. On the phone the front row stands a
+     tenth of its size into the results' rounded top. On desktop the folded dock is only its bar of controls, so the
+     huddle stands on the bar: each front portrait's box, 10 of its 150 units under the feet, ends at the edge instead
+     of covering the buttons (#57). */
+  const places = new Map<number, { x: number; y: number; size: number; depth: number }>();
+  if (gathered && huddled.length) {
+    const m = huddled.length, base = (desktop ? CIRCLE_FEEL.huddle.desktop * geo.u : CIRCLE_FEEL.huddle.phone) * (m > 8 ? 0.88 : 1), room = W - 24;
+    const drawn = (entry: typeof huddled[number], size: number) => (entry.critter.extent.right - entry.critter.extent.left) * size * (entry.critter.growth ?? 1);
+    // neighbours' drawings meet by no more than this share of their mean width
+    const SHOULDER = 0.82;
+    const step = (row: typeof huddled, i: number, size: number) => (drawn(row[i - 1]!, size) + drawn(row[i]!, size)) / 2 * SHOULDER;
+    const span = (row: typeof huddled, size: number) => row.slice(1).reduce((sum, _, i) => sum + step(row, i + 1, size), 0) + (drawn(row[0]!, size) + drawn(row.at(-1)!, size)) / 2;
+    // the size a row reaches: up to 1.3 times the base on a phone with room to spare, never wider than the scene
+    const fit = (row: typeof huddled) => Math.min(base * (desktop ? 1 : 1.3), base * room / span(row, base));
+    // one row when everyone fits at full size, so nobody stands behind anybody; else the scatter page's two
+    const single = fit(huddled) >= base, front = single ? m : m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, row = huddled.slice(0, front), size = fit(row);
+    let x = W / 2 - span(row, size) / 2 + drawn(row[0]!, size) / 2;
+    const frontX = row.map((entry, i) => (x += i ? step(row, i, size) : 0));
+    const underFeet = Math.round(size * 1.25) * 10 / 150, frontY = desktop ? dock.y - underFeet : dock.y + size * 0.1;
+    row.forEach((entry, rank) => places.set(entry.index, { x: frontX[rank]!, y: frontY, size, depth: 3200 + rank }));
+    huddled.slice(front).forEach((entry, i) => {
+      const gap = Math.max(0, Math.min(front - 2, Math.floor((front - 1 - back) / 2) + i));
+      // half a critter behind the front row, far enough back that a face shows over its heads
+      places.set(entry.index, { x: (frontX[gap]! + frontX[gap + 1]!) / 2, y: frontY - size * 0.5, size: size * 0.9, depth: 3100 + front + i });
+    });
+  }
   const slots = input.critters.map((critter, index) => {
     const slot = (index - input.focus + n) % n, away = gathered && !!critter.away;
     let x = geo.cx, y = geo.focusY, size = geo.focusSize, depth = 999, face: 'left' | 'right' | 'front' = 'front', ringSize = 0;
     if (gathered) {
-      /* the huddle on the results' top edge (huddleAt). On the phone the front row stands a tenth of its size into the
-         results' rounded top. On desktop the folded dock is only its bar of controls, so the huddle stands on the bar:
-         each front portrait's box, 10 of its 150 units under the feet, ends at the edge instead of covering the buttons */
-      const m = huddled.length, rank = rankOf.get(index) ?? 0, front = m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, crowd = m > 8 ? 0.88 : 1;
-      size = (desktop ? CIRCLE_FEEL.huddle.desktop * geo.u : CIRCLE_FEEL.huddle.phone) * crowd;
-      const step = size * 0.58, frontX = (j: number) => W / 2 + (j - (front - 1) / 2) * step, underFeet = Math.round(size * 1.25) * 10 / 150;
-      if (rank < front) { x = frontX(rank); y = desktop ? dock.y - underFeet : dock.y + size * 0.1; depth = 3200 + rank; }
-      else { const gap = Math.floor((front - 1 - back) / 2) + (rank - front); x = (frontX(gap) + frontX(gap + 1)) / 2; y = desktop ? dock.y - underFeet - size * 0.36 : dock.y - size * 0.26; size *= 0.9; depth = 3100 + rank; }
+      /* a critter left out of the huddle keeps the first place, unseen, as it always has */
+      const place = places.get(index) ?? places.get(huddled[0]?.index ?? index) ?? { x: W / 2, y: dock.y, size: CIRCLE_FEEL.huddle.phone, depth: 3200 };
+      ({ x, y, size, depth } = place);
       face = x < W / 2 ? 'right' : 'left';
     } else if (ring) {
       const angle = (90 - slot * 360 / n) * Math.PI / 180, sin = Math.sin(angle), cos = Math.cos(angle);
@@ -190,50 +220,93 @@ export function layoutGame(input: LayoutInput) {
   const trailFrom = { x: focused.foot.x + headR * 0.8, y: headY - headR - 6 }, trailTo = { x: Math.min(focused.foot.x + headR + 36, W - 40), y: statement.y + statement.height + 6 };
   const trail: Rect[] = !desktop && input.reading ? [0.18, 0.5, 0.8].map((along, i) => { const size = [8, 11, 15][i]!; return { x: trailFrom.x + (trailTo.x - trailFrom.x) * along - size / 2, y: trailFrom.y + (trailTo.y - trailFrom.y) * along - size / 2, width: size, height: size }; }) : [];
 
-  /* the tags, centred above each head and solved together so a tall back critter leaves room (layoutRing) */
+  /* the tags, centred above each head and solved together so a tall back critter leaves room (layoutRing). Each tag
+     first looks for room near its own critter rather than drifting up the room to find it, which left tags naming
+     nobody on short phones and on 1280 px desktops (QA lifecycle-03) */
   const visible = slots.filter(it => !it.tag.hidden), tolerance = desktop ? (input.viewport.width === 1280 ? 161 : 0) : n > 8 ? 123 : 0;
   // On short floors portrait bounds are soft obstacles; readable tags, crumbs and controls retain priority.
   const compactLabels = !desktop && H - dockH < 550;
-  const choices = visible.map(it => {
+  const blocked = (box: Rect) => (showHeap && overlapArea(box, { x: heap.x - 2, y: heap.y - 2, width: heap.width + 4, height: heap.height + 4 }) > 0) || obstacles.some(other => overlapArea(box, other) > 0) || box.y + box.height > dock.y;
+  const widthsOf = (it: typeof visible[number]) => it.shortWidth < it.fullWidth && !(it.slot === 0 && desktop) ? [it.fullWidth, it.shortWidth] : [it.fullWidth];
+  type Candidate = { box: Rect; short: boolean; cost: number };
+  const distinct = (options: (Candidate & { valid?: boolean })[]) => {
     const seen = new Set<string>();
-    const above = it.figure.y - 4 - it.tag.height, widths = it.shortWidth < it.fullWidth && !(it.slot === 0 && desktop) ? [it.fullWidth, it.shortWidth] : [it.fullWidth];
+    return options.filter(option => {
+      const key = `${option.box.x},${option.box.y},${option.box.width}`;
+      if (option.valid === false || seen.has(key)) return false;
+      seen.add(key); return true;
+    }).sort((a, b) => a.cost - b.cost);
+  };
+  /** Spots within `reach` tag heights of the tag's own critter: centred above it or under its feet, and with `nudge`
+   *  also shifted sideways or beside the body. Sitting over a neighbour costs less than drifting away from its own. */
+  const near = (it: typeof visible[number], reach: number, nudge: boolean, strict: boolean) => distinct(widthsOf(it).flatMap((width, shortIndex) => {
+    const height = it.tag.height, limit = height * reach, centre = it.foot.x - width / 2, above = it.figure.y - 4 - height, options: Candidate[] = [];
+    const place = (x: number, y: number, preference: number) => {
+      const box: Rect = { x: Math.min(Math.max(x, 6), W - 6 - width), y: Math.max(2, y), width, height }, distance = rectGap(box, it.figure);
+      if (distance > limit || width > W - 12 || blocked(box)) return;
+      const others = slots.reduce((sum, other) => other === it ? sum : sum + overlapArea(box, other.figure), 0);
+      // strict: no more over a neighbour than the scatter page allows (its tolerance), as long as that keeps tags near
+      if (strict && !compactLabels && slots.some(other => other !== it && overlapArea(box, other.figure) > tolerance)) return;
+      options.push({ box, short: shortIndex > 0, cost: distance / 2 + preference + shortIndex * 20 + others / 40 + overlapArea(box, it.figure) / 8 });
+    };
+    for (let lift = 0; lift <= limit; lift += 4) for (const shift of nudge ? [0, -0.25, 0.25, -0.5, 0.5] : [0]) place(centre + shift * width, above - lift, lift / 4 + Math.abs(shift) * 12);
+    if (nudge) for (const along of [0, 0.25, 0.5]) {
+      const y = it.figure.y + it.figure.height * along;
+      place(it.figure.x - width - 4, y, 8 + along * 8); place(it.figure.x + it.figure.width + 4, y, 8 + along * 8);
+    }
+    const below = Math.max(it.foot.y + 6, it.pile.y + it.pile.height + 6);
+    for (let drop = 0; drop <= limit; drop += 4) place(centre, below + drop, 12 + drop / 4);
+    return options;
+  })).slice(0, 24);
+  const wide = (it: typeof visible[number]) => {
+    const above = it.figure.y - 4 - it.tag.height;
     const positions = Array.from({ length: 65 }, (_, i) => above - i * 4);
     if (compactLabels) {
       const below = Math.max(it.foot.y + 6, it.pile.y + it.pile.height + 6);
       positions.push(...Array.from({ length: 9 }, (_, i) => below + i * 4));
     }
-    const options = widths.flatMap((width, shortIndex) => positions.map(y => {
+    return distinct(widthsOf(it).flatMap((width, shortIndex) => positions.map(y => {
       const box: Rect = { x: Math.min(Math.max(it.foot.x - width / 2, 6), W - 6 - width), y: Math.max(2, y), width, height: it.tag.height };
       const hit = slots.reduce((maximum, other) => other === it ? maximum : Math.max(maximum, overlapArea(box, other.figure)), 0);
-      const blocked = (showHeap && overlapArea(box, { x: heap.x - 2, y: heap.y - 2, width: heap.width + 4, height: heap.height + 4 }) > 0) || obstacles.some(other => overlapArea(box, other) > 0) || box.y + box.height > dock.y;
-      return { box, short: shortIndex > 0, cost: Math.abs(y - above) / 4 + (y > above ? 10 : 0) + shortIndex * 20 + hit, valid: width <= W - 12 && !blocked && (hit <= tolerance || compactLabels) };
-    })).filter(option => {
-      const key = `${option.box.x},${option.box.y},${option.box.width}`;
-      if (!option.valid || seen.has(key)) return false;
-      seen.add(key); return true;
-    }).sort((a, b) => a.cost - b.cost);
-    return { it, candidates: options };
-  }).sort((a, b) => a.candidates.length - b.candidates.length);
-  const assigned: Rect[] = [], selected = new Map<number, { box: Rect; short: boolean }>();
-  let attempts = 0;
-  function fit(index: number): boolean {
-    if (index === choices.length) return true;
-    if (++attempts > 12000) return false;
-    // Re-evaluate the tightest remaining tag after each placement. A fixed order exhausts the search on short floors.
-    const remaining = choices.filter(choice => !selected.has(choice.it.index)).map(choice => ({
-      it: choice.it, candidates: choice.candidates.filter(candidate => !assigned.some(other => overlapArea(candidate.box, other) > 0)),
-    })).sort((a, b) => a.candidates.length - b.candidates.length);
-    const { it, candidates: options } = remaining[0]!;
-    if (!options.length) return false;
-    for (const candidate of options) {
-      if (assigned.some(other => overlapArea(candidate.box, other) > 0)) continue;
-      assigned.push(candidate.box); selected.set(it.index, candidate);
-      if (fit(index + 1)) return true;
-      assigned.pop(); selected.delete(it.index);
+      return { box, short: shortIndex > 0, cost: Math.abs(y - above) / 4 + (y > above ? 10 : 0) + shortIndex * 20 + hit, valid: width <= W - 12 && !blocked(box) && (hit <= tolerance || compactLabels) };
+    })));
+  };
+  /* the tightest tag is placed first, every choice re-checked against the tags already placed, backing off when stuck */
+  function solve(choices: { it: typeof visible[number]; candidates: Candidate[] }[], budget: number) {
+    const assigned: Rect[] = [], selected = new Map<number, Candidate>();
+    let attempts = 0;
+    function fit(index: number): boolean {
+      if (index === choices.length) return true;
+      if (++attempts > budget) return false;
+      // Re-evaluate the tightest remaining tag after each placement. A fixed order exhausts the search on short floors.
+      const remaining = choices.filter(choice => !selected.has(choice.it.index)).map(choice => ({
+        it: choice.it, candidates: choice.candidates.filter(candidate => !assigned.some(other => overlapArea(candidate.box, other) > 0)),
+      })).sort((a, b) => a.candidates.length - b.candidates.length);
+      const { it, candidates: options } = remaining[0]!;
+      if (!options.length) return false;
+      for (const candidate of options) {
+        if (assigned.some(other => overlapArea(candidate.box, other) > 0)) continue;
+        assigned.push(candidate.box); selected.set(it.index, candidate);
+        if (fit(index + 1)) return true;
+        assigned.pop(); selected.delete(it.index);
+      }
+      return false;
     }
-    return false;
+    return { fitted: fit(0), selected };
   }
-  const fitted = fit(0);
+  /* Near first, widening only as far as it must: centred (the review page's tags) within one tag height, then one and
+     a half, then nudged sideways or beside, all clear of other critters as the review page asks; then over part of a
+     neighbour rather than away from its own; still stuck, the wide search's spots, far dearer, join for the tags that
+     need them, so only those drift */
+  let choices: { it: typeof visible[number]; candidates: Candidate[] }[] = [], fitted = false, selected = new Map<number, Candidate>();
+  // each stage gets a search budget; a strict stage that would take long to fail gives way to the next, which is cheap
+  for (const [candidatesOf, budget] of [[(it: typeof visible[number]) => near(it, 1, false, true), 300], [(it: typeof visible[number]) => near(it, 1.5, false, true), 1000],
+    [(it: typeof visible[number]) => near(it, 1.5, true, true), 1000], [(it: typeof visible[number]) => near(it, 1.5, true, false), 2000],
+    [(it: typeof visible[number]) => distinct([...near(it, 1.5, true, false), ...wide(it).map(option => ({ ...option, cost: option.cost + 100 }))]), 4000]] as const) {
+    choices = visible.map(it => ({ it, candidates: candidatesOf(it) }));
+    ({ fitted, selected } = solve(choices, budget));
+    if (fitted) break;
+  }
   for (const it of visible) {
     const choice = selected.get(it.index) ?? choices.find(entry => entry.it === it)?.candidates[0];
     if (choice) it.tag = { ...choice.box, short: choice.short, hidden: !!input.reading && !desktop && overlapArea(choice.box, statement) > 0 };

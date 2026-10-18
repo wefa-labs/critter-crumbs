@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { copy, formatCopy, CIRCLE_FEEL } from '@critter-crumbs/shared';
+import { copy, formatCopy, CIRCLE_FEEL, GROWTH } from '@critter-crumbs/shared';
 import { useTrait } from 'koota/react';
 import type { Entity } from 'koota';
 import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
@@ -136,6 +136,8 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
     name: targetLabel(feast.targets[index]!), own: entity.has(IsOwn) && treatment.ownAsleep,
     count: counts?.[index] ?? entity.get(Count)!.given,
     extent: portraitMetrics(entity.get(Identity)!.parameters, gathered ? entity.get(Received)!.fed : 0).extent,
+    /* the size the feast grew it to (world/motion.ts), so the huddle can give it room */
+    growth: gathered ? 1 + GROWTH.scaleGain * entity.get(Received)!.fed : 1,
     away: fedAny && entity.get(Received)!.crumbs <= 0,
   }));
   const layout = layoutGame({ viewport, critters, focus, reading, issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
