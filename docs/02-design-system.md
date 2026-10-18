@@ -542,6 +542,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Simple view (fallback or chosen) | Portraits in stages; one notice line | `fallback.*` |
 | Offline | Banner; controls stay usable; submit shows why it waits | `err.offline` |
 | Not in the burrow | Burrow name and the ask-a-member line | `burrow.unknown.*` |
+| A link to no feast (the store has no such feast, or the link was cut short in copying) | Heading, the check-the-link line and Back; no Try again, since trying again cannot help | `feast.missing.*` |
 | Feast cancelled | Listed in past feasts with a "Cancelled" chip | `feast.cancelled` |
 | People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
 
@@ -656,6 +657,8 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `burrow.unknown.body` | Ask someone in {burrowName} to add {shortAddress}. |
 | `feast.cancelled` | Cancelled |
 | `feast.tooFew` | {feastTitle} ended before scattering: a people feast needs at least 3 critters. Start a new one when the burrow is ready. |
+| `feast.missing.title` | There's no feast at this link |
+| `feast.missing.body` | Check the link with whoever sent it. |
 
 **Feast setup (F4)**
 

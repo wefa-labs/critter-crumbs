@@ -64,10 +64,15 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   const staying = passed || closing, stillStaying = useDeferredValue(staying);
   /* the scatter screen's code and the feast's load while scattering, so those waits are a moment */
   useEffect(() => { if (phase === 'scattering' && me) { void import('./scatter.js'); void import('./results.js'); } }, [phase, me]);
+  /* A link that leads to no feast: the store has no feast by that id (404), or the id is not one at all, as when a
+     link is cut short in copying (400). Trying again cannot help, so the page says so in place of Try again, and the
+     announcer stays quiet. */
+  const missing = !resource.data && resource.error instanceof ApiClientError && (resource.error.status === 404 || resource.error.status === 400);
   /* the game's notices are not live regions; a failed refresh is read out through the polite announcer */
-  const refreshFailure = resource.error ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
+  const refreshFailure = resource.error && !missing ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
   useEffect(() => { if (refreshFailure) announce(refreshFailure); }, [refreshFailure]);
   useMusic(feastPageMusic(resource.data, phase, !!me));
+  if (missing) return <Page title={copy['feast.missing.title']}><p>{copy['feast.missing.body']}</p><Link href="/">{copy['action.back']}</Link></Page>;
   if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} bare />;
   const feast = resource.data, now = trusted ?? feast.serverNow;
   const props = { api, run, busy, refresh: resource.refresh, announce };

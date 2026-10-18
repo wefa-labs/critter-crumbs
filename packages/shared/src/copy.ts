@@ -155,6 +155,8 @@ export const copy = {
   "burrow.unknown.body": "Ask someone in {burrowName} to add {shortAddress}.",
   "feast.cancelled": "Cancelled",
   "feast.tooFew": "{feastTitle} ended before scattering: a people feast needs at least 3 critters. Start a new one when the burrow is ready.",
+  "feast.missing.title": "There's no feast at this link",
+  "feast.missing.body": "Check the link with whoever sent it.",
   "setup.title": "Start a feast",
   "setup.draft.chip": "Draft — only you can see this",
   "setup.field.title": "Feast title",
