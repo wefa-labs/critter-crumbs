@@ -3,7 +3,8 @@ import { generate, layout } from './index.js';
 
 /** October review draw order; independent vectors captured from the design artifact. */
 export const GEN_VERSION_2 = '2';
-export type CritterVersion = '1' | '2';
+export type { CritterVersion } from '@critter-crumbs/shared';
+import type { CritterVersion } from '@critter-crumbs/shared';
 function cyrb53(value: string) {
   let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
   for (let i = 0; i < value.length; i++) {

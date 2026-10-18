@@ -29,7 +29,7 @@ test('local connection, identity and creator removal leave a durable visible his
   await page.getByRole('button', { name: 'Add', exact: true }).click();
   // Each row's control names its member; the dialog's control keeps the plain label.
   await page.getByRole('button', { name: 'Remove from burrow: 0x0000…00ff', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Remove from burrow', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Remove', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Membership history' })).toBeVisible();
   await page.setViewportSize({ width: 375, height: 812 });
   await page.reload();

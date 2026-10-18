@@ -6,8 +6,8 @@ import { bytesToHex, concatHex, getAddress, keccak256, stringToHex } from 'viem'
 import type { Database, Row } from './database.js';
 import { HttpError } from './errors.js';
 import { activeMember, createBurrowTransactions, requireMember, timestamp, type BurrowSnapshot } from './burrow-transactions.js';
-import { dbHex, feastClock, feastFromRow, milliseconds, targetFromRow } from './feast-rows.js';
-import { freezePeopleTargets, insertTarget, peopleTargets, sameAddress } from './targets.js';
+import { dbHex, feastClock, feastFromRow, milliseconds, portraitFromRow, targetFromRow } from './feast-rows.js';
+import { currentPortrait, freezePeopleTargets, insertTarget, peopleTargets, sameAddress } from './targets.js';
 export function createFeasts(db: Database, clock: () => number, timelock?: Timelock) {
   const transactions = createBurrowTransactions(db, clock);
   async function read(id: string, actor: Address | null) {
@@ -19,12 +19,18 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     if (row.status === 'draft' && (!member || row.created_by !== actor)) throw new HttpError(403, 'burrow.unknown.title');
     if (!member) {
       const targets = visibleTargets(snapshot, row);
-      return { ...(row.aggregate_public && phaseAt(feastClock(row), snapshot.now) === 'feast' ? resultView(row) : {}), id, burrowName: snapshot.burrow.name, title: row.title, context: row.context, kind: row.kind, ...feastClock(row), aggregatePublic: row.aggregate_public, targets, portraits: portraits(snapshot, targets), phase: phaseAt(feastClock(row), snapshot.now), serverNow: snapshot.now };
+      return { ...(row.aggregate_public && phaseAt(feastClock(row), snapshot.now) === 'feast' ? resultView(row) : {}), id, burrowName: snapshot.burrow.name, title: row.title, context: row.context, kind: row.kind, ...feastClock(row), aggregatePublic: row.aggregate_public, targets, portraits: portraits(snapshot, row, targets), phase: phaseAt(feastClock(row), snapshot.now), serverNow: snapshot.now };
     }
     return view(snapshot, id, actor!);
   }
-  function portraits(snapshot: BurrowSnapshot, targets: Target[]) {
-    return targets.map(target => ({ targetId: target.id, variant: Number(snapshot.members.find(member => sameAddress(String(member.address), target.ownerAddress ?? ''))?.variant ?? 0) }));
+  function portraits(snapshot: BurrowSnapshot, feast: Row, targets: Target[]) {
+    const current = feast.kind === 'people' && ['draft', 'gathering'].includes(phaseAt(feastClock(feast), snapshot.now));
+    return targets.map(target => {
+      if (current) return currentPortrait(target, snapshot.members, 'profile', null);
+      const row = snapshot.targets.find(row => row.feast_id === feast.id && dbHex(row.target_id) === target.id);
+      if (!row) throw new Error('Missing feast portrait');
+      return portraitFromRow(row);
+    });
   }
   function visibleTargets(snapshot: BurrowSnapshot, row: Row) {
     return row.kind === 'people' && ['draft', 'gathering'].includes(phaseAt(feastClock(row), snapshot.now))
@@ -37,7 +43,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     const phase = phaseAt(feast, snapshot.now);
     const statements = snapshot.statements.filter(statement => statement.feast_id === id && targets.some(target => target.id === dbHex(statement.target_id)));
     const ballots = snapshot.ballots.filter(ballot => ballot.feast_id === id);
-    return { ...feast, ...resultView(row), burrowName: snapshot.burrow.name, portraits: portraits(snapshot, targets), phase, serverNow: snapshot.now,
+    return { ...feast, ...resultView(row), burrowName: snapshot.burrow.name, portraits: portraits(snapshot, row, targets), phase, serverNow: snapshot.now,
       statements: statements.filter(statement => ['scattering', 'feast'].includes(phase) || sameAddress(String(statement.author_address), actor))
         .map(statement => ({ targetId: dbHex(statement.target_id), authorAddress: getAddress(String(statement.author_address)), body: statement.body, updatedAt: milliseconds(statement.updated_at) })),
       participation: { written: statements.filter(statement => String(statement.body).length > 0).map(statement => dbHex(statement.target_id)), scattered: [...new Set(ballots.map(ballot => String(ballot.attester)))].sort().map(address => getAddress(address)) }, ownReceipts: ballots.filter(ballot => ballot.attester === actor).map(ballot => ({ uid: dbHex(ballot.uid), seq: String(ballot.seq) })).sort((a, b) => BigInt(a.seq) < BigInt(b.seq) ? -1 : 1), ownBallotUids: ballots.filter(ballot => ballot.attester === actor).map(ballot => dbHex(ballot.uid)) };
@@ -58,7 +64,8 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
       const reservation = await transactions.write(burrowId, (snapshot, now, bind) => {
         const row = requireCreator(snapshot, id, actor), phase = phaseAt(feastClock(row), now);
         if (row.status === 'open') return { sql: [], result: null };
-        if (phase !== 'draft' || milliseconds(row.gathering_ends_at) <= now) throw new HttpError(400, 'setup.deadline.order');
+        if (phase !== 'draft') throw new HttpError(400, 'setup.deadline.order');
+        if (milliseconds(row.gathering_ends_at) <= now) throw new HttpError(400, 'setup.open.late');
         integer(visibleTargets(snapshot, row).length, 1, MAX_FEAST_TARGETS, 'err.feastCapacity');
         if (row.kind === 'people' && snapshot.members.filter(member => member.left_at === null).length < 3) throw new HttpError(400, 'setup.min.people');
         if (row.shutter_registration_started_at !== null && now - milliseconds(row.shutter_registration_started_at) < 60000) throw new HttpError(503, 'err.storeUnreachable');
@@ -72,7 +79,9 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
         if (registration.identityPrefix !== reservation.prefix || registration.eonKey.length <= 2) throw new Error('Invalid registration response');
         await transactions.write(burrowId, (snapshot, now, bind) => {
           const row = requireCreator(snapshot, id, actor);
-          if (row.shutter_registration_token !== token || phaseAt(feastClock(row), now) !== 'draft' || milliseconds(row.gathering_ends_at) <= now) throw new HttpError(400, 'setup.deadline.order');
+          if (row.shutter_registration_token !== token || phaseAt(feastClock(row), now) !== 'draft') throw new HttpError(400, 'setup.deadline.order');
+          // registration on Chiado can take minutes; a deadline that passed meanwhile is the same late draft
+          if (milliseconds(row.gathering_ends_at) <= now) throw new HttpError(400, 'setup.open.late');
           if (visibleTargets(snapshot, row).length > MAX_FEAST_TARGETS) throw new HttpError(400, 'err.feastCapacity');
           return { sql: [`update feasts set status='open',opened_at=${bind(timestamp(now))}::timestamptz,
             shutter_identity=${bind(Buffer.from(registration.identity.slice(2), 'hex'))}::bytea,shutter_eon=${bind(registration.eon)}::int,shutter_eon_key=${bind(Buffer.from(registration.eonKey.slice(2), 'hex'))}::bytea,shutter_tx_hash=${bind(registration.txHash)},shutter_registration_started_at=null,shutter_registration_token=null
@@ -90,7 +99,7 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
       await transactions.write(burrowId, (snapshot, now, bind) => {
         const row = requireCreator(snapshot, id, actor);
         if (!['draft', 'gathering'].includes(phaseAt(feastClock(row), now))) throw new HttpError(400, 'scatter.closed');
-        return { sql: [...(row.kind === 'people' ? freezePeopleTargets(snapshot.members, id, bind) : []), `update feasts set status='cancelled',cancelled_at=${bind(timestamp(now))}::timestamptz where id=${bind(id)}::uuid and exists(select 1 from gate)`], result: undefined };
+        return { sql: [...(row.kind === 'people' ? freezePeopleTargets(snapshot.members, id, bind, now) : []), `update feasts set status='cancelled',cancelled_at=${bind(timestamp(now))}::timestamptz where id=${bind(id)}::uuid and exists(select 1 from gate)`], result: undefined };
       });
       return read(id, actor);
     },
@@ -109,11 +118,12 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
         requireMember(snapshot, actor);
         const row = snapshot.feasts.find(row => row.id === id)!;
         const phase = phaseAt(feastClock(row), now);
-        if (phase !== 'gathering' && !(phase === 'draft' && row.kind === 'options')) throw new HttpError(400, 'scatter.closed');
+        // a statement that arrives once gathering has closed is refused (PRD R13) and says so, not that scattering closed
+        if (phase !== 'gathering' && !(phase === 'draft' && row.kind === 'options')) throw new HttpError(400, phase === 'scattering' || phase === 'feast' ? 'gathering.closed' : 'scatter.closed');
         const targets = row.kind === 'people' ? peopleTargets(snapshot.members) : snapshot.targets.filter(target => target.feast_id === id).map(targetFromRow);
         const target = targets.find(target => target.id === targetId);
         if (!target || !sameAddress(target.ownerAddress ?? String(row.created_by), actor)) throw new HttpError(403, 'err.generic');
-        return { sql: [insertTarget(target, id, bind), `insert into statements (feast_id,target_id,author_address,body,updated_at)
+        return { sql: [insertTarget(target, id, bind, currentPortrait(target, snapshot.members, 'creation', now)), `insert into statements (feast_id,target_id,author_address,body,updated_at)
           select ${bind(id)}::uuid,${bind(Buffer.from(targetId.slice(2), 'hex'))}::bytea,${bind(actor)},${bind(body)},${bind(timestamp(now))}::timestamptz from gate
           on conflict (feast_id,target_id) do update set body=excluded.body,updated_at=excluded.updated_at`], result: undefined };
       });
@@ -123,14 +133,14 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
     const setup = parseFeastSetup(input), id = randomUUID();
     await transactions.write(burrowId, (snapshot, now, bind) => {
       requireMember(snapshot, actor);
-      if (setup.gatheringEndsAt <= now) throw new HttpError(400, 'setup.deadline.order');
+      if (setup.gatheringEndsAt <= now) throw new HttpError(400, 'setup.deadline.past');
       if (setup.kind === 'people' && snapshot.members.filter(member => member.left_at === null).length < 3) throw new HttpError(400, 'setup.min.people');
       const targets: Target[] = setup.kind === 'people' ? peopleTargets(snapshot.members) : setup.options.map((option, position) => ({ id: optionTargetId(id, position), name: option.name, position, ownerAddress: null, kind: 'option' }));
       integer(targets.length, 1, MAX_FEAST_TARGETS, 'err.feastCapacity');
       const sql = [`insert into feasts (id,burrow_id,created_by,kind,title,context,crumbs_per_critter,gathering_ends_at,scattering_ends_at,aggregate_public,individual_open)
         select ${bind(id)}::uuid,id,${bind(actor)},${bind(setup.kind)}::feast_kind,${bind(setup.title)},${bind(setup.context)},${bind(setup.crumbsPerCritter)}::int,${bind(timestamp(setup.gatheringEndsAt))}::timestamptz,${bind(timestamp(setup.scatteringEndsAt))}::timestamptz,${bind(setup.aggregatePublic)}::boolean,${bind(setup.individualOpen)}::boolean from gate`];
       for (const target of targets) {
-        sql.push(insertTarget(target, id, bind));
+        sql.push(insertTarget(target, id, bind, currentPortrait(target, snapshot.members, 'creation', now)));
         if (setup.kind === 'options') sql.push(`insert into statements (feast_id,target_id,author_address,body,updated_at) select ${bind(id)}::uuid,${bind(Buffer.from(target.id.slice(2), 'hex'))}::bytea,${bind(actor)},${bind(setup.options[target.position]!.statement)},${bind(timestamp(now))}::timestamptz from gate`);
       }
       return { sql, result: undefined };

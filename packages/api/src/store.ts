@@ -1,10 +1,15 @@
 import { getAddress } from 'viem';
-import type { Address, Profile } from '@critter-crumbs/shared';
+import type { Address, CritterIdentity, Profile } from '@critter-crumbs/shared';
 import type { Database, Row } from './database.js';
 export const timestamp = (now: number) => new Date(now).toISOString();
 const milliseconds = (value: unknown) => value === null || value === undefined ? null : new Date(value as string | number).getTime();
+export function identityFromRow(row: Row): CritterIdentity {
+  const generatorVersion = row.generator_version, rendererVersion = row.renderer_version;
+  if ((generatorVersion !== '1' && generatorVersion !== '2') || (rendererVersion !== '1' && rendererVersion !== '2') || rendererVersion !== generatorVersion) throw new Error('Unsupported critter identity versions');
+  return { generatorVersion, rendererVersion, variant: Number(row.variant) };
+}
 export function profileFromRow(row: Row): Profile {
-  return { address: getAddress(String(row.address)), variant: Number(row.variant), rerollsUsed: Number(row.rerolls_used), critterLocked: Boolean(row.critter_locked),
+  return { address: getAddress(String(row.address)), ...identityFromRow(row), rerollsUsed: Number(row.rerolls_used), critterLocked: Boolean(row.critter_locked),
     displayName: row.display_name as string | null, ensName: row.ens_name as string | null,
     ensCheckedAt: milliseconds(row.ens_checked_at), createdAt: milliseconds(row.created_at)! };
 }

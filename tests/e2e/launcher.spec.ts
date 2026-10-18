@@ -1,6 +1,6 @@
 import { test, expect, type Page } from 'playwright/test';
 import { listen } from './listen.js';
-import { connectLocal } from './session.js';
+import { connectLocal, openSettings } from './session.js';
 
 /*
  * Before connecting, as the flow page draws it (docs/explorations/app-screens: SCREENS.launch, invite, connect,
@@ -74,14 +74,14 @@ test('on desktop the painting fills the space below the beta notice and the crit
   }
 });
 
-test('How it works walks three steps that can be skipped, with ten practice crumbs to give on the second', async ({ page }) => {
+test('How it works walks four steps, with practice crumbs and a worked feast result', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
   await page.getByRole('link', { name: 'How it works', exact: true }).click();
   await expect(page).toHaveURL(/\/how-it-works$/);
   await expect(page).toHaveTitle('How it works · Critter Crumbs');
   await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeFocused();
-  await expect(page.getByRole('img', { name: 'Step 1 of 3', exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Step 1 of 4', exact: true })).toBeVisible();
   await expect(page.locator('.screen-floor .floor-prop [data-crumb]')).toHaveCount(24);
   await expect(page.getByRole('button', { name: 'Skip', exact: true })).toBeVisible();
 
@@ -115,7 +115,13 @@ test('How it works walks three steps that can be skipped, with ten practice crum
   await expect(page.getByRole('heading', { level: 1, name: 'Where they go stays private', exact: true })).toBeFocused();
   await expect(page.locator('.screen-floor .scene-paint')).toHaveAttribute('data-painting', 'dusk');
   await expect(page.locator('.screen-floor svg.portrait[data-asleep="true"]')).toHaveCount(4);
-  await expect(page.getByRole('button', { name: 'Skip', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'When the feast opens', exact: true })).toBeFocused();
+  await expect(page.getByRole('img', { name: 'Step 4 of 4', exact: true })).toBeVisible();
+  await expect(page.getByRole('table', { name: 'Practice feast results', exact: true })).toContainText('120');
+  await expect(page.getByRole('row', { name: 'Moss 120 40.0%', exact: true })).toBeVisible();
+  await expect(page.getByRole('row', { name: 'Fern 30 10.0%', exact: true })).toBeVisible();
+  await expect(page.getByText('Fern didn’t scatter and still receives a share.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Got it', exact: true }).click();
   await expect(page).toHaveURL(/127\.0\.0\.1:5173\/$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Critter Crumbs', exact: true })).toBeVisible();
@@ -213,7 +219,7 @@ test('dark follows the device until Settings chooses, and the choice is kept', a
 
   await page.emulateMedia({ colorScheme: 'dark' });
   await connectLocal(page, 1);
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   const dark = page.getByRole('checkbox', { name: /^Dark mode/ });
   await expect(dark).toBeChecked();
   await dark.uncheck();
@@ -223,7 +229,7 @@ test('dark follows the device until Settings chooses, and the choice is kept', a
   expect(await ground(page)).toBe(LIGHT);
   // and the other way: dark chosen on a device that is light
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await expect(dark).not.toBeChecked();
   await dark.check();
   expect(await ground(page)).toBe(DARK);
@@ -231,7 +237,7 @@ test('dark follows the device until Settings chooses, and the choice is kept', a
   await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
   expect(await ground(page)).toBe(DARK);
   // Settings also leads back to the first steps
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('dialog').getByRole('link', { name: 'How it works', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);

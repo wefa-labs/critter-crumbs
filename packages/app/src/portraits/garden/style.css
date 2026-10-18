@@ -1,0 +1,8 @@
+.garden-refined .cr-hover { transform:translateY(var(--garden-lift,0px)); }
+/* A wing group's origin is its root (species.ts, wingAt). Keep the default transform box and origin here: a fill-box
+   origin would also re-centre the group's own mirror transform and stack the left wing on the right. */
+.garden-refined[data-asleep="true"] .cr-wing { scale:.78 1; }
+.garden-refined .portrait__head,.garden-refined .portrait__eye,.garden-refined .portrait__cheek { transform-box:view-box; transform-origin:0 0; }
+.garden-refined .portrait__eye { transform-origin:center; transform-box:fill-box; }
+.garden-refined .portrait__cheek { transform-origin:center; transform-box:fill-box; }
+.garden-refined[data-asleep="true"] .p-calm { opacity:.65; }

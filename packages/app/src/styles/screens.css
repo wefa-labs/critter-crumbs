@@ -115,3 +115,21 @@ dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscro
 /* ------------------------------------------------------------------ while the session is read, a screen's code arrives
    or a route's data is on its way: three bobbing crumbs, filling the screen or waiting under the page's header */
 .opening { display:flex; min-height:40dvh; align-items:center; justify-content:center; }
+
+/* The first steps use the launcher's room scale. Authored positions and sizes refer to the 1600 × 897 painting. */
+.learn .sheet-screen { --room-h:calc(.8 * 100dvh); }
+.room-scene { --room-w:calc(var(--room-h) * 1600 / 897); }
+.room-scene .scene-paint { background-size:auto var(--room-h); background-position:center bottom; }
+.room-scene .floor-critter, .room-scene .floor-prop { --drawing-w:calc(var(--size) * var(--room-h) / 897); left:clamp(calc(var(--drawing-w) / 2 + 4px), calc(50% + (var(--x) / 100 - .5) * var(--room-w)), calc(100% - var(--drawing-w) / 2 - 4px)); top:calc(100% - (1 - var(--y) / 100) * var(--room-h)); width:var(--drawing-w); }
+/* A very short floor still shows the whole head, including growth at the feast, above the sheet overlap. */
+.learn .screen-floor { container-type:size; }
+@supports (height:1cqh) { .learn .screen-floor .floor-critter { --drawing-w:min(calc(var(--size) * var(--room-h) / 897), calc((100cqh - 40px) * .7)); } }
+/* Content may scroll on small displays or with larger text; actions stay in their own fixed row. */
+.learn .screen-sheet { display:grid; grid-template-rows:minmax(0, 1fr) auto; overflow:hidden; gap:12px; }
+.learn-content { min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable; display:flex; flex-direction:column; gap:10px; padding:2px; }
+.learn-results { width:100%; border-collapse:collapse; font-size:var(--cc-text-sm); font-variant-numeric:tabular-nums; line-height:1.3; }
+.learn-results th, .learn-results td { padding:3px 8px; border-bottom:1px solid var(--cc-line); text-align:right; }
+.learn-results th:first-child { text-align:left; }
+.learn-results thead { color:var(--cc-text-2); }
+.learn-explanation { color:var(--cc-text-2); font-size:var(--cc-text-sm); }
+@media (min-width:900px) { .learn .sheet-screen { --room-h:max(100vw * 897 / 1600, 100dvh - 36px); } }

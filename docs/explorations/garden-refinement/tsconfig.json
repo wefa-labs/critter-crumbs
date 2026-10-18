@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.tools.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "baseUrl": "../../..",
+    "paths": {
+      "@critter-crumbs/shared": ["packages/shared/src/index.ts"],
+      "@critter-crumbs/core": ["packages/core/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "generate-fixtures.ts"]
+}

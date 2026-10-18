@@ -1,6 +1,6 @@
 import type { World } from 'koota';
 import { REDUCED_MOTION, RIG } from '@critter-crumbs/shared';
-import { Asleep, Portrait, Rig, Settings } from '../world/traits.js';
+import { Asleep, Clock, Portrait, Rig, Settings } from '../world/traits.js';
 import { portraitState, UNIT } from './index.js';
 
 /**
@@ -23,14 +23,15 @@ export function renderPortraits(world: World) {
       outgoing.setAttribute('aria-hidden', 'true'); outgoing.removeAttribute('role'); outgoing.classList.add('portrait-fade');
       svg.after(outgoing);
     }
-    for (const [key, value] of Object.entries(rig)) {
+    if (current?.applyRig) current.applyRig({ rig, now: world.get(Clock)!.now, asleep, quiet });
+    else for (const [key, value] of Object.entries(rig)) {
       const property = key.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`);
       const unit = ['leanZ', 'headTilt', 'earL', 'earR', 'postureX'].includes(key) ? 'deg' : key === 'liftY' || key === 'pupilX' || key === 'pupilY' ? 'px' : '';
       svg.style.setProperty(`--${property}`, `${unit === 'px' ? value * (key.startsWith('pupil') ? current?.eyeRadius ?? 0 : UNIT) : value}${unit}`);
     }
-    svg.dataset.asleep = String(asleep);
+    if (svg.dataset.asleep !== String(asleep)) svg.dataset.asleep = String(asleep);
     const mouth = svg.querySelector('.portrait__mouth');
-    if (mouth && current) {
+    if (mouth && current && !current.applyRig) {
       const radius = current.headRadius;
       mouth.setAttribute('d', `M${-radius * .2} ${radius * .4} Q0 ${radius * (.4 + .25 * rig.mouth)} ${radius * .22} ${radius * .4}`);
       mouth.setAttribute('opacity', rig.mouth > 0 ? String(RIG.mouthOpacity) : '0');

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Critter Crumbs design review</title>
+<style>
+@font-face{font-family:Grandstander;src:url(../../../packages/app/public/fonts/grandstander-wordmark.woff2);font-weight:900}
+:root{color-scheme:light;--bg:#F6F0E4;--ink:#2E2226;--soft:#6B5B5E;--line:#D7CDBF;--gold:#D9A441}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:32px 24px 64px}h1{font:900 clamp(30px,5vw,48px)/1.1 Grandstander,system-ui;margin:12px 0 18px}h2{font-size:25px;margin:0 0 12px}h3{font-size:19px}p{max-width:78ch}.intro{font-size:19px}.stamp{font-size:14px;color:var(--soft)}nav{display:flex;flex-wrap:wrap;gap:12px;margin:24px 0}a{color:inherit;text-underline-offset:4px}nav a,.action{display:inline-flex;min-height:44px;align-items:center;padding:8px 18px;border:1.5px solid var(--ink);border-radius:999px;background:var(--gold);font-weight:700;text-decoration:none}a:focus-visible,summary:focus-visible{outline:3px solid #156152;outline-offset:4px}section{margin-top:40px;padding-top:28px;border-top:1px solid var(--line)}.badge{display:inline-block;font-size:13px;font-weight:700;background:#E8DDCE;border:1px solid var(--line);padding:4px 10px;border-radius:999px}.pending{background:#F6E5BB}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.card{border:1px solid var(--line);border-radius:20px;background:#FBF7EF;padding:20px}.card h3{margin:8px 0}.card p{color:var(--soft)}img{display:block;width:100%;height:auto;border-radius:12px;margin:16px 0}figure{margin:20px 0}figcaption{font-size:14px;color:var(--soft)}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}details{margin-top:20px}summary{min-height:44px;cursor:pointer;font-weight:700}.note{padding:16px 20px;border-left:4px solid #156152;background:#EAF0DB;border-radius:0 12px 12px 0}.scroll{overflow:auto}@media(max-width:650px){main{padding:24px 16px 48px}.grid{grid-template-columns:1fr}.intro{font-size:17px}}
+</style>
+<main>
+<p class="stamp">16 October 2026 · Local review · Critter Crumbs</p>
+<h1>Critters, scenes and sound</h1>
+<p class="intro">Painted Garden Spirits, eight species, portraits first, and opt-in migration are chosen. The eight-species refinement is ready to review through an explicit app preview switch. Scene and first-meeting improvements are implemented locally. Music candidates are ready to compare by listening.</p>
+<nav aria-label="Review sections"><a href="#critters">Critter choices</a><a href="#scenes">Scenes and learning</a><a href="#music">Listen to loops</a><a href="#decisions">Decisions to review</a></nav>
+<p class="note">Production still selects v1 critters. Development ordinarily selects v2. Versioned identity storage is prepared locally; personal adoption and music playback changes remain pending.</p>
+
+<section id="critters"><span class="badge">Refined art ready for review</span><h2>The critter choices</h2><p><a class="action" href="../garden-refinement/index.html">Review the refined eight-species package</a> · <a href="../garden-refinement/README.md">Evidence and rollback instructions</a></p>
+<p>The comparison uses the same addresses and variants throughout. Afolabi chose Garden Spirits with the Painted Companions’ softer finish. <a href="../claude-code-critter-refinement-2026-10-16.md">Claude’s refinement brief</a> covers individual variation, small faces, scene composition, expressions and measured rendering performance. Finished art remains for review.</p>
+<figure><a href="../critter-directions/images/app-launcher-390.jpg"><img src="../critter-directions/images/app-launcher-390.jpg" alt="Four launcher comparisons: production v1, faithful v2, Garden Spirits, and Painted Companions"></a><figcaption>Left to right: production v1, faithful v2, Garden Spirits, Painted Companions. The recommended hybrid finish has its own comparisons in the full gallery.</figcaption></figure>
+<div class="grid"><article class="card"><h3>Same seed, different direction</h3><p>Faces at list sizes, full bodies, silhouettes, eight- and ten-critter groups, sleep and receiving a crumb.</p><a class="action" href="../critter-directions/index.html?still">Open the critter gallery</a></article><article class="card"><h3>How they sit in the game</h3><p>Phone and desktop launcher, scattering and results comparisons, with the exact draws and known limitations.</p><a class="action" href="../critter-directions/README.md">Read the design record</a></article></div>
+</section>
+
+<section id="scenes"><span class="badge">Implemented locally</span><h2>Consistent rooms and clearer first steps</h2>
+<p>The tutorial keeps the launcher's room scale and floor anchors. Its four steps cover equal handfuls, practice scattering, privacy, and a worked feast result. On phones the actions stay pinned while longer content scrolls inside the sheet.</p>
+<div class="grid"><article class="card"><h3>One first meeting</h3><p>Meet and reroll your critter while entering a name. Keeping saves both together. Existing locks, ENS names and invite destinations are preserved.</p><a href="../../reviews/scene-onboarding/images/meeting-320-light-v2.jpg"><img src="../../reviews/scene-onboarding/images/meeting-320-light-v2.jpg" alt="Combined first meeting on a 320-pixel phone"></a></article><article class="card"><h3>A result you can follow</h3><p>Four critters had 100 crumbs each; three scattered. The actual tally returns 120, 90, 60 and 30 out of 300. Fern receives a share despite not scattering.</p><a href="../../reviews/scene-onboarding/images/tutorial-results-390-light-v2.jpg"><img src="../../reviews/scene-onboarding/images/tutorial-results-390-light-v2.jpg" alt="The fourth tutorial step showing the worked feast result"></a></article></div>
+<p><a href="../scene-proportions/README.md">Composition values and reference comparisons</a> · <a href="../scene-proportions/mocks.html">Static design proposals</a> · <a href="../../reviews/scene-onboarding/README.md">Verification and current captures</a></p>
+<p class="stamp">Development captures use v2. The verification record also distinguishes production-parity v1. New creature designs are reviewed separately above.</p>
+</section>
+
+<section id="music"><span class="badge pending">Listening review pending</span><h2>Compare the music seams</h2>
+<p>All four tracks have today’s repeat, a proposed phrase-aligned loop and an alternative, with three repeat boundaries each. The candidates use the existing tracks and short per-track fades. The measurements support the comparison; they do not establish that a seam sounds right.</p>
+<p><a class="action" href="../music-loops/audition.html">Open the listening page</a> <a href="../music-loops/README.md">Read the loop analysis</a></p>
+<p>The auditions and their source hashes are preserved inside this checkout. No paid generation, new compositions or playback changes were made.</p>
+</section>
+
+<section id="decisions"><h2>Decisions and remaining review</h2><div class="scroll"><table><thead><tr><th scope="col">Choice</th><th scope="col">Direction</th><th scope="col">Current status</th></tr></thead><tbody>
+<tr><th scope="row">Critter direction</th><td>Painted Garden Spirits</td><td>Chosen; refined preview available</td></tr>
+<tr><th scope="row">Species and rendering</th><td>Eight species, portraits first</td><td>Chosen; small-face readability and rendering performance still need proof</td></tr>
+<tr><th scope="row">Identity migration</th><td>Preserve existing choices and offer explicit opt-in</td><td>Versioned storage prepared locally; consent flow and selection allowance remain for review</td></tr>
+<tr><th scope="row">Music joins</th><td>Choose proposed or alternative loops after hearing several seams; keep any track whose candidate does not improve it</td><td>Playback unchanged</td></tr>
+</tbody></table></div>
+<p>Art integration still needs independent generator vectors, rendering from stored versions, appropriate face/hover anchors and measured rendering performance. Existing locks and reroll counts are preserved. The selected art is not enabled in production.</p>
+</section>
+</main>
+</html>

@@ -1,0 +1,53 @@
+diff --git a/packages/app/src/portraits/metrics.ts b/packages/app/src/portraits/metrics.ts
+index 3ac3b8d..a49b534 100644
+--- a/packages/app/src/portraits/metrics.ts
++++ b/packages/app/src/portraits/metrics.ts
+@@ -1,9 +1,16 @@
+ import { layoutCritter, type VersionedCritter } from '@critter-crumbs/core';
++import { explorationDirection } from './version.js';
++import { gardenDraw, gardenLayout } from '../../../../docs/explorations/critter-directions/src/garden.ts';
++import { companionDraw, companionLayout } from '../../../../docs/explorations/critter-directions/src/companions.ts';
+ export interface PortraitExtent { top: number; left: number; right: number; headY: number; headRadius: number }
+ const tails: Record<string, readonly [number,number]> = {puff:[.95,.46],stub:[1.02,.5],branch:[.9,1.51],tadpole:[.9,1.34],spark:[.9,1.27],emberwisp:[.9,1.07],cloudwisp:[.9,1.25],longwisp:[.9,1.95]};
+ const crests: Record<string,number> = {sapling:.62,droplet:.72,reed:.85,ember:.78,seedpods:.45};
+ /** Extents use the painter's authored box, never a DOM measurement. */
+ export function portraitMetrics(params: VersionedCritter, fed=0) {
++ if(explorationDirection&&params.version==='2'){const extent=explorationDirection==='garden'?gardenLayout(gardenDraw(params),fed).extent:companionLayout(companionDraw(params),fed).extent;return {extent} as ReturnType<typeof metricsOf>;}
++ return metricsOf(params,fed);
++}
++function metricsOf(params: VersionedCritter, fed=0) {
+  const g=layoutCritter(params);
+  const R=g.hr*54*1.22,W=g.bw*54*1.04,H=g.bh*54*.9,Rt=R*.8;
+  const bodyY=140-H*.96-2,headY=bodyY-H*.8-R*.45,earLength=g.earLen*54*.78;
+diff --git a/packages/app/src/portraits/painter.ts b/packages/app/src/portraits/painter.ts
+index 265323e..3231ed6 100644
+--- a/packages/app/src/portraits/painter.ts
++++ b/packages/app/src/portraits/painter.ts
+@@ -1,10 +1,13 @@
+ import type { VersionedCritter } from '@critter-crumbs/core';
+ import { createPortrait, type PortraitOptions } from './index.js';
+-import { critterVersion } from './version.js';
++import { critterVersion, explorationDirection } from './version.js';
++import { paintGarden } from '../../../../docs/explorations/critter-directions/src/garden.ts';
++import { paintCompanion } from '../../../../docs/explorations/critter-directions/src/companions.ts';
+ import { paintV2, inkedPortraitLook, type PortraitLook } from './painter-v2.js';
+ export type { PortraitLook } from './painter-v2.js';
+ /** The build setting keeps the October painter out of production until its release is chosen. */
+ export function paintCritter(document:Document,params:VersionedCritter,state:PortraitOptions&{delighted?:boolean},look?:PortraitLook){
++ if(explorationDirection&&params.version==='2'){const paint=explorationDirection==='garden'?paintGarden:paintCompanion;const svg=paint(document,params,{size:state.size,asleep:state.asleep,delighted:state.delighted,fed:state.fed,name:state.name,decorative:state.decorative});svg.dataset.size=String(state.size??'stage');return svg;}
+  if(critterVersion==='2'&&params.version==='2')return paintV2(document,params,state,look??inkedPortraitLook);
+  if(params.version!=='1')throw new RangeError('The selected build has no painter for this version');
+  return createPortrait(document,params,state);
+diff --git a/packages/app/src/portraits/version.ts b/packages/app/src/portraits/version.ts
+index ee8bf53..b668790 100644
+--- a/packages/app/src/portraits/version.ts
++++ b/packages/app/src/portraits/version.ts
+@@ -8,3 +8,8 @@ export const critterVersion: CritterVersion = import.meta.env.DEV && !asProducti
+ 
+ export const meshVersions = new Set<CritterVersion>(['1']);
+ export const supportsMesh = (version:CritterVersion) => meshVersions.has(version);
++
++/** EXPLORATION ONLY (docs/explorations/critter-directions): ?direction=garden|companions in a development build draws the
++ * version 2 critters with an exploration painter. Never in production; reverted after the review captures. */
++const direction = import.meta.env.DEV && typeof location !== 'undefined' ? new URLSearchParams(location.search).get('direction') : null;
++export const explorationDirection = direction === 'garden' || direction === 'companions' ? direction : null;

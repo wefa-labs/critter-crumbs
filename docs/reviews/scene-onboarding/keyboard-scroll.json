@@ -1,0 +1,21 @@
+{
+  "actions": {
+    "bottom": 548,
+    "height": 52,
+    "left": 20,
+    "right": 300,
+    "top": 496,
+    "width": 280,
+    "x": 20,
+    "y": 496
+  },
+  "contentTop": 94.5,
+  "document": [
+    320,
+    568
+  ],
+  "viewport": [
+    320,
+    568
+  ]
+}

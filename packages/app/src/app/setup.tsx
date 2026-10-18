@@ -25,7 +25,7 @@ function SetupForm({ burrow, api, run, busy, announce }: { burrow: BurrowView; a
   return <Page title={copy['setup.title']} context={burrow.name}><p>{burrow.name}</p><p className="chip">{copy['setup.draft.chip']}</p><form className="form-column" onSubmit={event => { event.preventDefault(); setError(''); void run(async () => {
     try {
       const setup = parseFeastSetup({ title, context, kind, crumbsPerCritter: crumbs, gatheringEndsAt: new Date(gathering).getTime(), scatteringEndsAt: new Date(scattering).getTime(), aggregatePublic, individualOpen, options });
-      const now = api.now(); if (now === null || setup.gatheringEndsAt <= now) throw new ValidationError('setup.deadline.order');
+      const now = api.now(); if (now !== null && setup.gatheringEndsAt <= now) throw new ValidationError('setup.deadline.past');
       const draft = await api.write(`/api/burrows/${burrow.id}/feasts`, 'POST', setup); navigate(`/feasts/${draft.id}`);
     } catch (error) { if (error instanceof ValidationError) setError(copy[error.copyId]); throw error; }
   }); }}>

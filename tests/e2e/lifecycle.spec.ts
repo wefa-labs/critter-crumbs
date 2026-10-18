@@ -24,7 +24,7 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   expect(requests.some(url=>/(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(false);
   for(const [i,page]of pages.entries()){
    await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}/scatter`);
-   await page.locator('.game-profile').click();await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
+   await page.getByRole('button',{name:'Your critter and settings',exact:true}).click();await page.getByRole('button',{name:'Disconnect',exact:true}).click();await connectLocal(page,i+1);
    if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.game-scene .portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
    const inputs=page.locator('.focus-count input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }

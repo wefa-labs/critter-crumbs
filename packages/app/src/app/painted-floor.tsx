@@ -12,10 +12,10 @@ export function PaintedFloor({ painting, className, ref, children }: { painting:
 }
 
 /** A critter standing on the floor by its feet. */
-export function FloorCritter({ critter, beside, children }: { critter: SceneCritter; beside?: Beside; children?: ReactNode }) {
+export function FloorCritter({ critter, beside, children, fed = 0 }: { critter: SceneCritter; beside?: Beside; children?: ReactNode; fed?: number }) {
   return (
     <div className="floor-critter" data-face={critter.face} style={standingStyle(critter, beside)}>
-      <PortraitImage address={critter.address} variant={critter.variant ?? 0} name="" size="stage" asleep={critter.asleep} />
+      <PortraitImage address={critter.address} variant={critter.variant ?? 0} name="" size="stage" asleep={critter.asleep} fed={fed} />
       {children}
     </div>
   );

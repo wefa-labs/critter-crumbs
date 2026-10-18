@@ -1,0 +1,371 @@
+[
+  {
+    "actions": {
+      "bottom": 647,
+      "height": 52,
+      "left": 20,
+      "right": 355,
+      "top": 595,
+      "width": 335,
+      "x": 20,
+      "y": 595
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      375,
+      667
+    ],
+    "heading": "Everyone gets the same handful",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 375,
+      "height": 667
+    },
+    "version": "1",
+    "step": 1
+  },
+  {
+    "actions": {
+      "bottom": 647,
+      "height": 52,
+      "left": 20,
+      "right": 355,
+      "top": 595,
+      "width": 335,
+      "x": 20,
+      "y": 595
+    },
+    "animations": [
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      375,
+      667
+    ],
+    "heading": "Tap to give a crumb. Hold to pour.",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 375,
+      "height": 667
+    },
+    "version": "1",
+    "step": 2
+  },
+  {
+    "actions": {
+      "bottom": 647,
+      "height": 52,
+      "left": 20,
+      "right": 355,
+      "top": 595,
+      "width": 335,
+      "x": 20,
+      "y": 595
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      375,
+      667
+    ],
+    "heading": "Where they go stays private",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 375,
+      "height": 667
+    },
+    "version": "1",
+    "step": 3
+  },
+  {
+    "actions": {
+      "bottom": 647,
+      "height": 52,
+      "left": 20,
+      "right": 355,
+      "top": 595,
+      "width": 335,
+      "x": 20,
+      "y": 595
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      375,
+      667
+    ],
+    "heading": "When the feast opens",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 375,
+      "height": 667
+    },
+    "version": "1",
+    "step": 4
+  },
+  {
+    "actions": {
+      "bottom": 824,
+      "height": 52,
+      "left": 20,
+      "right": 370,
+      "top": 772,
+      "width": 350,
+      "x": 20,
+      "y": 772
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      390,
+      844
+    ],
+    "heading": "Everyone gets the same handful",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "version": "1",
+    "step": 1
+  },
+  {
+    "actions": {
+      "bottom": 824,
+      "height": 52,
+      "left": 20,
+      "right": 370,
+      "top": 772,
+      "width": 350,
+      "x": 20,
+      "y": 772
+    },
+    "animations": [
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      390,
+      844
+    ],
+    "heading": "Tap to give a crumb. Hold to pour.",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "version": "1",
+    "step": 2
+  },
+  {
+    "actions": {
+      "bottom": 824,
+      "height": 52,
+      "left": 20,
+      "right": 370,
+      "top": 772,
+      "width": 350,
+      "x": 20,
+      "y": 772
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      390,
+      844
+    ],
+    "heading": "Where they go stays private",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "version": "1",
+    "step": 3
+  },
+  {
+    "actions": {
+      "bottom": 824,
+      "height": 52,
+      "left": 20,
+      "right": 370,
+      "top": 772,
+      "width": 350,
+      "x": 20,
+      "y": 772
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      390,
+      844
+    ],
+    "heading": "When the feast opens",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 390,
+      "height": 844
+    },
+    "version": "1",
+    "step": 4
+  },
+  {
+    "actions": {
+      "bottom": 692,
+      "height": 52,
+      "left": 913,
+      "right": 1248,
+      "top": 640,
+      "width": 335,
+      "x": 913,
+      "y": 640
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      1280,
+      720
+    ],
+    "heading": "Everyone gets the same handful",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "version": "1",
+    "step": 1
+  },
+  {
+    "actions": {
+      "bottom": 692,
+      "height": 52,
+      "left": 913,
+      "right": 1248,
+      "top": 640,
+      "width": 335,
+      "x": 913,
+      "y": 640
+    },
+    "animations": [
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      1280,
+      720
+    ],
+    "heading": "Tap to give a crumb. Hold to pour.",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "version": "1",
+    "step": 2
+  },
+  {
+    "actions": {
+      "bottom": 692,
+      "height": 52,
+      "left": 913,
+      "right": 1248,
+      "top": 640,
+      "width": 335,
+      "x": 913,
+      "y": 640
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      1280,
+      720
+    ],
+    "heading": "Where they go stays private",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "version": "1",
+    "step": 3
+  },
+  {
+    "actions": {
+      "bottom": 692,
+      "height": 52,
+      "left": 913,
+      "right": 1248,
+      "top": 640,
+      "width": 335,
+      "x": 913,
+      "y": 640
+    },
+    "animations": [
+      "none",
+      "none",
+      "none",
+      "none"
+    ],
+    "document": [
+      1280,
+      720
+    ],
+    "heading": "When the feast opens",
+    "still": "true",
+    "theme": "light",
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "version": "1",
+    "step": 4
+  }
+]

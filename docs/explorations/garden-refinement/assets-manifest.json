@@ -1,0 +1,127 @@
+{
+  "renderer": "garden-refined-review-1",
+  "generatorVersion": "2",
+  "provenance": "Code-authored refinement of the local Garden Spirits prototype. Standalone SVG snapshots exported from the corrected gallery. No external art service used.",
+  "files": [
+    {
+      "path": "assets/fox-0.svg",
+      "bytes": 19501,
+      "sha256": "d89702d22f485b2ce955dd2a416e3c7829dff154d91750c9c33ee09688ad99a1"
+    },
+    {
+      "path": "assets/fox-1.svg",
+      "bytes": 20795,
+      "sha256": "a9adfe600c7cafb45955cacfdae35b70871bddcac03d909dbb93271b54c9ad93"
+    },
+    {
+      "path": "assets/fox-2.svg",
+      "bytes": 20905,
+      "sha256": "477253ccff72387a28fd2c27f3d5d84c42b643ced783099883fcdf81f1506ba8"
+    },
+    {
+      "path": "assets/koi-0.svg",
+      "bytes": 15848,
+      "sha256": "af11035c9731dee8ebb6067f988e8e177c3f73b7945e166a51d86521509ea9b1"
+    },
+    {
+      "path": "assets/koi-1.svg",
+      "bytes": 15838,
+      "sha256": "d8988c09324b692cbf4286fa2af49dc4a9e79f8b461e27aca43d12248b0a8680"
+    },
+    {
+      "path": "assets/koi-2.svg",
+      "bytes": 15922,
+      "sha256": "ba5fee12e32e7221484113fce0a34ec56b7fcc0920b2aa2df7abe1eb9cb7811e"
+    },
+    {
+      "path": "assets/lamb-0.svg",
+      "bytes": 26286,
+      "sha256": "65a4d42ce9a440bff45f69abc1a8830f90d073607d8c0704958854bbc7fbae7c"
+    },
+    {
+      "path": "assets/lamb-1.svg",
+      "bytes": 26153,
+      "sha256": "a7a135f0a63af16a0177063ab6572591165402a89193e4b820a61167cfa52331"
+    },
+    {
+      "path": "assets/lamb-2.svg",
+      "bytes": 26145,
+      "sha256": "362b8a69525ee362d0d7e4875eca64d358cf72d9d50ffc423cd94ae5270a1bd7"
+    },
+    {
+      "path": "assets/lemur-0.svg",
+      "bytes": 22676,
+      "sha256": "9ec8ab5bf09df6fafa33d387070a7186789f1953548296d8b4edaf5caf266592"
+    },
+    {
+      "path": "assets/lemur-1.svg",
+      "bytes": 22534,
+      "sha256": "dc331a138a47dfeff55c58fbf3ccbd9250d780934cb49ca7596ac2bdefb1f789"
+    },
+    {
+      "path": "assets/lemur-2.svg",
+      "bytes": 22647,
+      "sha256": "218199eb477bf6fa10acdd8d996d154432cfb1dd16672a6a3247dcec179e1377"
+    },
+    {
+      "path": "assets/moth-0.svg",
+      "bytes": 25508,
+      "sha256": "735b7ec2de2ec93bde06203b9195429573aebebdbc4f881bb2f05b350a748b54"
+    },
+    {
+      "path": "assets/moth-1.svg",
+      "bytes": 26406,
+      "sha256": "15588d5b2ef653bcefe5691f92d1b4999ebfc8b2d4da74929d0d826789afda50"
+    },
+    {
+      "path": "assets/moth-2.svg",
+      "bytes": 26299,
+      "sha256": "c7b2e7116b7893695cfc8c4791a2ab09572f9ae36a4330b29f10aa56653a4d91"
+    },
+    {
+      "path": "assets/phoenix-0.svg",
+      "bytes": 31569,
+      "sha256": "1113b508578eb6e909f85b19d714deff2ce59629e47779a03e5242ae0071c72f"
+    },
+    {
+      "path": "assets/phoenix-1.svg",
+      "bytes": 31609,
+      "sha256": "fd0f1aec6ac1ab5e716ad4c63dcbd3472b8c71848825c64a0934cffecd929805"
+    },
+    {
+      "path": "assets/phoenix-2.svg",
+      "bytes": 29292,
+      "sha256": "9a05bf9e0657fc9487169893756397f397598bd3173b1bb634b539d7e460b62d"
+    },
+    {
+      "path": "assets/squirrel-0.svg",
+      "bytes": 35798,
+      "sha256": "0bc450c2c33d1c20c52b5fd315c532e6edb2589851cbee4985b236e7adf1fc47"
+    },
+    {
+      "path": "assets/squirrel-1.svg",
+      "bytes": 35373,
+      "sha256": "64c00c7b08c157b039a770899008d9de46633e41072e6eb526617f2deeca13f6"
+    },
+    {
+      "path": "assets/squirrel-2.svg",
+      "bytes": 35960,
+      "sha256": "2f10191f41e944324ba60d21eec7c83cff05175ad39c9c9be7b7ebee9b8791c1"
+    },
+    {
+      "path": "assets/turtle-0.svg",
+      "bytes": 28266,
+      "sha256": "df51f2e9c021eebfae475a1c1445ab376cb1dd02a41ab077a4f49eeba8fccd5a"
+    },
+    {
+      "path": "assets/turtle-1.svg",
+      "bytes": 29601,
+      "sha256": "e8d29ee2c9a420f9312488157ea8e70af143cbb95f9a77f124efa8886dc44afc"
+    },
+    {
+      "path": "assets/turtle-2.svg",
+      "bytes": 28342,
+      "sha256": "5925822c55bfe451b8c6f7d369a5858a6f9bc8da9f1ba5333e1178f9cfbb7462"
+    }
+  ]
+}

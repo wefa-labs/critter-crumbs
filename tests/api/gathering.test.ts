@@ -69,7 +69,7 @@ test('API options statements are editable by the creator in draft and hidden fro
   expect((await api({ method: 'GET', path, headers: members[0]!.headers })).body.statements).toEqual([]);
   expect((await api({ method: 'PUT', path: `${path}/statements/${target.id}`, headers: members[0]!.headers, body: { body: 'Changed.' } })).status).toBe(403);
 });
-test.each([['overlong', 0, 'x'.repeat(2001), 'gathering.limit'], ['late', 1000, 'Late', 'scatter.closed']] as const)('API statements reject %s edits', async (_, elapsed, body, error) => {
+test.each([['overlong', 0, 'x'.repeat(2001), 'gathering.limit'], ['late', 1000, 'Late', 'gathering.closed']] as const)('API statements reject %s edits', async (_, elapsed, body, error) => {
   const { api, createFeast, close, advance } = await apiHarness(); disposals.push(close);
   const { path, owner, created } = await createFeast({ kind: 'options', open: true });
   const target = (created.body.targets as { id: string }[])[0]!;
@@ -121,6 +121,20 @@ test.each([
   const response = await api({ method: 'POST', path: `/api/burrows/${burrow.body.id}/feasts`, headers: owner.headers, body: { title: 'Fixture', kind: 'options', options: [{ name: 'Oak', statement: '' }], gatheringEndsAt: clock()+1000, scatteringEndsAt: clock()+2000, aggregatePublic: true, individualOpen: false, ...change } });
   expect(response.status).toBe(400);
 });
+test('API set-up and opening each say when the gathering deadline has already passed', async () => {
+  const { api, connect, close, clock, advance } = await apiHarness(); disposals.push(close);
+  const owner = await connect();
+  const burrow = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
+  const setup = (gatheringEndsAt: number) => ({ title: 'Budget', kind: 'options', gatheringEndsAt, scatteringEndsAt: gatheringEndsAt + 60000, aggregatePublic: false, individualOpen: false, options: [{ name: 'Garden' }] });
+  const late = await api({ method: 'POST', path: `/api/burrows/${burrow.body.id}/feasts`, headers: owner.headers, body: setup(clock() - 1000) });
+  expect(late.status).toBe(400); expect(late.body.error).toBe('setup.deadline.past');
+  const draft = await api({ method: 'POST', path: `/api/burrows/${burrow.body.id}/feasts`, headers: owner.headers, body: setup(clock() + 1000) });
+  expect(draft.status).toBe(201);
+  advance(2000);
+  const opened = await api({ method: 'POST', path: `/api/feasts/${draft.body.id}/open`, headers: owner.headers });
+  expect(opened.status).toBe(400); expect(opened.body.error).toBe('setup.open.late');
+});
+
 test('API people draft requires three active critters at creation', async () => {
   const { api, connect, close, clock } = await apiHarness(); disposals.push(close);
   const owner = await connect();

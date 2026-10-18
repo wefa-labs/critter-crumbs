@@ -440,7 +440,7 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `TopBar` | Burrow + phase + deadlines | burrow name, `PhaseChip`, `DeadlineStrip`, settings button | — | `<header>`; burrow name is not a heading |
 | `PhaseChip` | Current phase | text chip | draft / gathering / scattering / feast | Text, not colour alone |
 | `DeadlineStrip` | Both deadlines, unmissable | two `DeadlineItem`s | upcoming / closing-soon (< 6 h) / closed | Each item is a `<button aria-expanded>` that reveals the absolute time; relative time refreshes every minute, silently (`aria-live="off"`) |
-| `ConnectButton` | Enter the app | primary button | default / loading / connected (shows portrait + name) | Label is "Connect", never mentions a wallet (PRD §3) |
+| `ConnectButton` | Enter the app | primary button | default / loading; after connecting, the shared critter-face control opens profile navigation | Label is "Connect", never mentions a wallet (PRD §3) |
 | `CritterCell` | A critter in the grid | stage, name row, statement line, controls row | asleep / awake / own / done (viewer has submitted) / fed levels (results) | The cell is a `<li>`; the stage is `aria-hidden`; the name row carries the accessible summary (§12.6) |
 | `ScatterControls` | Give and take crumbs | `−` button, `NumberField`, `+` button | default / at-zero-remaining (`+` aria-disabled) / at-zero-here (`−` aria-disabled) / pouring | 44 × 44 targets; tap-and-hold on both; accessible names "Give a crumb to Fern" / "Take a crumb back from Fern" |
 | `NumberField` | Exact amount | `<input type="text" inputmode="numeric" pattern="[0-9]*">` | default / invalid (out of range, clamps on blur) | Label "Crumbs for Fern"; Up/Down ±1, Shift ±10; commits on Enter/blur |
@@ -463,11 +463,13 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `Button` | Primary / secondary / quiet | `<button>` | all | Primary: Burrow on Oat; secondary: Surface with strong border; quiet: text-only Soil, underlined on hover/focus |
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
-| `Sheet` / `Dialog` | Confirmations, settings | native `<dialog>` opened with `showModal()` | — | No hand-rolled focus trap; Esc closes; focus returns to the opener |
+| `Sheet` / `Dialog` | Confirmations, settings, connection | native `<dialog>` opened with `showModal()`; stable header, scrolling body, reserved feedback area, and action footer | loading / choices / waiting / error retain their outer frame | No hand-rolled focus trap; Esc closes unless busy; focus returns to the opener. Bottom sheet on phone; centred card on desktop |
+| `ProfileNavigation` | Identity and app navigation | the same 44 px critter-face button in page and game headers opens a native dialog | profile / settings | Your burrows, Start a burrow, Copy address, Settings, How it works, Disconnect; keeping/meeting behavior remains unchanged |
+| `Notification` | Confirm discrete actions | leaf, outcome text, dismiss control; inside the active dialog when one is open | success / dismissed | One polite announcement; no focus theft. Visible for six seconds, paused while hovered/focused; repeated actions replace the message and restart its lifetime. Errors stay visible; scatter-count announcements do not become toasts |
 | `SoundControls` | Two toggles | effects switch, music switch, still-critters switch, simple-view switch | — | Sounds and Music both default on (decision of 2026-10-08); each persisted |
 | `RerollControl` | Meet your critter | big portrait, re-roll button with remaining count, keep button | 4 → 0 re-rolls left / locked | The portrait swap is announced: "New critter. 3 re-rolls left." |
 | `MemberList` | Burrow critters | list of portrait + name + address | — | `role="list"` restored when styled (Safari) |
-| `BurrowList` | Home | list of burrows with critter counts and the next deadline | empty | — |
+| `BurrowList` | Home | list of burrows with critter counts and the next deadline | empty | Each complete card is one semantic link, including its metadata and padding; visible keyboard focus |
 | `FeastList` | Past and current feasts | list with phase chips and dates | empty | Cancelled feasts are listed, labelled |
 | `EmptyState` | Nothing here yet | portrait (asleep), title, body, one action | — | §9 |
 | `Skeleton` | Loading | Oat/Sunken shimmer blocks | — | `aria-hidden`; not announced |
@@ -504,8 +506,8 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 ## 8. Time and deadlines
 
 - Relative first, absolute one tap away: "Gathering closes in 2 days" · tap → "Tue 14 Oct, 18:00 (BST)". Relative strings come from `Intl.RelativeTimeFormat`; absolute from `Intl.DateTimeFormat` with `timeZoneName: "short"` in the viewer's zone.
-- Both deadlines are always visible in the top bar during gathering and scattering; the past one is shown as "closed {relative}" so the timeline stays legible.
-- "Closing soon" (< 6 h) changes the item's text prefix and adds the `clock` icon; never colour alone.
+- Both deadlines are always visible in the top bar during gathering and scattering; the past one is shown as "closed {relative}" so the timeline stays legible. A cancelled or void feast shows neither.
+- "Closing soon" (< 6 h) replaces the next deadline's line with `deadline.soon`, said once rather than beside it; the later deadline keeps its own line so the two stay apart. It adds the `clock` icon; never colour alone.
 - Countdown text refreshes every minute with `aria-live="off"`; deadlines are never announced spontaneously.
 - All times come from the trusted timestamp (PRD R13). If the device clock disagrees by more than 5 minutes, `err.clockSkew` shows once per session as a polite notice.
 
@@ -516,9 +518,9 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark and the tagline on a plate, four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `action.connect`, `launch.learn` |
 | Arrive by a link, not connected | Header with the burrow line and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer and the one connect button | `arrive.*` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
-| First steps (How it works) | Three short screens that can be skipped, open before connecting and again from Settings: the same handful, ten practice crumbs to give, and where they go stays private | `learn.*` |
-| First connect, no ENS | Name prompt dialog | `name.*` |
-| Meet your critter | `RerollControl` | `critter.*` |
+| First steps (How it works) | Four short screens that can be skipped, open before connecting and again from Settings: the same handful, ten practice crumbs to give, where they go stays private, and a worked feast result. The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*` |
+| First connect, no ENS | Name and critter choice share the same stable first-meeting dialog; Keep saves both together | `name.*`, `critter.*` |
+| Meet your critter | Selected portrait on a painted stage with `RerollControl`, name field when needed, and pinned Keep action. Rerolls preserve the draft name; existing locks remain in force | `critter.*`, `name.*` |
 | Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
 | Burrow, only you | Member list with one row; add-critter field focused | `burrow.empty.*` |
 | Burrow, no feasts | Feast list empty state | `burrow.feasts.empty.*` |
@@ -593,7 +595,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `arrive.asleep` | The critters are asleep until you connect. |
 | `arrive.cta` | Connect to join |
 | `launch.learn` | How it works |
-| `learn.step` | Step {i} of {n} (the name of the three dots) |
+| `learn.step` | Step {i} of {n} (the name of the progress dots) |
 | `learn.next` | Next |
 | `learn.skip` | Skip |
 | `learn.done` | Got it |
@@ -679,6 +681,10 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.field.scattering` | Scattering closes |
 | `setup.deadline.help` | Everyone sees these in their own time zone. Yours is {tz}. |
 | `setup.deadline.order` | Scattering has to close after gathering. |
+| `setup.deadline.past` | That gathering deadline has already passed. Choose a later time. |
+| `setup.title.missing` | The feast needs a title, up to 80 characters. |
+| `setup.option.unnamed` | Every option needs a name, up to 80 characters. |
+| `setup.option.duplicate` | Two options have the same name. Give each one its own. |
 | `setup.privacy.title` | Who sees the result? |
 | `setup.privacy.aggregate.label` | The result |
 | `setup.privacy.aggregate.public` | Public — anyone with the link, and recorded on-chain |
@@ -693,6 +699,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.open.title` | Open {feastTitle}? |
 | `setup.open.body` | Gathering starts now and closes {gatheringDeadline}. You can extend that once. |
 | `setup.open.cta` | Open the feast |
+| `setup.open.late` | This draft's gathering deadline has passed, so it can't open. Cancel it and start a new feast with later times. (In place of Open on a draft past its gathering deadline.) |
 
 **Gathering (F5)**
 
@@ -704,6 +711,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `gathering.limit` | That's the limit — 2,000 characters. |
 | `gathering.save` | Save statement |
 | `gathering.saved` | Saved. |
+| `gathering.closed` | Gathering closed before your latest words were saved. Anything you saved earlier still stands. (A statement saved too late, and words left unsaved when gathering closes.) |
 | `gathering.hidden` | Nobody sees this until scattering opens. |
 | `gathering.participation` | {written} of {total} statements written |
 | `gathering.notYet` | Not yet: {names} |
@@ -1032,3 +1040,37 @@ The Game Design document owns every sound token. This document fixes what is sha
 ### Phase 3 additions to §10
 
 The shared copy table adds screen/burrow document titles, burrow card counts and next deadlines, visible saved-draft guidance, creator-removal/history wording, scatter receipt/unsaved-edit explanations, and accessible names for the heap and symbol buttons. The exact strings remain in `packages/shared/src/copy.ts`. A saved scatter in another tab is identified as the latest; the current screen's in-memory edits are kept, and the next save replaces the accepted scatter. No plaintext allocation is restored from the server before the feast.
+
+### Shared shell copy additions (15 October 2026)
+
+| ID | Copy |
+|---|---|
+| `profile.title` | Your critter |
+| `profile.address.copy` | Copy address |
+| `profile.address.copied` | Address copied. |
+| `notification.label` | Update |
+| `notification.dismiss` | Dismiss notification |
+| `err.copy` | Couldn't copy. Try again, or select the text and copy it yourself. |
+| `burrow.remove` | Remove |
+
+The removal row's accessible label still names the member and burrow context.
+
+
+### First meeting and results tutorial 16 October 2026
+
+The first meeting combines the critter and name in the existing stable dialog. No new generator, migration, identity rule, or API contract is introduced. Keeping a choice saves its name and lock in one profile update. Existing ENS names need no replacement name; a locked critter that lacks a name gets the name-only completion. The existing fourth-reroll auto-lock remains. The tutorial uses painting coordinates for consistent depth, constrains drawings on very short floors, and keeps actions outside its scroll region.
+
+| ID | Text |
+|---|---|
+| `learn.results.title` | When the feast opens |
+| `learn.results.body` | Four critters had 100 crumbs each in this example. Three scattered {total}. |
+| `learn.results.table` | Practice feast results |
+| `learn.results.critter` | Critter |
+| `learn.results.crumbs` | Crumbs |
+| `learn.results.share` | Share |
+| `learn.results.explain` | {name} received {crumbs} of {total} crumbs: {share}. |
+| `learn.results.absent` | Fern didn’t scatter and still receives a share. |
+| `learn.example.moss` | Moss |
+| `learn.example.clover` | Clover |
+| `learn.example.juniper` | Juniper |
+| `learn.example.fern` | Fern |

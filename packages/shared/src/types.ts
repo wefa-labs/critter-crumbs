@@ -9,7 +9,13 @@ export interface FeastSetup {
   gatheringEndsAt: number; scatteringEndsAt: number; aggregatePublic: boolean; individualOpen: boolean;
   options: { name: string; statement: string }[];
 }
-export interface Profile { address: Address; variant: number; rerollsUsed: number; critterLocked: boolean; displayName: string | null; ensName: string | null; ensCheckedAt: number | null; createdAt: number }
+export type CritterVersion = '1' | '2';
+/** Generator output and the drawing recipe are both part of an appearance. */
+export interface CritterIdentity { generatorVersion: CritterVersion; rendererVersion: CritterVersion; variant: number }
+export interface FeastPortrait extends CritterIdentity {
+  targetId: Hex; source: 'profile' | 'creation' | 'freeze' | 'legacy-baseline'; capturedAt: number | null;
+}
+export interface Profile extends CritterIdentity { address: Address; rerollsUsed: number; critterLocked: boolean; displayName: string | null; ensName: string | null; ensCheckedAt: number | null; createdAt: number }
 export interface Target { id: Hex; ownerAddress: Address | null; name: string; position: number; kind: 'person' | 'option' }
 export interface Statement { targetId: Hex; authorAddress: Address; body: string; updatedAt: number }
 export interface PublishedEntry { seq: string; uid: Hex; attester: Address }

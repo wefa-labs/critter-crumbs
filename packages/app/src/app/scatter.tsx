@@ -88,7 +88,7 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
   const [runtime] = useState(() => createStageRuntime({ issued: feast.crumbsPerCritter, viewer: me.address, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })), outputs: { sound: audio.cue, feedback: cue => { if (cue.token === 'pile.wall') { const preferences = runtime.world.get(Settings)!; if (!preferences.still && !preferences.reducedMotion) { heapMotion.current?.cancel(); heapMotion.current = jiggleHeap(heap.current); } } }, hop: cue => hops.add(cue) } }));
   const [session] = useState(() => createScatterSession({ api, feast, viewer: me.address, onAccepted: receipt => browserReceiptBook().remember(feast.id, me.address, receipt.uid), sign: async (amounts, now, latest) => {
     const connected = currentAccount.current();
-    if (!connected || connected.address.toLowerCase() !== me.address.toLowerCase()) { setSigning(false); throw new ApiClientError('scatter.sign.rejected', 401); }
+    if (!connected || connected.address.toLowerCase() !== me.address.toLowerCase()) { setSigning(false); throw new ApiClientError('err.sessionExpired', 401); }
     try { const { signScatter } = await import('../crypto/index.js'); return await signScatter(connected, latest, amounts, now); }
     catch (error) { if (error instanceof ApiClientError) throw error; throw new ApiClientError('scatter.sign.rejected', 400); }
   } }));

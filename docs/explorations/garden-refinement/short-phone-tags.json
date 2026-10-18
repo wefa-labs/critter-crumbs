@@ -1,0 +1,48 @@
+{
+  "viewport": [
+    320,
+    568
+  ],
+  "checks": [
+    {
+      "name": "Moss",
+      "overlap": 0
+    },
+    {
+      "name": "Fern",
+      "overlap": 0
+    },
+    {
+      "name": "Juniper",
+      "overlap": 0
+    },
+    {
+      "name": "Clover",
+      "overlap": 0
+    },
+    {
+      "name": "Acorn",
+      "overlap": 0
+    },
+    {
+      "name": "Hazel Montgomery",
+      "overlap": 0
+    },
+    {
+      "name": "Pebble",
+      "overlap": 0
+    },
+    {
+      "name": "Willow",
+      "overlap": 0
+    },
+    {
+      "name": "Bramble",
+      "overlap": 0
+    },
+    {
+      "name": "Sorrel",
+      "overlap": 0
+    }
+  ]
+}

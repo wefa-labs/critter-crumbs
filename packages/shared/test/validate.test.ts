@@ -13,6 +13,12 @@ test.each([{ crumbsPerCritter: 9 }, { crumbsPerCritter: 1001 }, { crumbsPerCritt
 test('validators reject duplicate option names', () => {
   expect(() => parseFeastSetup({ ...input, kind: 'options', options: [{ name: 'A' }, { name: 'a' }] })).toThrow(ValidationError);
 });
+// Each set-up error says what to fix, not only a field's name (Technical Spec §15 E25, QA edge-states-09).
+test('set-up errors say what to fix: a missing title, an unnamed option, two options with one name', () => {
+  expect(() => parseFeastSetup({ ...input, title: ' ' })).toThrow('setup.title.missing');
+  expect(() => parseFeastSetup({ ...input, kind: 'options', options: [{ name: '  ' }] })).toThrow('setup.option.unnamed');
+  expect(() => parseFeastSetup({ ...input, kind: 'options', options: [{ name: 'Garden' }, { name: 'garden' }] })).toThrow('setup.option.duplicate');
+});
 test('validators reject a 50-target setup that cannot fit every complete scatter in 4 KB', () => {
   const options = Array.from({ length: 50 }, (_, i) => ({ name: `Option ${i}` }));
   expect(() => parseFeastSetup({ ...input, kind: 'options', options })).toThrow('err.feastCapacity');

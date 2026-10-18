@@ -1,17 +1,16 @@
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { copy, formatCopy, CIRCLE_FEEL } from '@critter-crumbs/shared';
+import { copy, formatCopy, CIRCLE_FEEL, GROWTH } from '@critter-crumbs/shared';
 import { useTrait } from 'koota/react';
 import type { Entity } from 'koota';
 import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
-import { generateCritter } from '@critter-crumbs/core';
-import { critterVersion } from '../portraits/version.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameStage } from '../app/game-stage.js';
-import { Link, PortraitImage, targetLabel } from '../app/ui.js';
+import { Link, ProfileButton, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
-import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName, type Rect } from './layout.js';
+import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName } from './layout.js';
+import { rectStyle } from './styles.js';
 import { composeGame, deviceFor } from './composition.js';
 import { defaultScene } from './art.js';
 import { presentSleep } from './motion.js';
@@ -19,12 +18,10 @@ import { SceneBackdrop } from './scenes.js';
 import { CrumbMound, ThoughtBubble } from './mound.js';
 import { Dock } from './dock.js';
 import type { CritterElement } from './icons.js';
-import { faceCrop } from './styles.js';
 import { measureText } from './measure.js';
 import { useScatterInput } from '../app/scatter-input.js';
 import { useAudio, useMusic } from '../audio/context.js';
 
-const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.width, height: r.height });
 
 /**
  * The header over every core state: the burrow and the feast, a line at the right on desktop (the closing day while
@@ -34,7 +31,6 @@ const rectStyle = (r: Rect): CSSProperties => ({ left: r.x, top: r.y, width: r.w
 export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLine, aside, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; burrowLine?: string; aside?: ReactNode; children: ReactNode }) {
   useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
   useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
-  const face = viewer ? faceCrop(44, portraitMetrics(generateCritter(viewer.address, viewer.variant, critterVersion)).extent.headY) : undefined;
   return (
     <div className="core-game">
       <header className="game-header">
@@ -44,7 +40,7 @@ export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLin
         </div>
         <span className="closing-day" id="game-when">{when}</span>
         {viewer
-          ? <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onProfile}><PortraitImage address={viewer.address} variant={viewer.variant} name={copy['scatter.own.short']} size="stage" /></button>
+          ? <ProfileButton address={viewer.address} variant={viewer.variant} onClick={onProfile} />
           : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : aside ?? null}
       </header>
       <div className="game-content">{children}</div>
@@ -117,7 +113,12 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
   const previous = useRef<ReturnType<typeof layoutGame> | null>(null), from = useRef<ReturnType<typeof layoutGame> | null>(null);
   useLayoutEffect(() => {
     const host = body.current!;
-    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; setViewport({ width: box.width, height: box.height + HEADER_HEIGHT }); });
+    const fit = (width: number, height: number) => setViewport(current => current.width === width && current.height === height + HEADER_HEIGHT ? current : { width, height: height + HEADER_HEIGHT });
+    /* measured before the first paint: an update made here is drawn in the same frame, so a game screen never shows
+       the phone layout it was first rendered with (QA lifecycle-12); the observer follows later changes */
+    const box = host.getBoundingClientRect();
+    fit(box.width, box.height);
+    const observer = new ResizeObserver(entries => { const box = entries[0]!.contentRect; fit(box.width, box.height); });
     observer.observe(host);
     return () => observer.disconnect();
   }, []);
@@ -135,6 +136,8 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
     name: targetLabel(feast.targets[index]!), own: entity.has(IsOwn) && treatment.ownAsleep,
     count: counts?.[index] ?? entity.get(Count)!.given,
     extent: portraitMetrics(entity.get(Identity)!.parameters, gathered ? entity.get(Received)!.fed : 0).extent,
+    /* the size the feast grew it to (world/motion.ts), so the huddle can give it room */
+    growth: gathered ? 1 + GROWTH.scaleGain * entity.get(Received)!.fed : 1,
     away: fedAny && entity.get(Received)!.crumbs <= 0,
   }));
   const layout = layoutGame({ viewport, critters, focus, reading, issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });

@@ -1,0 +1,87 @@
+{
+  "generatorVersion": "2",
+  "renderer": "garden-refined-review-1",
+  "note": "Comparison fixtures selected to keep one species across variants 0–2; ordinary rerolls can change species. No saved identities are changed.",
+  "groups": [
+    {
+      "species": "squirrel",
+      "name": "Acorn squirrel",
+      "address": "0x0000000000000000000000000000000000000052",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "moth",
+      "name": "Lichen moth",
+      "address": "0x000000000000000000000000000000000000024e",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "turtle",
+      "name": "Pond turtle",
+      "address": "0x000000000000000000000000000000000000014c",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "koi",
+      "name": "Koi kite",
+      "address": "0x00000000000000000000000000000000000000fd",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "fox",
+      "name": "Ember fox",
+      "address": "0x0000000000000000000000000000000000000479",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "phoenix",
+      "name": "Phoenix chick",
+      "address": "0x00000000000000000000000000000000000000b6",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "lemur",
+      "name": "Flying lemur",
+      "address": "0x00000000000000000000000000000000000001ba",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    },
+    {
+      "species": "lamb",
+      "name": "Cloud lamb",
+      "address": "0x000000000000000000000000000000000000011b",
+      "variants": [
+        0,
+        1,
+        2
+      ]
+    }
+  ]
+}

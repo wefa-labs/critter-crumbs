@@ -1,0 +1,81 @@
+/* The app keeps its chrome in the viewport; long pages scroll within main. */
+#root.app-shell { height:100dvh; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+#root.app-shell > .environment-notice { flex:none; }
+#root.app-shell > .app-header { flex:none; width:100%; max-width:none; min-height:64px; margin:0; padding:10px 20px; align-items:center; flex-wrap:nowrap; border-bottom:var(--cc-border); }
+#root.app-shell > main { flex:1; min-height:0; width:100%; margin:0 auto; overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
+#root.app-shell > main:has(.core-game) { overflow:hidden; scrollbar-gutter:auto; }
+#root.app-shell > .notice { flex:none; width:calc(100% - 32px); }
+.app-header .brand { min-width:0; font-size:clamp(18px, 5vw, 24px); }
+.app-header nav { flex:none; }
+.profile-identity { display:flex; align-items:center; gap:16px; margin-bottom:12px; }
+.profile-identity strong { min-width:0; overflow-wrap:anywhere; }
+.profile-address { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:center; gap:12px; }
+.profile-address p { margin:0; }
+.profile-address button { padding:8px 12px; }
+.profile-links { display:grid; margin-top:12px; }
+.profile-links a, .profile-links .quiet { display:flex; align-items:center; min-height:44px; padding:8px 12px; border:0; border-radius:12px; background:transparent; color:var(--cc-text); box-shadow:none; text-align:left; font-size:var(--cc-text-md); font-weight:600; text-decoration:none; justify-content:flex-start; }
+.profile-links > :hover { background:var(--cc-bg-sunken); }
+.link-list li.burrow-card { display:block; padding:0; }
+.burrow-card > a { display:block; width:100%; padding:var(--cc-space-5); border-radius:inherit; text-decoration:none; }
+.burrow-card > a:hover { background:var(--cc-bg-sunken); }
+.burrow-card strong { display:block; overflow-wrap:anywhere; }
+.burrow-card p { margin:8px 0 0; font-family:var(--cc-font-body); font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.announcement-host { flex:none; height:0; }
+.announcement-host > .notice:not(.sr-only) { position:fixed; top:108px; left:50%; translate:-50% 0; width:min(560px, calc(100% - 32px)); margin:0; z-index:5000; }
+.app-toast { position:fixed; bottom:max(20px, env(safe-area-inset-bottom)); left:50%; translate:-50% 0; z-index:5000; display:flex; align-items:center; gap:12px; width:min(420px, calc(100% - 32px)); padding:8px 8px 8px 16px; border:var(--cc-border-strong); border-radius:20px; background:var(--cc-bg-raised); color:var(--cc-text); box-shadow:var(--cc-shadow-2); font-size:var(--cc-text-sm); font-weight:600; }
+.app-toast > span:nth-child(2) { flex:1; overflow-wrap:anywhere; }
+.app-toast > button { flex:none; width:44px; height:44px; min-height:44px; padding:0; border:0; box-shadow:none; background:transparent; color:inherit; }
+.notification-leaf { color:var(--cc-ok); animation:notification-hop var(--cc-dur-2) var(--cc-ease-out); }
+.dialog-feedback .app-toast { position:static; translate:none; width:100%; padding:2px 4px 2px 10px; box-shadow:none; }
+@keyframes notification-hop { 50% { transform:translateY(-4px) rotate(-10deg); } }
+@media (prefers-reduced-motion:reduce) { .notification-leaf { animation:none; } }
+html[data-still="true"] .notification-leaf { animation:none; }
+
+/* Shared frame: content changes inside a bounded body, never by resizing the dialog. */
+dialog.app-dialog {
+  --dialog-height:560px;
+  width:min(560px, calc(100% - 32px));
+  height:min(var(--dialog-height), calc(100dvh - 32px));
+  max-height:calc(100dvh - 32px);
+  margin:auto;
+  padding:24px;
+  overflow:hidden;
+  color:var(--cc-text);
+  background:var(--cc-bg);
+  border:var(--cc-border-strong);
+  border-radius:24px;
+  box-shadow:var(--cc-shadow-2);
+}
+dialog.app-dialog[open] { display:grid; grid-template-rows:auto minmax(0, 1fr) 64px auto; gap:12px; }
+dialog.app-dialog::backdrop { background:color-mix(in srgb, var(--cc-burrow) 40%, transparent); }
+.app-dialog .dialog-heading { margin:0; display:flex; flex-wrap:nowrap; align-items:flex-start; gap:12px; }
+.app-dialog .dialog-heading h2 { margin:0; font-size:var(--cc-text-xl); overflow-wrap:anywhere; }
+.app-dialog .dialog-close { flex:none; padding:8px 12px; }
+.dialog-body { min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-gutter:stable; }
+.dialog-feedback { min-height:0; overflow:auto; }
+.dialog-actions { display:flex; align-items:center; justify-content:flex-end; gap:12px; }
+.dialog-actions > * { min-width:0; }
+.dialog-actions > button { min-height:48px; }
+dialog.connect-sheet { --dialog-height:460px; }
+dialog.app-dialog.game-dialog { --dialog-height:340px; }
+.connect-sheet .dialog-body .stack { padding:2px; }
+.app-dialog .dialog-feedback .notice { margin:0; padding:10px; font-size:var(--cc-text-sm); }
+@media (min-width:700px) { dialog.app-dialog.game-dialog { width:min(460px, calc(100% - 32px)); } }
+@media (max-width:699px) {
+  dialog.app-dialog { width:100%; max-width:none; margin:auto 0 0; height:min(var(--dialog-height), calc(100dvh - 16px)); max-height:calc(100dvh - 16px); padding:20px 16px max(16px, env(safe-area-inset-bottom)); border-width:1.5px 0 0; border-radius:24px 24px 0 0; }
+}
+
+/* The selected critter and its name share one bounded first-meeting frame. */
+.meet-dialog .dialog-body { display:grid; grid-template-rows:minmax(100px, 1fr) auto; gap:12px; }
+.meet-scene { position:relative; min-height:0; overflow:hidden; background:var(--cc-floor-base); border-radius:16px; --room-h:clamp(280px, 55dvh, 400px); }
+.meet-dialog form p { margin:0 0 12px; }
+.meet-dialog .field { margin:0; }
+.meet-dialog .field input { padding:10px 12px; }
+.meet-name { font-weight:700; }
+.meet-dialog .dialog-actions > button { flex:1; max-width:220px; height:52px; min-height:52px; padding:0 12px; line-height:1.2; }
+@media (max-width:360px) { .meet-dialog .dialog-actions > button { padding-inline:8px; font-size:var(--cc-text-sm); } }
+@media (min-width:700px) {
+  dialog.meet-dialog { width:min(720px, calc(100% - 32px)); }
+  .meet-dialog .dialog-body { grid-template-columns:1fr 1fr; grid-template-rows:minmax(0, 1fr); align-items:center; gap:24px; }
+  .meet-scene { align-self:stretch; --room-h:600px; }
+}

@@ -8,22 +8,20 @@ import { GameScene, HeaderWhen } from '../game/parts.js';
 import { FedLine, FocusRow, ResultsPill } from '../game/dock.js';
 import { FeastSheet, WaitingSheet, statementSurfaces } from '../game/sheets.js';
 import { Grow, ResultsCard, ResultsPanel } from '../game/surface.js';
-import { faceCrop } from '../game/styles.js';
 import { Received } from '../world/index.js';
-import { ApiClientError, generateCritter, type Account } from '@critter-crumbs/core';
+import { ApiClientError, type Account } from '@critter-crumbs/core';
 import { copy, formatCopy, CIRCLE_FEEL, FEAST, GROWTH, type CopyId, type TallyResult } from '@critter-crumbs/shared';
 import { useAudio } from '../audio/context.js';
 import { Feast as FeastTrait, type GameSettings } from '../world/index.js';
 import { createStageRuntime } from '../sim/stage-runtime.js';
-import { critterVersion } from '../portraits/version.js';
-import { portraitMetrics } from '../portraits/metrics.js';
+import { gardenReview } from '../portraits/version.js';
 import { aggregateCsv, giverCsv, downloadCsv } from './csv.js';
 import { ResultRecord } from './result-record.js';
 import type { RunAction } from './burrows.js';
 import { joinNames, percentShare } from './time.js';
 import { browserReceiptBook } from './receipts.js';
 import { createHops } from './heap.js';
-import { PortraitImage, targetLabel } from './ui.js';
+import { CritterFace, PortraitImage, targetLabel } from './ui.js';
 import { gameView, isMemberFeast, portraitVariant, resultStates, resultsViews, type MemberFeast, type PublicFeast, type ResultsView } from './feast-view.js';
 import type { OpenedFeast } from './feast-session.js';
 import type { AppApi, Me } from './session.js';
@@ -93,7 +91,7 @@ function ResultsList({ feast, opened, record, givers, actions }: { feast: Public
       <ol className="results-rows">
         {rows.map(row => {
           const target = feast.targets.find(t => t.id === row.targetId)!;
-          return <li key={row.targetId} className="results-row"><span className="results-face"><PortraitImage address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size="stage" fed={fedFor(row.share, feast.targets.length)} /></span><span className="results-name">{targetLabel(target)}</span><span className="results-amount">{row.crumbs}<small>{percentShare(row.share)}</small></span></li>;
+          return <li key={row.targetId} className="results-row"><span className="results-face">{gardenReview ? <CritterFace address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={44} /> : <PortraitImage address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size="stage" fed={fedFor(row.share, feast.targets.length)} />}</span><span className="results-name">{targetLabel(target)}</span><span className="results-amount">{row.crumbs}<small>{percentShare(row.share)}</small></span></li>;
         })}
       </ol>
       {one ? <p className="results-sum">{formatCopy('results.one', { name: memberName(feast, result.counted[0]!.attester) })}</p> : null}
@@ -106,13 +104,6 @@ function ResultsList({ feast, opened, record, givers, actions }: { feast: Public
       {actions ? <div className="results-actions">{actions}</div> : null}
     </div>
   );
-}
-
-/** A critter's face cropped to the head, as the flow page draws the givers' table (face()). */
-function CritterFace({ address, variant, name, size }: { address: string; variant: number; name: string; size: number }) {
-  const headY = portraitMetrics(generateCritter(address, variant, critterVersion)).extent.headY;
-
-  return <span className="critter-face" style={faceCrop(size, headY)} aria-hidden="true"><PortraitImage address={address} variant={variant} name={name} size="stage" /></span>;
 }
 
 /** Flow 47: who gave what, the table scrolling sideways with each giver held at the left (Design System §6.5). */

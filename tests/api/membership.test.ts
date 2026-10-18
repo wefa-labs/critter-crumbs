@@ -9,7 +9,7 @@ test('API burrow admits only pre-added addresses and gives unconnected members d
   const path = `/api/burrows/${created.body.id}`;
   expect((await api({ method: 'POST', path: `${path}/members`, headers: owner.headers, body: { address: newcomer.address } })).status).toBe(200);
   const before = await api({ method: 'GET', path, headers: owner.headers });
-  expect(before.body.members).toContainEqual(expect.objectContaining({ address: newcomer.address, variant: 0, joinedAt: null, leftAt: null }));
+  expect(before.body.members).toContainEqual(expect.objectContaining({ address: newcomer.address, variant: 0, generatorVersion: '1', rendererVersion: '1', joinedAt: null, leftAt: null }));
   const member = await connect(2);
   expect((await api({ method: 'POST', path: `${path}/join`, headers: member.headers })).status).toBe(200);
   const stranger = await connect(3);

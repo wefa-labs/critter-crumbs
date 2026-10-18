@@ -1,10 +1,11 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { copy, formatCopy, type Target } from '@critter-crumbs/shared';
 import { cappedStatement, statementParts } from './statements.js';
 import { PortraitImage, targetLabel } from './ui.js';
 import { portraitVariant, type MemberFeast } from './feast-view.js';
 import type { AppApi, Me } from './session.js';
 import type { RunAction } from './burrows.js';
+import { useNotification } from './announcements.js';
 /** A statement as text, links as elements (never HTML). `paragraphs` sets each blank-line-separated part as its own
  *  paragraph, as the review pages do in the game's statement panels. */
 export function StatementText({ body, paragraphs = false }: { body: string; paragraphs?: boolean }) {
@@ -14,10 +15,18 @@ export function StatementText({ body, paragraphs = false }: { body: string; para
 function StatementEditor({ target, feast, api, run, busy, refresh, announce }: { target: Target; feast: MemberFeast; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void }) {
   const initial = feast.statements.find(statement => statement.targetId === target.id)?.body ?? '';
   const [body, setBody] = useState(initial), [saved, setSaved] = useState(initial), [savedOnce, setSavedOnce] = useState(false), [limited, setLimited] = useState(false);
-  const current = useRef(body), limitAnnounced = useRef(false);
+  const current = useRef(body), limitAnnounced = useRef(false), stored = useRef(initial), closesAt = useRef(feast.gatheringEndsAt);
+  closesAt.current = feast.gatheringEndsAt;
+  const notify = useNotification();
+  /* The page turns to the statements the second gathering closes, and this editor goes with it. Words not yet saved
+     cannot be any more (PRD R13), so the member is told rather than finding them gone (QA edge-states-03). */
+  useEffect(() => () => {
+    const now = api.now();
+    if (current.current !== stored.current && now !== null && now >= closesAt.current) notify(copy['gathering.closed']);
+  }, [api, notify]);
   const count = Array.from(body).length;
   return <form className="statement-editor" onSubmit={event => { event.preventDefault(); const submitted = current.current; void run(async () => {
-    await api.write(`/api/feasts/${feast.id}/statements/${target.id}`, 'PUT', { body: submitted }); setSaved(submitted); setSavedOnce(true); announce(copy['gathering.saved']); refresh();
+    await api.write(`/api/feasts/${feast.id}/statements/${target.id}`, 'PUT', { body: submitted }); setSaved(submitted); stored.current = submitted; setSavedOnce(true); announce(copy['gathering.saved']); refresh();
   }); }}><div className="statement-heading"><PortraitImage address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={64} /><h2>{targetLabel(target)}</h2></div>
     <label className="field"><span>{feast.kind === 'people' ? copy['gathering.yours.title'] : copy['setup.option.statement']}</span><textarea value={body} onChange={event => { const next = cappedStatement(event.target.value); current.current = next.body; setBody(next.body); setLimited(next.truncated); if (next.truncated && !limitAnnounced.current) announce(copy['gathering.limit']); limitAnnounced.current = next.truncated; }} /></label>
     <p>{feast.kind === 'people' ? copy['gathering.prompt'] : copy['setup.type.options.help']}</p><p aria-live="off">{formatCopy('gathering.counter', { n: count })}</p>{limited ? <p>{copy['gathering.limit']}</p> : null}<p>{copy['gathering.hidden']}</p><button disabled={busy}>{copy['gathering.save']}</button>{savedOnce && body === saved ? <span className="chip">{copy['gathering.saved']}</span> : null}
