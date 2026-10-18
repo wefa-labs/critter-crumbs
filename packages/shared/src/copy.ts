@@ -153,6 +153,8 @@ export const copy = {
   "burrow.leave.cta": "Leave burrow",
   "burrow.unknown.title": "This burrow doesn't know you yet",
   "burrow.unknown.body": "Ask someone in {burrowName} to add {shortAddress}.",
+  "burrow.missing.title": "There's no burrow at this link",
+  "burrow.missing.body": "Check the link with whoever sent it.",
   "feast.cancelled": "Cancelled",
   "feast.tooFew": "{feastTitle} ended before scattering: a people feast needs at least 3 critters. Start a new one when the burrow is ready.",
   "feast.missing.title": "There's no feast at this link",
