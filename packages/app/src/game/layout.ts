@@ -110,12 +110,14 @@ export function layoutGame(input: LayoutInput) {
     const slot = (index - input.focus + n) % n, away = gathered && !!critter.away;
     let x = geo.cx, y = geo.focusY, size = geo.focusSize, depth = 999, face: 'left' | 'right' | 'front' = 'front', ringSize = 0;
     if (gathered) {
-      /* the huddle on the results' top edge (huddleAt) */
+      /* the huddle on the results' top edge (huddleAt). On the phone the front row stands a tenth of its size into the
+         results' rounded top. On desktop the folded dock is only its bar of controls, so the huddle stands on the bar:
+         each front portrait's box, 10 of its 150 units under the feet, ends at the edge instead of covering the buttons */
       const m = huddled.length, rank = rankOf.get(index) ?? 0, front = m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, crowd = m > 8 ? 0.88 : 1;
       size = (desktop ? CIRCLE_FEEL.huddle.desktop * geo.u : CIRCLE_FEEL.huddle.phone) * crowd;
-      const step = size * 0.58, frontX = (j: number) => W / 2 + (j - (front - 1) / 2) * step;
-      if (rank < front) { x = frontX(rank); y = dock.y + size * 0.1; depth = 3200 + rank; }
-      else { const gap = Math.floor((front - 1 - back) / 2) + (rank - front); x = (frontX(gap) + frontX(gap + 1)) / 2; y = dock.y - size * 0.26; size *= 0.9; depth = 3100 + rank; }
+      const step = size * 0.58, frontX = (j: number) => W / 2 + (j - (front - 1) / 2) * step, underFeet = Math.round(size * 1.25) * 10 / 150;
+      if (rank < front) { x = frontX(rank); y = desktop ? dock.y - underFeet : dock.y + size * 0.1; depth = 3200 + rank; }
+      else { const gap = Math.floor((front - 1 - back) / 2) + (rank - front); x = (frontX(gap) + frontX(gap + 1)) / 2; y = desktop ? dock.y - underFeet - size * 0.36 : dock.y - size * 0.26; size *= 0.9; depth = 3100 + rank; }
       face = x < W / 2 ? 'right' : 'left';
     } else if (ring) {
       const angle = (90 - slot * 360 / n) * Math.PI / 180, sin = Math.sin(angle), cos = Math.cos(angle);
