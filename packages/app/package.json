@@ -20,10 +20,10 @@
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",
     "@react-three/drei": "10.7.9",
-    "@react-three/fiber": "9.8.1",
+    "@react-three/fiber": "9.8.2",
     "koota": "0.6.6",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "three": "0.186.1",
     "@critter-crumbs/shared": "0.0.0"
   }

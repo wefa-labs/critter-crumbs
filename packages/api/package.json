@@ -21,6 +21,6 @@
     "@critter-crumbs/core": "0.0.0",
     "@critter-crumbs/shared": "0.0.0",
     "@neondatabase/serverless": "1.2.0",
-    "viem": "2.56.0"
+    "viem": "2.57.7"
   }
 }
