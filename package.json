@@ -23,7 +23,7 @@
     "test": "node scripts/test.mjs",
     "compile": "node scripts/generate-tokens.mjs && tsc -b",
     "check:licenses": "bun scripts/check-dependencies.mjs",
-    "check:audit": "bun audit --audit-level=high --ignore=GHSA-vfj7-8cjw-p6xm --ignore=GHSA-mrhx-c7xc-m3w5",
+    "check:audit": "bun audit --audit-level=high --ignore=GHSA-mrhx-c7xc-m3w5",
     "check": "bun run check:toolchain && bun run check:tokens && bun run lint && bun run typecheck && bun run test && bun run check:development-assets && bun run check:workspaces && bun run check:licenses && bun run check:audit",
     "build": "bun run compile && vite build --config packages/app/vite.config.ts",
     "vercel-build": "PATH=\"$PWD/.vercel/bun/bin:$PATH\" .vercel/bun/bin/bun run build",
