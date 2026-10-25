@@ -52,10 +52,11 @@ Vercel keeps no commit for a deployment made from the command line, so each prod
 | 12 October, 17:48 | Not recorded | `dpl_5A3gRP65NuLCcH1GDkeztwkpgkBR` | Made from the command line 49 seconds after #55 merged, so probably `b908f4a`. |
 | 17 October, 22:52 | `a8277cb` | `dpl_D2ngWuHJik5XGGLmiqVphqD8NnG7` | #56 with #57 and #59: the Garden Spirits groundwork, the demo-path fixes and the visual polish. Migration 0009 was applied first, as its [release order](../reviews/versioned-identity-2026-10-16.md#release-order-and-remaining-integration) requires. |
 | 18 October, 01:00 | `cce4c2c` | `dpl_9fGNtBK3KyMAhC9Y59LFj34YXgEG` | #60: a feast or burrow link that leads nowhere now says so. No migration. |
+| 25 October, 13:32 | `0083c20` | `dpl_AhZWJr63UoiccQ8SNMbFSgRqDXHm` | #64: the October dependency updates (viem 2.57.7, Fiber 9.8.2, React 19.3.1, Vite 7.3.7, PGlite 0.5.10, ESLint 10.13.0, Playwright 1.64.1, Vitest 5.0.5), six audit advisories cleared, dependabot ignore rules for the held-back majors. No migration (9 of 9 applied); nothing was in flight. The live shell is `index-BUeQo5ia.js`. |
 
 Before migration 0009 the database held no feasts and no targets, only two profiles, so there were no writes to drain. Afterwards all nine migrations were applied, and both profiles were still on version 1 with their critters locked. Its columns have defaults, so the API that was live before it still runs on the migrated schema. Production draws version 1 critters. Garden Spirits stays behind its review switch, which production builds do not turn on.
 
-The 17 and 18 October deployments were checked from outside, signed out, as the first one was:
+The 17, 18 and 25 October deployments were checked from outside, signed out, as the first one was:
 - all 22 route files answer, and a nonce is issued;
 - the development routes are closed;
 - the page starts in Chromium and WebKit with no breach of its policy;
