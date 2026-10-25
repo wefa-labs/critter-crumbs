@@ -27,3 +27,27 @@ After a fresh resolution from the reviewed manifests and eligible pins, installa
 ## Bun migration
 
 Bun 1.4.2 imports the reviewed versions and override selectors. Its full audit reports six advisory records: three low and three moderate, with zero high or critical. Bun and npm count findings differently; the change from npm’s 46 affected development findings is not evidence of 40 fixes. Current command output is in `docs/foundation/evidence.md`.
+
+## Late-October advisories — 25 October 2026
+
+`bun audit --audit-level=high` reported six high findings on 25 October against the lockfile that passed on 18 October. The advisories were published or reviewed between 20 and 23 October. Vite's is cleared by Vite 7.3.7, a direct development dependency recorded in [the tooling review](tooling-update-2026-10.md). The others are transitive development packages, raised by overrides:
+
+| Requested transitive package | Patched version | Advisory evidence |
+|---|---|---|
+| `undici@5` and `undici@>=6.7.0 <6.29.1`: the Vercel CLI, its Node builder and Blob client, and the EAS SDK's Hardhat | `6.29.1` | [Excessive content-encodings](https://github.com/advisories/GHSA-xjj6-f33q-929c) |
+| `undici@>=7.0.0 <7.30.1`: the Vercel Sandbox client | `7.30.1` | [Excessive content-encodings](https://github.com/advisories/GHSA-xjj6-f33q-929c) |
+| `follow-redirects@<1.16.1`: solc, through the EAS SDK's Hardhat | `1.16.1` | [Array-form headers](https://github.com/advisories/GHSA-q3jh-wrc6-jgq8), [sensitive-header escaping](https://github.com/advisories/GHSA-8r9p-f939-6h3c) |
+| `zod@>=4.0.0 <4.6.6`: the Vercel CLI, its auth and config packages and its Sandbox client | `4.6.6` | [Oversized constrained collections](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5) |
+
+The undici selectors keep their earlier shapes with raised bounds; they selected 6.28.1 and 7.29.1 before. The follow-redirects and zod selectors are new. `undici@5` already crossed to 6 in September, as described above; the other selectors stay within the major their dependents request. Each patched archive was downloaded into its own directory and matched its registry SHA-512 and SHA-1; each is MIT and was published more than seven days before resolution.
+
+| Package | Version | Gzip bytes | Own licence SHA-256 | Archive integrity |
+|---|---|---:|---|---|
+| [`undici`](https://registry.npmjs.org/undici/6.29.1) | `6.29.1` | 297,796 | `a6db8096b2707bc0102d256917d4d33f298ba36d8c3f25de067a2b5bb379db27` | `sha512-EvRlUt/QqAEvXdQeRMYUfwOQsfzpDztykrG2owGEE/rBOBoYv9uF39ZzsNDh4lTFHhTr2XOZjKkYgueD12ZmGA==` |
+| [`undici`](https://registry.npmjs.org/undici/7.30.1) | `7.30.1` | 405,247 | `a6db8096b2707bc0102d256917d4d33f298ba36d8c3f25de067a2b5bb379db27` | `sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==` |
+| [`follow-redirects`](https://registry.npmjs.org/follow-redirects/1.16.1) | `1.16.1` | 10,076 | `bfa8a54bb952ccda79f0f1889721d108f5b605babbb2b8a3705ffb52f4132eb7` | `sha512-FNvFGzoMLWmE6Yj9spb/zjd7yiNCHiAW9/Tg9CXrQ8wuu32HtlJOwWO11OJafl5FfY3DxTdQ0vj42zU1kvv5jg==` |
+| [`zod`](https://registry.npmjs.org/zod/4.6.6) | `4.6.6` | 1,141,937 | `3f1189b28e3866e0d979968d466b78f813f76827cfdca1fbb124cc0a5c8841f8` | `sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==` |
+
+zod 3.22.4 has no fixed release: the advisory covers every version below 4.6.6. Four of the Vercel CLI's builders pin it exactly (`@vercel/backends`, `@vercel/express`, `@vercel/hono` and `@vercel/python-analysis`), and the newest release of each still does (22.0.2 for the first three, 0.15.2 for the last). An override across the major would change those builders' validation code in ways this repository cannot exercise, so `check:audit` ignores GHSA-mrhx-c7xc-m3w5, as it ignored braces from 6 October. Bun ignores an advisory as a whole, so this would also pass a zod 4 copy below 4.6.6; the override is what keeps those fixed. The builders validate this repository's own configuration, never a member's input. Nothing in the app or the functions imports zod: abitype, under viem, declares it as an optional peer for its separate `abitype/zod` entry, which viem does not load.
+
+With the overrides and that ignore, `bun audit --audit-level=high` finds nothing at or above high: 786 packages checked, 11 findings below high, 1 ignored. Without the new ignore it reports exactly one: zod 3.22.4. The braces advisory, GHSA-vfj7-8cjw-p6xm, was withdrawn on 23 October, so its ignore matched nothing; with Afolabi's go-ahead it was removed on 25 October, and a new braces advisory would be enforced again.
