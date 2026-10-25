@@ -12,7 +12,7 @@ updates:
     # Majors held back on 25 October 2026; minor and patch updates still come.
     # Reasons: docs/research/tooling-update-2026-10.md. Remove a rule when its reason goes.
     ignore:
-      - dependency-name: typescript # typescript-eslint's parser refuses TypeScript 7
+      - dependency-name: typescript # the parser refuses 7; 6 is unreviewed
         update-types: ['version-update:semver-major']
       - dependency-name: '@types/node' # functions and tools run on Node 22
         update-types: ['version-update:semver-major']

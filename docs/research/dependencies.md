@@ -44,7 +44,7 @@ The matching declaration archives were also inspected: both use MIT, with own li
 
 ## Runtime update review — 25 October 2026
 
-The four runtime updates in PR #62 were downloaded from their exact npm archive URLs, each into its own directory. Each archive's SHA-512 and SHA-1 matched the registry record and PR #62's lockfile; each package manifest and own licence was read. All four keep MIT licences, and React, React DOM and viem ship licence files byte-identical to the versions they replace. viem's exact dependency `ox` moves from 0.14.34 to 0.14.56, MIT, published 11 October. React's declaration packages stay at 19.3.0, the latest published.
+The four runtime updates in PR #62 were downloaded from their exact npm archive URLs, each into its own directory. Each archive's SHA-512 matched the registry record and PR #62's lockfile, and its SHA-1 the registry record; each package manifest and own licence was read. All four keep MIT licences, and React, React DOM and viem ship licence files byte-identical to the versions they replace. viem's exact dependency `ox` moves from 0.14.34 to 0.14.56, MIT, published 11 October. React's declaration packages stay at 19.3.0, the latest published.
 
 | Package | Version | Gzip archive bytes |
 |---|---|---:|

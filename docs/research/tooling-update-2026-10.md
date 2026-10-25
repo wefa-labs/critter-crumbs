@@ -11,17 +11,17 @@ The exact npm archives below were downloaded and their SHA-512 integrity, packag
 
 ## Tooling update review — 25 October 2026
 
-PR #63 proposed ten development updates. The five that stay within the limits above are taken: PGlite 0.5.10, Three declarations 0.186.0, ESLint 10.13.0, Playwright 1.64.1 and Vitest 5.0.5. Vite moves to 7.3.7, the patch release of the installed line, because 7.3.6 bundles a `launch-editor` affected by [GHSA-587h-7wmj-h5pm](https://github.com/advisories/GHSA-587h-7wmj-h5pm) (high), [GHSA-r825-w8mm-5pxw](https://github.com/advisories/GHSA-r825-w8mm-5pxw) and [GHSA-698v-4r3x-3vcv](https://github.com/advisories/GHSA-698v-4r3x-3vcv); 7.3.7 bundles `launch-editor-middleware` ^2.14.2, the fixed release.
+PR #63 proposed ten development updates. The five that stay within the limits above and need no review of their own are taken: PGlite 0.5.10, Three declarations 0.186.0, ESLint 10.13.0, Playwright 1.64.1 and Vitest 5.0.5. Vite moves to 7.3.7, the patch release of the installed line, because 7.3.6 bundles a `launch-editor` affected by [GHSA-587h-7wmj-h5pm](https://github.com/advisories/GHSA-587h-7wmj-h5pm) (high), [GHSA-r825-w8mm-5pxw](https://github.com/advisories/GHSA-r825-w8mm-5pxw) and [GHSA-698v-4r3x-3vcv](https://github.com/advisories/GHSA-698v-4r3x-3vcv); 7.3.7 bundles `launch-editor-middleware` ^2.14.2, the fixed release.
 
 Five are held back, and `.github/dependabot.yml` ignores their major updates:
 
-- **TypeScript 7.0.2.** The installed TypeScript ESLint parser, 8.68.0, declares `typescript >=4.8.4 <6.1.0` and refuses TypeScript 7 at start-up; PR #63's CI stopped there. 8.72.0, the latest, declares the same range.
+- **TypeScript 7.0.2.** The installed TypeScript ESLint parser, 8.68.0, declares `typescript >=4.8.4 <6.1.0` and refuses TypeScript 7 at start-up; PR #63's CI stopped there. 8.72.0, the latest, declares the same range. The major-version rule also keeps out TypeScript 6.0.3, which that range accepts but nobody has reviewed.
 - **Node declarations 26.6.5.** The functions and tools run on Node 22, so the declarations stay on 22.x.
 - **Noble curves 2.4.0.** The local Shutter helper keeps 1.9.1 and its reviewed API.
 - **Vite 8.3.4.** Vite 8 builds with Rolldown: its manifest depends on `rolldown` where 7.3.7 depends on `rollup` and `esbuild`. The app's chunk split (`manualChunks` in `packages/app/vite.config.ts`) and the bundle budgets are measured on Rollup's output, so the move needs its own review and fresh budget figures.
 - **React plugin 6.1.2.** It declares `vite ^8.0.0`, so it waits for Vite 8; 5.2.0 accepts Vite 4 to 8.
 
-Each exact npm archive below was downloaded from its registry tarball URL into its own directory. Its SHA-512 and SHA-1 matched the registry record and the lockfile, and its package manifest and own licence were read. Install scripts remained disabled. ESLint's licence is unchanged since 10.12.0. Vitest's `LICENSE.md` differs from 5.0.3's in one bundled notice's copyright years; Vite's is byte-identical to 7.3.6's. Playwright and its exact dependency `playwright-core` also carry `NOTICE` and `ThirdPartyNotices.txt`.
+Each exact npm archive below was downloaded from its registry tarball URL into its own directory. Its SHA-512 matched the registry record and the lockfile, its SHA-1 matched the registry record, and its package manifest and own licence were read. Install scripts remained disabled. ESLint's licence is unchanged since 10.12.0. Vitest's `LICENSE.md` differs from 5.0.3's in one bundled notice's copyright years; Vite's is byte-identical to 7.3.6's. Playwright and its exact dependency `playwright-core` also carry `NOTICE` and `ThirdPartyNotices.txt`.
 
 | Package | Version | Licence | Gzip bytes | Own licence SHA-256 | Archive integrity |
 |---|---|---|---:|---|---|
