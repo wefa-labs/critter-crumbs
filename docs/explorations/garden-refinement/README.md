@@ -107,12 +107,26 @@ VITE_GARDEN_REVIEW=true bun run build
 
 For an immediate visual rollback, open the same route with **`?critters=1` and reload**. For a future review deployment, rebuild without `VITE_GARDEN_REVIEW`. Neither action touches saved identities.
 
-The pre-art checkpoint is **`d9d53aa322e6193fc5e0b2e13a940810e5c89d69`** (`feat(shared,client): add stable shell and versioned identities`). The art is a separate commit tagged `review/garden-refined-2026-10-16`; the checkpoint is tagged `rollback/pre-garden-2026-10-16`. Claude's completion fixes are one further commit on top of the art. It edits files the art commit introduced, so revert both, newest first:
+The art merged to `main` with PR #56 on 17 October 2026 and was deployed switched off. Production builds don't set `VITE_GARDEN_REVIEW`, so the live site draws version 1 and never loads the review art. Nothing needs rolling back to keep it off.
+
+The two tags stay as markers. `rollback/pre-garden-2026-10-16` is the pre-art checkpoint, **`d9d53aa`** (`feat(shared,client): add stable shell and versioned identities`), and `review/garden-refined-2026-10-16` is the art commit, **`6815240`**. Don't reset `main` to the checkpoint: everything merged since would go, and production already runs the checkpoint's migration 0009. The range `rollback/pre-garden-2026-10-16..codex/shared-shell` is no longer the art alone either: the branch went on to carry twenty more commits, including the desktop results huddle (#57) and the visual polish batch (#59).
+
+To remove the review art from the code, revert its three commits on a branch from `main`, newest first: the opening cast (`4e9e557`), Claude's completion fixes (`e1d4183`) and the art (`6815240`).
 
 ```sh
-git revert --no-edit rollback/pre-garden-2026-10-16..codex/shared-shell
+git revert --no-edit 4e9e557 e1d4183 6815240
 ```
 
-At hand-off that range holds exactly the two art commits. If other commits land on the branch later, list the range first (`git log --oneline rollback/pre-garden-2026-10-16..codex/shared-shell`) and revert only the completion commit and `review/garden-refined-2026-10-16`, in that order. Either way the shared shell, onboarding, tutorial and versioned storage stay. Neither art commit adds a database migration or identity writes, so no database rollback is needed. Do not reset the branch to discard unrelated work, and do not move the tags.
+On 25 October, against `main` at `0083c20`, two files conflicted. Resolve each, `git add` it, and run `git revert --continue`:
+
+- `docs/decisions.md`, on the second and third reverts. Keep `main`'s version, because the log is append-only, and add a new entry recording the removal.
+- `packages/app/src/game/layout.ts`, on the third revert. Keep `main`'s version: the art commit also carried the short-phone name-tag fix, which applies to every critter version, and later layout changes build on it.
+
+Three later tests also measure layouts with the review art's shapes and stop compiling once it is gone:
+
+- `packages/app/test/name-tags.test.ts` and `packages/app/test/circle-legibility.test.ts`: remove the `gardenDraw, gardenLayout` import and the `'Garden Spirits'` entry.
+- `packages/app/test/results-huddle.test.ts`: import `portraitMetrics` from `../src/portraits/metrics.js` in place of the garden import, and build each extent with `portraitMetrics(generate2(member.address, 0), fed).extent`.
+
+With those changes every step of `bun run check`, and `bun run build`, passed on the reverted tree. API and deployment tests that timed out under heavy machine load passed on a serial re-run; the reverts touch none of their code. The shared shell, onboarding, tutorial, versioned storage and the desktop results huddle (#57) all stay. None of the three commits adds a database migration or identity writes, so no database rollback is needed. Do not move the tags.
 
 Before personal adoption can ship, review the final generation recipe and renderer version, then implement a preview/Keep flow that reads stored versions and requires an explicit choice. Existing frozen feast snapshots must continue using their recorded appearance. No adoption endpoint, production migration, chain write, public registration or deployment was performed here.
