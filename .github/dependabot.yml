@@ -9,6 +9,19 @@ updates:
         dependency-type: production
       tooling:
         dependency-type: development
+    # Majors held back on 25 October 2026; minor and patch updates still come.
+    # Reasons: docs/research/tooling-update-2026-10.md. Remove a rule when its reason goes.
+    ignore:
+      - dependency-name: typescript # typescript-eslint's parser refuses TypeScript 7
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@types/node' # functions and tools run on Node 22
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@noble/curves' # the local Shutter helper's reviewed 1.9 API
+        update-types: ['version-update:semver-major']
+      - dependency-name: vite # Vite 8 builds with Rolldown; budgets need measuring again
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@vitejs/plugin-react' # 6 requires Vite 8
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:
