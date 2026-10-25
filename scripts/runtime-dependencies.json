@@ -1,25 +1,25 @@
 [
   {
     "name": "react",
-    "version": "19.3.0",
+    "version": "19.3.1",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93",
     "gzipArchiveBytes": 26394,
-    "integrity": "sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog=="
+    "integrity": "sha512-QNhWdt7nrgVWWQG58QuGsAR3jv3Hbe4mb4vz7w2csnHavciZJgda1CPNaldF6eVxv90ud3jUXpKlHL69gO38yw=="
   },
   {
     "name": "react-dom",
-    "version": "19.3.0",
+    "version": "19.3.1",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93",
-    "gzipArchiveBytes": 1409226,
-    "integrity": "sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q=="
+    "gzipArchiveBytes": 1410652,
+    "integrity": "sha512-Y0bARz53lhEC1NMCASs0/j+faB/zqt3R8hpvg1e8+61ZVJ4UL0UdC4cBbXfZMcIuhrfgeILTLe+ZeBCavQPtKQ=="
   },
   {
     "name": "three",
@@ -34,14 +34,14 @@
   },
   {
     "name": "@react-three/fiber",
-    "version": "9.8.1",
+    "version": "9.8.2",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": null,
     "sourceNotice": "docs/research/licenses/react-three-fiber-LICENSE",
     "noticeSha256": "9c35b5de7b7493a707fffe4eb23bd2f7f449153c1911f7c6eefb4e591fd5349a",
-    "gzipArchiveBytes": 555765,
-    "integrity": "sha512-GbNP4r6F/gpclFKkLGHzXcuwFWAzLyKsmrQGcDuwK3wQnwLH6F1TfGtEYjHy8OQoGsajwT19B9jtVLLjjfH09w=="
+    "gzipArchiveBytes": 561970,
+    "integrity": "sha512-6s0ejw0bT1myQ/aLLugcil8/zBmNnnHw/AISWF1yfDLOxfX3yYaTS+0IkpJITEnm/SSMLtxje6CJDt0i5Wu1Sw=="
   },
   {
     "name": "@react-three/drei",
@@ -69,14 +69,14 @@
   },
   {
     "name": "viem",
-    "version": "2.56.0",
+    "version": "2.57.7",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "091d17ae5f625ffeb381e7109daaf6c492dd32502d612d8ecd24e2ddf6d16b74",
-    "gzipArchiveBytes": 3854371,
-    "integrity": "sha512-JmkgIk4jN+im4oguLxwPv19pwSaGH9kcGSq25Ilm55106ULBBMNR3eWKKA0wZoeyLPSHIiOwZ4sGceEYEIq7LA=="
+    "gzipArchiveBytes": 4119011,
+    "integrity": "sha512-x3UqqrcQuESaRVK6a0BvNmoNP0SVhu913uxEAxYLJx1lNYnj6ylTntfUdakCUKjk1+T+63gkdwFGJQ2O5C/nRw=="
   },
   {
     "name": "@shutter-network/shutter-sdk",

@@ -41,3 +41,18 @@ The matching declaration archives were also inspected: both use MIT, with own li
 |---|---|---:|---|
 | [`@types/react`](https://registry.npmjs.org/@types/react/19.3.0) | `19.3.0` | 77,822 | `sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg==` |
 | [`@types/react-dom`](https://registry.npmjs.org/@types/react-dom/19.3.0) | `19.3.0` | 8,185 | `sha512-ZI7bU42mZXXKHn/qNLEw2IrbiINU7X5+vfgdixBHkCNpYWXjKgfQ/P+uyGb5CjOLB9UcnTeg3rylQtV2hym44Q==` |
+
+## Runtime update review — 25 October 2026
+
+The four runtime updates in PR #62 were downloaded from their exact npm archive URLs, each into its own directory. Each archive's SHA-512 and SHA-1 matched the registry record and PR #62's lockfile; each package manifest and own licence was read. All four keep MIT licences, and React, React DOM and viem ship licence files byte-identical to the versions they replace. viem's exact dependency `ox` moves from 0.14.34 to 0.14.56, MIT, published 11 October. React's declaration packages stay at 19.3.0, the latest published.
+
+| Package | Version | Gzip archive bytes |
+|---|---|---:|
+| [`react`](https://registry.npmjs.org/react/19.3.1) | `19.3.1` | 26,394 |
+| [`react-dom`](https://registry.npmjs.org/react-dom/19.3.1) | `19.3.1` | 1,410,652 |
+| [`@react-three/fiber`](https://registry.npmjs.org/@react-three/fiber/9.8.2) | `9.8.2` | 561,970 |
+| [`viem`](https://registry.npmjs.org/viem/2.57.7) | `2.57.7` | 4,119,011 |
+
+Fiber still omits its own licence from the archive. Its registry `gitHead`, `e6ec3506ebf7879c26bd5ac27986b5d4421f3254`, is not in the public repository, so the published source is taken to be the `v9.8.2` tag and release commit, `d74622ea8ed717f7212d7e19d65ff3e325508389`, committed 23 minutes before the archive was published. The archive's manifest equals that commit's `packages/fiber/package.json` apart from the version and a `files` list added at publication, and the commit's `LICENSE`, Git blob `493cfb3c8335c31bea327e0e27a8cb22004111d7`, is byte-identical to the retained notice. [Fiber's licence at the release commit](https://github.com/pmndrs/react-three-fiber/blob/d74622ea8ed717f7212d7e19d65ff3e325508389/LICENSE).
+
+With all four, the production build's gzip figures are shell 116,827 of 120,000 bytes (116,826 before), three 199,129 of 250,000 (198,469) and crypto 109,171 (108,585, no cap). Archive integrity and licence hashes are recorded in `scripts/runtime-dependencies.json`.
