@@ -1,0 +1,43 @@
+@critter-crumbs/core licensing
+Copyright (c) 2026 WEFA LLC
+
+The software in this package is licensed under MIT, except for the critter
+implementations in src/generator/ and their compiled forms in dist/generator/.
+Copies of those generator and layout implementations remain excluded when
+embedded in another file or bundle. The remaining software retains its MIT
+permissions; this is not a choice of licences for the same material.
+
+The reserved generator implementations are made available for inspection only.
+All rights held by WEFA are reserved. No permission to use, copy, modify,
+distribute, sublicense or sell them is granted without separate written
+permission from WEFA LLC. Contact: afo@wefa.world. Replace the generator or
+obtain permission before reusing or distributing that material.
+
+WEFA and Critter Crumbs branding is not licensed for use as a derivative's
+brand. Existing third-party licences and public-domain inputs are unaffected,
+including the generator's hash and PRNG algorithms. The repository's
+LICENSE-WEFA and docs/research/generator-v1-vectors.md record their provenance.
+
+The following licence applies to the remaining software:
+
+MIT License
+
+Copyright (c) 2026 WEFA LLC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

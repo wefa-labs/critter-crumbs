@@ -3,6 +3,8 @@
 **Document 2 of 4** · Status: draft for review · 2026-09-01
 Upstream: `01-prd.md` (vocabulary §3, rules §5, flows §7). Downstream: `03-game-design.md`, `04-technical-spec.md`.
 
+**Licence scope, 2026-10-28.** Functional frontend software is MIT. WEFA reserves the critter generator, portrait and mesh artwork implementations, art and branding identified in [LICENSE-WEFA](../LICENSE-WEFA). Their description in this specification does not grant reuse rights to that material. Third-party fonts retain their existing licences. See the [licence overview](../LICENSE).
+
 **How to read this document.** Written for coding agents, with a human reviewing.
 
 - Token values are normative. Change a token, not a component.

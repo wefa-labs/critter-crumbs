@@ -59,7 +59,7 @@ These recur across phases; each prompt tells the agent to file them as `needs-hu
 
 ## Running the prompts
 
-Phases 2 and 3 are proprietary code, so per your Codex rule use the private profile, and choose the GPT 6 model id with `-m`:
+Phases 2 and 3 include MIT software and separately reserved generator, art and audio material; see the [licence overview](../../LICENSE). When using the private Codex profile, choose the GPT 6 model id with `-m`:
 
 ```bash
 codex --profile-v2 private -m <gpt-6-model-id> "$(cat docs/build/phase-2-core.md)"

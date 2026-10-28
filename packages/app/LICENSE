@@ -1,0 +1,57 @@
+@critter-crumbs/app licensing
+Copyright (c) 2026 WEFA LLC
+
+The functional frontend software in this package is licensed under MIT, except
+for the following reserved material:
+
+- The portrait artwork implementations in src/portraits/, the mesh artwork
+  implementation in src/three/critter.ts and the portrait styles in
+  src/styles/portraits.css.
+- The SVG drawing data crumbPath in src/game/art.ts and ICON_PATHS in
+  src/game/styles.ts. The surrounding functional code remains MIT.
+- Artwork and audio recordings in public/scenes/ and public/audio/, and WEFA's
+  artwork, critter depictions, screenshots and audiovisual recordings elsewhere
+  in the package. Asset manifests and audio playback code remain MIT.
+- WEFA and Critter Crumbs branding.
+
+Copies, adaptations and generated depictions of reserved material remain
+excluded, including reserved code compiled into dist/ or embedded in bundles.
+The core package's generator has its own reserved-material notice. The
+remaining software retains its MIT permissions; this is not a choice of
+licences for the same material.
+
+The reserved material is made available for inspection only. All rights held by
+WEFA are reserved. No permission to use, copy, modify, distribute, sublicense or
+sell it is granted without separate written permission from WEFA LLC. Contact:
+afo@wefa.world. Replace it or obtain permission before reuse or distribution.
+No trademark licence or right to present a derivative as an official WEFA
+product is granted; lawful descriptive use and required attribution are
+unaffected.
+
+Existing third-party licences and public-domain material are unaffected. The
+Grandstander font remains under public/fonts/Grandstander-OFL.txt. Font
+licensing does not grant rights to WEFA's branding.
+
+The following licence applies to the remaining software:
+
+MIT License
+
+Copyright (c) 2026 WEFA LLC
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,3 +1,4 @@
+// WEFA reserved mesh artwork implementation; see ../../LICENSE.
 import { Bone, BufferGeometry, CapsuleGeometry, Color, ConeGeometry, Float32BufferAttribute, Group, MeshStandardMaterial, Skeleton, SkinnedMesh, SphereGeometry, Sprite, SpriteMaterial, TorusGeometry, Uint16BufferAttribute, Vector3, type Texture } from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';

@@ -1,3 +1,4 @@
+/* WEFA reserved portrait artwork styles; see ../../LICENSE. */
 .portrait { display:block; overflow:visible; width:100%; height:auto; --scale-x:1; --scale-y:1; --head-tilt:0deg; --lean-z:0deg; --lift-y:0px; --lids:1; --cheeks:0; --mouth:0; --ear-l:0deg; --ear-r:0deg; --pupil-x:0px; --pupil-y:0px; }
 .portrait[data-size="40"] { width:40px; }
 .portrait[data-size="64"] { width:64px; }

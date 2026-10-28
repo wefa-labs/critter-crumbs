@@ -5,6 +5,7 @@ import type { Rect } from './layout.js';
  * The few values the core game's components hand to CSS: the icons' drawings and the custom properties that place a
  * cropped face, an element's colours and a scene's layers. Kept as data here so the components stay free of wording.
  */
+// ICON_PATHS is WEFA reserved drawing data; the surrounding code is MIT. See ../../LICENSE.
 export const ICON_PATHS = {
   left: { box: '0 0 20 20', d: 'M12.5 4l-6 6 6 6', stroke: 2.4 },
   right: { box: '0 0 20 20', d: 'M7.5 4l6 6-6 6', stroke: 2.4 },

@@ -3,6 +3,8 @@
 **Document 3 of 4** · Status: draft for review · 2026-09-02 · §5 rewritten 2026-10-09 for the settled sound set
 Upstream: `01-prd.md` (rules §5, flows §7), `02-design-system.md` (the six words §2, tokens §3, lighting presets §4.2, critter state §5.4, the heap §7.4, screen-reader pairing §12.6). Downstream: `04-technical-spec.md`.
 
+**Licence scope, 2026-10-28.** The functional game, simulation and audio playback software is MIT. WEFA reserves the generator, artwork implementations, art, audio recordings and branding identified in [LICENSE-WEFA](../LICENSE-WEFA), including copies embedded in prototypes and demonstrations. See the [licence overview](../LICENSE); third-party terms remain in force.
+
 **How to read this document.** Written for coding agents, with a human reviewing.
 
 - Every number here is a starting value to build to, then tune in the rehearsal. Ship the number; do not invent a different one. If tuning changes it, change it here.
