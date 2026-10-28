@@ -19,15 +19,17 @@ Two feast types use the same mechanic:
 
 1. **Gathering.** Members write what they did, or the creator describes the budget options. Statements stay hidden until scattering opens.
 2. **Scattering.** Statements open together. Members read them and privately allocate their crumbs. A complete scatter can be replaced until the deadline; the latest accepted scatter counts.
-3. **The feast.** At the deadline, Shutter's keypers release the decryption key. Each device decrypts and computes the same deterministic tally. Results can be exported as CSV, and public totals can optionally be recorded on-chain.
+3. **The feast.** At the deadline, Shutter's keypers release the decryption key. Each device decrypts and computes the same deterministic tally. Results can be exported as CSV.
 
 Everyone gets the same number of crumbs and must allocate all of them. In a people feast, you cannot give crumbs to yourself. Members who do not scatter can still receive; the burrow is told who did not take part. Shares are proportions of the crumbs actually scattered.
 
 ## Current status
 
-Critter Crumbs is a **testnet beta**, first deployed on 11 October 2026. The [deployment record](docs/build/deployment.md#deployment-record) lists subsequent releases and the configuration in use: Shutter on Chiado and result attestations on Base Sepolia.
+Critter Crumbs is a **testnet beta**, first deployed on 11 October 2026. The [deployment record](docs/build/deployment.md#deployment-record) lists subsequent releases and the configuration in use: Shutter on Chiado and EAS on Base Sepolia.
 
-The app implements burrows and membership, feast setup, statements, private scatters, local tallying, result fingerprints and CSV export. It currently produces an allocation decision; payments are made separately. Mainnet use, fund-holding contracts, automated payouts, Chinese localization and permanent allocation privacy are planned work.
+The app implements burrows and membership, feast setup, statements, private scatters, local tallying, result fingerprints and CSV export. It currently produces an allocation decision; payments are made separately. Results are viewed within the burrow. Hosted public-result recording and visitor results remain integration work; local rehearsal recording uses a fixture.
+
+Mainnet integration, fund-holding contracts, automated payouts and Chinese localization are planned work. Permanent allocation privacy is a research goal.
 
 The [rehearsal run sheet](docs/build/rehearsal.md) and [phone and accessibility checks](docs/reviews/october-qa/phone-checks.md) describe the remaining validation with people and real devices.
 
