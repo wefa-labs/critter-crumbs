@@ -1,58 +1,102 @@
 # Critter Crumbs
 
-> Everyone gets a handful of crumbs to share.
+A private way for a community to share a budget or recognise contributions. Everyone gets the same handful of **crumbs**, allocates them independently, and sees the result when the **feast** opens.
 
-A private way for a group to decide how something gets shared out. Your **burrow** gathers, everyone gets the same handful of **crumbs**, and you **scatter** yours to the **critters** you think earned them. Every crumb stays encrypted until the **feast** — then it all opens at once, and everyone computes the same result on their own device.
+Your group is a **burrow**. The people or budget options receiving crumbs are **critters**: generated characters that grow when fed. Tap to give a crumb, hold to pour, or enter an exact number.
 
-Two uses, one mechanic:
+[Testnet beta](https://www.crittercrumbs.app) · [Deployment status](docs/build/deployment.md) · [Licence and reuse](#licence-and-reuse)
 
-- **People feast** — recognising contribution. Crumbs go to other people.
-- **Options feast** — splitting a budget. Crumbs go to named options.
+## Why it exists
 
-Either way, every target is a critter: a small 3D creature generated from an address, that grows a little when fed.
+The first proposed split can anchor a discussion. Visible work can overshadow quiet contributions, and public individual allocations can encourage reciprocal favours. Critter Crumbs gives each member equal allocation power and keeps scatters encrypted until the deadline, so people can decide independently.
+
+Two feast types use the same mechanic:
+
+- **People feast:** recognise contributions by giving crumbs to other people.
+- **Options feast:** split a budget across options described by the creator.
 
 ## How a feast works
 
-1. **Gathering** — everyone writes what they did, hidden from each other.
-2. **Scattering** — statements open all at once; everyone reads, then scatters their crumbs privately. Tap to give a crumb, hold to pour.
-3. **The feast** — at the deadline the decryption key is released, every client decrypts and tallies locally, and the critters wake and grow. Results and a CSV follow.
+1. **Gathering.** Members write what they did, or the creator describes the budget options. Statements stay hidden until scattering opens.
+2. **Scattering.** Statements open together. Members read them and privately allocate their crumbs. A complete scatter can be replaced until the deadline; the latest accepted scatter counts.
+3. **The feast.** At the deadline, Shutter's keypers release the decryption key. Each device decrypts and computes the same deterministic tally. Results can be exported as CSV, and public totals can optionally be recorded on-chain.
 
-Scatters are threshold-encrypted until the deadline (Shutter), signed by each member (EAS off-chain attestations) so nothing can be forged or quietly dropped, and public results can be recorded on-chain (Base). The server stores ciphertext and serves it back; it never sees an allocation and never computes a result. No analytics, no telemetry.
+Everyone gets the same number of crumbs and must allocate all of them. In a people feast, you cannot give crumbs to yourself. Members who do not scatter can still receive; the burrow is told who did not take part. Shares are proportions of the crumbs actually scattered.
 
-## Status
+## Current status
 
-Phase 3 game and browser UI implemented for local mock rehearsal, September 2026. Integration and remaining validation gates are tracked in the [Phase 3 handoff](docs/build/phase-3-handoff.md). First real use: a council of 6–10 people in October 2026, with a rehearsal feast in September. The four documents in `docs/` are the specification: [product requirements](docs/01-prd.md), [design system](docs/02-design-system.md), [game design](docs/03-game-design.md), [technical spec](docs/04-technical-spec.md). Coding agents read [AGENTS.md](AGENTS.md) first (any agent: Claude Code, Codex, others), use the glossary in [CONTEXT.md](CONTEXT.md) and the skills vendored in `.agents/skills/`; decisions are logged in [docs/decisions.md](docs/decisions.md) and [docs/adr/](docs/adr/).
+Critter Crumbs is a **testnet beta**, first deployed on 11 October 2026. The [deployment record](docs/build/deployment.md#deployment-record) lists subsequent releases and the configuration in use: Shutter on Chiado and result attestations on Base Sepolia.
 
-## Local rehearsal
+The app implements burrows and membership, feast setup, statements, private scatters, local tallying, result fingerprints and CSV export. It currently produces an allocation decision; payments are made separately. Mainnet use, fund-holding contracts, automated payouts, Chinese localization and permanent allocation privacy are planned work.
 
-Use Bun 1.4.2 and Node 22.22.1. From the repository root:
+The [rehearsal run sheet](docs/build/rehearsal.md) and [phone and accessibility checks](docs/reviews/october-qa/phone-checks.md) describe the remaining validation with people and real devices.
+
+## Privacy and verification
+
+Scatters are encrypted in the browser using Shutter's threshold timelock and signed as EAS off-chain attestations. The server stores ciphertext and serves it back; it never sees an allocation and never computes a result. Published receipts and the set of scatters at close let members check whether their accepted scatter was included. The tally runs independently on each device.
+
+**Privacy after the feast has a limit.** Once the decryption key is released, anyone who can obtain the ciphertexts can decrypt individual scatters. The option to keep individual scatters closed after the feast is enforced by access and display rules. Permanent cryptographic privacy is future work. Participation is visible within the burrow even before the feast.
+
+The app has no analytics or telemetry. The [product requirements](docs/01-prd.md#8-privacy-and-trust) and [technical specification](docs/04-technical-spec.md) describe the trust model and its boundaries.
+
+## Licence and reuse
+
+Developed by **WEFA LLC**. The core, functional frontend and server software are licensed under [MIT](LICENSE-MIT), with explicit exclusions for the generator and creative assets. WEFA retains copyright in its original work. MIT permits modification, distribution and commercial reuse of the covered software with the required notices.
+
+| Material | Terms |
+|---|---|
+| Protocol, cryptography integrations, tally, phase rules, schemas, validators, API, database code, functional frontend, tests, tooling and documentation | MIT |
+| Critter generator and layout implementations, portrait and mesh artwork implementations, specified drawing data, art, audio recordings and branding | WEFA rights reserved, subject to existing third-party terms |
+| Third-party dependencies and fonts | Their existing licences |
+
+[LICENSE](LICENSE) explains the split; [LICENSE-WEFA](LICENSE-WEFA) identifies the reserved material, including copies embedded in builds and prototypes. Audio playback and other functional code remain MIT when they refer to reserved assets. The Grandstander font retains its [SIL Open Font License](packages/app/public/fonts/Grandstander-OFL.txt).
+
+The complete branded build includes reserved modules and assets. Reusing those portions requires separate written permission from WEFA or replacements for the generator, art, audio and branding. Contact [afo@wefa.world](mailto:afo@wefa.world) for permissions. Package-local licence files describe each workspace's scope.
+
+## Review the implementation
+
+| Location | Responsibility |
+|---|---|
+| [packages/core](packages/core) | Signing, timelock encryption, tally, result verification and API client; also contains the separately reserved generator |
+| [packages/shared](packages/shared) | Types, validators, copy and shared constants |
+| [packages/api](packages/api) | Server handlers, encrypted storage, membership and lifecycle rules |
+| [packages/app](packages/app) | Screens, interaction, portraits, 3D and audio playback |
+
+The four specifications cover [product behaviour](docs/01-prd.md), [design](docs/02-design-system.md), [game feel and simulation](docs/03-game-design.md) and [technical architecture](docs/04-technical-spec.md). [CONTEXT.md](CONTEXT.md) is the glossary; [decisions](docs/decisions.md) and [ADRs](docs/adr) record consequential choices. Contributors and coding agents should read [AGENTS.md](AGENTS.md).
+
+The stack is Vite, React and TypeScript; React Three Fiber and Koota for the critters; viem, Shutter and EAS for signing and encryption; and Vercel Functions with Neon Postgres for the hosted service.
+
+## Run a local rehearsal
+
+Use **Bun 1.4.2** and **Node 22.22.1**. The setup below runs the complete branded build, subject to the reserved-material permissions above. From the repository root:
 
 ```sh
 bun install --frozen-lockfile --ignore-scripts
 SHUTTER_MODE=mock DEV_ENDPOINTS_ENABLED=1 LOCAL_API_PORT=4300 bun run dev:local
 ```
 
-Then run `LOCAL_API_PORT=4300 bun run seed --phase gathering` in another terminal and open the printed feast at `http://127.0.0.1:5173`. The Connect dialog exposes eight local rehearsal accounts only in development with the server's mock controls enabled. Use the API clock and key-release controls from [local core](docs/build/local-core.md) to move through the feast. Local result recording uses a recorded transaction fixture; it sends no real transaction.
+In another terminal, seed a feast:
 
-`bun run check`, `bun run build`, and `bun run e2e` are the validation commands. E2E requires Chromium (`bun run e2e:install`) and the running mock app/API. See [validation evidence and remaining gates](docs/build/phase-3-validation.md).
+```sh
+LOCAL_API_PORT=4300 bun run seed --phase gathering
+```
 
-## Stack
+Open the printed feast at `http://127.0.0.1:5173`. The Connect dialog provides eight local rehearsal accounts. These use public test keys; never fund them. Local mock mode uses a local database and simulated key release. Local result recording uses a fixture and sends no real transaction.
 
-Vite, React, TypeScript · React Three Fiber and drei for the critters · Koota for the simulation core · viem for signing · Shutter for timelock encryption · EAS for attestations · Vercel Functions and Neon Postgres.
+[Local core](docs/build/local-core.md) explains fixtures, clock controls and key release. Hosted-service configuration is covered in the [deployment guide](docs/build/deployment.md).
 
-## Licence
+## Validation
 
-Critter Crumbs is developed by **WEFA LLC**. Its core, frontend and server software are available under the [MIT License](LICENSE-MIT), with explicit exclusions for the critter generator and creative assets. WEFA retains copyright in its original work; MIT permits reuse, modification, distribution and commercial use of the covered software with the required notices.
+```sh
+bun run check
+bun run build
+```
 
-| Material | Terms |
-|---|---|
-| Protocol, encryption, signing, tally, phase rules, schemas, validators, API, database code, functional frontend, tests, tooling and documentation | MIT |
-| Critter generator and layout implementations; portrait and mesh artwork implementations; specified SVG drawing data | WEFA rights reserved |
-| Artwork, scene paintings, generated critter depictions, audio recordings and branding | WEFA rights reserved, subject to existing third-party terms |
-| Third-party dependencies, fonts and other separately licensed material | Their existing licences |
+`check` runs lint, typechecking, tests, development-asset and workspace checks, licence and archive verification, and the dependency audit. `build` compiles the workspaces, builds the app and enforces chunk budgets.
 
-[LICENSE](LICENSE) is the licence overview; [LICENSE-WEFA](LICENSE-WEFA) identifies the reserved paths and embedded artwork. Audio playback and other functional code remain MIT even when they refer to reserved assets. The Grandstander font retains its [SIL Open Font License](packages/app/public/fonts/Grandstander-OFL.txt).
+Browser lifecycle tests require the running mock app/API and an explicit Chromium installation:
 
-The complete branded build includes reserved modules and assets. To reuse or distribute those portions, obtain separate written permission from WEFA or replace them with your own generator, artwork, audio and branding. Publishing the source does not grant rights to the reserved material. For permissions, contact [afo@wefa.world](mailto:afo@wefa.world).
-
-The root, core and app package metadata use `SEE LICENSE IN LICENSE` because they contain both MIT software and reserved material. The shared and API packages use `MIT`. Each workspace includes its own licence notice. `private: true` prevents accidental package publication; it does not change these licence grants.
+```sh
+bun run e2e:install
+bun run e2e
+```
