@@ -417,7 +417,9 @@ Rejected, with the reason: `ethers` (duplicate of viem; only reachable via the d
 ```
 critter-crumbs/
 ├── AGENTS.md                 vocabulary, rules, workstreams, how to run and test
-├── LICENSE                   all rights reserved (PRD P12; holder per Q9)
+├── LICENSE                   MIT software / reserved-material scope (PRD P12)
+├── LICENSE-MIT               MIT grant; copyright holder WEFA LLC
+├── LICENSE-WEFA              reserved generator, art, audio and branding
 ├── docs/                     01–04, explorations/, decisions.md
 ├── api/                      one-line Vercel route exports from @critter-crumbs/api
 │   └── session/…  me.ts  burrows/…  feasts/…  dev/…
@@ -434,7 +436,11 @@ critter-crumbs/
 
 **Two agents.** A owns `/src/core`, `/api`, `/db`, `/scripts`; B owns `/src/app` and `/public`. Both may edit `/src/shared` only through small, reviewed changes; the first two days produce it (§16). `docs/decisions.md` is append-only: date, decision, why, who — for every call not in the four documents. `AGENTS.md` carries the vocabulary table, the banned words, the "no innerHTML / no Date.now in logic / no new dependency without a decisions entry" rules, and the commands.
 
-**Licence.** This is a for-profit product. `LICENSE` reads `Copyright © 2026 <holder>. All rights reserved.` followed by a short notice that the source is published for review and no rights to use, copy, modify or distribute are granted (PRD P12). The holder is **WEFA LLC**; the repository moves to the WEFA GitHub organisation, which changes nothing in the file. Consequence for dependencies: every runtime dependency must be permissively licensed (MIT, Apache-2.0, OFL are; a copyleft licence such as GPL or AGPL on the Shutter SDK would be a blocker for a proprietary product — **V1** now includes this check, and the fallback is to isolate the SDK behind the `Timelock` interface as a separately licensed module or to replace it).
+**Licence, updated 2026-10-28.** WEFA LLC retains copyright in its original work and licenses the core, functional frontend and server software, tests, tooling and documentation under MIT. `LICENSE` is the scope overview and `LICENSE-MIT` contains the unmodified MIT grant. `LICENSE-WEFA` identifies the excluded generator and layout implementations, portrait/mesh artwork implementations, drawing data, art, audio recordings and branding. Compiled copies and embedded artwork keep the same exclusions; referring to reserved assets does not remove MIT permissions from the surrounding software. The complete branded build includes reserved material, so reuse of that material requires separate permission or replacements. This supersedes the original review-only licence in PRD P12.
+
+**Package notices.** Root, core and app metadata use `SEE LICENSE IN LICENSE` because the generator is inside core and reserved artwork and audio ship with app. Their licence files distinguish covered software from reserved source and compiled material. Shared and API metadata use `MIT`, with the grant included in each package. Package publication remains disabled through `private: true`. The licence change does not move modules or change generator output.
+
+**Third-party terms.** Existing dependency, font and public-domain terms remain authoritative; WEFA does not relicense them or claim their ownership. Runtime dependencies still require permissive licences and reviewed evidence, except for an explicitly recorded exception in `docs/decisions.md`. V1 includes compatibility with the MIT software and reserved material; incompatible terms require review, isolation behind the `Timelock` interface or replacement.
 
 ## 13. Environments and configuration
 
@@ -532,7 +538,7 @@ Two agents, A (core) and B (app), from Wednesday 2026-09-03. Rehearsal-ready bui
 
 | # | Claim to verify | Where it matters |
 |---|---|---|
-| V1 | `@shutter-network/shutter-sdk`: exact exports, WASM requirement, gzipped size, and **its licence must be permissive** (a copyleft licence blocks a proprietary product; see §12) | §6, §11, §12, CSP |
+| V1 | `@shutter-network/shutter-sdk`: exact exports, WASM requirement, gzipped size, and **its licence must be permissive** and compatible with the MIT software / reserved-material split (see §12) | §6, §11, §12, CSP |
 | V2 | Shutter API: key/plan needed for `register_identity`, gas coverage on mainnet, identity derivation with the API as registrant, exact rate limits per key vs per IP | §6 |
 | V3 | Shutter API CORS for the browser fallback | E1 |
 | V4 | EAS off-chain UID preimage and the domain version for off-chain v2; cross-check test | §7 |

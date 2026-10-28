@@ -367,7 +367,7 @@ Preconditions: the rehearsal feast has completed, in September (§10). Measureme
 | P9 | Crumbs per critter: minimum 10, maximum 1,000, default 100. Below 10 the proportions are too coarse to mean anything; above 1,000 the pour stops feeling like a handful and the number field does all the work | F4 |
 | P10 | One critter per address, shared across all burrows; re-rolls happen once, at first meeting | F2 |
 | P11 | A people feast that falls below three critters before scattering opens ends without scattering; the burrow is told; anyone can start a new one | §6 |
-| P12 | License form: an explicit `LICENSE` file — "Copyright © 2026 {holder}. All rights reserved." — plus a short notice that the source is published for review only and no rights to use, copy, modify or distribute are granted. This is the most protective option and can be relaxed to an open license later; the reverse is hard | §13 |
+| P12 | Licence scope, updated 2026-10-28: core, frontend and server software are MIT, with explicit exclusions for WEFA's critter generator, artwork implementations, art, audio and branding. `LICENSE` defines the split, `LICENSE-MIT` contains the grant, and `LICENSE-WEFA` identifies reserved material and third-party exceptions. WEFA LLC retains copyright in its original work. This supersedes the initial review-only licence | Technical Spec §12 |
 | P13 | The problem statement: four ways a group's split goes wrong, and the one thing Critter Crumbs changes | §1 |
 | P14 | All four privacy combinations are valid; burrow-only totals may be paired with individual scatters open to the burrow, and the forcing rule is removed | §8 |
 | P15 | A copyable statement prompt composed in the browser when a feast opens, for the member to take to their own assistant; no model is called from the product | F5 |
@@ -382,7 +382,7 @@ Preconditions: the rehearsal feast has completed, in September (§10). Measureme
 | Q4 | Bounds on crumbs per critter? | Have a minimum and maximum; default 100 and lean toward it. Values per P9. |
 | Q5 | Who signs and pays for the on-chain result attestation? | The creator, or any member of the burrow (F9). |
 | Q6 | Dates? | Feast in October, not fixed; rehearsal in September (P7). |
-| Q7 | License? | Retain full ownership; a strongly protective license to start (P12 for the form). |
+| Q7 | License? | Updated 2026-10-28: MIT for core, frontend and server software; WEFA retains copyright and reserves the generator, art, audio and branding. See P12 and the root licence files. |
 | — | Minimum critters for a people feast | Three, not four (R6). |
 | — | Multiple burrows | v0, not v1 (§2, F3, F10). |
 | — | The §8 honest limit | Accepted for v0; stronger privacy is a v1 exploration. |

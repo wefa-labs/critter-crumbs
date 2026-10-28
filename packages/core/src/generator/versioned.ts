@@ -1,3 +1,5 @@
+// WEFA reserved generator implementation; see LICENSE in this directory.
+// Existing third-party hash and PRNG terms remain in force.
 import { hex, integer } from '@critter-crumbs/shared';
 import { generate, layout } from './index.js';
 

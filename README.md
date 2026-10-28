@@ -42,4 +42,17 @@ Vite, React, TypeScript · React Three Fiber and drei for the critters · Koota 
 
 ## Licence
 
-Copyright © 2026 WEFA LLC. All rights reserved. See [LICENSE](LICENSE).
+Critter Crumbs is developed by **WEFA LLC**. Its core, frontend and server software are available under the [MIT License](LICENSE-MIT), with explicit exclusions for the critter generator and creative assets. WEFA retains copyright in its original work; MIT permits reuse, modification, distribution and commercial use of the covered software with the required notices.
+
+| Material | Terms |
+|---|---|
+| Protocol, encryption, signing, tally, phase rules, schemas, validators, API, database code, functional frontend, tests, tooling and documentation | MIT |
+| Critter generator and layout implementations; portrait and mesh artwork implementations; specified SVG drawing data | WEFA rights reserved |
+| Artwork, scene paintings, generated critter depictions, audio recordings and branding | WEFA rights reserved, subject to existing third-party terms |
+| Third-party dependencies, fonts and other separately licensed material | Their existing licences |
+
+[LICENSE](LICENSE) is the licence overview; [LICENSE-WEFA](LICENSE-WEFA) identifies the reserved paths and embedded artwork. Audio playback and other functional code remain MIT even when they refer to reserved assets. The Grandstander font retains its [SIL Open Font License](packages/app/public/fonts/Grandstander-OFL.txt).
+
+The complete branded build includes reserved modules and assets. To reuse or distribute those portions, obtain separate written permission from WEFA or replace them with your own generator, artwork, audio and branding. Publishing the source does not grant rights to the reserved material. For permissions, contact [afo@wefa.world](mailto:afo@wefa.world).
+
+The root, core and app package metadata use `SEE LICENSE IN LICENSE` because they contain both MIT software and reserved material. The shared and API packages use `MIT`. Each workspace includes its own licence notice. `private: true` prevents accidental package publication; it does not change these licence grants.

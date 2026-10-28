@@ -1,3 +1,21 @@
-Copyright (c) 2026 WEFA LLC. All rights reserved.
+Critter Crumbs licensing
+Copyright (c) 2026 WEFA LLC
 
-This source code is published for review only. No licence or right to use, copy, modify, merge, publish, distribute, sublicense or sell this software, or any part of it, is granted, whether expressly, by implication, estoppel or otherwise. All rights not expressly granted are reserved by the copyright holder.
+The core, frontend and server software, tests, tooling and documentation are
+licensed under the MIT License in LICENSE-MIT, except for the reserved material
+identified in LICENSE-WEFA and material carrying its own third-party terms.
+
+The reserved material includes the critter generator and portrait/mesh artwork
+implementations, artwork, audio recordings and branding. LICENSE-WEFA identifies
+the source paths and embedded material excluded from the MIT grant. Copies of
+that material in compiled code, bundles, generated artwork and documentation
+remain excluded; the surrounding MIT-licensed software remains under MIT.
+
+This is a repository containing both open-source software and reserved material,
+not a choice between two licences for the same material. WEFA retains copyright
+in its original work. Existing third-party licences and public-domain material
+are unaffected; this notice does not claim ownership of them.
+
+Package-local LICENSE files state the scope for each workspace. The complete
+branded application includes reserved material: permission to reuse or distribute
+that material must be obtained separately from WEFA, or it must be replaced.
