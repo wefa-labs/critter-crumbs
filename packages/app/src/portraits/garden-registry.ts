@@ -8,6 +8,6 @@ type GardenRenderer = {
 let renderer: GardenRenderer | undefined;
 export function registerGardenRenderer(value: GardenRenderer) { renderer = value; }
 export function gardenRenderer() {
-  if (!renderer) throw new Error('Garden review renderer has not loaded');
+  if (!renderer) throw new Error('Garden Spirits renderer has not loaded');
   return renderer;
 }

@@ -62,7 +62,7 @@ test('desktop portraits draw all generated variants and use the system typeface'
   await page.screenshot({ path: '.scratch/evidence/portraits-desktop.png' });
 });
 
-test('review Garden Spirits keep each wing on its own side, fold it at the root asleep and hold small sizes', async ({ page }) => {
+test('Garden Spirits keep each wing on its own side, fold it at the root asleep and hold small sizes', async ({ page }) => {
   await page.goto('/__preview/portraits');
   await expect(page.getByRole('heading', { name: 'Portrait workshop' })).toBeVisible();
   // The moth, phoenix and lemur review fixtures (docs/explorations/garden-refinement/fixtures.json).

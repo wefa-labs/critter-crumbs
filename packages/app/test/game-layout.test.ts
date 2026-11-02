@@ -28,7 +28,7 @@ describe('October circle layout',()=>{
  // just enough to stay beside it rather than climbing the room (QA lifecycle-03).
  it('keeps review tags clear of the thought bubble and piles, centred over their critter or beside it',()=>{
   for(const viewport of [{width:375,height:812},{width:1280,height:800},{width:1440,height:900}])for(const count of [4,6,8,10])for(let focus=0;focus<count;focus++){
-   const critters=members.slice(0,count).map((member,i)=>({name:member.name,own:i===2,count:i===2?0:12,extent:portraitMetrics(generate2(member.address,0)).extent}));
+   const critters=members.slice(0,count).map((member,i)=>({name:member.name,own:i===2,count:i===2?0:12,extent:portraitMetrics(generate2(member.address,0),0,false).extent}));
    const layout=layoutGame({viewport,critters,focus,issued:100,...scattering(deviceOf(viewport.width))});
    for(const slot of layout.slots)if(!slot.tag.hidden){expect(overlapArea(slot.tag,layout.bubble),JSON.stringify({viewport,count,focus,slot:slot.index})).toBe(0);for(const other of layout.slots)if(other.slot!==0)expect(overlapArea(slot.tag,other.pile)).toBe(0);const desired=Math.min(Math.max(slot.foot.x-slot.tag.width/2,6),layout.scene.width-6-slot.tag.width);if(slot.tag.x!==desired)expect(rectGap(slot.tag,slot.figure)).toBeLessThanOrEqual(slot.tag.height*1.5);}
   }

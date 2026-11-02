@@ -4,7 +4,7 @@ import { createElement } from 'react';
 import { App } from './app/app.js';
 import { copy } from '@critter-crumbs/shared';
 import { readDarkChoice, showDarkChoice } from './app/theme.js';
-import { gardenReview } from './portraits/version.js';
+import { gardenSpirits } from './portraits/version.js';
 document.title = copy['app.name'];
 // A dark or light look someone chose is in place before the first screen is drawn; otherwise the device decides.
 try { showDarkChoice(document.documentElement, readDarkChoice(localStorage)); } catch { /* Storage can be switched off; the device's look stands. */ }
@@ -14,8 +14,8 @@ try { showDarkChoice(document.documentElement, readDarkChoice(localStorage)); } 
 void document.fonts.load('900 1em Grandstander', copy['app.name']).catch(() => {});
 const root = document.getElementById('root')!;
 async function boot() {
-  // Defer rendering until the optional art chunk is ready; keep entry-module evaluation synchronous.
-  if (gardenReview) await import('./portraits/garden/install.js');
+  // Defer rendering until the Garden Spirits art chunk is ready; keep entry-module evaluation synchronous.
+  if (gardenSpirits) await import('./portraits/garden/install.js');
   if (import.meta.env.DEV && location.pathname === '/dev/screens') {
     const { ScreenGallery } = await import('./dev/screens.js');
     const reactRoot = createRoot(root); reactRoot.render(createElement(ScreenGallery));

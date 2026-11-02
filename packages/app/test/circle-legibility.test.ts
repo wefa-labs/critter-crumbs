@@ -8,7 +8,7 @@ import members from '../src/dev/game-members.js';
 import { fixtureAllocation } from '../src/dev/game-fixtures.js';
 
 const looks = {
-  'version 2': (address: string) => portraitMetrics(generate2(address, 0)).extent,
+  'version 2': (address: string) => portraitMetrics(generate2(address, 0), 0, false).extent,
   'Garden Spirits': (address: string) => gardenLayout(gardenDraw(generate2(address, 0))).extent,
 };
 const phones = [{ width: 390, height: 844 }, { width: 375, height: 667 }, { width: 320, height: 568 }];

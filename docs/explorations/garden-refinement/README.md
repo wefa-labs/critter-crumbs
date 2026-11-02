@@ -99,6 +99,8 @@ The short-phone stress check exposed overlapping tags. Short floors now scale bo
 
 ## Review switch and rollback
 
+**Since 2 November 2026 Garden Spirits are the default in every build (ADR 0006).** The review switch below is gone: `VITE_GARDEN_REVIEW` is no longer read, `?critters=garden` is the same as no query, and `?critters=1` draws version 1. The rest of this section is the record of the review period.
+
 Local development: open `/?critters=garden` or `/how-it-works?critters=garden`. A production-style review build additionally requires `VITE_GARDEN_REVIEW=true` at build time. The ordinary build omits the review art chunk. The review flag alone does not change the default: the explicit query is also required. Internal navigation retains the loaded renderer for that page session; a refreshed URL needs the query again.
 
 ```sh

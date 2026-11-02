@@ -70,8 +70,8 @@ test('an invited first-time member keeps their destination, draft name and critt
 test('all first-step actions stay in place on short phones and desktops in every critter version', async ({ page }) => {
   for (const viewport of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
-    // development drawings, production version 1 and the Garden Spirits review art, whose opening cast differs
-    for (const query of ['', '?critters=1', '?critters=garden']) {
+    // Garden Spirits, whose opening cast differs, then version 1 and the October inked drawing
+    for (const query of ['', '?critters=1', '?critters=2']) {
       await page.goto(`/how-it-works${query}`);
       await expect(page.getByRole('heading', { name: 'Everyone gets the same handful', exact: true })).toBeFocused();
       await page.evaluate(() => document.fonts.ready);
