@@ -14,7 +14,7 @@ import { copy, formatCopy, CIRCLE_FEEL, FEAST, GROWTH, type CopyId, type TallyRe
 import { useAudio } from '../audio/context.js';
 import { Feast as FeastTrait, type GameSettings } from '../world/index.js';
 import { createStageRuntime } from '../sim/stage-runtime.js';
-import { gardenReview } from '../portraits/version.js';
+import { gardenSpirits } from '../portraits/version.js';
 import { aggregateCsv, giverCsv, downloadCsv } from './csv.js';
 import { ResultRecord } from './result-record.js';
 import type { RunAction } from './burrows.js';
@@ -91,7 +91,7 @@ function ResultsList({ feast, opened, record, givers, actions }: { feast: Public
       <ol className="results-rows">
         {rows.map(row => {
           const target = feast.targets.find(t => t.id === row.targetId)!;
-          return <li key={row.targetId} className="results-row"><span className="results-face">{gardenReview ? <CritterFace address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={44} /> : <PortraitImage address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size="stage" fed={fedFor(row.share, feast.targets.length)} />}</span><span className="results-name">{targetLabel(target)}</span><span className="results-amount">{row.crumbs}<small>{percentShare(row.share)}</small></span></li>;
+          return <li key={row.targetId} className="results-row"><span className="results-face">{gardenSpirits ? <CritterFace address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={44} /> : <PortraitImage address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size="stage" fed={fedFor(row.share, feast.targets.length)} />}</span><span className="results-name">{targetLabel(target)}</span><span className="results-amount">{row.crumbs}<small>{percentShare(row.share)}</small></span></li>;
         })}
       </ol>
       {one ? <p className="results-sum">{formatCopy('results.one', { name: memberName(feast, result.counted[0]!.attester) })}</p> : null}

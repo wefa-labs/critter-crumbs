@@ -2,8 +2,8 @@ import { test, expect } from 'playwright/test';
 import { connectLocal } from './session.js';
 
 /* Design System §11: when 3D gives up, a notice says so and "every control keeps working". The notice once sat in the
-   game's own row, where it took a column of the screen and pushed + and the next arrow off a phone. A development
-   build draws version 2 critters, which have no 3D, so the page is opened as production draws it (?critters=1), and
+   game's own row, where it took a column of the screen and pushed + and the next arrow off a phone. Every build
+   draws Garden Spirits by default, which have no 3D, so the page is opened with version 1 (?critters=1), and
    the 3D module is refused, which is one of the ways in. */
 for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 }]) test(`when 3D gives up, its notice moves nothing on the scatter screen at ${viewport.width}`, async ({ page }) => {
   await page.setViewportSize(viewport);
