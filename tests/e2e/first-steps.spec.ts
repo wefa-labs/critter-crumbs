@@ -68,6 +68,8 @@ test('an invited first-time member keeps their destination, draft name and critt
 });
 
 test('all first-step actions stay in place on short phones and desktops in every critter version', async ({ page }) => {
+  // fifteen page loads of five steps each: three times the ordinary budget
+  test.slow();
   for (const viewport of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 720 }, { width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
     // Garden Spirits, whose opening cast differs, then version 1 and the October inked drawing
@@ -76,7 +78,7 @@ test('all first-step actions stay in place on short phones and desktops in every
       await expect(page.getByRole('heading', { name: 'Everyone gets the same handful', exact: true })).toBeFocused();
       await page.evaluate(() => document.fonts.ready);
       const controls = page.locator('.learn-actions'), frame = await controls.boundingBox();
-      for (let step = 1; step < 4; step++) {
+      for (let step = 1; step < 5; step++) {
         await page.getByRole('button', { name: 'Next', exact: true }).click();
         expect(await controls.boundingBox()).toEqual(frame);
       }

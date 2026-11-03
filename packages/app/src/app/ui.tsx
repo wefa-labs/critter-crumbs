@@ -16,7 +16,8 @@ export const shortAddress = (address: string) => `${address.slice(0, 6)}…${add
 /** A stored name that is only the address falls back to the §5.5 short form; the full address is shown separately. */
 export const memberLabel = (name: string, address: string) => name.toLowerCase() === address.toLowerCase() ? shortAddress(address) : name;
 export const targetLabel = (target: Target) => target.ownerAddress?.toLowerCase() === target.name.toLowerCase() ? shortAddress(target.name) : target.name;
-export function navigate(path: string) { history.pushState(null, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
+/** Moves to `path`, recording the screen it was left from, so the first steps can return there (learn-return.ts). */
+export function navigate(path: string) { history.pushState({ from: location.pathname }, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
 export function Link({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
   return <a href={href} className={className} onClick={event => { if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); navigate(href); } }}>{children}</a>;
 }

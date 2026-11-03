@@ -132,4 +132,7 @@ dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscro
 .learn-results th:first-child { text-align:left; }
 .learn-results thead { color:var(--cc-text-2); }
 .learn-explanation { color:var(--cc-text-2); font-size:var(--cc-text-sm); }
+.learn-phases { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+/* the week's thought bubbles are drawn as the reveal screen draws them (game.css .thought-target) */
+.learn-bubble svg { filter:drop-shadow(0 2px 3px color-mix(in srgb, var(--cc-burrow) 18%, transparent)); }
 @media (min-width:900px) { .learn .sheet-screen { --room-h:max(100vw * 897 / 1600, 100dvh - 36px); } }

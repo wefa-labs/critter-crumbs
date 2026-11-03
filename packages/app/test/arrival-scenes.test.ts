@@ -68,7 +68,7 @@ describe('arriving by a link', () => {
 });
 
 describe('the first steps', () => {
-  const [handful, tap, hidden, opened] = LEARN_STEPS;
+  const [handful, tap, week, hidden, opened] = LEARN_STEPS;
 
   it('shows the same handful at each of four critters’ feet', () => {
     expect(handful!.painting).toBe('window');
@@ -79,7 +79,24 @@ describe('the first steps', () => {
   it('gives ten practice crumbs to three critters on the second step, and only there', () => {
     expect(tap!.critters.map(place)).toEqual([[40, 91.5, 190], [50, 85, 170], [60, 91.5, 190]]);
     expect([place(tap!.practice!), tap!.practice!.crumbs]).toEqual([[50, 95.5, 88], 10]);
-    expect([handful!.practice, hidden!.practice, opened!.practice]).toEqual([undefined, undefined, undefined]);
+    expect([handful!.practice, week!.practice, hidden!.practice, opened!.practice]).toEqual([undefined, undefined, undefined, undefined]);
+  });
+
+  it('tells the week on the third step: the group awake where it stood, every statement open in a bubble beside each head', () => {
+    expect(week!.painting).toBe('window');
+    expect(week!.phases).toBe(true);
+    expect(week!.critters.map(place)).toEqual(handful!.critters.map(place));
+    expect(week!.critters.every(critter => !critter.asleep)).toBe(true);
+    expect([week!.heaps, week!.pods]).toEqual([[], []]);
+    expect(week!.bubbles).toHaveLength(4);
+    for (const [index, bubble] of week!.bubbles!.entries()) {
+      const critter = week!.critters[index]!, box = critter.size * 1.25 / 897 * 100;
+      expect(bubble.x - critter.x).toBeCloseTo(3.3, 5);
+      expect(critter.y - bubble.y).toBeCloseTo(box * 0.48, 5);
+      expect(bubble.size).toBe(70);
+    }
+    expect([handful!.phases, tap!.phases, hidden!.phases, opened!.phases]).toEqual([undefined, undefined, undefined, undefined]);
+    expect([handful!.bubbles, tap!.bubbles, hidden!.bubbles, opened!.bubbles]).toEqual([undefined, undefined, undefined, undefined]);
   });
 
   it('shows privacy at dusk with everyone asleep and a closed pod where each handful was', () => {
@@ -88,8 +105,8 @@ describe('the first steps', () => {
     expect(hidden!.pods.map(place)).toEqual([[43, 91, 40], [50, 95, 40], [58.5, 94.5, 40], [64.5, 90, 40]]);
   });
 
-  it('keeps one sheet height for all four, returning to an awake group at the feast', () => {
-    expect(LEARN_STEPS).toHaveLength(4);
+  it('keeps one sheet height for all five, returning to an awake group at the feast', () => {
+    expect(LEARN_STEPS).toHaveLength(5);
     expect(opened!.painting).toBe('window');
     expect(opened!.critters.every(critter => !critter.asleep)).toBe(true);
     expect(sheetScreenStyle(LEARN_SHEET_HEIGHT)).toEqual({ '--sheet-h': '410px', '--floor-h': 362 });

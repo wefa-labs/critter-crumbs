@@ -8,6 +8,7 @@ import { sceneCircle } from './invite-circle.js';
 import { FloorCritter, PaintedFloor } from './painted-floor.js';
 import { INVITE_SCENE, sheetScreenStyle } from './painted-scene.js';
 import { absoluteDeadline } from './time.js';
+import { Link } from './ui.js';
 
 function InviteDeadline({ phase, at, now }: { phase: 'gathering' | 'scattering'; at: number; now: number }) {
   return <div><b>{deadlineLine(phase, at, now)}</b><time dateTime={new Date(at).toISOString()}>{absoluteDeadline(at)}</time></div>;
@@ -15,7 +16,8 @@ function InviteDeadline({ phase, at, now }: { phase: 'gathering' | 'scattering';
 
 /**
  * A feast opened from a link by someone who has not connected (flow page, SCREENS.invite; PRD F1): the burrow, the
- * feast, both deadlines and the critters asleep before anything else, then one way in. `sound` is the Music toggle.
+ * feast, both deadlines and the critters asleep before anything else, then one way in, and under it the way to the
+ * first steps, which return here (learn-return.ts). `sound` is the Music toggle.
  */
 export function Invite({ feast, now, connect, sound }: { feast: PublicFeast; now: number; connect: () => void; sound: ReactNode }) {
   return (
@@ -34,6 +36,7 @@ export function Invite({ feast, now, connect, sound }: { feast: PublicFeast; now
           <p>{copy['arrive.explainer']}</p>
           <Grow />
           <button type="button" className="pill wide" onClick={connect}>{copy['arrive.cta']}</button>
+          <Link className="quiet" href="/how-it-works">{copy['launch.learn']}</Link>
         </section>
       </div>
     </GameFrame>

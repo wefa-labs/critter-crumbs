@@ -1,9 +1,10 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { copy, formatCopy, GROWTH, HOLD_DELAY_MS, POUR_RATE_MIN } from '@critter-crumbs/shared';
 import { useAudio } from '../audio/context.js';
-import { CrumbGlyph } from '../game/mound.js';
+import { CrumbGlyph, ThoughtBubble } from '../game/mound.js';
 import { ROUND } from '../game/styles.js';
 import { LEARN_SHEET_HEIGHT, LEARN_STEPS } from './learn-steps.js';
+import { returnPath } from './learn-return.js';
 import { LEARN_RESULT, LEARN_RESULT_ROWS } from './learn-example.js';
 import { FloorCritter, FloorHeap, PaintedFloor } from './painted-floor.js';
 import { sheetScreenStyle, standingStyle, type SceneCritter, type Standing } from './painted-scene.js';
@@ -12,7 +13,9 @@ import { Link, navigate } from './ui.js';
 import { percentShare } from './time.js';
 
 /** Each step's title and line. The second step's title is the scatter screen's own instruction. */
-const WORDS = [['learn.handful.title', 'learn.handful.body'], ['scatter.instruction', 'learn.tap.body'], ['learn.private.title', 'learn.private.body'], ['learn.results.title', 'learn.results.body']] as const;
+const WORDS = [['learn.handful.title', 'learn.handful.body'], ['scatter.instruction', 'learn.tap.body'], ['learn.phases.title', 'learn.phases.deadlines'], ['learn.private.title', 'learn.private.body'], ['learn.results.title', 'learn.results.body']] as const;
+/** The week, on the third step: each phase by its name, then one line. */
+const PHASES = [['phase.gathering', 'learn.phases.gathering'], ['phase.scattering', 'learn.phases.scattering'], ['phase.feast', 'learn.phases.feast']] as const;
 
 /** A closed seed pod: where a scatter rests until the feast (design pass, Appendix A: "gentle hiding, not locks"). */
 function SeedPod({ pod }: { pod: Standing }) {
@@ -50,9 +53,10 @@ function PracticeCritter({ critter, give, released }: { critter: SceneCritter; /
 }
 
 /**
- * The first steps behind "How it works" (flow page, SCREENS['learn-handful'], ['learn-tap'] and ['learn-private']):
- * four short screens that can be skipped, open to anyone before connecting. On the second, ten practice crumbs can be
- * given away; they are counted nowhere. This is the one tour the app has (docs/decisions.md, 2026-10-11).
+ * The first steps behind "How it works" (flow page, SCREENS['learn-handful'], ['learn-tap'] and ['learn-private'], then
+ * the week and the worked result): five short screens that can be skipped, open to anyone before connecting. On the
+ * second, ten practice crumbs can be given away; they are counted nowhere. This is the one tour the app has
+ * (docs/decisions.md, 2026-10-11 and 2026-11-03). Skip and Got it return where the steps were opened from.
  */
 export function Learn({ sound, announce, still }: { sound: ReactNode; announce: (text: string) => void; still: boolean }) {
   const [step, setStep] = useState(0), heading = useRef<HTMLHeadingElement>(null), floor = useRef<HTMLDivElement>(null), crumb = useRef<HTMLSpanElement>(null), headingId = useId();
@@ -61,7 +65,7 @@ export function Learn({ sound, announce, still }: { sound: ReactNode; announce: 
   const remaining = useRef(0), [left, setLeft] = useState(0), audio = useAudio();
   useEffect(() => { document.title = formatCopy('app.pageTitle', { title: copy['launch.learn'] }); }, []);
   useEffect(() => { heading.current?.closest('.learn-content')?.scrollTo(0, 0); heading.current?.focus({ preventScroll: true }); }, [step]);
-  const leave = () => navigate('/');
+  const leave = () => navigate(returnPath(history.state));
   function next() { remaining.current = LEARN_STEPS[step + 1]!.practice?.crumbs ?? 0; setLeft(remaining.current); setStep(step + 1); }
   function give(critter: Element) {
     if (remaining.current <= 0) return false;
@@ -81,6 +85,7 @@ export function Learn({ sound, announce, still }: { sound: ReactNode; announce: 
             : <FloorCritter key={critter.address} critter={critter} fed={last ? Math.min(1, LEARN_RESULT_ROWS[i]!.share[0] / LEARN_RESULT_ROWS[i]!.share[1] * scene.critters.length / GROWTH.fairShareCap) ** GROWTH.exponent : 0} />)}
           {scene.heaps.map(heap => <FloorHeap key={heap.x} heap={heap} />)}
           {scene.pods.map(pod => <SeedPod key={pod.x} pod={pod} />)}
+          {scene.bubbles?.map(bubble => <div key={bubble.x} className="floor-prop learn-bubble" style={standingStyle(bubble)}><ThoughtBubble /></div>)}
           {scene.practice ? <FloorHeap heap={scene.practice} crumbs={left} practice /> : null}
           {last ? LEARN_RESULT_ROWS.map((row, i) => <FloorHeap key={row.targetId} heap={{ ...scene.critters[i]!, x: scene.critters[i]!.x + 3, y: scene.critters[i]!.y + 1, size: 36, crumbs: row.crumbs / 10 }} />) : null}
           <span className="practice-crumb" ref={crumb} hidden><CrumbGlyph /></span>
@@ -89,7 +94,8 @@ export function Learn({ sound, announce, still }: { sound: ReactNode; announce: 
           <section className="learn-content" tabIndex={0} aria-labelledby={headingId}>
           <div className="learn-dots" role="img" aria-label={formatCopy('learn.step', { i: step + 1, n: LEARN_STEPS.length })}>{LEARN_STEPS.map((_, index) => <i key={index} data-on={index === step} />)}</div>
           <h1 ref={heading} id={headingId} tabIndex={-1}>{copy[title]}</h1>
-          <p>{last ? formatCopy('learn.results.body', { total: LEARN_RESULT.totalScattered }) : copy[body]}</p>
+          {scene.phases ? <ul className="learn-phases">{PHASES.map(([phase, line]) => <li key={phase}><b>{copy[phase]}</b>{' '}{copy[line]}</li>)}</ul> : null}
+          <p>{copy[body]}</p>
           {scene.practice ? <p className="learn-count">{left ? <><b>{left}</b>{' '}{copy['pile.remaining.words']}</> : copy['pile.empty']}</p> : null}
           {last ? <><table className="learn-results"><caption className="sr-only">{copy['learn.results.table']}</caption><thead><tr><th scope="col">{copy['learn.results.critter']}</th><th scope="col">{copy['learn.results.crumbs']}</th><th scope="col">{copy['learn.results.share']}</th></tr></thead><tbody>{LEARN_RESULT_ROWS.map(row => <tr key={row.targetId}><th scope="row">{copy[row.name]}</th><td>{row.crumbs}</td><td>{percentShare(row.share)}</td></tr>)}</tbody></table>
             <p className="learn-explanation">{formatCopy('learn.results.explain', { name: copy[firstResult.name], crumbs: firstResult.crumbs, total: LEARN_RESULT.totalScattered, share: percentShare(firstResult.share) })}</p><p className="learn-explanation">{copy['learn.results.absent']}</p></> : null}

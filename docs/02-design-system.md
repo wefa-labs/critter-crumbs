@@ -518,9 +518,9 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Screen / state | What shows | Copy (§10) |
 |---|---|---|
 | Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark and the tagline on a plate, four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `action.connect`, `launch.learn` |
-| Arrive by a link, not connected | Header with the burrow line and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer and the one connect button | `arrive.*` |
+| Arrive by a link, not connected | Header with the burrow line and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
-| First steps (How it works) | Four short screens that can be skipped, open before connecting and again from Settings: the same handful, ten practice crumbs to give, where they go stays private, and a worked feast result. The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*` |
+| First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen and Settings: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*` |
 | First connect, no ENS | Name and critter choice share the same stable first-meeting dialog; Keep saves both together | `name.*`, `critter.*` |
 | Meet your critter | Selected portrait on a painted stage with `RerollControl`, name field when needed, and pinned Keep action. Rerolls preserve the draft name; existing locks remain in force | `critter.*`, `name.*` |
 | Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
@@ -549,7 +549,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Feast cancelled | Listed in past feasts with a "Cancelled" chip | `feast.cancelled` |
 | People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
 
-First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27), and it is never shown unasked: it opens from How it works on the launcher and in Settings. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
+First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen and in Settings. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
 
 ## 10. UX copy
 
@@ -604,11 +604,16 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `learn.skip` | Skip |
 | `learn.done` | Got it |
 | `learn.handful.title` | Everyone gets the same handful |
-| `learn.handful.body` | In a feast, everyone has the same crumbs to share out, and gives all of them away. |
+| `learn.handful.body` | A feast is how a group shares something out. Everyone gets the same crumbs, and gives all of them away. |
 | `learn.tap.body` | Try it: give these ten crumbs away. They are only practice. (The step’s title is `scatter.instruction`.) |
 | `learn.tap.give` | Give a practice crumb (the name of each practice critter’s button) |
+| `learn.phases.title` | Three phases, two deadlines |
+| `learn.phases.gathering` | Everyone writes what they did. Nobody else can read it yet. (Each phase’s line follows its name, `phase.gathering`, `phase.scattering`, `phase.feast`, in bold.) |
+| `learn.phases.scattering` | Every statement opens at once. Read them, then scatter your crumbs. You can change your mind until the deadline. |
+| `learn.phases.feast` | Everything opens, and the numbers are there. |
+| `learn.phases.deadlines` | Both deadlines stay on screen, in your time zone. |
 | `learn.private.title` | Where they go stays private |
-| `learn.private.body` | Nobody sees where anyone’s crumbs went until the feast. Then every scatter opens at once. |
+| `learn.private.body` | Nobody sees where anyone’s crumbs went until the feast, not even us. The key that opens every scatter is released at the deadline, and not before. |
 
 **Connect and critter (F2)**
 
@@ -1024,12 +1029,15 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D27 | The app opens on a launcher, a title screen with one Connect and How it works; a feast opened from a link shows the invite screen with one Connect to join. Neither shows Settings or a second connect button. How it works opens the first steps, the one tour (§9) | Afolabi’s review of 11 October 2026; the flow page’s launcher, invite and first steps (`docs/explorations/app-screens`) |
 | D28 | Where there is no Settings to open (the launcher, the first steps, a visitor’s header) a Music toggle sits at the top right. It shows music as on only once it can be heard, because a browser lets none play before the first press, and a press that starts the sound leaves the setting on | "Once we add music there should be a toggle" (Afolabi, 11 October 2026) |
 | D29 | The Window and Dusk scenes are painted plates, one for the phone and one for desktop: the room seen from above, its wall arching around the circle and its floor filling the rest, under the look’s wash and grain. The app raises a plate until its wall ends 8 px above the circle’s back row, so no critter stands on a wall at any screen size. Entrance is still drawn from crops | "Better background images for the gameplay that has more of a floor and wall" (Afolabi, 11 October 2026): the painted floor plate the decision of 5 October waited for. How they were painted and the rule a new one follows are in `docs/explorations/floor-plates` |
+| D30 | The first steps are five screens: the handful, the practice tap, the week (three phases and two deadlines, every statement open in a bubble beside each head), the private pods and the worked result. They open from the launcher, the invite screen and Settings, and Skip and Got it return to the screen that opened them, else the launcher | Afolabi’s review request of 3 November 2026 against *Don’t Make Me Think* and *Refactoring UI* (`docs/reviews/first-steps-2026-11`); amends D27’s four screens |
 
 **October adoption (2026-10-06).** D14–D24 override the earlier grid, type, control, heap and reading descriptions in §1, §3, §6 and §7 for core game screens. The generated token source is normative for Inked daylight values. Other screens inherit these tokens and keep their existing layouts.
 
 **Before connecting (2026-10-11).** D25–D28 bring the flow page’s screens for someone who has not connected into the app: the launcher, arriving by a link, choosing how to connect and the first steps. The screens a connected member sees outside the core game (first name and critter, home, a burrow and its members, setup, gathering, the profile) still keep their earlier layouts and wait for the same treatment.
 
 **Painted floors (2026-10-11).** D29 replaces the cropped, mirrored floor of the core game screens with painted plates for the two scenes the game shows. The launcher’s critters are drawn about 1.4 times the flow page’s, at the height of the painting’s table (`docs/decisions.md`, 2026-10-11).
+
+**Five first steps (2026-11-03).** D30 adds the week to the first steps and a way into them from the invite screen, which is most members’ first screen (PRD F1). The first screen now defines a feast before using the word, the private screen says who cannot peek and why, and the result screen says what its table cannot: that every device adds the scatters up and that shares come from the crumbs actually given. Not yet built from the review: the page behind "Why nobody can peek" and the links to it from the waiting screen and the results (`docs/reviews/first-steps-2026-11/README.md`, build order 4 to 7).
 
 ### Open — confirm before implementation
 
@@ -1071,12 +1079,12 @@ The first meeting combines the critter and name in the existing stable dialog. N
 | ID | Text |
 |---|---|
 | `learn.results.title` | When the feast opens |
-| `learn.results.body` | Four critters had 100 crumbs each in this example. Three scattered {total}. |
+| `learn.results.body` | Every scatter opens at once, and your own device adds them up. Here, four critters had 100 crumbs each and three of them scattered. |
 | `learn.results.table` | Practice feast results |
 | `learn.results.critter` | Critter |
 | `learn.results.crumbs` | Crumbs |
 | `learn.results.share` | Share |
-| `learn.results.explain` | {name} received {crumbs} of {total} crumbs: {share}. |
+| `learn.results.explain` | Shares come from the crumbs actually given, {total} in all, so {name}’s {crumbs} is {share}. |
 | `learn.results.absent` | Fern didn’t scatter and still receives a share. |
 | `learn.example.moss` | Moss |
 | `learn.example.clover` | Clover |
