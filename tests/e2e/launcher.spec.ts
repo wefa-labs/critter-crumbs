@@ -74,14 +74,14 @@ test('on desktop the painting fills the space below the beta notice and the crit
   }
 });
 
-test('How it works walks four steps, with practice crumbs and a worked feast result', async ({ page }) => {
+test('How it works walks five steps, with practice crumbs, the week and a worked feast result', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
   await page.getByRole('link', { name: 'How it works', exact: true }).click();
   await expect(page).toHaveURL(/\/how-it-works$/);
   await expect(page).toHaveTitle('How it works · Critter Crumbs');
   await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeFocused();
-  await expect(page.getByRole('img', { name: 'Step 1 of 4', exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Step 1 of 5', exact: true })).toBeVisible();
   await expect(page.locator('.screen-floor .floor-prop [data-crumb]')).toHaveCount(24);
   await expect(page.getByRole('button', { name: 'Skip', exact: true })).toBeVisible();
 
@@ -111,16 +111,24 @@ test('How it works walks four steps, with practice crumbs and a worked feast res
   await critters.first().click();
   await expect(count).toHaveText('All scattered');
 
+  // the week: the four awake with every statement open, and the three phases as lines
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Three phases, two deadlines', exact: true })).toBeFocused();
+  await expect(page.locator('.screen-floor .learn-bubble')).toHaveCount(4);
+  await expect(page.locator('.screen-floor svg.portrait[data-asleep="true"]')).toHaveCount(0);
+  await expect(page.locator('.learn-phases li')).toHaveText([/^Gathering Everyone writes what they did\./, /^Scattering Every statement opens at once\./, /^Feast Everything opens, and the numbers are there\.$/]);
+  await expect(page.getByText('Both deadlines stay on screen, in your time zone.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Where they go stays private', exact: true })).toBeFocused();
   await expect(page.locator('.screen-floor .scene-paint')).toHaveAttribute('data-painting', 'dusk');
   await expect(page.locator('.screen-floor svg.portrait[data-asleep="true"]')).toHaveCount(4);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'When the feast opens', exact: true })).toBeFocused();
-  await expect(page.getByRole('img', { name: 'Step 4 of 4', exact: true })).toBeVisible();
+  await expect(page.getByRole('img', { name: 'Step 5 of 5', exact: true })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Practice feast results', exact: true })).toContainText('120');
   await expect(page.getByRole('row', { name: 'Moss 120 40.0%', exact: true })).toBeVisible();
   await expect(page.getByRole('row', { name: 'Fern 30 10.0%', exact: true })).toBeVisible();
+  await expect(page.getByText('Shares come from the crumbs actually given, 300 in all, so Moss’s 120 is 40.0%.', { exact: true })).toBeVisible();
   await expect(page.getByText('Fern didn’t scatter and still receives a share.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Got it', exact: true }).click();
   await expect(page).toHaveURL(/127\.0\.0\.1:5173\/$/);
@@ -260,11 +268,18 @@ test('a feast opened from a link shows the burrow, the feast, both deadlines and
     await expect(page.getByRole('button', { name: 'Connect to join', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Settings' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Music', exact: true })).toHaveCount(1);
+    await expect(page.getByRole('link', { name: 'How it works', exact: true })).toBeVisible();
     const join = await box(page, '.screen-sheet .pill'), critters = await boxes(page, '.screen-floor .floor-critter'), floor = await box(page, '.screen-floor');
     expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([viewport.width, viewport.height]);
     expect(join.height).toBeGreaterThanOrEqual(44); expect(join.y + join.height).toBeLessThanOrEqual(viewport.height);
     for (const critter of critters) { expect(critter.x).toBeGreaterThanOrEqual(floor.x); expect(critter.x + critter.width).toBeLessThanOrEqual(floor.x + floor.width); expect(critter.y).toBeGreaterThanOrEqual(floor.y); }
   }
+  // the way to the first steps is under Connect to join, and leaving them returns to the feast
+  await page.getByRole('link', { name: 'How it works', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/feasts/${feast.id}$`));
+  await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible();
   // connecting from the link lands in the feast itself
   await connectLocal(page, 1);
   await expect(page.getByRole('textbox', { name: 'Your statement', exact: true })).toBeVisible();

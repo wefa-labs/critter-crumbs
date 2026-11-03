@@ -11,6 +11,10 @@ export interface LearnStep {
   pods: readonly Standing[];
   /** the heap of practice crumbs, on the step where a tap gives one */
   practice?: SceneHeap;
+  /** the step that tells the week: the three phases as lines on the sheet, and every statement open on the floor */
+  phases?: true;
+  /** a thought bubble beside each head, as the reveal screen draws them when statements open */
+  bubbles?: readonly Standing[];
 }
 /**
  * Positions are in the painting, not the screen. x and y are percent of
@@ -26,8 +30,17 @@ const QUARTET = [
 ] as const;
 /** Each of the quartet's own handful, and later its pod, lies at its feet. */
 const AT_FEET = [{ x: 43, y: 91.5 }, { x: 50, y: 95.5 }, { x: 58.5, y: 95 }, { x: 64.5, y: 90.5 }] as const;
+/**
+ * A thought bubble just right of a head, where the reveal screen puts it (game/layout.ts). A drawing's box is 1.25 times
+ * as tall as wide (viewBox 120 × 150) and a Garden Spirit fills its lower part, so the bubble's foot sits about half
+ * way up the box, measured in the browser on 3 November 2026; the taller October drawings wear it a little deeper.
+ */
+const bubbleBy = ({ x, y, size }: Standing): Standing => ({ x: x + 3.3, y: y - size * 1.25 / 897 * 100 * 0.48, size: 70 });
 
-/** The first steps behind "How it works" (flow page, SCREENS['learn-handful'], ['learn-tap'] and ['learn-private']). */
+/**
+ * The first steps behind "How it works": the flow page's three (SCREENS['learn-handful'], ['learn-tap'] and
+ * ['learn-private']), the week between the tap and the pods, and the worked result at the end.
+ */
 export const LEARN_STEPS: readonly LearnStep[] = [
   { painting: 'window', critters: QUARTET.map(critter => ({ ...critter, asleep: false })), heaps: AT_FEET.map(spot => ({ ...spot, size: 52, crumbs: 6 })), pods: [] },
   {
@@ -39,6 +52,7 @@ export const LEARN_STEPS: readonly LearnStep[] = [
       { address: FERN, variant: openingVariant(FERN), x: 60, y: 91.5, size: 190, asleep: false, face: 'left' },
     ],
   },
+  { painting: 'window', critters: QUARTET.map(critter => ({ ...critter, asleep: false })), heaps: [], pods: [], phases: true, bubbles: QUARTET.map(bubbleBy) },
   { painting: 'dusk', critters: QUARTET.map(critter => ({ ...critter, asleep: true })), heaps: [], pods: AT_FEET.map(spot => ({ x: spot.x, y: spot.y - 0.5, size: 40 })) },
   { painting: 'window', critters: QUARTET.map(critter => ({ ...critter, asleep: false })), heaps: [], pods: [] },
 ];
