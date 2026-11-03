@@ -104,7 +104,7 @@ export const copy = {
   "learn.tap.body": "Try it: give these ten crumbs away. They are only practice.",
   "learn.tap.give": "Give a practice crumb",
   "learn.phases.title": "Three phases, two deadlines",
-  "learn.phases.gathering": "Everyone writes what they did. Nobody else can read it yet.",
+  "learn.phases.gathering": "Everyone writes what they did. Nobody else in the burrow can read it yet.",
   "learn.phases.scattering": "Every statement opens at once. Read them, then scatter your crumbs. You can change your mind until the deadline.",
   "learn.phases.feast": "Everything opens, and the numbers are there.",
   "learn.phases.deadlines": "Both deadlines stay on screen, in your time zone.",

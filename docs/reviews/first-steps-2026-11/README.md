@@ -145,7 +145,7 @@ Five screens, one sentence each, the same floor and sheet. Proposed wording, for
 |---|---|---|
 | 1 | Everyone gets the same handful | A feast is how a group shares something out. Everyone gets the same crumbs, and gives all of them away. |
 | 2 | Tap to give a crumb. Hold to pour. | Try it: give these ten crumbs away. They are only practice. *(unchanged)* |
-| 3 *(new)* | Three phases, two deadlines | **Gathering.** Everyone writes what they did. Nobody else can read it yet. · **Scattering.** Every statement opens at once. Read them, then give; you can change your mind until the deadline. · **The feast.** Everything opens, and the numbers are there. · Both deadlines stay on screen, in your own time. |
+| 3 *(new)* | Three phases, two deadlines | **Gathering.** Everyone writes what they did. Nobody else in the burrow can read it yet. · **Scattering.** Every statement opens at once. Read them, then give; you can change your mind until the deadline. · **The feast.** Everything opens, and the numbers are there. · Both deadlines stay on screen, in your own time. |
 | 4 | Where they go stays private | Nobody sees where anyone's crumbs went until the feast, not even us. The key that opens every scatter is released at the deadline, and not before. → *Why nobody can peek* |
 | 5 | When the feast opens | Every scatter opens at once, and your own device adds them up. Here, four critters had 100 crumbs each and three of them scattered. *(table)* Shares come from the crumbs actually given, 300 in all, so Moss's 120 is 40.0%. Fern didn't scatter and still receives a share. → *Why nobody can peek* |
 
@@ -181,7 +181,7 @@ Tracer bullets, each one shippable and reviewable on its own. Workstream B throu
 | 7 | Optional: the home empty state's link (F10) | `app/burrows.tsx` | the home test | §9 |
 | 8 | A get-it test with two council members before the rehearsal (below) | | | the result in this folder |
 
-Steps 1 to 3 were built on 3 November on the branch `claude/first-steps-explain` (`docs/decisions.md`, 2026-11-03): the invite link and the return path, the copy pass, and the week as a third step with every statement open in a thought bubble beside each head. One thing the build changed from the plan: the private step says "not even us" but does not yet link to the page, which does not exist until step 4.
+Steps 1 to 3 were built on 3 November on the branch `claude/first-steps-explain` (`docs/decisions.md`, 2026-11-03): the invite link and the return path, the copy pass, and the week as a third step with every statement open in a thought bubble beside each head. One thing the build changed from the plan: the private step says "not even us" but does not yet link to the page, which does not exist until step 4. The step 3 captures beside this review predate one later change: the gathering line now says nobody else *in the burrow* can read a statement, because the host can (Technical spec §2).
 
 Constraints that hold throughout: every string is a copy ID with its row in §10; the generator and the tally are untouched (the worked example still runs through the production tally); no `Date.now()`; the shell stays within its budget (it is at about 104 KB of 120 KB; the page is lazy); nothing opens unasked; the vocabulary rules.
 

@@ -608,7 +608,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `learn.tap.body` | Try it: give these ten crumbs away. They are only practice. (The step’s title is `scatter.instruction`.) |
 | `learn.tap.give` | Give a practice crumb (the name of each practice critter’s button) |
 | `learn.phases.title` | Three phases, two deadlines |
-| `learn.phases.gathering` | Everyone writes what they did. Nobody else can read it yet. (Each phase’s line follows its name, `phase.gathering`, `phase.scattering`, `phase.feast`, in bold.) |
+| `learn.phases.gathering` | Everyone writes what they did. Nobody else in the burrow can read it yet. (Each phase’s line follows its name, `phase.gathering`, `phase.scattering`, `phase.feast`, in bold.) |
 | `learn.phases.scattering` | Every statement opens at once. Read them, then scatter your crumbs. You can change your mind until the deadline. |
 | `learn.phases.feast` | Everything opens, and the numbers are there. |
 | `learn.phases.deadlines` | Both deadlines stay on screen, in your time zone. |
