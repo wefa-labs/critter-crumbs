@@ -11,14 +11,18 @@ import { Launcher } from './launcher.js';
 import { MusicButton } from './music-button.js';
 import { createPressWatch } from './music-choice.js';
 import { screenMusic } from './screen-music.js';
-import { ProfileMenu } from './profile.js';
-import { Onboarding } from './onboarding.js';
 import { readDarkChoice, saveDarkChoice, showDarkChoice } from './theme.js';
 const FeastRoute=lazy(()=>import('./feast.js').then(module=>({default:module.FeastRoute})));
 const LearnRoute=lazy(()=>import('./learn.js').then(module=>({default:module.Learn})));
 /* starting a feast is a creator's occasional page, so its code arrives when it is opened */
 const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.SetupRoute})));
-import { Burrow, CreateBurrow, Home } from './burrows.js';
+/* the screens a connected member sees outside a feast arrive once someone has connected, so the launcher and the
+   invite, which most people open first, do not carry them (scripts/build-budget.mjs) */
+const HomeRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Home})));
+const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
+const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
+const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
+const ProfileMenu=lazy(()=>import('./profile.js').then(module=>({default:module.ProfileMenu})));
 import { Dialog, Link, Opening, ProfileButton } from './ui.js';
 
 type Choice = { provider: AccountProvider; option: AccountOption };
@@ -118,9 +122,9 @@ export function App() {
   else if (path === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
   else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={path} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
-  else if (path === '/burrows/new') { music = screenMusic.burrow; content = <CreateBurrow api={api} session={session} run={run} busy={working} />; }
-  else if (burrow) { music = screenMusic.burrow; content = <Burrow key={path} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} />; }
-  else { music = screenMusic.home; content = <Home me={me} api={api} />; }
+  else if (path === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute api={api} session={session} run={run} busy={working} /></Suspense>; }
+  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={path} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
+  else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
     <a href="#content" className="skip-link">{copy['skip.content']}</a>
@@ -131,9 +135,9 @@ export function App() {
     </nav><div id="feast-header" /></header>
     {!online && !launching ? <p className="notice">{copy['err.offline']}</p> : null}
     <main id="content" tabIndex={-1}>{content}</main>
-    {profileOpen && me ? <ProfileMenu me={me} close={() => setProfileOpen(false)} settings={() => { setProfileOpen(false); setSettingsOpen(true); }} meet={() => { setProfileOpen(false); dismissOnboarding(false); }} disconnect={() => void run(async () => { await session.disconnect(); setProfileOpen(false); })} run={run} busy={working} /> : null}
+    {profileOpen && me ? <Suspense fallback={null}><ProfileMenu me={me} close={() => setProfileOpen(false)} settings={() => { setProfileOpen(false); setSettingsOpen(true); }} meet={() => { setProfileOpen(false); dismissOnboarding(false); }} disconnect={() => void run(async () => { await session.disconnect(); setProfileOpen(false); })} run={run} busy={working} /></Suspense> : null}
     {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} /> : null}
-    {me ? <Onboarding key={me.address} me={me} session={session} run={run} busy={working} visible={!connecting && !onboardingDismissed} close={() => dismissOnboarding(true)} announce={announce} /> : null}
+    {me ? <Suspense fallback={null}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} visible={!connecting && !onboardingDismissed} close={() => dismissOnboarding(true)} announce={announce} /></Suspense> : null}
     {settingsOpen ? <Dialog title={copy['settings.title']} onClose={closeSettings}><div className="stack">{(Object.keys(settingKeys) as StoredSetting[]).map(key => {
       const labels = { effects: 'sound.effects.label', music: 'sound.music.label', still: 'motion.still.label', simple: 'view.simple.label' } as const;
       const help = { effects: 'sound.effects.help', music: 'sound.music.help', still: 'motion.still.help', simple: 'view.simple.help' } as const;
