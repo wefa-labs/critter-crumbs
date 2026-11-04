@@ -13,6 +13,9 @@ test('copy uses singular forms when the interpolated count is one', () => {
   expect(formatCopy('arrive.burrow', { burrowName: 'Oak', n: 1 })).toBe('Oak · 1 critter');
   expect(formatCopy('arrive.burrow', { burrowName: 'Oak', n: 2 })).toBe('Oak · 2 critters');
   expect(formatCopy('reveal.announce', { n: 1 })).toBe('Statements are open. 1 statement to read.');
+  // A burrow of one on Home (QA copy-03)
+  expect(formatCopy('home.critterCount', { n: 1 })).toBe('1 critter');
+  expect(formatCopy('home.critterCount', { n: 8 })).toBe('8 critters');
 });
 
 test('the workshops’ and the rehearsal’s own strings are kept apart from the copy a member is shown', () => {
