@@ -2,7 +2,7 @@ import { expect, test } from 'vitest';
 import { generate2 } from '@critter-crumbs/core';
 import { gardenDraw, gardenLayout } from '../src/portraits/garden/species.js';
 import { portraitMetrics } from '../src/portraits/metrics.js';
-import { layoutGame } from '../src/game/layout.js';
+import { layoutGame, overlapArea } from '../src/game/layout.js';
 import { composeGame } from '../src/game/composition.js';
 import members from '../src/dev/game-members.js';
 import { fixtureAllocation } from '../src/dev/game-fixtures.js';
@@ -24,5 +24,15 @@ function* circles(viewport: { width: number; height: number }, n: number, extent
 test('on a phone no critter in the circle is drawn narrower than 56 px', () => {
   for (const [look, extentOf] of Object.entries(looks)) for (const viewport of phones) for (const n of [8, 10]) for (const { focus, layout } of circles(viewport, n, extentOf)) {
     for (const slot of layout.slots) expect(slot.stage.width, `${look} ${viewport.width}x${viewport.height} n=${n} focus ${focus}`).toBeGreaterThanOrEqual(56);
+  }
+});
+
+// Design pass §21 measured the heap of crumbs left never over a critter, on the 375 × 812 phone and the three desktops;
+// the screens suite checks the same at 430 × 932. Garden Spirits are wider than the October drawing (ADR 0006): at
+// 375 × 812 with six, an ember fox's tail reached 0.2 px into the heap's box.
+test('the heap of crumbs left covers no critter at the sizes the design pass measured', () => {
+  const measured = [{ width: 375, height: 812 }, { width: 430, height: 932 }, { width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }];
+  for (const [look, extentOf] of Object.entries(looks)) for (const viewport of measured) for (const n of [4, 6, 8, 10]) for (const { focus, layout } of circles(viewport, n, extentOf)) {
+    for (const slot of layout.slots) expect(overlapArea(layout.heap!, slot.figure), `${look} ${viewport.width}x${viewport.height} n=${n} focus ${focus}: ${slot.name}`).toBe(0);
   }
 });
