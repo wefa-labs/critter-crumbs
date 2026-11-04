@@ -48,6 +48,20 @@ export const LAUNCHER_SCENE: { painting: Painting; critters: readonly (SceneCrit
 export const INVITE_SCENE: { painting: Painting; sheetHeight: number } = { painting: 'window', sheetHeight: 400 };
 
 /**
+ * The first meeting (flow page, SCREENS.meet and SCREENS.name): your critter large at the front of the floor, awake to
+ * be met; a kept critter that is only being named stands smaller and asleep. Both sheets are 360 pixels tall: the
+ * flow page's 260 and 330, with room for the name field under the line and for Disconnect under the actions.
+ */
+export const MEETING_SCENE: { painting: Painting; meet: Standing & { sheetHeight: number }; name: Standing & { sheetHeight: number } } = {
+  painting: 'window',
+  meet: { x: 50, y: 92, size: 210, sheetHeight: 360 },
+  name: { x: 50, y: 90, size: 150, sheetHeight: 360 },
+};
+
+/** Your critter's profile (flow page, SCREENS.profile): your critter at the front of the floor, over a sheet 520 pixels tall. */
+export const PROFILE_SCENE: { painting: Painting; critter: Standing; sheetHeight: number } = { painting: 'window', critter: { x: 50, y: 92, size: 150 }, sheetHeight: 520 };
+
+/**
  * A screen whose words are in a sheet under the floor (the side panel on desktop): the sheet's height on the phone, and
  * with it the height the design's 812-pixel phone leaves the floor between the 64-pixel header and the sheet, which
  * rises 24 pixels over the floor's foot. The stylesheet scales the floor's drawings from the two.

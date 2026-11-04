@@ -6,7 +6,8 @@ import type { Entity } from 'koota';
 import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/index.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameStage } from '../app/game-stage.js';
-import { Link, ProfileButton, targetLabel } from '../app/ui.js';
+import { ScreenHeader } from '../app/screen-header.js';
+import { ProfileButton, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
 import { circleBackRow, HEADER_HEIGHT, hitRect, layoutGame, shortName } from './layout.js';
@@ -24,25 +25,22 @@ import { useAudio, useMusic } from '../audio/context.js';
 
 
 /**
- * The header over every core state: the burrow and the feast, a line at the right on desktop (the closing day while
- * scattering, the summary at the feast) and your critter's face, or Connect for a visitor (flow page, screen 50). A
- * screen for someone arriving by link gives its own line above the title and its own control at the right.
+ * The header over every core state (ScreenHeader, the same as every screen with a floor): the burrow and the feast,
+ * the beta chip, a line at the right on desktop (the closing day while scattering, the summary at the feast) and your
+ * critter's face, or Connect for a visitor (flow page, screen 50). A screen for someone arriving by link gives its own
+ * line above the title and its own control at the right.
  */
 export function GameFrame({ feast, viewer, onProfile, onConnect, when, burrowLine, aside, children }: { feast: PublicFeast; viewer?: { address: string; variant: number }; onProfile?: () => void; onConnect?: () => void; when?: ReactNode; burrowLine?: string; aside?: ReactNode; children: ReactNode }) {
   useLayoutEffect(() => { document.getElementById('content')?.focus(); }, []);
   useEffect(() => { document.title = formatCopy('app.contextTitle', { screen: feast.title, burrow: feast.burrowName }); }, [feast.title, feast.burrowName]);
   return (
     <div className="core-game">
-      <header className="game-header">
-        <div className="game-context">
-          <Link className="game-burrow" href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}>{burrowLine ?? feast.burrowName}</Link>
-          <h1>{feast.title}</h1>
-        </div>
-        <span className="closing-day" id="game-when">{when}</span>
-        {viewer
+      <ScreenHeader title={feast.title} burrow={burrowLine ?? feast.burrowName} href={'burrowId' in feast ? `/burrows/${feast.burrowId}` : '/'}
+        end={viewer
           ? <ProfileButton address={viewer.address} variant={viewer.variant} onClick={onProfile} />
-          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : aside ?? null}
-      </header>
+          : onConnect ? <button type="button" className="pill soft small game-connect" onClick={onConnect}>{copy['action.connect']}</button> : aside ?? null}>
+        <span className="closing-day" id="game-when">{when}</span>
+      </ScreenHeader>
       <div className="game-content">{children}</div>
     </div>
   );

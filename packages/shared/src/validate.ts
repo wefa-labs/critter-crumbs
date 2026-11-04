@@ -1,5 +1,5 @@
 import type { CopyId } from './copy.js';
-import { MAX_FEAST_TARGETS } from './limits.js';
+import { MAX_FEAST_TARGETS, MAX_NAME_LENGTH } from './limits.js';
 import type { FeastSetup, Hex } from './types.js';
 
 export class ValidationError extends Error {
@@ -9,12 +9,16 @@ export function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new ValidationError();
   return value as Record<string, unknown>;
 }
+/** Whether text is from `min` to `max` characters long, counted in Unicode code points. */
+const sized = (value: string, min: number, max: number) => { const length = Array.from(value).length; return length >= min && length <= max; };
 export function text(value: unknown, min: number, max: number, id: CopyId = 'err.generic', trim = false): string {
   if (typeof value !== 'string') throw new ValidationError(id);
   const result = trim ? value.trim() : value;
-  if (Array.from(result).length < min || Array.from(result).length > max) throw new ValidationError(id);
+  if (!sized(result, min, max)) throw new ValidationError(id);
   return result;
 }
+/** Whether a display name or an option name can be saved as it is: 1 to MAX_NAME_LENGTH characters once trimmed. */
+export const nameFits = (value: string) => sized(value.trim(), 1, MAX_NAME_LENGTH);
 export function integer(value: unknown, min: number, max: number, id: CopyId = 'err.generic'): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < min || value > max) throw new ValidationError(id);
   return value;
@@ -40,7 +44,7 @@ export function parseFeastSetup(value: unknown): FeastSetup {
     if (!Array.isArray(input.options) || input.options.length === 0) throw new ValidationError('setup.options.title');
     if (input.options.length > MAX_FEAST_TARGETS) throw new ValidationError('err.feastCapacity');
     for (const option of input.options) {
-      const item = record(option), name = text(item.name, 1, 80, 'setup.option.unnamed', true);
+      const item = record(option), name = text(item.name, 1, MAX_NAME_LENGTH, 'setup.option.unnamed', true);
       if (options.some(existing => existing.name.toLowerCase() === name.toLowerCase())) throw new ValidationError('setup.option.duplicate');
       options.push({ name, statement: text(item.statement ?? '', 0, 2000, 'gathering.limit') });
     }
@@ -58,7 +62,8 @@ export function parseProfileUpdate(value: unknown): { displayName?: string; vari
   const input = record(value), result: { displayName?: string; variant?: number; keepCritter?: true } = {};
   // Version adoption needs its own reviewed opt-in operation, never an ordinary edit.
   if ('generatorVersion' in input || 'rendererVersion' in input) throw new ValidationError();
-  if (input.displayName !== undefined) result.displayName = text(input.displayName, 1, 80, 'name.label', true);
+  // A name saved before the 16-character limit stays as it is; only a new one is held to it (docs/decisions.md, 2026-11-03).
+  if (input.displayName !== undefined) result.displayName = text(input.displayName, 1, MAX_NAME_LENGTH, 'name.limit', true);
   if (input.variant !== undefined) result.variant = integer(input.variant, 0, 4);
   if (input.keepCritter !== undefined) { if (input.keepCritter !== true) throw new ValidationError(); result.keepCritter = true; }
   return result;

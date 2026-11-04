@@ -9,7 +9,8 @@ import { LEARN_RESULT, LEARN_RESULT_ROWS } from './learn-example.js';
 import { FloorCritter, FloorHeap, PaintedFloor } from './painted-floor.js';
 import { sheetScreenStyle, standingStyle, type SceneCritter, type Standing } from './painted-scene.js';
 import { flyPracticeCrumb } from './practice-flight.js';
-import { Link, navigate } from './ui.js';
+import { ScreenHeader } from './screen-header.js';
+import { navigate } from './ui.js';
 import { percentShare } from './time.js';
 
 /** Each step's title and line. The second step's title is the scatter screen's own instruction. */
@@ -77,7 +78,7 @@ export function Learn({ sound, announce, still }: { sound: ReactNode; announce: 
   const say = () => announce(remaining.current ? formatCopy('pile.remaining', { n: remaining.current }) : copy['pile.empty']);
   return (
     <div className="core-game learn">
-      <header className="game-header"><Link href="/" className="wordmark">{copy['app.name']}</Link>{sound}</header>
+      <ScreenHeader end={sound} />
       <div className="sheet-screen" style={sheetScreenStyle(LEARN_SHEET_HEIGHT)}>
         <PaintedFloor painting={scene.painting} className="screen-floor room-scene" ref={floor}>
           {scene.critters.map((critter, i) => scene.practice
