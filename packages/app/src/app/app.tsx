@@ -46,7 +46,9 @@ export function App() {
   /* dark follows the device until someone chooses (theme.ts) */
   const [darkChoice, setDarkChoice] = useState(() => readDarkChoice(services.preferences.storage)), [deviceDark, setDeviceDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches);
   const sounding = useSyncExternalStore(audio.subscribe, audio.running);
-  const [onboardingDismissed, dismissOnboarding] = useState(false);
+  /* whose first meeting stands over the screen they connected on: it stays until Keep, even once the fourth re-roll has
+     locked the critter (onboarding.tsx) */
+  const [meetingFor, setMeetingFor] = useState<string | null>(null);
   const [online, setOnline] = useState(navigator.onLine);
   const providers = useRef<Promise<AccountProvider[]> | undefined>(undefined);
   const working = busy || state.busy;
@@ -99,7 +101,7 @@ export function App() {
     if (!provider) return;
     setWaiting(option);
     void run(async () => {
-      try { await session.connect(provider, option); audio.play('connect'); dismissOnboarding(false); setConnecting(false); setConnectReason(''); if (resumeAfterConnect.current) { resumeAfterConnect.current = false; setAlert(copy['connect.resumed']); } }
+      try { await session.connect(provider, option); audio.play('connect'); setConnecting(false); setConnectReason(''); if (resumeAfterConnect.current) { resumeAfterConnect.current = false; setAlert(copy['connect.resumed']); } }
       catch (error) { closeConnect(); setAlert(message(error, 'connect.rejected')); }
       finally { setWaiting(null); }
     });
@@ -109,6 +111,9 @@ export function App() {
   const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(path);
   const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(path);
   const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(path);
+  /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
+  if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
+  const meeting = me !== null && meetingFor === me.address;
   const openProfile = () => { profileOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setProfileOpen(true); };
   const closeSettings = () => { setSettingsOpen(false); requestAnimationFrame(() => profileOpener.current?.isConnected && profileOpener.current.focus()); };
   /* the Music toggle wherever there is no Settings to open: the launcher, the first steps and a visitor's header */
@@ -126,18 +131,20 @@ export function App() {
   else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={path} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
   else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
+  /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
+  const layer = me && meeting ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} /></Suspense> : null;
   return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
-    <a href="#content" className="skip-link">{copy['skip.content']}</a>
+    <a href="#content" className="skip-link" inert={layer !== null}>{copy['skip.content']}</a>
     <aside className="environment-notice" aria-label={copy['app.environment.label']}><strong>{copy['app.environment.badge']}</strong><span>{copy['app.environment.help']}</span></aside>
-    <header className="app-header"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
+    <header className="app-header" inert={layer !== null}><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
     </nav><div id="feast-header" /></header>
     {!online && !launching ? <p className="notice">{copy['err.offline']}</p> : null}
-    <main id="content" tabIndex={-1}>{content}</main>
-    {profileOpen && me ? <Suspense fallback={null}><ProfileMenu me={me} close={() => setProfileOpen(false)} settings={() => { setProfileOpen(false); setSettingsOpen(true); }} meet={() => { setProfileOpen(false); dismissOnboarding(false); }} disconnect={() => void run(async () => { await session.disconnect(); setProfileOpen(false); })} run={run} busy={working} /></Suspense> : null}
+    <main id="content" tabIndex={-1} inert={layer !== null}>{content}</main>
+    {layer ? <div className="screen-layer">{layer}</div> : null}
+    {profileOpen && me ? <Suspense fallback={null}><ProfileMenu me={me} close={() => setProfileOpen(false)} settings={() => { setProfileOpen(false); setSettingsOpen(true); }} meet={() => setProfileOpen(false)} disconnect={() => void run(async () => { await session.disconnect(); setProfileOpen(false); })} run={run} busy={working} /></Suspense> : null}
     {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} /> : null}
-    {me ? <Suspense fallback={null}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} visible={!connecting && !onboardingDismissed} close={() => dismissOnboarding(true)} announce={announce} /></Suspense> : null}
     {settingsOpen ? <Dialog title={copy['settings.title']} onClose={closeSettings}><div className="stack">{(Object.keys(settingKeys) as StoredSetting[]).map(key => {
       const labels = { effects: 'sound.effects.label', music: 'sound.music.label', still: 'motion.still.label', simple: 'view.simple.label' } as const;
       const help = { effects: 'sound.effects.help', music: 'sound.music.help', still: 'motion.still.help', simple: 'view.simple.help' } as const;

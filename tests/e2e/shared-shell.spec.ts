@@ -147,13 +147,21 @@ test('the first meeting saves the name and chosen critter together from its fixe
   await page.goto('/');
   await page.getByRole('button', { name: 'Connect', exact: true }).click();
   await page.getByRole('button', { name: 'Rehearsal critter 8', exact: true }).click();
-  const critter = page.getByRole('dialog', { name: 'Meet your critter', exact: true });
+  const critter = page.getByRole('region', { name: 'Meet your critter', exact: true });
   await expect(critter).toBeVisible();
-  const frame = await critter.boundingBox();
+  const keep = critter.getByRole('button', { name: 'Keep this one', exact: true }), frame = await keep.boundingBox();
   await expect(critter.locator('svg.portrait')).toHaveCount(1);
-  await critter.getByRole('textbox', { name: 'Display name', exact: true }).fill('Avery');
-  expect(await critter.boundingBox()).toEqual(frame);
-  await critter.getByRole('button', { name: 'Keep this one', exact: true }).click();
+  // the name counts to 16 and stops there (D10)
+  const name = critter.getByRole('textbox', { name: 'Display name', exact: true });
+  await name.fill('Avery');
+  await expect(critter.getByText('5 / 16', { exact: true })).toBeVisible();
+  await name.fill('Bartholomew Brambleworth');
+  await expect(name).toHaveValue('Bartholomew Bram');
+  await expect(critter.getByText('16 / 16', { exact: true })).toBeVisible();
+  await name.fill('Avery');
+  expect(await keep.boundingBox()).toEqual(frame);
+  await keep.click();
+  await expect(critter).toHaveCount(0);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(named && kept).toBe(true);
 });

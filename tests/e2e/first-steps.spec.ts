@@ -31,8 +31,11 @@ test('an invited first-time member keeps their destination, draft name and critt
   await page.reload();
   await page.getByRole('button', { name: 'Connect', exact: true }).click();
   await page.getByRole('button', { name: 'This browser', exact: true }).click();
-  const meeting = page.getByRole('dialog', { name: 'Meet your critter', exact: true });
+  // the first meeting is a whole screen over the page the member connected on, with no way past it but Keep
+  const meeting = page.getByRole('region', { name: 'Meet your critter', exact: true });
   await expect(meeting).toBeVisible();
+  await expect(meeting.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
+  await expect(page.locator('#content')).toHaveAttribute('inert', '');
   const frame = await meeting.boundingBox(), keep = meeting.getByRole('button', { name: 'Keep this one', exact: true });
   const keepFrame = await keep.boundingBox();
   await expect(keep).toBeDisabled();
@@ -53,7 +56,7 @@ test('an invited first-time member keeps their destination, draft name and critt
     else await route.continue();
   });
   await keep.click();
-  await expect(meeting.getByRole('alert')).not.toBeEmpty();
+  await expect(page.getByRole('alert')).not.toBeEmpty();
   await expect(meeting.getByRole('textbox')).toHaveValue('Avery');
   expect(await meeting.boundingBox()).toEqual(frame);
   await page.unroute('**/api/me');

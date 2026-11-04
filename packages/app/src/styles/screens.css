@@ -86,9 +86,58 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .invite-deadlines b { font-size:var(--cc-text-sm); line-height:1.3; text-wrap:balance; }
 .invite-deadlines time { font-size:var(--cc-text-xs); color:var(--cc-text-2); white-space:nowrap; }
 
-/* ------------------------------------------------------------------ the first steps: the wordmark in the header, three
-   dots, and on the second step practice crumbs */
-.learn .game-header .wordmark { flex:1; font-size:22px; color:inherit; text-decoration:none; }
+/* ------------------------------------------------------------------ the header over every screen with a floor
+   (screen-header.tsx), which is also the game's (game.css .game-header): a back chevron, the burrow's line over the
+   title or the wordmark, the beta chip beside them, and at the right your critter's face */
+.game-header .wordmark { font-size:22px; color:inherit; text-decoration:none; }
+.screen-back { width:44px; height:44px; min-height:44px; flex:none; display:grid; place-items:center; margin-left:-10px; padding:0; border:0; border-radius:50%; background:transparent; color:var(--cc-text); box-shadow:none; }
+.screen-back .game-icon { width:20px; height:20px; }
+.screen-mark, .screen-title { flex:1; min-width:0; display:flex; align-items:center; gap:10px; }
+.screen-mark .wordmark { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.screen-title h1 { min-width:0; margin:0; font-family:var(--cc-font-display); font-weight:800; font-size:var(--cc-text-xl); line-height:1.2; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* the burrow's line keeps the game's 44 px target over the title, with the chip after its words */
+.game-line { position:absolute; top:-6px; left:0; right:0; display:flex; align-items:flex-start; gap:8px; pointer-events:none; }
+.game-line > .game-burrow { position:relative; top:0; flex:0 1 auto; pointer-events:auto; }
+.game-line > .beta-chip { margin-top:8px; }
+.beta-chip { flex:none; display:inline-flex; align-items:center; height:20px; padding:0 8px; border-radius:var(--cc-radius-pill); background:var(--cc-bg-sunken); color:var(--cc-text-2); font-size:var(--cc-text-xs); font-weight:700; line-height:1; white-space:nowrap; }
+
+/* ------------------------------------------------------------------ a screen with a floor (place-screen.tsx): the
+   invite's frame, with the sheet's words scrolling above its actions, which stay at its foot */
+.place-screen:focus { outline:none; }
+.place-sheet { display:grid; grid-template-columns:minmax(0, 1fr); grid-template-rows:minmax(0, 1fr) auto; overflow:hidden; }
+.place-words { min-height:0; overflow:auto; overscroll-behavior:contain; display:flex; flex-direction:column; gap:14px; padding:2px; }
+.place-words > * { flex:none; }
+.place-words h1 { margin:0; font-size:var(--cc-text-xl); line-height:1.25; letter-spacing:-.01em; }
+.place-words h3 { margin:0; font-size:var(--cc-text-md); line-height:1.3; }
+.place-words .field { margin:0; }
+.place-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.place-actions { display:flex; gap:10px; align-items:center; }
+.place-actions > .pill { flex:1 1 0; min-width:0; padding-inline:12px; }
+@media (max-width:360px) { .place-actions > .pill { padding-inline:8px; font-size:var(--cc-text-sm); } }
+/* a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx) */
+.screen-layer { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:var(--cc-bg); }
+.screen-layer > .core-game { flex:1; height:auto; min-height:0; }
+#root:has(> .screen-layer) > .notice { position:fixed; top:64px; left:16px; right:16px; z-index:5000; }
+/* who has done something, at a glance: the count, the faces in a row with those not yet dimmed, then their names */
+.face-row { display:grid; gap:4px; }
+.face-row-count { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.face-row-faces { display:flex; flex-wrap:wrap; align-items:center; row-gap:4px; padding-left:10px; }
+.face-row-face { margin-left:-10px; line-height:0; }
+.face-row-face[data-done="false"] .stage { opacity:.45; filter:grayscale(.4); }
+.face-row-waiting { font-size:var(--cc-text-xs); color:var(--cc-text-2); }
+
+/* ------------------------------------------------------------------ the first meeting (onboarding.tsx): your critter
+   large on the floor; in the sheet its element, the line, the name with its counter, Re-roll and Keep this one */
+.name-field { display:grid; gap:6px; }
+.name-field label { font-size:var(--cc-text-sm); font-weight:700; color:var(--cc-text); }
+.name-box { position:relative; display:block; }
+.name-box input { padding-right:72px; }
+.name-count { position:absolute; right:14px; top:50%; translate:0 -50%; font-size:var(--cc-text-xs); font-weight:400; color:var(--cc-text-2); font-variant-numeric:tabular-nums; pointer-events:none; }
+.name-count[data-over="true"] { color:var(--cc-error-text); font-weight:700; }
+.meeting-name { font-weight:700; }
+
+/* ------------------------------------------------------------------ the first steps: three dots, and on the second
+   step practice crumbs */
 .learn-dots { display:flex; gap:6px; align-items:center; }
 .learn-dots i { width:8px; height:8px; border-radius:4px; background:var(--cc-line); }
 .learn-dots i[data-on="true"] { width:22px; background:var(--cc-text); }
