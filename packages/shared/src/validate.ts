@@ -1,5 +1,5 @@
 import type { CopyId } from './copy.js';
-import { MAX_FEAST_TARGETS } from './limits.js';
+import { MAX_FEAST_TARGETS, MAX_NAME_LENGTH } from './limits.js';
 import type { FeastSetup, Hex } from './types.js';
 
 export class ValidationError extends Error {
@@ -40,7 +40,7 @@ export function parseFeastSetup(value: unknown): FeastSetup {
     if (!Array.isArray(input.options) || input.options.length === 0) throw new ValidationError('setup.options.title');
     if (input.options.length > MAX_FEAST_TARGETS) throw new ValidationError('err.feastCapacity');
     for (const option of input.options) {
-      const item = record(option), name = text(item.name, 1, 80, 'setup.option.unnamed', true);
+      const item = record(option), name = text(item.name, 1, MAX_NAME_LENGTH, 'setup.option.unnamed', true);
       if (options.some(existing => existing.name.toLowerCase() === name.toLowerCase())) throw new ValidationError('setup.option.duplicate');
       options.push({ name, statement: text(item.statement ?? '', 0, 2000, 'gathering.limit') });
     }
@@ -58,7 +58,8 @@ export function parseProfileUpdate(value: unknown): { displayName?: string; vari
   const input = record(value), result: { displayName?: string; variant?: number; keepCritter?: true } = {};
   // Version adoption needs its own reviewed opt-in operation, never an ordinary edit.
   if ('generatorVersion' in input || 'rendererVersion' in input) throw new ValidationError();
-  if (input.displayName !== undefined) result.displayName = text(input.displayName, 1, 80, 'name.label', true);
+  // A name saved before the 16-character limit stays as it is; only a new one is held to it (docs/decisions.md, 2026-11-03).
+  if (input.displayName !== undefined) result.displayName = text(input.displayName, 1, MAX_NAME_LENGTH, 'name.limit', true);
   if (input.variant !== undefined) result.variant = integer(input.variant, 0, 4);
   if (input.keepCritter !== undefined) { if (input.keepCritter !== true) throw new ValidationError(); result.keepCritter = true; }
   return result;

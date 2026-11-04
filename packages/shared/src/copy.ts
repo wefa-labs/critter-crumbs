@@ -189,7 +189,7 @@ export const copy = {
   "setup.deadline.order": "Scattering has to close after gathering.",
   "setup.deadline.past": "That gathering deadline has already passed. Choose a later time.",
   "setup.title.missing": "The feast needs a title, up to 80 characters.",
-  "setup.option.unnamed": "Every option needs a name, up to 80 characters.",
+  "setup.option.unnamed": "Every option needs a name, up to 16 characters.",
   "setup.option.duplicate": "Two options have the same name. Give each one its own.",
   "setup.privacy.title": "Who sees the result?",
   "setup.privacy.aggregate.label": "The result",

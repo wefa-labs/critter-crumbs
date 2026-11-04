@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_NAME_LENGTH } from '@critter-crumbs/shared';
+import { MAX_NAME_LENGTH, parseProfileUpdate } from '@critter-crumbs/shared';
 import { fitName, nameFits } from '../src/app/name-field.js';
 
 /* Names are 16 characters, counted as the server counts them (decision D10 of the November UI audit). */
@@ -17,8 +17,14 @@ describe('a name field', () => {
     expect(fitName(`${saved}!`, saved)).toBe(saved);
   });
 
-  it('saves something besides spaces, up to 16 once trimmed', () => {
-    for (const name of ['Juniper', ` ${'a'.repeat(16)} `, '🦊'.repeat(16)]) expect(nameFits(name)).toBe(true);
-    for (const name of ['', '   ', 'a'.repeat(17), '🦊'.repeat(17)]) expect(nameFits(name)).toBe(false);
+  it('saves only what the server takes: something besides spaces, up to 16 once trimmed', () => {
+    for (const name of ['Juniper', ` ${'a'.repeat(16)} `, '🦊'.repeat(16)]) {
+      expect(nameFits(name)).toBe(true);
+      expect(() => parseProfileUpdate({ displayName: name })).not.toThrow();
+    }
+    for (const name of ['', '   ', 'a'.repeat(17), '🦊'.repeat(17)]) {
+      expect(nameFits(name)).toBe(false);
+      expect(() => parseProfileUpdate({ displayName: name })).toThrow('name.limit');
+    }
   });
 });

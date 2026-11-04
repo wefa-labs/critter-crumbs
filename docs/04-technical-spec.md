@@ -95,7 +95,7 @@ create table profiles (
   renderer_version  text not null default '1',
   variant        smallint not null default 0 check (variant between 0 and 4),
   rerolls_used   smallint not null default 0 check (rerolls_used between 0 and 4),
-  display_name   text,                       -- used when no ENS name
+  display_name   text,                       -- used when no ENS name; 1–16 characters on save (below), earlier ones kept
   created_at     timestamptz not null default now()
 );
 
@@ -362,7 +362,7 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `POST /session` | — | Verify the signed message; set the cookie; return profile |
 | `DELETE /session` | session | Clear the cookie (`Clear-Site-Data: "cookies"`) |
 | `GET /me` | session | Profile, burrows, ENS name |
-| `PUT /me` | session | Display name; re-roll (`variant`, guarded by `rerolls_used ≤ 4`) |
+| `PUT /me` | session | Display name, 1 to 16 characters once trimmed; re-roll (`variant`, guarded by `rerolls_used ≤ 4`) |
 | `POST /burrows` | session | Create |
 | `GET /burrows/:id` | member | Members, feasts (phase computed), join state |
 | `POST /burrows/:id/members` | member | Add by address (ENS resolved server-side) |
@@ -382,7 +382,7 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `GET /dev/config`, `POST /dev/seed`, `POST /dev/time`, `POST /dev/release-key` | dev only | §14; `config` tells the browser whether the rehearsal accounts may be offered |
 | `POST /dev/result-transaction` | dev only, local API only | Stands in for the Base transaction when a result is recorded in the local rehearsal. Only `scripts/local-api.ts` can answer it, so it has no route file |
 
-Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (no schema library). Every write is wrapped in a transaction; every phase gate calls `phaseAt(feast, serverNow)`.
+Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (no schema library). A display name and an option name are 1 to 16 Unicode code points once trimmed (`MAX_NAME_LENGTH`; `docs/decisions.md`, 2026-11-03); the limit applies to new saves, so names stored under the earlier limit of 80 stay as they are, with no database constraint and nothing migrated. Every write is wrapped in a transaction; every phase gate calls `phaseAt(feast, serverNow)`.
 
 ## 10. Storage and hosting
 
@@ -503,7 +503,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E22 | ENS RPC down | Addresses shown, `err.ensUnavailable` | — | Yes |
 | E23 | Store down during gathering or scattering | `err.storeUnreachable`; typed statements and allocations stay in the DOM | Retry; the deadline does not move (only the single extension can, before it passes) | Yes if it returns before close; a store outage across the close is the one real risk, mitigated by Vercel + Neon availability and by the feast's deadlines being days, not minutes |
 | E24 | Extension requested after the gathering deadline | Rejected: `gathering.extend` is hidden once `phaseAt` says scattering | — | Yes |
-| E25 | Duplicate option names, zero options, crumbs out of bounds, deadline order | Inline form errors (`setup.*`) | Fix and resubmit | — |
+| E25 | Duplicate option names, an option name missing or over 16 characters, zero options, crumbs out of bounds, deadline order | Inline form errors (`setup.*`) | Fix and resubmit | — |
 | E26 | Two tabs, one scattering in each | Each submission gets its own `seq`; the latest counts; both tabs re-read and show the latest | — | Yes |
 | E27 | Statement over 2,000 characters pasted | Truncated at the cap client-side; `gathering.limit`; the server rejects longer | — | Yes |
 | E28 | Reveal opened before Shutter's timestamp on a fast clock | `feast.keyNotYet`; nothing decrypts | Wait | Yes |
