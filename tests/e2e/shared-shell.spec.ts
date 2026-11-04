@@ -52,6 +52,7 @@ test('your critter is one screen over the page it was opened from, with the sett
   const profile = page.getByRole('region', { name: 'Your critter', exact: true });
   await expect(page).toHaveURL(/\/your-critter$/);
   await expect(profile.getByRole('heading', { level: 1, name: 'Your critter', exact: true })).toBeVisible();
+  await expect(profile.getByRole('note', { name: 'Development status', exact: true })).toContainText('Beta · Testnet');
   await expect(profile).toBeFocused();
   await expect(profile.getByText('0x7E5F…5Bdf', { exact: true })).toBeVisible();
   await expect(profile.getByText("This one's yours.", { exact: true })).toBeVisible();

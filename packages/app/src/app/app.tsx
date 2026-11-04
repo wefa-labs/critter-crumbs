@@ -24,6 +24,7 @@ const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.
 const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
 const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
 import { returnPath, YOUR_CRITTER_PATH } from './learn-return.js';
+import { BetaChip } from './screen-header.js';
 import { Link, Opening, ProfileButton, navigate } from './ui.js';
 
 type Choice = { provider: AccountProvider; option: AccountOption };
@@ -150,8 +151,7 @@ export function App() {
   }, [layered, opener]);
   return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
     <a href="#content" className="skip-link" inert={layered}>{copy['skip.content']}</a>
-    <aside className="environment-notice" aria-label={copy['app.environment.label']}><strong>{copy['app.environment.badge']}</strong><span>{copy['app.environment.help']}</span></aside>
-    <header className="app-header" inert={layered}><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
+    <header className="app-header" inert={layered}><div className="screen-mark"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><BetaChip /></div><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
     </nav><div id="feast-header" /></header>
