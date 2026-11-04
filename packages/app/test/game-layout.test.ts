@@ -71,6 +71,20 @@ describe('October surfaces', () => {
     expect(at('scatter', { width: 375, height: 812 }).trail).toEqual([]);
     expect(layoutGame({ viewport: { width: 1440, height: 900 }, critters: critters(8), focus: 0, reading: true, issued: 100, ...scattering('desktop') }).trail).toEqual([]);
   });
+  it('sizes the phone statement to its text up to 378 px, the trail rising to its foot (D8)', () => {
+    const { surface, scene } = composeGame('reading', 'phone');
+    const open = (statementHeight?: number) => layoutGame({ viewport: { width: 375, height: 812 }, critters: critters(8), focus: 0, reading: true, issued: 100, surface, scene, ...(statementHeight === undefined ? {} : { statementHeight }) });
+    /* a line or two: the bubble is that tall, at the same place, and the puffs reach up to just under it */
+    const short = open(131.4);
+    expect(short.statement).toEqual({ x: 12, y: 12, width: 351, height: 132 });
+    const top = short.trail.at(-1)!;
+    expect(top.y + top.height / 2).toBeGreaterThan(12 + 132);
+    expect(top.y + top.height / 2).toBeLessThan(12 + 378);
+    /* a long statement, or one not yet measured, takes the whole bubble and scrolls inside it */
+    for (const height of [900, undefined, 0]) expect(open(height).statement.height).toBe(378);
+    /* a shorter bubble covers fewer tags */
+    expect(short.slots.filter(slot => slot.tag.hidden).length).toBeLessThanOrEqual(open(900).slots.filter(slot => slot.tag.hidden).length);
+  });
   it('stands the desktop results huddle on the folded dock, every portrait clear of its controls', () => {
     for (const viewport of [{ width: 1280, height: 720 }, { width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }]) for (const n of [4, 6, 8, 10]) {
       const layout = at('results', viewport, n);

@@ -1,0 +1,10 @@
+/* The feel and the notices around the screens (the November UI audit, build steps 10 to 12). */
+
+/* ------------------------------------------------------------------ a floor critter stirred by a touch
+   (app/floor-stir.ts): the game's sleep glyphs, each hidden until it is let out */
+.floor-critter .sleep-glyph { opacity:1; line-height:1; }
+.floor-critter .sleep-glyph span { opacity:0; }
+
+/* ------------------------------------------------------------------ the invite's floor: the game's window plate in a
+   box the size of the game's scene (invite.tsx), its foot under the sheet */
+.invite-plate { position:absolute; inset:0 0 auto; height:100%; }

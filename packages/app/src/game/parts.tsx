@@ -81,6 +81,16 @@ export function critterElement(runtime: StageRuntime, index: number): CritterEle
   return parameters?.version === '2' ? parameters.element as CritterElement : null;
 }
 
+/**
+ * How tall the open statement's bubble stands with all of its text showing: the bubble's frame and heading, the text's
+ * own height and the padding under it. The text's height is its laid-out height, which the bubble's opening scale does
+ * not change; a pixel more covers the frame's measures, which the browser rounds.
+ */
+function wholeStatementHeight(host: HTMLElement, text: HTMLElement) {
+  const bubble = host.firstElementChild as HTMLElement, scroll = text.parentElement!, room = getComputedStyle(scroll);
+  return bubble.offsetHeight - scroll.offsetHeight + parseFloat(room.paddingTop) + parseFloat(room.paddingBottom) + parseFloat(getComputedStyle(text).height) + 1;
+}
+
 /** What a state's surface holds; which of these shows is the composition's choice, not the screen's. */
 export interface GameSurfaces {
   /** dock states: the focus row and the bar's middle; the results states keep the bar */
@@ -105,8 +115,8 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
   reading?: boolean; onRead?: (index: number) => void; onClose?: () => void; announce: (text: string) => void; editable?: boolean; sceneId?: string;
   counts?: readonly number[]; remaining?: number; issued?: number; heapHost?: React.RefObject<HTMLDivElement | null>;
 }) {
-  const body = useRef<HTMLDivElement>(null), scene = useRef<HTMLDivElement>(null), dockHost = useRef<HTMLDivElement>(null);
-  const [viewport, setViewport] = useState({ width: 390, height: 844 });
+  const body = useRef<HTMLDivElement>(null), scene = useRef<HTMLDivElement>(null), dockHost = useRef<HTMLDivElement>(null), statementHost = useRef<HTMLDivElement>(null);
+  const [viewport, setViewport] = useState({ width: 390, height: 844 }), [statementHeight, setStatementHeight] = useState<number>();
   const pile = useTrait(runtime.heap, Pile)!;
   const previous = useRef<ReturnType<typeof layoutGame> | null>(null), from = useRef<ReturnType<typeof layoutGame> | null>(null);
   useLayoutEffect(() => {
@@ -138,8 +148,20 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
     growth: gathered ? 1 + GROWTH.scaleGain * entity.get(Received)!.fed : 1,
     away: fedAny && entity.get(Received)!.crumbs <= 0,
   }));
-  const layout = layoutGame({ viewport, critters, focus, reading, issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
+  const layout = layoutGame({ viewport, critters, focus, reading, ...(statementHeight === undefined ? {} : { statementHeight }), issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
   const turn = (direction: number) => turnTo((focus + direction + critters.length) % critters.length);
+  /* the phone's open statement is as tall as its text, up to the layout's bubble (D8): measured as each statement opens,
+     before the frame is drawn, and again if its text changes height (a font arriving) */
+  const phoneStatement = reading && !layout.desktop && !!surfaces.statement?.phone;
+  useLayoutEffect(() => {
+    const host = statementHost.current, text = host?.querySelector<HTMLElement>('.statement-scroll > *');
+    if (!phoneStatement || !host || !text) return;
+    const measure = () => { const height = wholeStatementHeight(host, text); setStatementHeight(current => current === height ? current : height); };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(text);
+    return () => observer.disconnect();
+  }, [phoneStatement, focus]);
   const away = critters.filter(critter => critter.away).length;
   useLayoutEffect(() => {
     const old = previous.current;
@@ -198,7 +220,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
           <button key={bubble.index} type="button" className="thought-target" data-focus={bubble.index === focus} aria-label={formatCopy('read.statement', { name: targetLabel(feast.targets[bubble.index]!) })} onClick={readerOf(bubble.index)} style={{ ...rectStyle(hitRect(bubble.rect)), zIndex: 2950, '--bubble-width': `${bubble.rect.width}px`, '--bubble-height': `${bubble.rect.height}px` } as CSSProperties}><ThoughtBubble /></button>
         )) : null}
         {layout.trail.map((puff, index) => <i key={index} className="thought-puff" aria-hidden="true" style={rectStyle(puff)} />)}
-        {reading && !desktop && surfaces.statement?.phone ? <div className="statement-host" style={rectStyle(layout.statement)}>{surfaces.statement.phone}</div> : null}
+        {phoneStatement ? <div ref={statementHost} className="statement-host" style={rectStyle(layout.statement)}>{surfaces.statement!.phone}</div> : null}
         {surfaces.toast ?? null}
         {showsDock ? (
           <div ref={dockHost} className="dock-position" data-surface={surface.kind} style={rectStyle(layout.dock)}>

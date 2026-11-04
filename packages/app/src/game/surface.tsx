@@ -66,8 +66,11 @@ export function PanelStatement({ name, element, own, body, empty }: { name: stri
   );
 }
 
-/** The phone's results: the dock grown into a card with its heading and close icon, the list scrolling under a fade. */
-export function ResultsCard({ title, close, heading, children }: { title: string; close?: () => void; heading?: React.RefObject<HTMLHeadingElement | null>; children: ReactNode }) {
+/**
+ * The phone's results: the dock grown into a card with its heading and close icon, the list scrolling under a fade, and
+ * its actions pinned at its foot, so a long list never pushes the download below the fold (decision D9).
+ */
+export function ResultsCard({ title, close, heading, actions, children }: { title: string; close?: () => void; heading?: React.RefObject<HTMLHeadingElement | null>; actions?: ReactNode; children: ReactNode }) {
   return (
     <section className="results-card" aria-label={title}>
       <div className="results-heading">
@@ -75,6 +78,7 @@ export function ResultsCard({ title, close, heading, children }: { title: string
         {close ? <button className="icon-button statement-close" type="button" aria-label={copy['action.close']} onClick={close}><GameIcon name="close" /></button> : null}
       </div>
       <div className="results-scroll">{children}</div>
+      {actions ? <div className="results-actions">{actions}</div> : null}
     </section>
   );
 }
