@@ -271,7 +271,7 @@ Two things Schell would ask of the whole, rather than of a screen:
 
 ## What to update: a build order
 
-Tracer bullets, each shippable and reviewable on its own. Workstream B throughout, with small shared changes to `copy.ts`. Every string a copy ID with a Design System §10 row; the shell stays under 120 KB (it measures 117,751 gzip bytes on main at 64497b0, so the frame's session first moves the connected screens into lazy chunks; the floor pieces are already in it for the launcher); the vocabulary rules; nothing opens unasked.
+Tracer bullets, each shippable and reviewable on its own. Workstream B throughout, with small shared changes to `copy.ts`. Every string a copy ID with a Design System §10 row; the shell stays under 120 KB (it measures 117,505 gzip bytes on main at 64497b0, so the frame's session first moves the connected screens into lazy chunks; the floor pieces are already in it for the launcher); the vocabulary rules; nothing opens unasked.
 
 | # | Change | Where | Size | Must or could |
 |---|---|---|---|---|
@@ -315,4 +315,4 @@ Checks for each: the e2e suite (setup, gathering, the launcher, the shared shell
 - **Not checked:** a real phone, a screen reader, WebKit, sound, the 3D meshes (none load with Garden Spirits), the dark look beyond the launcher, home and the burrow.
 - **One harness note.** Playwright's `click` on the dock's plus button and the count field timed out on the live scatter screen under phone emulation, though both take presses (`c04` was made by dispatching pointer events, and the devtools hit test lands on the button). The October screens suite drives the same controls without trouble, so this is left as a note for whoever extends `capture.mjs`, not as a finding against the app.
 - No code was changed. This folder, its images, the two scripts and the Schell digest are the only files added.
-- **Corrected after merging (3 November).** X3 first said the setup form's groups were still capsules, from QA lifecycle-14; they were mended on 16 October, and only the home and burrow cards are capsules. The build order first put the shell at about 104 KB; a build of main at 64497b0 measures 117,751 of 120,000 gzip bytes.
+- **Corrected after merging (3 November).** X3 first said the setup form's groups were still capsules, from QA lifecycle-14; they were mended on 16 October, and only the home and burrow cards are capsules. The build order first put the shell at about 104 KB; the build's own budget check on main at 64497b0 measures 117,505 of 120,000 gzip bytes.
