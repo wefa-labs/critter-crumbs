@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { ApiClientError, createApiClient, type AccountOption, type AccountProvider } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, ValidationError } from '@critter-crumbs/shared';
-import { browserSettings, MUSIC_SETTING, saveSetting, settingKeys, type StoredSetting } from '../sim/settings.js';
+import { browserSettings, MUSIC_SETTING, saveSetting, type StoredSetting } from '../sim/settings.js';
 import { createSession } from './session.js';
 import { createAudio, UNLOCK_EVENTS, type MusicTrack } from '../audio/index.js';
 import { AudioProvider } from '../audio/context.js';
@@ -22,8 +22,9 @@ const HomeRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Ho
 const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
 const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
 const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
-const ProfileMenu=lazy(()=>import('./profile.js').then(module=>({default:module.ProfileMenu})));
-import { Dialog, Link, Opening, ProfileButton } from './ui.js';
+const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
+import { returnPath, YOUR_CRITTER_PATH } from './learn-return.js';
+import { Link, Opening, ProfileButton, navigate } from './ui.js';
 
 type Choice = { provider: AccountProvider; option: AccountOption };
 function message(error: unknown, fallback: CopyId = 'err.generic') { return error instanceof ApiClientError || error instanceof ValidationError ? copy[error.copyId].replace(/\{[^}]+\}/g, '…') : copy[fallback]; }
@@ -37,12 +38,13 @@ export function App() {
   });
   const { api, session, audio, pressWatch } = services, state = useSyncExternalStore(session.subscribe, session.snapshot);
   const [path, setPath] = useState(location.pathname), [busy, setBusy] = useState(false), running = useRef(false), resumeAfterConnect = useRef(false);
+  /* the screen your critter's profile was opened over, which is where its back chevron leads, and what opened it: the
+     face that was pressed, to have the focus back; a profile opened by its own address has neither beneath it */
+  const [under, setUnder] = useState(() => returnPath(history.state)), [opener, setOpener] = useState<Element | null>(null);
   const [connecting, setConnecting] = useState(false), [choices, setChoices] = useState<Choice[]>([]), [discovering, setDiscovering] = useState(false), [connectReason, setConnectReason] = useState('');
   /* the choice the connect sheet is waiting on, from its press until the app it names has answered */
   const [waiting, setWaiting] = useState<AccountOption | null>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false), [settings, setSettings] = useState(services.preferences.settings);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileOpener = useRef<HTMLElement | null>(null);
+  const [settings, setSettings] = useState(services.preferences.settings);
   /* dark follows the device until someone chooses (theme.ts) */
   const [darkChoice, setDarkChoice] = useState(() => readDarkChoice(services.preferences.storage)), [deviceDark, setDeviceDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches);
   const sounding = useSyncExternalStore(audio.subscribe, audio.running);
@@ -60,7 +62,7 @@ export function App() {
   }
   useEffect(() => { void session.restore().catch(error => setAlert(message(error))); }, [session]);
   useEffect(() => {
-    const changed = () => { audio.stop(); setPath(location.pathname); setAlert(''); setSettingsOpen(false); setProfileOpen(false); };
+    const changed = () => { audio.stop(); setPath(location.pathname); setUnder(returnPath(history.state)); setAlert(''); };
     const network = () => { setOnline(navigator.onLine); setAlert(navigator.onLine ? '' : copy['err.offline']); if (navigator.onLine) announce(copy['err.online']); };
     const media = matchMedia('(prefers-reduced-motion: reduce)'), scheme = matchMedia('(prefers-color-scheme: dark)');
     const motion = () => setSettings(value => ({ ...value, reducedMotion: media.matches })), device = () => setDeviceDark(scheme.matches);
@@ -108,48 +110,54 @@ export function App() {
   }
   function chooseSetting(key: StoredSetting, value: boolean) { saveSetting(services.preferences.storage, key, value); setSettings(settings => ({ ...settings, [key]: value })); }
   function chooseDark(value: boolean) { saveDarkChoice(services.preferences.storage, value); showDarkChoice(document.documentElement, value); setDarkChoice(value); }
-  const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(path);
-  const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(path);
-  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(path);
+  /* the screen in view, or the one beneath your critter's profile while that is open */
+  const profile = path === YOUR_CRITTER_PATH, screen = profile ? under : path;
+  const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(screen);
+  const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(screen);
+  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen);
   /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
   const meeting = me !== null && meetingFor === me.address;
-  const openProfile = () => { profileOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setProfileOpen(true); };
-  const closeSettings = () => { setSettingsOpen(false); requestAnimationFrame(() => profileOpener.current?.isConnected && profileOpener.current.focus()); };
+  const openProfile = () => { setOpener(document.activeElement); navigate(YOUR_CRITTER_PATH); };
   /* the Music toggle wherever there is no Settings to open: the launcher, the first steps and a visitor's header */
   const musicButton = <MusicButton on={settings.music} sounding={sounding} soundAtPress={pressWatch.soundAtPress} choose={value => chooseSetting(MUSIC_SETTING, value)} />;
   /* the launcher says its own trouble, in its sheet */
-  const launching = state.ready && !feastRoute && path !== '/how-it-works' && !me;
+  const launching = state.ready && !feastRoute && screen !== '/how-it-works' && !me;
   /* each screen's music; a feast's pages name their own, and loading leaves playing whatever was */
   let content, music: MusicTrack | undefined;
   if (!state.ready) content = <Opening bare />;
-  else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={openProfile} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={path} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
-  else if (path === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
+  else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={openProfile} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={screen} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
+  else if (screen === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
-  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={path} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
-  else if (path === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute api={api} session={session} run={run} busy={working} /></Suspense>; }
-  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={path} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
+  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
+  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute api={api} session={session} run={run} busy={working} /></Suspense>; }
+  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
   else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
-  const layer = me && meeting ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} /></Suspense> : null;
+  const layer = !me ? null
+    : meeting ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} /></Suspense>
+    : profile ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={() => navigate(under)} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
+      disconnect={() => void run(async () => { await session.disconnect(); navigate(under); })} run={run} busy={working} /></Suspense>
+    : null;
+  /* the screen beneath a layer stays as it was only when it was there before: your critter's profile, opened from it.
+     The first meeting stands over nothing, and the screen it was opened on arrives once it is done. */
+  const layered = layer !== null, beneath = !layered || (profile && !meeting && opener !== null);
+  useEffect(() => {
+    if (layered || !opener) return;
+    if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    setOpener(null);
+  }, [layered, opener]);
   return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
-    <a href="#content" className="skip-link" inert={layer !== null}>{copy['skip.content']}</a>
+    <a href="#content" className="skip-link" inert={layered}>{copy['skip.content']}</a>
     <aside className="environment-notice" aria-label={copy['app.environment.label']}><strong>{copy['app.environment.badge']}</strong><span>{copy['app.environment.help']}</span></aside>
-    <header className="app-header" inert={layer !== null}><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
+    <header className="app-header" inert={layered}><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
     </nav><div id="feast-header" /></header>
     {!online && !launching ? <p className="notice">{copy['err.offline']}</p> : null}
-    <main id="content" tabIndex={-1} inert={layer !== null}>{content}</main>
-    {layer ? <div className="screen-layer">{layer}</div> : null}
-    {profileOpen && me ? <Suspense fallback={null}><ProfileMenu me={me} close={() => setProfileOpen(false)} settings={() => { setProfileOpen(false); setSettingsOpen(true); }} meet={() => setProfileOpen(false)} disconnect={() => void run(async () => { await session.disconnect(); setProfileOpen(false); })} run={run} busy={working} /></Suspense> : null}
+    <main id="content" tabIndex={-1} inert={layered}>{beneath ? content : null}</main>
+    {layered ? <div className="screen-layer">{layer}</div> : null}
     {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} /> : null}
-    {settingsOpen ? <Dialog title={copy['settings.title']} onClose={closeSettings}><div className="stack">{(Object.keys(settingKeys) as StoredSetting[]).map(key => {
-      const labels = { effects: 'sound.effects.label', music: 'sound.music.label', still: 'motion.still.label', simple: 'view.simple.label' } as const;
-      const help = { effects: 'sound.effects.help', music: 'sound.music.help', still: 'motion.still.help', simple: 'view.simple.help' } as const;
-      return <label className="setting" key={key}><input type="checkbox" checked={settings[key]} onChange={event => chooseSetting(key, event.target.checked)} /><span><strong>{copy[labels[key]]}</strong><small>{copy[help[key]]}</small></span></label>;
-    })}<label className="setting"><input type="checkbox" checked={darkChoice ?? deviceDark} onChange={event => chooseDark(event.target.checked)} /><span><strong>{copy['view.dark.label']}</strong><small>{copy['view.dark.help']}</small></span></label>
-      <Link href="/how-it-works">{copy['launch.learn']}</Link></div></Dialog> : null}
   </Announcements></AudioProvider>;
 }

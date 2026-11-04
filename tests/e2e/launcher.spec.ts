@@ -1,6 +1,6 @@
 import { test, expect, type Page } from 'playwright/test';
 import { listen } from './listen.js';
-import { connectLocal, openSettings } from './session.js';
+import { connectLocal, openProfile } from './session.js';
 
 /*
  * Before connecting, as the flow page draws it (docs/explorations/app-screens: SCREENS.launch, invite, connect,
@@ -227,27 +227,30 @@ test('dark follows the device until Settings chooses, and the choice is kept', a
 
   await page.emulateMedia({ colorScheme: 'dark' });
   await connectLocal(page, 1);
-  await openSettings(page);
-  const dark = page.getByRole('checkbox', { name: /^Dark mode/ });
+  let profile = await openProfile(page);
+  const dark = profile.getByRole('switch', { name: 'Dark mode', exact: true });
   await expect(dark).toBeChecked();
   await dark.uncheck();
   expect(await ground(page)).toBe(LIGHT);
+  await profile.getByRole('button', { name: 'Back', exact: true }).click();
   await page.reload();
   await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
   expect(await ground(page)).toBe(LIGHT);
   // and the other way: dark chosen on a device that is light
   await page.emulateMedia({ colorScheme: 'light' });
-  await openSettings(page);
+  profile = await openProfile(page);
   await expect(dark).not.toBeChecked();
   await dark.check();
   expect(await ground(page)).toBe(DARK);
+  // the profile has its own address, so it is still there after a reload
   await page.reload();
-  await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
+  await expect(profile).toBeVisible();
   expect(await ground(page)).toBe(DARK);
-  // Settings also leads back to the first steps
-  await openSettings(page);
-  await page.getByRole('dialog').getByRole('link', { name: 'How it works', exact: true }).click();
+  // it also leads to the first steps, which return to it
+  await profile.getByRole('link', { name: 'How it works', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(profile).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 

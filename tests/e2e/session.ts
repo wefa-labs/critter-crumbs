@@ -33,7 +33,10 @@ export async function connectLocal(page: Page, index: number, name = 'Avery', cl
   await expect(page.getByRole('dialog')).toHaveCount(0);
 }
 
-export async function openSettings(page: Page) {
+/** Opens your critter's profile, whose switches are the settings, from the face in the header; returns the screen. */
+export async function openProfile(page: Page) {
   await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
-  await page.getByRole('dialog', { name: 'Your critter', exact: true }).getByRole('button', { name: 'Settings', exact: true }).click();
+  const profile = page.getByRole('region', { name: 'Your critter', exact: true });
+  await expect(profile).toBeVisible();
+  return profile;
 }

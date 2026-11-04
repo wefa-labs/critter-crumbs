@@ -136,6 +136,27 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .name-count[data-over="true"] { color:var(--cc-error-text); font-weight:700; }
 .meeting-name { font-weight:700; }
 
+/* ------------------------------------------------------------------ your critter (profile.tsx): its element over the
+   floor; in the sheet the name, the short address to copy, the settings as switches, How it works and Disconnect */
+.floor-chip { position:absolute; left:50%; top:12%; translate:-50% 0; z-index:1; }
+.profile-kept { font-size:var(--cc-text-xs); color:var(--cc-text-2); text-align:right; }
+.critter-address { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:48px; padding:0 4px 0 14px; border:1.5px solid var(--cc-line-strong); border-radius:14px; background:var(--cc-bg-raised); }
+.critter-address .address { overflow-wrap:normal; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.your-critter .quiet { padding-inline:10px; }
+.your-critter .place-actions { justify-content:space-between; }
+.your-critter .place-actions a.quiet { display:inline-flex; align-items:center; }
+.switch-row { display:grid; grid-template-columns:minmax(0, 1fr) auto; column-gap:14px; align-items:center; min-height:60px; padding:10px 0; cursor:pointer; }
+.switch-row + .switch-row { border-top:1px solid var(--cc-line); }
+.switch-row b { grid-column:1; font-size:var(--cc-text-md); line-height:1.3; }
+.switch-row small { grid-column:1; color:var(--cc-text-2); line-height:1.4; }
+/* the switch is the checkbox itself, drawn as a track and a knob, so the keyboard and the screen reader lose nothing */
+.switch-row input { grid-column:2; grid-row:1 / span 2; position:relative; width:52px; height:32px; margin:0; appearance:none; border-radius:var(--cc-radius-pill); border:1.5px solid var(--cc-line-strong); background:var(--cc-bg-sunken); cursor:pointer; transition:background-color 160ms var(--cc-ease-out); }
+.switch-row input::before { content:''; position:absolute; top:3px; left:3px; width:23px; height:23px; border-radius:50%; border:1.5px solid var(--cc-line-strong); background:var(--cc-bg); transition:left 160ms var(--cc-ease-out); }
+.switch-row input:checked { background:var(--cc-text); }
+.switch-row input:checked::before { left:22px; }
+@media (prefers-reduced-motion:reduce) { .switch-row input, .switch-row input::before { transition:none; } }
+html[data-still="true"] .switch-row input, html[data-still="true"] .switch-row input::before { transition:none; }
+
 /* ------------------------------------------------------------------ the first steps: three dots, and on the second
    step practice crumbs */
 .learn-dots { display:flex; gap:6px; align-items:center; }

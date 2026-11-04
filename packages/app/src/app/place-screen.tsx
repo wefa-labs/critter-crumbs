@@ -21,8 +21,8 @@ import { CritterFace, ProfileButton } from './ui.js';
  *   their feet in percent of the floor and sized in the design's phone pixels.
  * - `sheetHeight` is the sheet's height on the design's 812 px phone; a shorter phone gets a shorter one.
  * - `actions` stay pinned at the sheet's foot while the rest of the sheet scrolls.
- * - `over` is for a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx): it takes
- *   the focus, Escape goes back, and on leaving it the focus and the page's title return to the screen beneath.
+ * - `over` is for a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx, which also
+ *   returns the focus): it takes the focus, Escape goes back, and on leaving it the page's title is the beneath one's.
  */
 export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewer, painting, floor, sheetHeight, actions, over = false, className = '', children }: {
   title: string; wordmark?: boolean; burrow?: string; href?: string; back?: () => void;
@@ -33,13 +33,9 @@ export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewe
   /* before the page's title changes, so that leaving can give the screen beneath its own back */
   useEffect(() => {
     if (!over) { document.getElementById('content')?.focus(); return; }
-    const opener = document.activeElement, beneath = document.title;
+    const beneath = document.title;
     root.current?.focus();
-    return () => {
-      document.title = beneath;
-      if (opener instanceof HTMLElement && opener !== document.body && opener.isConnected) opener.focus();
-      else document.getElementById('content')?.focus();
-    };
+    return () => { document.title = beneath; };
   }, [over]);
   useEffect(() => { document.title = burrow ? formatCopy('app.contextTitle', { screen: title, burrow }) : formatCopy('app.pageTitle', { title }); }, [title, burrow]);
   return (
