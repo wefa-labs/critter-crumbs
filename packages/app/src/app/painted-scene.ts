@@ -7,7 +7,7 @@ import { gardenSpirits } from '../portraits/version.js';
  * scene; every size is the drawing's width in the design's phone pixels, which the stylesheet scales to the screen.
  * A room-scene instead uses the 1600 × 897 painting's coordinates and pixels (learn-steps.ts).
  */
-export type Painting = 'window' | 'dusk';
+export type Painting = 'window' | 'dusk' | 'entrance';
 export type Facing = 'left' | 'right' | null;
 export interface Standing { x: number; y: number; size: number }
 export interface SceneCritter extends Standing { address: string; /** which of the address's drawings, for a critter someone re-rolled; the first unless given */ variant?: number; asleep: boolean; face: Facing }

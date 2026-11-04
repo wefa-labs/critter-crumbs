@@ -1,0 +1,55 @@
+/* Home and the burrow's screens (burrows.tsx) on the screen frame (place-screen.tsx, screens.css): the flow page's
+   cards, rows and chips (docs/explorations/app-screens: .card, .feastcard, .rows, .row, .chip, .zz). The burrows chunk
+   imports it, so it arrives with them. */
+
+/* the burrow's entrance: home, a new burrow, and a burrow before its first feast (flow page: paint 'entrance', pos center 82%) */
+.scene-paint[data-painting="entrance"] { background-image:url(/scenes/entrance.webp); background-position:center 82%; }
+/* a sleeper's z, over its head */
+.floor-z { position:absolute; left:calc(var(--x) * 1%); top:calc(var(--y) * 1%); font-size:calc(var(--size) * var(--u)); font-weight:800; line-height:1; color:var(--cc-text); text-shadow:0 0 3px var(--cc-bg), 0 0 6px var(--cc-bg); }
+.floor-z::after { content:'z'; }
+
+.burrow-screen a.pill { text-decoration:none; }
+.burrow-screen .place-actions a.quiet { display:inline-flex; align-items:center; }
+.burrow-screen .chip { display:inline-flex; align-items:center; width:max-content; height:26px; padding:0 10px; font-size:var(--cc-text-xs); font-weight:700; color:var(--cc-text); }
+.place-words > .chip { align-self:flex-start; margin:0; }
+.burrow-screen .field > span { font-size:var(--cc-text-sm); font-weight:700; color:var(--cc-text); }
+.burrow-help, .burrow-count { font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+
+/* a card that opens something: a burrow on home, the burrow's critters */
+.link-cards { display:grid; gap:12px; margin:0; padding:0; list-style:none; }
+.link-card { display:grid; grid-template-columns:auto minmax(0, 1fr) auto; align-items:center; gap:12px; padding:14px; border:var(--cc-border); border-radius:var(--cc-radius-lg); background:var(--cc-bg); box-shadow:var(--cc-shadow-1); color:var(--cc-text); text-decoration:none; }
+.link-card-words { display:grid; gap:2px; min-width:0; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.link-card-words b { font-size:var(--cc-text-md); font-weight:800; color:var(--cc-text); overflow-wrap:anywhere; }
+.link-card .game-icon { width:20px; height:20px; color:var(--cc-text-2); }
+
+/* a feast under way, and the card for no feasts yet */
+.feast-card { display:grid; gap:10px; padding:16px; border:var(--cc-border); border-radius:var(--cc-radius-lg); background:var(--cc-bg-sunken); box-shadow:var(--cc-shadow-1); }
+.feast-card-empty { background:var(--cc-bg); }
+.feast-card h3 { overflow-wrap:anywhere; }
+.feast-card-line { font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+/* the count of who has scattered opens the list of who has and who has not */
+.core-game .feast-card-who { display:block; width:100%; min-height:44px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; color:inherit; text-align:left; }
+.feast-card-who .face-row-count > span:first-child { text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:3px; }
+
+/* rows: the burrow's critters, its other feasts, who has scattered */
+.burrow-rows { display:grid; margin:0; padding:0; list-style:none; }
+.burrow-rows > li + li { border-top:1px solid var(--cc-line); }
+.burrow-row { display:grid; grid-template-columns:auto minmax(0, 1fr) auto; align-items:center; gap:12px; min-height:60px; padding:6px 0; }
+.burrow-row-words { display:grid; min-width:0; }
+.burrow-row-words b { overflow-wrap:anywhere; }
+.burrow-row-words small, .burrow-row-words time { font-size:var(--cc-text-xs); color:var(--cc-text-2); }
+.burrow-row .quiet { font-size:var(--cc-text-sm); }
+.feast-row { grid-template-columns:minmax(0, 1fr) auto; min-height:52px; color:var(--cc-text); text-decoration:none; }
+.burrow-add { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:end; gap:8px; }
+.burrow-past summary { justify-content:space-between; gap:10px; }
+.burrow-history { display:grid; gap:6px; }
+.burrow-history ol { display:grid; gap:4px; margin:0; padding:0; list-style:none; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.burrow-history li { display:flex; flex-wrap:wrap; gap:0 6px; }
+.burrow-history time::before { content:'· '; }
+
+/* the list of who has scattered, and the asks before removing and leaving: sheets as tall as what they hold */
+dialog.app-dialog.who-scattered { --dialog-height:480px; }
+.who-scattered .burrow-row { grid-template-columns:auto minmax(0, 1fr); min-height:48px; }
+.who-waiting { display:flex; align-items:center; gap:12px; padding-top:12px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+dialog.app-dialog.burrow-dialog { --dialog-height:320px; }
+.burrow-dialog .dialog-actions .pill { flex:1; }
