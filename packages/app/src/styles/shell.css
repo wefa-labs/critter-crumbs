@@ -56,6 +56,9 @@ dialog.app-dialog::backdrop { background:color-mix(in srgb, var(--cc-burrow) 40%
 .dialog-actions { display:flex; align-items:center; justify-content:flex-end; gap:12px; }
 .dialog-actions > * { min-width:0; }
 .dialog-actions > button { min-height:48px; }
+/* a dialog's one way out, Cancel or Back, is a text button at the left of its foot (Design System §7.1) */
+.dialog-actions .dialog-dismiss { margin-right:auto; padding:0 4px; border:0; border-radius:var(--cc-radius-sm); background:none; box-shadow:none; color:var(--cc-text); font-weight:700; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:3px; }
+.dialog-actions .dialog-dismiss:only-child { margin-inline:auto; }
 dialog.connect-sheet { --dialog-height:460px; }
 dialog.app-dialog.game-dialog { --dialog-height:340px; }
 .connect-sheet .dialog-body .stack { padding:2px; }
