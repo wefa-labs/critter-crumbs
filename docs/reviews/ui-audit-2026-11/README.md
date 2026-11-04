@@ -10,7 +10,7 @@ Every capture is in `images/`: `a-*` before connecting, `b-*` connected, `long-*
 
 **Everything a connected member sees outside the game was never built to the mocks.** Home, *Start a burrow*, the burrow, its members, *Start a feast*, the saved draft, gathering (people and options), the first meeting, the profile and Settings, every confirmation dialog and the error pages still have the September layout: a big heading, a plain form or list, capsule-shaped cards, no floor and no critters (`b02` to `b17`, `long-*`). The flow page drew all 54 screens with one anatomy, "a header with your critter's face, the painted floor with critters on it, and one surface for the content" (design pass §23). Twenty-eight of its 54 screens, stages 3 and 5 to 7, 9 and 10, are not built that way, and the design system said so on 11 October: those screens "still keep their earlier layouts and wait for the same treatment" (§14, *Before connecting*). That is the whole of the gap the request names. It is also most of the calendar: a member spends the gathering days, and every visit between feasts, on the screens that look least like the game.
 
-**Four cross-cutting defects make those screens look worse than the September design intended** and are cheap to fix on their own: the header of a feast page on a phone (the wordmark cut by the face button, the two deadlines drawn as two-line capsule buttons, 340 of 812 px before the content starts, `b09`, `b11`); every dialog asking twice (a Close button top right and Cancel at the foot, and the cancel-feast dialog offering *Cancel the feast* beside *Cancel*, which the mock avoided with *Back*); the capsule cards (the card radius token is the 999 px pill, so burrow and feast cards are capsules and the setup form's groups cut across their own fields, QA lifecycle-14); and the browser's blue radio buttons and date pickers inside the ink palette.
+**Four cross-cutting defects make those screens look worse than the September design intended** and are cheap to fix on their own: the header of a feast page on a phone (the wordmark cut by the face button, the two deadlines drawn as two-line capsule buttons, 340 of 812 px before the content starts, `b09`, `b11`); every dialog asking twice (a Close button top right and Cancel at the foot, and the cancel-feast dialog offering *Cancel the feast* beside *Cancel*, which the mock avoided with *Back*); the capsule cards (the card radius token is the 999 px pill, so burrow and feast cards are capsules); and the browser's blue radio buttons and date pickers inside the ink palette.
 
 **On game feel, by Schell's lenses, the week has one designed act.** The interest curve of a feast is hook (launcher, invite), rest (gathering), rise (statements open), peak (scattering), rest (waiting), climax (the feast), resolution (results). The rises, peaks and the climax are built as moments; both rests and the gateway between feasts (home, the burrow) are forms. Nothing on them can be touched for pleasure, no critter reacts to anything a member does there, and the only visible progress is a sentence ("8 of 8 statements written"). The mock's floor, with the writers awake and the others asleep, was the designed answer to that, and it is the single change that would do most for the feel.
 
@@ -66,13 +66,13 @@ Krug: two controls for one action is a choice nobody should have to make (70-72)
 
 **Change.** On the phone sheet, drop the heading's Close (Escape, the backdrop and the foot's Cancel remain; the native dialog needs no second button); keep a Close on the desktop card only where there is no Cancel. The cancel-feast dialog's way out says Back. One file (`ui.tsx`) and one string.
 
-### X3. Capsule cards and groups (must, S)
+### X3. Capsule cards (must, S)
 
-`--cc-radius-md` is the 999 px pill of the Inked daylight buttons, and `.link-list li` uses it, so the burrow card on home and every feast card on the burrow page is a capsule (`b02`, `b03-burrow-desktop`); their text sits in the pill's straight middle while the ends are empty. The setup form's fieldsets use the 22 px radius with the legend on the border, so the groups "are drawn as tall capsules that cut across their own fields" (QA lifecycle-14, still open, `long-setup-phone`). The mock's cards are 16 to 24 px rounded (Appendix A: "Rounded cards (16 to 24px radius), pill buttons").
+`--cc-radius-md` is the 999 px pill of the Inked daylight buttons, and `.link-list li` uses it, so the burrow card on home and every feast card on the burrow page is a capsule (`b02`, `b03-burrow-desktop`); their text sits in the pill's straight middle while the ends are empty. The setup form's groups are not capsules: they were redrawn as 22 px cards on 16 October, which closed QA lifecycle-14 (`d7f6dad`). The mock's cards are 16 to 24 px rounded (Appendix A: "Rounded cards (16 to 24px radius), pill buttons").
 
 Wathan: corner radius is one of the four levers of personality and must be consistent, never mixing pill and square on the same screen (20-26); groups are separated by space and tint before borders (96-99, 238-246).
 
-**Change.** Cards take `--cc-radius-lg` (22 px); the setup groups lose their drawn fieldset border in favour of a heading and spacing, as the mock lays them out (`mock-setup-phone`).
+**Change.** Cards take `--cc-radius-lg` (22 px). The mock goes further for the setup form and draws its choices as selectable cards with no box around each group (`mock-setup-phone`), which belongs to the setup port (build-order step 8).
 
 ### X4. The browser's controls inside the ink palette (should, S to M)
 
@@ -194,7 +194,7 @@ The flow page's numbers and names; *Verdict* is **Matches** (the frame, within t
 
 ### Starting a feast
 
-**23. Start a feast** and **24. Splitting a budget** · `mock-setup-phone`, `mock-setup-few-phone` · `b07-setup-phone`, `long-setup-phone`, `long-setup-options-phone`, `-desktop` · **Partly.** Every field and help line of the PRD is there and in the mock's order. The frame is missing, the groups are capsules (X3), the controls are the browser's (X4), the burrow name is printed twice (X10). *Update:* X3, X4, X10, the strip of the room above the form. *Could:* the mock's stepper and selectable cards; the three setup errors that only name a field (QA edge-states-09).
+**23. Start a feast** and **24. Splitting a budget** · `mock-setup-phone`, `mock-setup-few-phone` · `b07-setup-phone`, `long-setup-phone`, `long-setup-options-phone`, `-desktop` · **Partly.** Every field and help line of the PRD is there and in the mock's order. The frame is missing, each group is a boxed card where the mock sets choices apart with spacing and selectable cards, the controls are the browser's (X4), the burrow name is printed twice (X10). *Update:* X4, X10, the strip of the room above the form. *Could:* the mock's stepper and selectable cards; the three setup errors that only name a field (QA edge-states-09).
 
 **25. Too few critters** · `mock-setup-few-phone` · (by code) · **Partly.** The app says "A people feast needs at least 3 critters. This burrow has {n}." and blocks *Save draft*, which is the PRD's rule (R6 at creation); the mock lets the draft save and holds *Open the feast*. The app is right; the mock should follow it.
 
@@ -271,7 +271,7 @@ Two things Schell would ask of the whole, rather than of a screen:
 
 ## What to update: a build order
 
-Tracer bullets, each shippable and reviewable on its own. Workstream B throughout, with small shared changes to `copy.ts`. Every string a copy ID with a Design System §10 row; the shell stays under 120 KB (it was about 104 KB after PR #71; the frame's pieces are already in it for the launcher); the vocabulary rules; nothing opens unasked.
+Tracer bullets, each shippable and reviewable on its own. Workstream B throughout, with small shared changes to `copy.ts`. Every string a copy ID with a Design System §10 row; the shell stays under 120 KB (it measures 117,505 gzip bytes on main at 64497b0, so the frame's session first moves the connected screens into lazy chunks; the floor pieces are already in it for the launcher); the vocabulary rules; nothing opens unasked.
 
 | # | Change | Where | Size | Must or could |
 |---|---|---|---|---|
@@ -305,6 +305,8 @@ Checks for each: the e2e suite (setup, gathering, the launcher, the shared shell
 | D9 | *Replay Feast* and *Download* on the phone: ending the list, or pinned at the card's foot | Pinned; the CSV is the operator's one job |
 | D10 | Names: 16 characters everywhere (the design), or 40 (the field), or 80 (the server) | 16, with the counter |
 
+**Accepted.** Afolabi took all ten recommendations on 3 November 2026, and `docs/decisions.md` records them. D3 is built as one rule for every dialog: the foot's Cancel, or Back on the cancel-feast dialog, is the way out, and the heading keeps its Close only where the foot has none, as in Settings and the profile, since a phone has no Escape key.
+
 ## Evidence and limits
 
 - **Captures.** 170 images in `images/`: 23 before connecting (phone, desktop and dark), 28 connected, 16 long connected pages whole (including a member's view of the burrow and of gathering), 7 live-game frames, 42 gallery states on the phone and desktop, 54 mock frames. All at device pixel ratio 1, JPEG at quality 80, reduced motion. The mock frames are the flow page's own, in the Inked daylight look, unscaled.
@@ -313,3 +315,4 @@ Checks for each: the e2e suite (setup, gathering, the launcher, the shared shell
 - **Not checked:** a real phone, a screen reader, WebKit, sound, the 3D meshes (none load with Garden Spirits), the dark look beyond the launcher, home and the burrow.
 - **One harness note.** Playwright's `click` on the dock's plus button and the count field timed out on the live scatter screen under phone emulation, though both take presses (`c04` was made by dispatching pointer events, and the devtools hit test lands on the button). The October screens suite drives the same controls without trouble, so this is left as a note for whoever extends `capture.mjs`, not as a finding against the app.
 - No code was changed. This folder, its images, the two scripts and the Schell digest are the only files added.
+- **Corrected after merging (3 November).** X3 first said the setup form's groups were still capsules, from QA lifecycle-14; they were mended on 16 October, and only the home and burrow cards are capsules. The build order first put the shell at about 104 KB; the build's own budget check on main at 64497b0 measures 117,505 of 120,000 gzip bytes.
