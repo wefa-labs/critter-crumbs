@@ -695,9 +695,12 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.option.statement` | What this option is |
 | `setup.field.crumbs` | Crumbs per critter |
 | `setup.crumbs.help` | 100 keeps the maths simple. Anything from 10 to 1,000. |
+| `setup.crumbs.fewer` | Fewer crumbs (the stepper's −, ten fewer) |
+| `setup.crumbs.more` | More crumbs (the stepper's +, ten more) |
 | `setup.field.gathering` | Gathering closes |
 | `setup.field.scattering` | Scattering closes |
 | `setup.deadline.help` | Everyone sees these in their own time zone. Yours is {tz}. |
+| `setup.deadline.zone` | {zone} ({tz}) (the time zone in `setup.deadline.help`: its name and short form, "Pacific Time (PDT)") |
 | `setup.deadline.order` | Scattering has to close after gathering. |
 | `setup.deadline.past` | That gathering deadline has already passed. Choose a later time. |
 | `setup.title.missing` | The feast needs a title, up to 80 characters. |
@@ -710,7 +713,6 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.privacy.individual.label` | Who gave what |
 | `setup.privacy.individual.closed` | Closed — nobody sees individual scatters |
 | `setup.privacy.individual.open` | Open to the burrow after the feast |
-| `setup.privacy.individual.burrow` | Your burrow sees who gave what. Nothing goes public. |
 | `setup.min.people` | A people feast needs at least 3 critters. This burrow has {n}. |
 | `setup.save` | Save draft |
 | `setup.open` | Open the feast |

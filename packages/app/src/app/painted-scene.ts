@@ -62,6 +62,19 @@ export const MEETING_SCENE: { painting: Painting; meet: Standing & { sheetHeight
 export const PROFILE_SCENE: { painting: Painting; critter: Standing; sheetHeight: number } = { painting: 'window', critter: { x: 50, y: 92, size: 150 }, sheetHeight: 520 };
 
 /**
+ * Start a feast (flow page, SCREENS.setup and SCREENS['setup-few']): a strip of the room over a sheet 610 pixels tall,
+ * with you awake in the middle of it and two of the burrow either side, turned to you; in a burrow of two the pair
+ * face each other, and alone you stand in the middle.
+ */
+export const SETUP_SCENE: { painting: Painting; sheetHeight: number; you: Standing; beside: readonly (Standing & { face: Facing })[]; pair: readonly (Standing & { face: Facing })[] } = {
+  painting: 'window',
+  sheetHeight: 610,
+  you: { x: 50, y: 98, size: 70 },
+  beside: [{ x: 32, y: 96, size: 64, face: 'right' }, { x: 68, y: 96, size: 64, face: 'left' }],
+  pair: [{ x: 40, y: 97, size: 70, face: 'right' }, { x: 60, y: 97, size: 70, face: 'left' }],
+};
+
+/**
  * A screen whose words are in a sheet under the floor (the side panel on desktop): the sheet's height on the phone, and
  * with it the height the design's 812-pixel phone leaves the floor between the 64-pixel header and the sheet, which
  * rises 24 pixels over the floor's foot. The stylesheet scales the floor's drawings from the two.

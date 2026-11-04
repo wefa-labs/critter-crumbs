@@ -1,0 +1,46 @@
+/* Start a feast (setup.tsx) on the frame (place-screen.tsx, screens.css), as the flow page draws SCREENS.setup,
+   ['setup-options'] and ['setup-few']: the room's floor in the strip over the form; fields with their labels over them;
+   the type and the two privacy choices as cards on native radios; crumbs per critter as a stepper; each deadline's
+   absolute time in its field until the field has the focus; the options as cards; and at the foot the reason Save
+   draft is held over Cancel and Save draft. */
+/* the sheet keeps the flow page's 610 px on the 812 px phone, where the frame's 58dvh would stop it at 471, and a
+   shorter phone shortens the sheet, not the strip of the room: 64 px of header and 138 px of floor stay */
+.start-feast .sheet-screen { --sheet:min(var(--sheet-h), 100dvh - 202px); }
+.start-feast .scene-paint { background-position:center 88%; }
+.setup-form { display:flex; flex-direction:column; gap:14px; }
+.start-feast .chip { align-self:flex-start; display:inline-flex; align-items:center; height:26px; padding:0 10px; border:1.5px dashed var(--cc-line-strong); background:var(--cc-bg); color:var(--cc-text); font-size:var(--cc-text-xs); font-weight:700; }
+.start-feast .place-words h2 { font-size:var(--cc-text-md); line-height:1.3; }
+.start-feast .field { gap:6px; font-weight:400; color:var(--cc-text); }
+.start-feast .field > span:first-child, .start-feast .field > label, .choices legend { font-size:var(--cc-text-sm); font-weight:700; }
+.start-feast .field :is(input, textarea) { border-radius:14px; padding-inline-start:14px; }
+@supports (field-sizing:content) { .option-card textarea { field-sizing:content; max-block-size:10lh; } }
+
+/* one of two, each a card: the radio covers its card, unseen, and the card shows its state and its focus */
+.choices { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; min-width:0; margin:0; padding:0; border:0; }
+.choices legend { margin-bottom:6px; padding:0; }
+.choice { position:relative; display:grid; align-content:start; gap:4px; margin:0; padding:12px 14px; border:1.5px solid var(--cc-line-strong); border-radius:16px; background:var(--cc-bg); font-size:var(--cc-text-sm); cursor:pointer; }
+.choice b { font-size:var(--cc-text-md); }
+.choice input[type="radio"] { position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:pointer; }
+.choice:has(:checked) { background:var(--cc-bg-sunken); box-shadow:var(--cc-shadow-1); }
+.choice:has(:focus-visible) { outline:3px solid var(--cc-focus); outline-offset:2px; }
+@media (forced-colors:active) { .choice:has(:checked) { border-width:3px; } }
+
+.option-card { display:grid; gap:8px; padding:12px 14px; border:1.5px solid var(--cc-line-strong); border-radius:20px; background:var(--cc-bg-sunken); box-shadow:var(--cc-shadow-1); }
+
+/* the count is drawn as the flow page's bold number until it is focused to be typed */
+.crumb-stepper { display:flex; align-items:center; gap:14px; }
+.start-feast .crumb-stepper input { width:5ch; min-height:44px; padding:0; border-color:transparent; background:none; text-align:center; font-size:var(--cc-text-xl); font-weight:800; font-variant-numeric:tabular-nums; appearance:textfield; }
+.start-feast .crumb-stepper input:focus { border-color:var(--cc-line-strong); background:var(--cc-bg); }
+.crumb-stepper input::-webkit-inner-spin-button { appearance:none; }
+
+/* the absolute time lies over the platform's picker, whose own text shows only while it has the focus */
+.deadline-box { position:relative; display:block; }
+.start-feast .deadline-box input[data-shown="true"]:not(:focus) { color:transparent; }
+.deadline-box > span { position:absolute; inset:0 48px 0 15.5px; display:flex; align-items:center; overflow:hidden; white-space:nowrap; pointer-events:none; }
+.deadline-box:focus-within > span { visibility:hidden; }
+
+.start-feast .place-actions { flex-direction:column; align-items:stretch; }
+.start-feast .place-actions .notice { display:flex; align-items:flex-start; gap:10px; max-width:none; margin:0; padding:12px 14px; border-radius:16px; font-size:var(--cc-text-sm); line-height:1.45; }
+.start-feast .notice:not(.error) { background:var(--cc-bg-sunken); }
+.start-feast .notice .game-icon { flex:none; width:18px; height:18px; margin-top:1px; }
+.start-feast a.quiet { display:inline-flex; align-items:center; }
