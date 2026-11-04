@@ -13,12 +13,14 @@ import type { Me, Session } from './session.js';
 /**
  * The first meeting, a whole screen over the one the member connected on (flow page, SCREENS.meet and SCREENS.name;
  * decision D6 of the November UI audit): your critter large on the floor, its element beside the title, the line, the
- * name when the address has no ENS name, and Re-roll and Keep this one pinned at the foot. Nothing closes it but Keep.
+ * name when the address has no ENS name, and Re-roll and Keep this one pinned at the foot. Nothing closes it but Keep,
+ * or Disconnect, a quiet link under them, as How it works is under Connect, for someone who connected the wrong account
+ * (Afolabi, 3 November 2026): it signs out as the profile does, and leaves them where a signed-out visitor would be.
  * Rerolls keep the draft name, and Keep saves the name and the lock in one profile update. The fourth reroll already
  * locks the critter on the server; the meeting stays until Keep, so an edited name is never lost. A kept critter
  * without a name is only named (SCREENS.name), asleep until it has one. `done` follows the saved update.
  */
-export function Onboarding({ me, session, run, busy, announce, done }: { me: Me; session: Session; run: (action: () => Promise<void>) => Promise<void>; busy: boolean; announce: (text: string) => void; done: () => void }) {
+export function Onboarding({ me, session, run, busy, announce, done, disconnect }: { me: Me; session: Session; run: (action: () => Promise<void>) => Promise<void>; busy: boolean; announce: (text: string) => void; done: () => void; disconnect: () => void }) {
   const [name, setName] = useState(me.displayName ?? ''), form = useId(), audio = useAudio();
   const [meeting] = useState(!me.critterLocked);
   const needsName = !me.ensName, locked = me.critterLocked;
@@ -31,14 +33,15 @@ export function Onboarding({ me, session, run, busy, announce, done }: { me: Me;
     <PlaceScreen over wordmark title={title} painting={MEETING_SCENE.painting} sheetHeight={sheetHeight} className="first-meeting"
       floor={<FloorCritter critter={{ ...spot, address: me.address, variant: me.variant, asleep: !meeting, face: null }} />}
       actions={<>
-        {meeting ? <button type="button" className="pill soft" disabled={busy || locked || me.rerollsUsed >= 4} onClick={event => { const control = event.currentTarget; void run(async () => {
+        <div className="place-choices">{meeting ? <button type="button" className="pill soft" disabled={busy || locked || me.rerollsUsed >= 4} onClick={event => { const control = event.currentTarget; void run(async () => {
           await session.updateProfile({ variant: me.variant + 1 }); audio.play('reroll');
           announce(formatCopy('critter.reroll.announce', { remaining: 4 - session.snapshot().me!.rerollsUsed }));
         }).then(() => requestAnimationFrame(() => {
           const screen = control.closest('.first-meeting'), target = control.disabled ? screen?.querySelector<HTMLElement>('button[form]:not(:disabled)') ?? screen?.querySelector<HTMLElement>('input') : control;
           if (target?.isConnected) target.focus();
         })); }}>{me.rerollsUsed === 3 ? copy['critter.reroll.last'] : formatCopy('critter.reroll', { remaining: 4 - me.rerollsUsed })}</button> : null}
-        <button className="pill" form={form} disabled={busy || !ready}>{copy[meeting ? 'critter.keep' : 'name.save']}</button>
+        <button className="pill" form={form} disabled={busy || !ready}>{copy[meeting ? 'critter.keep' : 'name.save']}</button></div>
+        <button type="button" className="quiet" disabled={busy} onClick={disconnect}>{copy['action.disconnect']}</button>
       </>}>
       <div className="place-heading"><h1>{title}</h1>{meeting && element ? <ElementChip element={element} /> : null}</div>
       <p>{meeting ? locked ? copy['critter.locked'] : formatCopy('critter.meet.body', { max: 4 }) : copy['name.help']}</p>

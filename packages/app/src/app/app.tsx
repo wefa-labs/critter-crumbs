@@ -110,6 +110,9 @@ export function App() {
     });
   }
   function chooseSetting(key: StoredSetting, value: boolean) { saveSetting(services.preferences.storage, key, value); setSettings(settings => ({ ...settings, [key]: value })); }
+  /* disconnecting leaves the member where a signed-out visitor would be: on the screen beneath your critter's profile,
+     or on the page the first meeting stood over, which is the launcher, or the invite for a feast's link */
+  function disconnect(to?: string) { void run(async () => { await session.disconnect(); if (to) navigate(to); }); }
   function chooseDark(value: boolean) { saveDarkChoice(services.preferences.storage, value); showDarkChoice(document.documentElement, value); setDarkChoice(value); }
   /* the screen in view, or the one beneath your critter's profile while that is open */
   const profile = path === YOUR_CRITTER_PATH, screen = profile ? under : path;
@@ -137,9 +140,9 @@ export function App() {
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
   const layer = !me ? null
-    : meeting ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} /></Suspense>
+    : meeting ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} disconnect={() => disconnect()} /></Suspense>
     : profile ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={() => navigate(under)} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
-      disconnect={() => void run(async () => { await session.disconnect(); navigate(under); })} run={run} busy={working} /></Suspense>
+      disconnect={() => disconnect(under)} run={run} busy={working} /></Suspense>
     : null;
   /* the screen beneath a layer stays as it was only when it was there before: your critter's profile, opened from it.
      The first meeting stands over nothing, and the screen it was opened on arrives once it is done. */

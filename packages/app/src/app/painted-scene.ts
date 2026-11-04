@@ -49,13 +49,13 @@ export const INVITE_SCENE: { painting: Painting; sheetHeight: number } = { paint
 
 /**
  * The first meeting (flow page, SCREENS.meet and SCREENS.name): your critter large at the front of the floor, awake to
- * be met, over a sheet 360 pixels tall that holds the line, the name and two actions; a kept critter that is only being
- * named stands smaller and asleep, over the name's 330.
+ * be met; a kept critter that is only being named stands smaller and asleep. Both sheets are 360 pixels tall: the
+ * flow page's 260 and 330, with room for the name field under the line and for Disconnect under the actions.
  */
 export const MEETING_SCENE: { painting: Painting; meet: Standing & { sheetHeight: number }; name: Standing & { sheetHeight: number } } = {
   painting: 'window',
   meet: { x: 50, y: 92, size: 210, sheetHeight: 360 },
-  name: { x: 50, y: 90, size: 150, sheetHeight: 330 },
+  name: { x: 50, y: 90, size: 150, sheetHeight: 360 },
 };
 
 /** Your critter's profile (flow page, SCREENS.profile): your critter at the front of the floor, over a sheet 520 pixels tall. */

@@ -114,8 +114,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .place-words .field { margin:0; }
 .place-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .place-actions { display:flex; gap:10px; align-items:center; }
-.place-actions > .pill { flex:1 1 0; min-width:0; padding-inline:12px; }
-@media (max-width:360px) { .place-actions > .pill { padding-inline:8px; font-size:var(--cc-text-sm); } }
+.place-actions .pill { flex:1 1 0; min-width:0; padding-inline:12px; }
+@media (max-width:360px) { .place-actions .pill { padding-inline:8px; font-size:var(--cc-text-sm); } }
+.place-choices { flex:1; min-width:0; display:flex; gap:10px; align-items:center; }
 /* a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx) */
 .screen-layer { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:var(--cc-bg); }
 .screen-layer > .core-game { flex:1; height:auto; min-height:0; }
@@ -137,6 +138,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .name-count { position:absolute; right:14px; top:50%; translate:0 -50%; font-size:var(--cc-text-xs); font-weight:400; color:var(--cc-text-2); font-variant-numeric:tabular-nums; pointer-events:none; }
 .name-count[data-over="true"] { color:var(--cc-error-text); font-weight:700; }
 .meeting-name { font-weight:700; }
+/* its foot: the choice, and under it the quiet way out, as How it works is under Connect on the launcher */
+.first-meeting .place-actions { flex-direction:column; align-items:stretch; gap:4px; }
+.first-meeting .place-actions > .quiet { align-self:center; font-size:var(--cc-text-sm); }
 
 /* ------------------------------------------------------------------ your critter (profile.tsx): its element over the
    floor; in the sheet the name, the short address to copy, the settings as switches, How it works and Disconnect */

@@ -70,6 +70,63 @@ test('an invited first-time member keeps their destination, draft name and critt
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
+// Someone who connected the wrong account can leave the first meeting without keeping a critter for it (Afolabi,
+// 3 November 2026): Disconnect, quiet under the actions, leaves them where a signed-out visitor would be.
+test('the first meeting can be left by disconnecting, back where a signed-out visitor would be', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'gathering' } });
+  expect(seed.ok()).toBe(true);
+  const { feasts } = await seed.json(), feast = feasts[0];
+  // the profile a first meeting is for, presented at the HTTP boundary: a critter not kept yet, or kept with no name
+  let shown: { critterLocked: boolean } = { critterLocked: false };
+  await page.route('**/api/me', async route => {
+    const response = await route.fetch();
+    if (route.request().method() !== 'GET' || !response.ok()) { await route.fulfill({ response }); return; }
+    await route.fulfill({ response, json: { ...await response.json(), ensName: null, displayName: null, ...shown } });
+  });
+  const connect = async (button: string) => {
+    await page.getByRole('button', { name: button, exact: true }).click();
+    await page.getByRole('button', { name: 'Rehearsal critter 3', exact: true }).click();
+  };
+  const meeting = page.getByRole('region', { name: 'Meet your critter', exact: true });
+
+  // from a feast's link: back on its invite, signed out
+  await page.goto(`/feasts/${feast.id}`);
+  await connect('Connect to join');
+  await expect(meeting).toBeVisible();
+  // a quiet link, not a pill, under the choice it never competes with
+  const leave = meeting.getByRole('button', { name: 'Disconnect', exact: true }), keep = meeting.getByRole('button', { name: 'Keep this one', exact: true });
+  await expect(leave).toHaveClass(/\bquiet\b/);
+  const [leaving, keeping] = [(await leave.boundingBox())!, (await keep.boundingBox())!];
+  expect(leaving.y).toBeGreaterThanOrEqual(keeping.y + keeping.height);
+  expect(leaving.height).toBeGreaterThanOrEqual(44);
+  expect(leaving.y + leaving.height).toBeLessThanOrEqual(812);
+  await leave.click();
+  await expect(meeting).toHaveCount(0);
+  await expect(page).toHaveURL(new RegExp(`/feasts/${feast.id}$`));
+  await expect(page.getByRole('button', { name: 'Connect to join', exact: true })).toBeVisible();
+  expect((await readJson(page, '/api/me')).status).toBe(401);
+
+  // from the launcher: back on the launcher
+  await page.goto('/');
+  await connect('Connect');
+  await expect(meeting).toBeVisible();
+  await meeting.getByRole('button', { name: 'Disconnect', exact: true }).click();
+  await expect(meeting).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeVisible();
+  await expect(page.locator('.launch-plate')).toBeVisible();
+
+  // a kept critter that is only being named offers it too
+  shown = { critterLocked: true };
+  await connect('Connect');
+  const naming = page.getByRole('region', { name: 'What should the burrow call you?', exact: true });
+  await expect(naming).toBeVisible();
+  await naming.getByRole('button', { name: 'Disconnect', exact: true }).click();
+  await expect(naming).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeVisible();
+  expect((await readJson(page, '/api/me')).status).toBe(401);
+});
+
 test('all first-step actions stay in place on short phones and desktops in every critter version', async ({ page }) => {
   // fifteen page loads of five steps each: three times the ordinary budget
   test.slow();

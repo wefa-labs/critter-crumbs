@@ -114,13 +114,13 @@ describe('the first steps', () => {
 });
 
 describe('your critter', () => {
-  it('meets you large at the front of the floor, over a sheet that also holds the name, and names a kept critter smaller', () => {
+  it('meets you large at the front of the floor, over a sheet that also holds the name and Disconnect, and names a kept critter smaller', () => {
     expect(MEETING_SCENE.painting).toBe('window');
     // SCREENS.meet draws 210 at (50, 92) over a 260 px sheet; the app's meeting adds the name field, so its sheet is 360
     expect(place(MEETING_SCENE.meet)).toEqual([50, 92, 210]);
     expect(sheetScreenStyle(MEETING_SCENE.meet.sheetHeight)).toEqual({ '--sheet-h': '360px', '--floor-h': 412 });
-    // SCREENS.name: 150 at (50, 90) over 330
-    expect([...place(MEETING_SCENE.name), MEETING_SCENE.name.sheetHeight]).toEqual([50, 90, 150, 330]);
+    // SCREENS.name: 150 at (50, 90) over 330, which grows by Disconnect's row to the meeting's 360
+    expect([...place(MEETING_SCENE.name), MEETING_SCENE.name.sheetHeight]).toEqual([50, 90, 150, 360]);
   });
 
   it('stands on its profile where the flow page stands it, over a 520 px sheet', () => {
