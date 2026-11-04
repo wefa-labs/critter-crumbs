@@ -4,7 +4,8 @@
 @import './screens.css';
 @import './shell.css';
 /* dark follows the device unless someone has chosen for themselves, as the tokens do (tokens.css) */
-:root { color-scheme:light; }
+/* native radios, checkboxes and pickers take the palette's on-state, as Settings' switches do (Design System §7.1) */
+:root { color-scheme:light; accent-color:var(--cc-ok); }
 @media (prefers-color-scheme:dark) { :root:not([data-theme="light"]) { color-scheme:dark; } }
 :root[data-theme="dark"] { color-scheme:dark; }
 * { box-sizing:border-box; }
@@ -74,7 +75,7 @@ dialog::backdrop { background:rgb(42 33 26 / .35); }
 .empty-state { margin-block:var(--cc-space-6); padding:var(--cc-space-6); border:var(--cc-border); border-radius:var(--cc-radius-lg); }
 .empty-state .portrait-slot { margin-block:var(--cc-space-3); }
 .link-list,.member-list { list-style:none; margin:var(--cc-space-4) 0 var(--cc-space-6); padding:0; }
-.link-list li { display:flex; align-items:center; justify-content:space-between; gap:var(--cc-space-4); padding:var(--cc-space-5); margin-bottom:var(--cc-space-3); background:var(--cc-bg-raised); border:var(--cc-border); border-radius:var(--cc-radius-md); }
+.link-list li { display:flex; align-items:center; justify-content:space-between; gap:var(--cc-space-4); padding:var(--cc-space-5); margin-bottom:var(--cc-space-3); background:var(--cc-bg-raised); border:var(--cc-border); border-radius:var(--cc-radius-lg); }
 .link-list a { font-family:var(--cc-font-display); font-size:var(--cc-text-xl); }
 .member-list li { display:flex; align-items:center; gap:var(--cc-space-3); padding-block:var(--cc-space-3); border-bottom:var(--cc-border); }
 .member-list .portrait-slot { flex:0 0 40px; }

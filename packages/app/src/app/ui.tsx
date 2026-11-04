@@ -65,15 +65,20 @@ export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
   const announceWithin = useModalAnnouncements();
   useEffect(() => { const dialog = ref.current!; const previous = document.activeElement; dialog.showModal(); announceWithin(dialog.querySelector<HTMLElement>('.dialog-feedback') ?? dialog); dialog.querySelector<HTMLElement>('input, textarea')?.focus(); return () => { announceWithin(null); dialog.close(); if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); else document.getElementById('content')?.focus(); }; }, [announceWithin]);
 }
-/** One stable frame for dialogs and phone sheets; only its body scrolls as content changes. */
-export function Dialog({ title, children, onClose, busy = false, actions, className = '' }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; className?: string }) {
+/**
+ * One stable frame for dialogs and phone sheets; only its body scrolls as content changes. A dialog has one way out
+ * (Design System §7.1): `dismiss` puts Cancel, or Back where the dialog's action is itself a cancellation, at the left
+ * of the foot, and the heading then has no Close. Without it the heading's Close is the way out, as in Settings and
+ * the profile, since a phone has no Escape key.
+ */
+export function Dialog({ title, children, onClose, busy = false, actions, dismiss, className = '' }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; dismiss?: 'action.cancel' | 'action.back'; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null), id = useId();
   useModalDialog(ref);
   return <dialog ref={ref} className={`app-dialog ${className}`} aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
-    <div className="dialog-heading"><h2 id={id}>{title}</h2><button type="button" className="secondary dialog-close" disabled={busy} onClick={onClose}>{copy['action.close']}</button></div>
+    <div className="dialog-heading"><h2 id={id}>{title}</h2>{dismiss ? null : <button type="button" className="secondary dialog-close" disabled={busy} onClick={onClose}>{copy['action.close']}</button>}</div>
     <div className="dialog-body">{children}</div>
     <div className="dialog-feedback" />
-    {actions ? <div className="dialog-actions">{actions}</div> : null}
+    {actions || dismiss ? <div className="dialog-actions">{dismiss ? <button type="button" className="dialog-dismiss" disabled={busy} onClick={onClose}>{copy[dismiss]}</button> : null}{actions}</div> : null}
   </dialog>;
 }
 export function Field({ label, children, help }: { label: CopyId; children: ReactNode; help?: CopyId }) {
