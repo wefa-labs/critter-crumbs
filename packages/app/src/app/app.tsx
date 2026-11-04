@@ -64,7 +64,8 @@ export function App() {
   }
   useEffect(() => { void session.restore().catch(error => setAlert(message(error))); }, [session]);
   useEffect(() => {
-    const changed = () => { audio.stop(); setPath(location.pathname); setUnder(under => location.pathname === '/your-critter' && history.state?.from === '/how-it-works' ? under : returnPath(history.state)); setAlert(''); };
+    /* the profile's way back is read on arriving at it, except from the first steps, which return to it */
+    const changed = () => { audio.stop(); setPath(location.pathname); if (location.pathname === '/your-critter') setUnder(under => history.state?.from === '/how-it-works' ? under : returnPath(history.state)); setAlert(''); };
     const network = () => { setOnline(navigator.onLine); setAlert(navigator.onLine ? '' : copy['err.offline']); if (navigator.onLine) announce(copy['err.online']); };
     const media = matchMedia('(prefers-reduced-motion: reduce)'), scheme = matchMedia('(prefers-color-scheme: dark)');
     const motion = () => setSettings(value => ({ ...value, reducedMotion: media.matches })), device = () => setDeviceDark(scheme.matches);
