@@ -20,8 +20,7 @@ export function ConnectSheet({ options, discovering, reason, waiting, busy, choo
   options: AccountOption[]; discovering: boolean; reason: string; waiting: AccountOption | null; busy: boolean; choose: (option: AccountOption) => void; cancel: () => void;
 }) {
   return (
-    <Dialog title={copy['connect.title']} className="connect-sheet" onClose={cancel} busy={busy}
-      actions={<button type="button" className="secondary" disabled={busy} onClick={cancel}>{copy['action.cancel']}</button>}>
+    <Dialog title={copy['connect.title']} className="connect-sheet" onClose={cancel} busy={busy} dismiss="action.cancel">
       <div className="stack" aria-busy={discovering || !!waiting}>
       {reason ? <p>{reason}</p> : null}
       {waiting ? <>

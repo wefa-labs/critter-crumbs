@@ -425,6 +425,7 @@ type NumericSlot = 'n' | 'max' | 'remaining' | 'written' | 'total' | 'crumbs' | 
 export type CopyParams<Id extends CopyId> = { [Slot in Slots<(typeof copy)[Id]>]: Slot extends NumericSlot ? number : string };
 const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
   'arrive.burrow': { slot: 'n', one: '{burrowName} · {n} critter' },
+  'home.critterCount': { slot: 'n', one: '{n} critter' },
   'critter.reroll.announce': { slot: 'remaining', one: 'New critter. {remaining} re-roll left.' },
   'gathering.participation': { slot: 'total', one: '{written} of {total} statement written' },
   'reveal.body': { slot: 'crumbs', one: 'Read them first, then scatter your {crumbs} crumb.' },

@@ -22,10 +22,7 @@ export { Grow, Loader, SheetNotice } from './sheet-parts.js';
  */
 export function GameDialog({ title, children, cancel, action, busy = false }: { title: string; children: ReactNode; cancel: () => void; action: ReactNode; busy?: boolean }) {
   return (
-    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} actions={<>
-        <button className="quiet" type="button" disabled={busy} onClick={cancel}>{copy['action.cancel']}</button>
-        {action}
-      </>}>
+    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} dismiss="action.cancel" actions={action}>
       {children}
     </Dialog>
   );
