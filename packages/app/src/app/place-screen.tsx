@@ -30,7 +30,7 @@ export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewe
   painting: Painting; floor: ReactNode; sheetHeight: number; actions?: ReactNode; over?: boolean; className?: string; children: ReactNode;
 }) {
   const root = useRef<HTMLElement>(null);
-  /* before the page's title changes, so that leaving can give the screen beneath its own back */
+  /* runs before the title is set below, so it keeps the title of the screen beneath and gives it back on leaving */
   useEffect(() => {
     if (!over) { document.getElementById('content')?.focus(); return; }
     const beneath = document.title;
