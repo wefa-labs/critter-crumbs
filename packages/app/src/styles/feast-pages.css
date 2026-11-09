@@ -6,6 +6,8 @@
 .feast-page .chip { width:max-content; padding:4px 10px; font-size:var(--cc-text-xs); font-weight:700; line-height:1.5; color:var(--cc-text); }
 .feast-page .draft-chip { background:var(--cc-bg); border:1.5px dashed var(--cc-line-strong); }
 .feast-page a.pill { text-decoration:none; }
+/* the Music toggle for someone who has not connected, in the floor's corner as on the launcher */
+.floor-sound { position:absolute; top:16px; right:16px; z-index:2; }
 .feast-help { font-size:var(--cc-text-sm); line-height:1.45; color:var(--cc-text-2); }
 
 /* the sheet's first row: the phase, and both closes with their absolute times a tap away (the audit's X1, PRD §6) */

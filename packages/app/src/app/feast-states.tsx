@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { SheetNotice } from '../game/sheet-parts.js';
 import type { RunAction } from './burrows.js';
@@ -18,14 +19,17 @@ function ring(feast: PublicFeast, asleep: boolean) {
   return few ? <>{critters.map(({ key, ...critter }, index) => <FloorCritter key={key} critter={{ ...few[index]!, ...critter }} />)}</> : <FloorRing critters={critters} />;
 }
 
+/** For someone who has not connected, whose header has no face, the Music toggle stands in the floor's corner, as on the launcher. */
+const soundFor = (viewer: Viewer | undefined, sound: ReactNode) => viewer ? null : <div className="floor-sound">{sound}</div>;
+
 /**
  * A feast that was cancelled, or that ended before scattering because a people feast had fewer than three critters
  * when scattering opened (PRD P11): its critters asleep in their ring and, for a void feast, why in a leaf notice. The
- * page no longer counts down (QA edge-states-15). Back leads a member to the burrow.
+ * page no longer counts down (QA edge-states-15). Back leads a member to the burrow. `sound` is the Music toggle.
  */
-export function EndedFeast({ feast, viewer, trouble }: { feast: PublicFeast | MemberFeast; viewer: Viewer | undefined; trouble: string }) {
+export function EndedFeast({ feast, viewer, trouble, sound }: { feast: PublicFeast | MemberFeast; viewer: Viewer | undefined; trouble: string; sound: ReactNode }) {
   return (
-    <PlaceScreen {...feastFrame(feast, viewer)} painting={ENDED_SCENE.painting} sheetHeight={ENDED_SCENE.sheetHeight} className="feast-page feast-ended" floor={ring(feast, true)}
+    <PlaceScreen {...feastFrame(feast, viewer)} painting={ENDED_SCENE.painting} sheetHeight={ENDED_SCENE.sheetHeight} className="feast-page feast-ended" floor={<>{ring(feast, true)}{soundFor(viewer, sound)}</>}
       actions={<Link className="pill soft wide" href={isMemberFeast(feast) ? burrowPath(feast) : '/'}>{copy['action.back']}</Link>}>
       {trouble ? <SheetNotice trouble>{trouble}</SheetNotice> : null}
       {feast.phase === 'void' ? <SheetNotice>{formatCopy('feast.tooFew', { feastTitle: feast.title })}</SheetNotice> : <span className="chip">{copy['feast.cancelled']}</span>}
@@ -58,13 +62,13 @@ export function JoinedTooLate({ feast, me, viewer, trouble }: { feast: MemberFea
 /**
  * A feast's link that leads nowhere: the store has no feast by that id, or the id is not one (feast.tsx). The wordmark
  * heads the screen, since there is no burrow to name, and a critter sleeps on the floor: yours, or for someone who has
- * not connected, one of the critters the launcher shows.
+ * not connected, one of the critters the launcher shows. `sound` is the Music toggle.
  */
-export function NoFeastHere({ me, viewer }: { me: Me | null; viewer: Viewer | undefined }) {
+export function NoFeastHere({ me, viewer, sound }: { me: Me | null; viewer: Viewer | undefined; sound: ReactNode }) {
   const sleeper = me ? { address: me.address, variant: me.variant } : { address: JUNIPER, variant: openingVariant(JUNIPER) };
   return (
     <PlaceScreen wordmark title={copy['feast.missing.title']} {...(viewer ? { viewer } : {})} painting={NOWHERE_SCENE.painting} sheetHeight={NOWHERE_SCENE.sheetHeight} className="feast-page feast-nowhere"
-      floor={<FloorCritter critter={{ ...NOWHERE_SCENE.critter, ...sleeper, asleep: true }} />}
+      floor={<><FloorCritter critter={{ ...NOWHERE_SCENE.critter, ...sleeper, asleep: true }} />{soundFor(viewer, sound)}</>}
       actions={<Link className="pill soft wide" href="/">{copy['action.back']}</Link>}>
       <h1>{copy['feast.missing.title']}</h1>
       <p>{copy['feast.missing.body']}</p>

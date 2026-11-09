@@ -70,7 +70,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   /* your critter's face at the right of every header outside the game; the pages before scattering say a refresh the
      store did not answer (refreshFailure) in their sheet, as the plain page once did under its heading */
   const faceOf = (member: Me) => ({ address: member.address, variant: member.variant, open: onProfile }), viewer = me ? faceOf(me) : undefined;
-  if (missing) return <NoFeastHere me={me} viewer={viewer} />;
+  if (missing) return <NoFeastHere me={me} viewer={viewer} sound={sound} />;
   if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} bare />;
   const feast = resource.data, now = trusted ?? feast.serverNow;
   const props = { api, run, busy, refresh: resource.refresh, announce };
@@ -83,7 +83,7 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   let content;
   if ((staying || stillStaying) && isMemberFeast(feast) && me) content = scatterScreen ? scatter(true) : reveal;
   else if (phase !== feast.phase) content = <p>{copy['app.loading']}</p>;
-  else if (phase === 'cancelled' || phase === 'void') return <EndedFeast feast={feast} viewer={viewer} trouble={refreshFailure} />;
+  else if (phase === 'cancelled' || phase === 'void') return <EndedFeast feast={feast} viewer={viewer} trouble={refreshFailure} sound={sound} />;
   else if (phase === 'feast' && feast.aggregatePublic && !isMemberFeast(feast)) content = <Suspense fallback={<h1>{copy['results.title']}</h1>}><PublicResults feast={feast} settings={settings} announce={announce}/></Suspense>;
   else if (!me) return <Invite feast={feast} now={now} connect={connect} sound={sound} />;
   else if (!isMemberFeast(feast)) return <NotInBurrow feast={feast} me={me} viewer={faceOf(me)} run={run} busy={busy} />;
