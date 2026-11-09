@@ -10,11 +10,11 @@ import { GameIcon } from './icons.js';
 /** In a sheet, pushes what follows it to the foot. */
 export const Grow = () => <div className="sheet-grow" />;
 
-/** A notice inside a sheet: a leaf beside the line, or a cloud when something is not right yet. Not a live region. */
-export function SheetNotice({ trouble = false, children }: { trouble?: boolean; children: ReactNode }) {
+/** A notice inside a sheet: a leaf beside the line, or a cloud when something is not right yet. Not a live region; `id` lets a control it explains point to it. */
+export function SheetNotice({ trouble = false, id, children }: { trouble?: boolean; id?: string; children: ReactNode }) {
   return trouble
-    ? <div className="sheet-notice"><GameIcon name="cloud" /><span>{children}</span></div>
-    : <div className="sheet-notice"><GameIcon name="leaf" /><span>{children}</span></div>;
+    ? <div className="sheet-notice" id={id}><GameIcon name="cloud" /><span>{children}</span></div>
+    : <div className="sheet-notice" id={id}><GameIcon name="leaf" /><span>{children}</span></div>;
 }
 
 /** Three bobbing crumbs while the feast is laid out. */

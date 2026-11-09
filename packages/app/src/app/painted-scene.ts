@@ -10,6 +10,8 @@ import { gardenSpirits } from '../portraits/version.js';
 export type Painting = 'window' | 'dusk';
 export type Facing = 'left' | 'right' | null;
 export interface Standing { x: number; y: number; size: number }
+/** Where a critter stands and which way it is turned. */
+export interface Spot extends Standing { face: Facing }
 export interface SceneCritter extends Standing { address: string; /** which of the address's drawings, for a critter someone re-rolled; the first unless given */ variant?: number; asleep: boolean; face: Facing }
 export interface SceneHeap extends Standing { crumbs: number }
 /**
@@ -60,6 +62,19 @@ export const MEETING_SCENE: { painting: Painting; meet: Standing & { sheetHeight
 
 /** Your critter's profile (flow page, SCREENS.profile): your critter at the front of the floor, over a sheet 520 pixels tall. */
 export const PROFILE_SCENE: { painting: Painting; critter: Standing; sheetHeight: number } = { painting: 'window', critter: { x: 50, y: 92, size: 150 }, sheetHeight: 520 };
+
+/**
+ * Start a feast (flow page, SCREENS.setup and SCREENS['setup-few']): a strip of the room over a sheet 610 pixels tall,
+ * with you awake in the middle of it and two of the burrow either side, turned to you; in a burrow of two the pair
+ * face each other, and alone you stand in the middle.
+ */
+export const SETUP_SCENE: { painting: Painting; sheetHeight: number; you: Standing; beside: readonly [Spot, Spot]; pair: readonly [Spot, Spot] } = {
+  painting: 'window',
+  sheetHeight: 610,
+  you: { x: 50, y: 98, size: 70 },
+  beside: [{ x: 32, y: 96, size: 64, face: 'right' }, { x: 68, y: 96, size: 64, face: 'left' }],
+  pair: [{ x: 40, y: 97, size: 70, face: 'right' }, { x: 60, y: 97, size: 70, face: 'left' }],
+};
 
 /**
  * A screen whose words are in a sheet under the floor (the side panel on desktop): the sheet's height on the phone, and

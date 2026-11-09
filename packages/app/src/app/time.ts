@@ -17,6 +17,15 @@ export function relativeTime(at: number, now: number) {
 }
 export function localDateTime(at: number) { const date = new Date(at); return new Date(at - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
 export const localTimeZone = () => new Intl.DateTimeFormat().resolvedOptions().timeZone;
+/**
+ * The viewer's time zone as the flow page names it, "Pacific Time (PDT)": its name and its short form at `at`, or the
+ * short form alone ("UTC", "GMT+3") for a zone whose only name is its offset.
+ */
+export function zoneName(at: number, { locale, timeZone }: { locale?: string; timeZone?: string } = {}) {
+  const name = (timeZoneName: 'longGeneric' | 'longOffset' | 'short') => new Intl.DateTimeFormat(locale, { timeZoneName, ...(timeZone ? { timeZone } : {}) }).formatToParts(at).find(part => part.type === 'timeZoneName')?.value ?? '';
+  const zone = name('longGeneric'), tz = name('short');
+  return zone && zone !== name('longOffset') && zone !== tz ? formatCopy('setup.deadline.zone', { zone, tz }) : tz;
+}
 
 export const percentShare = (share: [number,number]) => new Intl.NumberFormat('en',{style:'percent',minimumFractionDigits:1,maximumFractionDigits:1}).format(share[0]/share[1]);
 

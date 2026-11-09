@@ -7,3 +7,5 @@ export const MAX_CIPHERTEXT_BYTES = 4096;
  * limit stay as they are.
  */
 export const MAX_NAME_LENGTH = 16;
+/** Crumbs per critter (PRD P9): a whole number from 10 to 1,000, and 100 unless the creator changes it. */
+export const CRUMBS_PER_CRITTER = { fewest: 10, most: 1000, norm: 100 } as const;
