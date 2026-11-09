@@ -191,6 +191,8 @@ export function layoutGame(input: LayoutInput) {
   const focused = slots.find(it => it.slot === 0)!, extent = input.critters[focused.index]!.extent;
   const headR = extent.headRadius * focused.stage.width, headY = focused.stage.y + extent.headY * focused.stage.height;
   const obstacles = slots.filter(it => it.pile.width && it.slot !== 0).map(it => it.pile);
+  // On short floors portrait bounds are soft obstacles; readable tags, crumbs and controls retain priority.
+  const compactLabels = !desktop && H - dockH < 550;
 
   /* the heap of crumbs left, in the middle of the circle where it covers least (heapNode) */
   const full = moundSize(PILE_RULE === 'exact' ? input.issued : Math.ceil(input.issued / 4));
@@ -212,6 +214,20 @@ export function layoutGame(input: LayoutInput) {
       const y = top + span * step / 10, box = { ...heap, y }, cost = around.reduce((sum, other) => sum + overlapArea(box, other), 0) + Math.abs(y - middle) * 0.5;
       if (cost < least) { least = cost; heap.y = y; }
     }
+    /* where every height still touches a critter beside the middle, the heap narrows about the middle, on the same
+       base, to stand a pixel clear of it: the design pass measured it never over a critter (§21). A critter across the
+       middle is left to the height, and a short floor keeps the heap's size. A Garden Spirit's tail can reach into the
+       box (ADR 0006) */
+    const half = compactLabels ? heap.width / 2 : slots.reduce((limit, it) => {
+      if (!overlapArea(heap, it.figure)) return limit;
+      const right = it.figure.x + it.figure.width;
+      return right <= geo.cx ? Math.min(limit, geo.cx - right - 1) : it.figure.x >= geo.cx ? Math.min(limit, it.figure.x - geo.cx - 1) : limit;
+    }, heap.width / 2);
+    if (half < heap.width / 2) {
+      const base = heap.y + heap.height;
+      heapWidth = Math.max(1, half * 2); ppu = heapWidth / full.width; heapHeight = full.height * ppu;
+      Object.assign(heap, { x: geo.cx - heapWidth / 2, y: base - heapHeight, width: heapWidth, height: heapHeight });
+    }
     if (!input.reading) obstacles.push(heap);
   }
 
@@ -232,8 +248,6 @@ export function layoutGame(input: LayoutInput) {
      first looks for room near its own critter rather than drifting up the room to find it, which left tags naming
      nobody on short phones and on 1280 px desktops (QA lifecycle-03) */
   const visible = slots.filter(it => !it.tag.hidden), tolerance = desktop ? (input.viewport.width === 1280 ? 161 : 0) : n > 8 ? 123 : 0;
-  // On short floors portrait bounds are soft obstacles; readable tags, crumbs and controls retain priority.
-  const compactLabels = !desktop && H - dockH < 550;
   const blocked = (box: Rect) => (showHeap && overlapArea(box, { x: heap.x - 2, y: heap.y - 2, width: heap.width + 4, height: heap.height + 4 }) > 0) || obstacles.some(other => overlapArea(box, other) > 0) || box.y + box.height > dock.y;
   const widthsOf = (it: typeof visible[number]) => it.shortWidth < it.fullWidth && !(it.slot === 0 && desktop) ? [it.fullWidth, it.shortWidth] : [it.fullWidth];
   type Candidate = { box: Rect; short: boolean; cost: number };
