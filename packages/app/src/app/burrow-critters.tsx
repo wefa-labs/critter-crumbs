@@ -26,9 +26,8 @@ export function CrittersScreen({ view, api, me, session, run, busy, refresh, onP
   useEffect(() => { if (removed && view.removals.length) { history.current?.focus(); setRemoved(false); } }, [removed, view]);
   const active = activeMembers(view), past = view.members.filter(member => member.leftAt !== null), creator = sameAddress(view.createdBy, me.address);
   const yours = (member: BurrowMember) => sameAddress(member.address, me.address);
-  const burrowPage = `/burrows/${view.id}`;
   return (
-    <PlaceScreen title={copy['burrow.members.title']} burrow={view.name} href={burrowPage} back={() => navigate(burrowPage)} viewer={{ address: me.address, variant: me.variant, open: onProfile }}
+    <PlaceScreen title={copy['burrow.members.title']} burrow={view.name} href={`/burrows/${view.id}`} back={() => navigate(`/burrows/${view.id}`)} viewer={{ address: me.address, variant: me.variant, open: onProfile }}
       painting={burrowPainting(view.feasts.length)} sheetHeight={BURROW_SHEETS.critters} floor={null} className="burrow-screen burrow-critters"
       actions={<CopyLink id={view.id} run={run} className="pill soft wide" />}>
       <AddCritter id={view.id} api={api} run={run} busy={busy} added={refresh} />

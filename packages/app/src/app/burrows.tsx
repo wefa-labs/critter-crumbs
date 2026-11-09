@@ -113,19 +113,23 @@ export function BurrowCritters({ id, session, ...screen }: Screen & { id: string
 /**
  * The burrow (flow page, SCREENS.burrow and ['burrow-quiet']; audit screens 17 and 18): its critters on the floor; each
  * feast under way as a card, the one closing next first; its other feasts as rows; its critters behind one card; and
- * at the foot Copy burrow link and Start a feast, which is gold when no feast is under way. A burrow with no feasts
+ * last Copy burrow link and Start a feast, which is gold when no feast is under way. They end the sheet rather than
+ * stay pinned, as the flow page draws them, so the feast under way and the rows have the room. A burrow with no feasts
  * yet has the empty card in their place, holding Start a feast.
  */
 function BurrowPage({ view, now, ...screen }: Screen & { view: BurrowView; now: number }) {
   const underWay = feastsUnderWay(view.feasts, now), others = otherFeasts(view.feasts, now), feasted = view.feasts.length > 0;
   return (
     <PlaceScreen title={view.name} back={goHome} viewer={viewerOf(screen)} painting={burrowPainting(view.feasts.length)} sheetHeight={feasted ? BURROW_SHEETS.feasts : BURROW_SHEETS.quiet} className="burrow-screen"
-      floor={<BurrowFloor view={view} you={screen.me.address} />}
-      actions={<><CopyLink id={view.id} run={screen.run} className="pill soft small" />{feasted ? <Link className={underWay.length ? 'pill soft small' : 'pill small'} href={`/burrows/${view.id}/feasts/new`}>{copy['burrow.feasts.new']}</Link> : null}</>}>
+      floor={<BurrowFloor view={view} you={screen.me.address} />}>
       {underWay.map(item => <FeastCard key={item.feast.id} underWay={item} view={view} api={screen.api} you={screen.me.address} now={now} />)}
       {feasted ? null : <NoFeasts id={view.id} primary />}
       {others.length ? <FeastRows feasts={others} now={now} /> : null}
       <CrittersCard view={view} />
+      <div className="place-actions">
+        <CopyLink id={view.id} run={screen.run} className="pill soft small" />
+        {feasted ? <Link className={underWay.length ? 'pill soft small' : 'pill small'} href={`/burrows/${view.id}/feasts/new`}>{copy['burrow.feasts.new']}</Link> : null}
+      </div>
     </PlaceScreen>
   );
 }

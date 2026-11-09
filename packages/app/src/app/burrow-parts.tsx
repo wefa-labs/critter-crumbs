@@ -3,7 +3,7 @@ import { copy, formatCopy } from '@critter-crumbs/shared';
 import { GameIcon } from '../game/icons.js';
 import { useNotification } from './announcements.js';
 import { burrowFloor, type YourPlace } from './burrow-scenes.js';
-import { activeMembers, youLast, type BurrowMember, type BurrowView } from './burrow-view.js';
+import { activeMembers, sameAddress, youLast, type BurrowMember, type BurrowView } from './burrow-view.js';
 import type { RunAction } from './burrows.js';
 import { copyBurrowLink } from './clipboard.js';
 import { FloorCritter } from './painted-floor.js';
@@ -19,12 +19,12 @@ export function YourCritter({ me, place, asleep = false }: { me: Me; place: Your
 /** A sleeper's "z" over its head (flow page, .zz): decoration, drawn by the stylesheet. */
 export const SleepingZ = ({ at }: { at: Standing }) => <span className="floor-z" style={standingStyle(at)} aria-hidden="true" />;
 
-/** The burrow's critters on its floor (burrow-scenes.ts, burrowFloor): you at the right of the front row, and those not yet joined asleep. */
+/** The burrow's critters on its floor (burrow-scenes.ts, burrowFloor): you at the right of the front row, awake, and the others not yet joined asleep. */
 export function BurrowFloor({ view, you }: { view: BurrowView; you: string }) {
   const members = youLast(activeMembers(view), you);
   return <>{burrowFloor(members.length).map(spot => {
     const member = members[spot.index]!;
-    return <FloorCritter key={member.address} critter={{ x: spot.x, y: spot.y, size: spot.size, face: spot.face, address: member.address, variant: member.variant, asleep: member.joinedAt === null }} />;
+    return <FloorCritter key={member.address} critter={{ x: spot.x, y: spot.y, size: spot.size, face: spot.face, address: member.address, variant: member.variant, asleep: member.joinedAt === null && !sameAddress(member.address, you) }} />;
   })}</>;
 }
 

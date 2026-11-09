@@ -40,15 +40,18 @@
 .burrow-row-words small, .burrow-row-words time { font-size:var(--cc-text-xs); color:var(--cc-text-2); }
 .burrow-row .quiet { font-size:var(--cc-text-sm); }
 .feast-row { grid-template-columns:minmax(0, 1fr) auto; min-height:52px; color:var(--cc-text); text-decoration:none; }
+.burrow-rows .sheet-notice { margin-bottom:10px; }
 .burrow-add { display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:end; gap:8px; }
 .burrow-past summary { justify-content:space-between; gap:10px; }
 .burrow-history { display:grid; gap:6px; }
 .burrow-history ol { display:grid; gap:4px; margin:0; padding:0; list-style:none; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
 .burrow-history li { display:flex; flex-wrap:wrap; gap:0 6px; }
 .burrow-history time::before { content:'· '; }
+/* the critters' sheet is as tall as the flow page draws it, over a strip of the floor: the frame's 58% would show four of eight */
+.burrow-critters .sheet-screen { --sheet:min(var(--sheet-h), calc(100dvh - 112px)); }
 
 /* the list of who has scattered, and the asks before removing and leaving: sheets as tall as what they hold */
-dialog.app-dialog.who-scattered { --dialog-height:480px; }
+dialog.app-dialog.who-scattered { --dialog-height:520px; }
 .who-scattered .burrow-row { grid-template-columns:auto minmax(0, 1fr); min-height:48px; }
 .who-waiting { display:flex; align-items:center; gap:12px; padding-top:12px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
 dialog.app-dialog.burrow-dialog { --dialog-height:320px; }

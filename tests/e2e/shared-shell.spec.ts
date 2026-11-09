@@ -43,7 +43,8 @@ test('your critter is one screen over the page it was opened from, with the sett
   const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'gathering' } });
   expect(seed.ok()).toBe(true);
   const { burrowId } = await seed.json();
-  await page.goto(`/burrows/${burrowId}`);
+  // the burrow's critters, whose add field is on their own screen
+  await page.goto(`/burrows/${burrowId}/critters`);
   await connectLocal(page, 1);
   const face = page.getByRole('button', { name: 'Your critter and settings', exact: true }), adding = page.getByRole('textbox', { name: 'Address or ENS name', exact: true });
   // something typed on the page beneath is still there when the profile goes back to it
@@ -67,9 +68,9 @@ test('your critter is one screen over the page it was opened from, with the sett
   expect(await page.evaluate(() => localStorage.getItem('cc.motion.still'))).toBe('0');
   await expect(profile.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible();
   await expect(profile.getByRole('link', { name: 'How it works', exact: true })).toHaveAttribute('href', '/how-it-works');
-  // the back chevron, Escape and the browser's Back each return to the burrow as it was, with the focus on the face
+  // the back chevron, Escape and the browser's Back each return to the screen beneath as it was, with the focus on the face
   await profile.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}/critters$`));
   await expect(adding).toHaveValue('fern.eth');
   await expect(face).toBeFocused();
   await face.click();
@@ -82,21 +83,26 @@ test('your critter is one screen over the page it was opened from, with the sett
   await page.goBack();
   await expect(profile).toHaveCount(0);
   await expect(adding).toHaveValue('fern.eth');
-  // a visit to the first steps from the profile, which return to it, keeps the way back to the burrow
+  // a visit to the first steps from the profile, which return to it, keeps the way back to the screen beneath
   await face.click();
   await profile.getByRole('link', { name: 'How it works', exact: true }).click();
   await page.getByRole('button', { name: 'Skip', exact: true }).click();
   await expect(profile).toBeVisible();
   await profile.getByRole('button', { name: 'Back', exact: true }).click();
-  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}/critters$`));
 
+  // the critters' back chevron leads to the burrow, and the burrow's home
+  const back = page.getByRole('button', { name: 'Back', exact: true });
+  await back.click();
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
+  await back.click();
+  await expect(page).toHaveURL(/\/$/);
   // home: a whole burrow card opens its burrow, and Start a burrow makes one
-  await page.getByRole('link', { name: 'Critter Crumbs', exact: true }).click();
   const card = page.locator(`a[href="/burrows/${burrowId}"]`);
-  await card.getByText('8 critters', { exact: true }).click();
+  await card.getByText(/^8 critters/).click();
   await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
   expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([390, 844]);
-  await page.getByRole('link', { name: 'Critter Crumbs', exact: true }).click();
+  await back.click();
   await page.getByRole('link', { name: 'Start a burrow', exact: true }).click();
   await page.getByRole('textbox', { name: 'Burrow name', exact: true }).fill(`Shell ${burrowId.slice(0, 8)}`);
   await page.getByRole('button', { name: 'Create burrow', exact: true }).click();
@@ -132,7 +138,7 @@ test('copy success is visible, repeatable and announced once, including inside t
   const toast = page.locator('.app-toast');
   await expect(toast).toContainText('Link copied.');
   await expect(page.locator('#announce')).toHaveText('Link copied.');
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(`http://127.0.0.1:5173/burrows/${burrowId}`);
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(new URL(`/burrows/${burrowId}`, page.url()).href);
   await copyLink.click();
   await expect(toast).toHaveCount(1);
   await toast.getByRole('button', { name: 'Dismiss notification', exact: true }).click();

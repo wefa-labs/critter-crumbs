@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { phaseAt } from '@critter-crumbs/core';
 import { copy, formatCopy } from '@critter-crumbs/shared';
+import { SheetNotice } from '../game/sheet-parts.js';
 import { dayLabel, feastAction, feastDay, feastProgress, sameAddress, type BurrowFeast, type BurrowView, type UnderWay } from './burrow-view.js';
 import { deadlineLine, phaseCopy } from './deadline-lines.js';
 import type { MemberFeast } from './feast-view.js';
@@ -58,17 +59,22 @@ function WhoScattered({ count, faces, you, close }: { count: string; faces: read
 
 /**
  * The burrow's other feasts under Feasts (flow page, the rows on SCREENS.burrow): a creator's drafts and the feasts that
- * have ended, each a row with its day and a chip for how it stands, which opens the feast.
+ * have ended, each a row with its day and a chip for how it stands, which opens the feast. A people feast that ended
+ * because fewer than three critters were left when scattering opened says so under its row, as a leaf notice (PRD R6
+ * and P11; flow page, SCREENS.offline; audit screen 52), rather than as a card that still counts down.
  */
 export function FeastRows({ feasts, now }: { feasts: readonly BurrowFeast[]; now: number }) {
   return <>
     <h3>{copy['burrow.feasts.title']}</h3>
     <ul role="list" className="burrow-rows">{feasts.map(feast => {
       const phase = phaseAt(feast, now), day = feastDay(feast, phase);
-      return <li key={feast.id}><Link className="burrow-row feast-row" href={`/feasts/${feast.id}`}>
-        <span className="burrow-row-words"><b>{feast.title}</b><time dateTime={new Date(day).toISOString()}>{dayLabel(day)}</time></span>
-        <span className="chip">{copy[phaseCopy[phase]]}</span>
-      </Link></li>;
+      return <li key={feast.id}>
+        <Link className="burrow-row feast-row" href={`/feasts/${feast.id}`}>
+          <span className="burrow-row-words"><b>{feast.title}</b><time dateTime={new Date(day).toISOString()}>{dayLabel(day)}</time></span>
+          <span className="chip">{copy[phaseCopy[phase]]}</span>
+        </Link>
+        {phase === 'void' ? <SheetNotice>{formatCopy('feast.tooFew', { feastTitle: feast.title })}</SheetNotice> : null}
+      </li>;
     })}</ul>
   </>;
 }
