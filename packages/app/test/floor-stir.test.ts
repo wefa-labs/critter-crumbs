@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CIRCLE_FEEL } from '@critter-crumbs/shared';
+import { CIRCLE_FEEL, stirPose } from '@critter-crumbs/shared';
 import { sleepGlyphKeyframes, stirKeyframes } from '../src/app/floor-stir.js';
 
 /* A floor critter stirs as your own critter stirs in the game (world/circle.ts): the same curves over the same time. */
@@ -18,6 +18,14 @@ describe('the stir on a painted floor', () => {
     expect(body[0]).toBe(0); expect(Math.abs(body.at(-1)!)).toBeLessThan(1e-9);
     expect(Math.max(...body)).toBe(CIRCLE_FEEL.stirSway); expect(Math.min(...body)).toBe(-CIRCLE_FEEL.stirSway);
     expect(body.indexOf(CIRCLE_FEEL.stirSway)).toBeLessThan(body.indexOf(-CIRCLE_FEEL.stirSway));
+  });
+
+  it("is the game's own stir, sampled, and at rest once it is done", () => {
+    const { head, body } = stirKeyframes();
+    head.forEach(frame => expect(degrees(frame)).toBeCloseTo(stirPose(frame.offset * CIRCLE_FEEL.stirMs).headTilt, 2));
+    body.forEach(frame => expect(degrees(frame)).toBeCloseTo(stirPose(frame.offset * CIRCLE_FEEL.stirMs).lean, 2));
+    const after = stirPose(CIRCLE_FEEL.sleepGlyphMs);
+    expect(after.headTilt).toBeCloseTo(0, 9); expect(after.lean).toBeCloseTo(0, 9);
   });
 
   it("lets each z rise and fade as the game's do", () => {

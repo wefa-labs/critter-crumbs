@@ -60,7 +60,8 @@ export function WaitingScene({ feast, settings, announce, error, retry }: { feas
   useEffect(() => runtime.setSettings(settings), [runtime, settings]);
   /* the reason the feast cannot be laid out yet is read out once; other errors reach the app's alert */
   useEffect(() => { if (error === 'feast.keyNotYet') announce(copy[error]); }, [error]);
-  const view = gameView({ phase: feast.phase, remaining: 0, keyPending: error === 'feast.keyNotYet' });
+  /* any reason the feast cannot be laid out yet is flow 43's sheet, which has room for it, the count and Try again */
+  const view = gameView({ phase: feast.phase, remaining: 0, keyPending: error !== null });
   return <WorldProvider world={runtime.world}><section className="game-flow"><GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={view.state} editable={false} announce={announce} remaining={0} surfaces={{ sheet: <WaitingSheet error={error} retry={retry} scattered={scatteredLine(feast)} /> }} /></section></WorldProvider>;
 }
 /** How many of the feast's participants have a scatter in, from the feast as the burrow sees it, before anything is opened. */

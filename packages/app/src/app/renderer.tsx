@@ -1,16 +1,14 @@
-import { Component, useEffect, useState, useSyncExternalStore, type ComponentType, type ReactNode, type RefObject } from 'react';
+import { Component, useEffect, useMemo, useState, useSyncExternalStore, type ComponentType, type ReactNode, type RefObject } from 'react';
 import { copy, RENDER_BUDGET } from '@critter-crumbs/shared';
 import { supportsMesh } from '../portraits/version.js';
 import { Identity } from '../world/index.js';
 import type { GameSettings } from '../world/index.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { createRenderPolicy } from '../sim/render-policy.js';
-import { usePostNotice } from './notices.js';
+import { useGameNotice } from './notices.js';
 import type { SceneProps } from '../three/scene.js';
 let session: ReturnType<typeof createRenderPolicy> | undefined;
 function renderingSession() { return session ??= createRenderPolicy(Math.min(devicePixelRatio, matchMedia('(pointer: coarse)').matches ? RENDER_BUDGET.phoneDpr : RENDER_BUDGET.desktopDpr)); }
-/* the simple view's notice is known on the stack by its setting */
-const RENDERER_NOTICE='view.simple.label';
 class RenderBoundary extends Component<{children:ReactNode;failed:()=>void},{failed:boolean}> {
  state={failed:false};static getDerivedStateFromError(){return {failed:true};}componentDidCatch(){this.props.failed();}render(){return this.state.failed?null:this.props.children;}
 }
@@ -20,9 +18,9 @@ export function Renderer({runtime,settings,surface,announce,diagnostics}:{runtim
  const [policy]=useState(renderingSession),state=useSyncExternalStore(policy.subscribe,policy.snapshot),[Scene,setScene]=useState<ComponentType<SceneProps>|null>(null),[attempt,setAttempt]=useState(0),[stages,setStages]=useState<HTMLElement[]>([]);
  useEffect(()=>{if(portraitsOnly(runtime)||settings.simple||state.phase==='fallback')return;let active=true;void import('../three/index.js').then(module=>{if(active)setScene(()=>module.StageScene);}).catch(()=>{if(active)policy.failed();});return()=>{active=false;};},[settings.simple,state.phase==='fallback',attempt]);
  useEffect(()=>{const notice=policy.takeAnnouncement();if(notice)announce(copy[notice]);},[state.notice,announce]);
- /* the simple view's notice joins the screen's others (notices.tsx), only while some critter has a 3D mesh to fall back from (D7) */
- const post=usePostNotice(),noticed=!portraitsOnly(runtime)&&!settings.simple&&state.notice?state.notice:null;
- useEffect(()=>{if(!noticed){post(RENDERER_NOTICE,null);return;}post(RENDERER_NOTICE,{key:RENDERER_NOTICE,text:copy[noticed],trouble:false,...(state.retryAvailable?{retry:{label:copy['fallback.retry'],run:()=>{if(policy.retry()){setScene(null);setAttempt(value=>value+1);}}}}:{})});return()=>post(RENDERER_NOTICE,null);},[noticed,state.retryAvailable,post]);
+ /* the simple view's notice stands over the game's floor with the others' look (notices.tsx), only while some critter has a 3D mesh to fall back from (D7) */
+ const noticed=!portraitsOnly(runtime)&&!settings.simple&&state.notice?state.notice:null;
+ useGameNotice(useMemo(()=>noticed?{text:copy[noticed],trouble:false,...(state.retryAvailable?{retry:{label:copy['fallback.retry'],run:()=>{if(policy.retry()){setScene(null);setAttempt(value=>value+1);}}}}:{})}:null,[noticed,state.retryAvailable]));
  useEffect(()=>{runtime.setIdleMotion(state.idle);},[runtime,state.idle]);
  useEffect(()=>{
    const nodes=Array.from(surface.current?.querySelectorAll<HTMLElement>('.stage[data-critter-id]')??[]);

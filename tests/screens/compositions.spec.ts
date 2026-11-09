@@ -4,7 +4,9 @@ import { expect, test, type Page } from 'playwright/test';
  * Each core state's composition, checked against numbers read off the review pages, never off the app:
  * the flow page's SCREENS (docs/explorations/app-screens/index.html: sheetH, .toast, .modal, .d-desktop .sheet) and
  * the scatter page, pass eleven (docs/explorations/scatter-layouts/index.html: DOCK_BASE 130, RESULTS_FLOOR 196, the
- * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall).
+ * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). One
+ * number is the app's own: the key's sheet is 20 px taller than the flow page's, for the count of who has scattered
+ * (docs/decisions.md, 2026-11-09).
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US' });
 const PHONE = { width: 375, height: 812 }, DESKTOP = { width: 1440, height: 900 }, HEADER = 64;
@@ -62,11 +64,13 @@ for (const state of RESULTS) {
     const card = await box(page, '.dock-position');
     expect(Math.round(card.y)).toBe(HEADER + 196);
     await expect(page.locator('.results-card')).toBeVisible();
-    /* the actions are pinned at the card's foot, under the list rather than at its end, however long it is (D9) */
-    await expect(page.locator('.results-scroll .pill')).toHaveCount(0);
-    const results = await box(page, '.results-card'), actions = await box(page, '.results-card .results-actions');
+    /* the actions are pinned at the card's foot, under the list rather than at its end, however long it is (D9); the
+       list keeps its own controls, such as recording the result */
+    const pinned = page.locator('.results-card > .results-actions');
+    await expect(page.locator('.results-scroll .results-actions')).toHaveCount(0);
+    const results = await box(page, '.results-card'), actions = await box(page, '.results-card > .results-actions');
     expect(Math.round(actions.y + actions.height)).toBe(Math.round(results.y + results.height));
-    for (const name of state === 'givers' ? ['Download CSV (who gave what)'] : ['Replay Feast', 'Download CSV']) await expect(page.getByRole('button', { name, exact: true })).toBeInViewport({ ratio: 1 });
+    for (const name of state === 'givers' ? ['Download CSV (who gave what)'] : ['Replay Feast', 'Download CSV']) await expect(pinned.getByRole('button', { name, exact: true })).toBeInViewport({ ratio: 1 });
     await open(page, state, DESKTOP);
     const dock = await box(page, '.dock-position'), bar = await box(page, '.results-bar');
     expect(Math.round(dock.height)).toBe(74);

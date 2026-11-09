@@ -50,7 +50,7 @@ export const sidePanelWidth = (width: number) => Math.min(480, Math.max(400, wid
  * floor in view.
  */
 const STATEMENT = { inset: 12, height: 378 };
-const statementHeight = (measured: number | undefined) => measured !== undefined && measured > 0 ? Math.min(STATEMENT.height, Math.ceil(measured)) : STATEMENT.height;
+const bubbleHeight = (measured: number | undefined) => measured !== undefined && measured > 0 ? Math.min(STATEMENT.height, Math.ceil(measured)) : STATEMENT.height;
 
 /** How far apart two rectangles are, in px; 0 when they touch or overlap. */
 export const rectGap = (a: Rect, b: Rect) => Math.hypot(Math.max(0, a.x - (b.x + b.width), b.x - (a.x + a.width)), Math.max(0, a.y - (b.y + b.height), b.y - (a.y + a.height)));
@@ -240,7 +240,7 @@ export function layoutGame(input: LayoutInput) {
     : input.scene.bubbles === 'focus' ? [{ index: focused.index, rect: bestBubble }] : [];
 
   /* open on the phone, the statement is a bubble across the top, three puffs rising to it from the focused head */
-  const statement: Rect = { x: STATEMENT.inset, y: STATEMENT.inset, width: W - STATEMENT.inset * 2, height: statementHeight(input.statementHeight) };
+  const statement: Rect = { x: STATEMENT.inset, y: STATEMENT.inset, width: W - STATEMENT.inset * 2, height: bubbleHeight(input.statementHeight) };
   const trailFrom = { x: focused.foot.x + headR * 0.8, y: headY - headR - 6 }, trailTo = { x: Math.min(focused.foot.x + headR + 36, W - 40), y: statement.y + statement.height + 6 };
   const trail: Rect[] = !desktop && input.reading ? [0.18, 0.5, 0.8].map((along, i) => { const size = [8, 11, 15][i]!; return { x: trailFrom.x + (trailTo.x - trailFrom.x) * along - size / 2, y: trailFrom.y + (trailTo.y - trailFrom.y) * along - size / 2, width: size, height: size }; }) : [];
 

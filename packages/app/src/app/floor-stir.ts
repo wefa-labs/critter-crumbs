@@ -1,19 +1,19 @@
-import { CIRCLE_FEEL, copy } from '@critter-crumbs/shared';
+import { CIRCLE_FEEL, copy, stirPose } from '@critter-crumbs/shared';
 
 /**
  * A critter standing on a painted floor stirs when it is touched, as your own critter stirs in the game
- * (world/circle.ts): its head tilts up and back and its body sways once either way over CIRCLE_FEEL.stirMs, and a
- * sleeper lets out three z's that rise and fade one after another. The floor's critters are drawings with no world
- * behind them, so the browser runs the same curves, sampled here, on its own animation clock; nothing is kept.
+ * (world/circle.ts): its head tilts up and back and its body sways once either way (stirPose), and a sleeper lets out
+ * three z's that rise and fade one after another. The floor's critters are drawings with no world behind them, so the
+ * browser runs the same curves, sampled here, on its own animation clock; nothing is kept.
  */
 const SAMPLES = 12, STIR = 'floor-stir';
 
 /** The stir's two curves, added to whatever pose the drawing stands in. */
 export function stirKeyframes() {
-  const at = Array.from({ length: SAMPLES + 1 }, (_, index) => index / SAMPLES);
+  const at = Array.from({ length: SAMPLES + 1 }, (_, index) => ({ offset: index / SAMPLES, pose: stirPose(index / SAMPLES * CIRCLE_FEEL.stirMs) }));
   return {
-    head: at.map(offset => ({ transform: `rotate(${(CIRCLE_FEEL.stirTilt * Math.sin(Math.PI * offset)).toFixed(2)}deg)`, offset })),
-    body: at.map(offset => ({ transform: `rotate(${(CIRCLE_FEEL.stirSway * Math.sin(2 * Math.PI * offset)).toFixed(2)}deg)`, offset })),
+    head: at.map(({ offset, pose }) => ({ transform: `rotate(${pose.headTilt.toFixed(2)}deg)`, offset })),
+    body: at.map(({ offset, pose }) => ({ transform: `rotate(${pose.lean.toFixed(2)}deg)`, offset })),
   };
 }
 

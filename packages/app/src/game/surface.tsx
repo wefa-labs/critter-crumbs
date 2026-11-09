@@ -52,6 +52,19 @@ export function PhoneStatement({ name, element, body, empty, close }: { name: st
   );
 }
 
+/**
+ * How tall an open phone statement (a PhoneStatement inside `host`) stands with all of its text showing: the bubble's
+ * frame and heading, the text's own height and the padding under it. The text's height is its laid-out height, which
+ * the bubble's opening scale does not change; a pixel more covers the frame's measures, which the browser rounds.
+ * `text` is the element to watch for its height changing; null until the statement has rendered.
+ */
+export function measureStatement(host: HTMLElement) {
+  const bubble = host.firstElementChild, text = bubble?.querySelector<HTMLElement>('.statement-scroll > *');
+  if (!(bubble instanceof HTMLElement) || !text) return null;
+  const scroll = text.parentElement!, room = getComputedStyle(scroll), measured = getComputedStyle(text);
+  return { text, height: () => bubble.offsetHeight - scroll.offsetHeight + parseFloat(room.paddingTop) + parseFloat(room.paddingBottom) + parseFloat(measured.height) + 1 };
+}
+
 /** On desktop the side panel always holds the focused critter's statement: its name, element and "You" for your own. */
 export function PanelStatement({ name, element, own, body, empty }: { name: string; element: CritterElement | null; own: boolean; body: string | undefined; empty: string }) {
   return (

@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { copy, formatCopy } from '@critter-crumbs/shared';
-import { circleBackRow, DESKTOP_MIN_WIDTH, HEADER_HEIGHT } from '../game/layout.js';
+import { deviceFor } from '../game/composition.js';
+import { circleBackRow, HEADER_HEIGHT } from '../game/layout.js';
 import { GameFrame } from '../game/parts.js';
 import { SceneBackdrop } from '../game/scenes.js';
-import { Grow } from '../game/sheet-parts.js';
 import { deadlineLine } from './deadlines.js';
 import { portraitVariant, type PublicFeast } from './feast-view.js';
 import { ScreenNotices } from './notices.js';
@@ -29,7 +29,7 @@ function useRoom(screen: RefObject<HTMLDivElement | null>, floor: RefObject<HTML
     const box = screen.current!, ground = floor.current!;
     const measure = () => {
       const scene = { width: ground.clientWidth, height: box.clientHeight }, viewport = { width: box.clientWidth, height: box.clientHeight + HEADER_HEIGHT };
-      setRoom(current => current?.scene.width === scene.width && current.scene.height === scene.height && current.viewport.width === viewport.width ? current : { scene, viewport, desktop: viewport.width >= DESKTOP_MIN_WIDTH });
+      setRoom(current => current?.scene.width === scene.width && current.scene.height === scene.height && current.viewport.width === viewport.width ? current : { scene, viewport, desktop: deviceFor(viewport.width) === 'desktop' });
     };
     measure();
     const observer = new ResizeObserver(measure);
@@ -46,7 +46,8 @@ function useRoom(screen: RefObject<HTMLDivElement | null>, floor: RefObject<HTML
  *
  * The ring stands on the plate the game stands its circle on, raised as the game raises it (game/plate.ts), so the
  * sleepers stand on the floor rather than on the table and the steps (the November UI audit, screen 2), and the room
- * is the one the feast opens in. The plate is the game's scene in size and the sheet covers its foot.
+ * is the one the feast opens in. The plate is the game's scene in size and the sheet covers its foot. The sheet is the
+ * frame's (place-screen.tsx): its words scroll under the app's notices and its two actions stay at its foot.
  */
 export function Invite({ feast, now, connect, sound }: { feast: PublicFeast; now: number; connect: () => void; sound: ReactNode }) {
   const screen = useRef<HTMLDivElement>(null), floor = useRef<HTMLDivElement>(null), room = useRoom(screen, floor);
@@ -58,18 +59,21 @@ export function Invite({ feast, now, connect, sound }: { feast: PublicFeast; now
   return (
     <GameFrame feast={feast} burrowLine={formatCopy('arrive.burrow', { burrowName: feast.burrowName, n: feast.targets.length })} aside={sound}>
       <div ref={screen} className="sheet-screen" style={sheetScreenStyle(INVITE_SCENE.sheetHeight)}>
-        <PaintedFloor painting={INVITE_SCENE.painting} backdrop={plate} className="screen-floor" ref={floor}>
+        <PaintedFloor backdrop={plate} className="screen-floor" ref={floor}>
           <FloorRing critters={feast.targets.map(target => ({ key: target.id, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), asleep: true }))} />
           <p className="floor-caption">{copy['arrive.asleep']}</p>
         </PaintedFloor>
-        <section className="screen-sheet">
-          <ScreenNotices />
-          {feast.context ? <p className="invite-context">{feast.context}</p> : null}
-          <div className="invite-deadlines"><InviteDeadline phase="gathering" at={feast.gatheringEndsAt} now={now} /><InviteDeadline phase="scattering" at={feast.scatteringEndsAt} now={now} /></div>
-          <p>{copy['arrive.explainer']}</p>
-          <Grow />
-          <button type="button" className="pill wide" onClick={connect}>{copy['arrive.cta']}</button>
-          <Link className="quiet" href="/how-it-works">{copy['launch.learn']}</Link>
+        <section className="screen-sheet place-sheet">
+          <div className="place-words">
+            <ScreenNotices />
+            {feast.context ? <p className="invite-context">{feast.context}</p> : null}
+            <div className="invite-deadlines"><InviteDeadline phase="gathering" at={feast.gatheringEndsAt} now={now} /><InviteDeadline phase="scattering" at={feast.scatteringEndsAt} now={now} /></div>
+            <p>{copy['arrive.explainer']}</p>
+          </div>
+          <div className="place-actions invite-actions">
+            <button type="button" className="pill wide" onClick={connect}>{copy['arrive.cta']}</button>
+            <Link className="quiet" href="/how-it-works">{copy['launch.learn']}</Link>
+          </div>
         </section>
       </div>
     </GameFrame>

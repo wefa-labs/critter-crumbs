@@ -8,6 +8,9 @@
 /* ------------------------------------------------------------------ the invite's floor: the game's window plate in a
    box the size of the game's scene (invite.tsx), its foot under the sheet */
 .invite-plate { position:absolute; inset:0 0 auto; height:100%; }
+/* its actions at the foot of its sheet, as the frame pins a screen's actions: Connect to join, How it works under it */
+.invite-actions { flex-direction:column; align-items:stretch; gap:8px; }
+.invite-actions .pill { flex:none; }
 
 /* ------------------------------------------------------------------ the standing notices (app/notices.tsx), stacked as
    the flow page stacks them (SCREENS.notices): at the head of a screen's sheet, or over the top of the game's floor,

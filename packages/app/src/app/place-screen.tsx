@@ -22,8 +22,6 @@ import { CritterFace, ProfileButton } from './ui.js';
  *   their feet in percent of the floor and sized in the design's phone pixels.
  * - `sheetHeight` is the sheet's height on the design's 812 px phone; a shorter phone gets a shorter one.
  * - `actions` stay pinned at the sheet's foot while the rest of the sheet scrolls.
- * - The app's standing notices (notices.tsx: the clock, ENS names, the simple view) head the sheet's words, as the
- *   flow page stacks them (SCREENS.notices).
  * - `over` is for a screen drawn over the rest of the app, which app.tsx makes inert beneath it: the first meeting, and
  *   your critter's profile over the screen it was opened from, to which app.tsx returns the focus. It takes the focus,
  *   Escape goes back where it has a back chevron, and on leaving it the page's title is the beneath one's again.

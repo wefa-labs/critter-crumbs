@@ -10,7 +10,7 @@ import { PortraitImage } from './ui.js';
  * critter stirs in the game (the November UI audit's toy outside the game); a floor drawn otherwise, such as the
  * invite's plate, passes its own `backdrop`.
  */
-export function PaintedFloor({ painting, backdrop, className, ref, children }: { painting: Painting; backdrop?: ReactNode; className: string; ref?: Ref<HTMLDivElement>; children: ReactNode }) {
+export function PaintedFloor({ painting, backdrop, className, ref, children }: ({ painting: Painting; backdrop?: undefined } | { backdrop: ReactNode; painting?: undefined }) & { className: string; ref?: Ref<HTMLDivElement>; children: ReactNode }) {
   return <div className={className} ref={ref} onPointerDown={stirTouched}>{backdrop ?? <><div className="scene-paint" data-painting={painting} /><div className="scene-wash" /></>}{children}</div>;
 }
 

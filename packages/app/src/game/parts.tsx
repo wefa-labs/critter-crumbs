@@ -21,6 +21,7 @@ import { CrumbMound, ThoughtBubble } from './mound.js';
 import { Dock } from './dock.js';
 import type { CritterElement } from './icons.js';
 import { measureText } from './measure.js';
+import { measureStatement } from './surface.js';
 import { useScatterInput } from '../app/scatter-input.js';
 import { useAudio, useMusic } from '../audio/context.js';
 
@@ -80,16 +81,6 @@ function TagCount({ entity, amount }: { entity: Entity; amount?: number }) { con
 export function critterElement(runtime: StageRuntime, index: number): CritterElement | null {
   const parameters = runtime.critters[index]?.get(Identity)?.parameters;
   return parameters?.version === '2' ? parameters.element as CritterElement : null;
-}
-
-/**
- * How tall the open statement's bubble stands with all of its text showing: the bubble's frame and heading, the text's
- * own height and the padding under it. The text's height is its laid-out height, which the bubble's opening scale does
- * not change; a pixel more covers the frame's measures, which the browser rounds.
- */
-function wholeStatementHeight(host: HTMLElement, text: HTMLElement) {
-  const bubble = host.firstElementChild as HTMLElement, scroll = text.parentElement!, room = getComputedStyle(scroll);
-  return bubble.offsetHeight - scroll.offsetHeight + parseFloat(room.paddingTop) + parseFloat(room.paddingBottom) + parseFloat(getComputedStyle(text).height) + 1;
 }
 
 /** What a state's surface holds; which of these shows is the composition's choice, not the screen's. */
@@ -155,12 +146,12 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
      before the frame is drawn, and again if its text changes height (a font arriving) */
   const phoneStatement = reading && !layout.desktop && !!surfaces.statement?.phone;
   useLayoutEffect(() => {
-    const host = statementHost.current, text = host?.querySelector<HTMLElement>('.statement-scroll > *');
-    if (!phoneStatement || !host || !text) return;
-    const measure = () => { const height = wholeStatementHeight(host, text); setStatementHeight(current => current === height ? current : height); };
+    const statement = phoneStatement && statementHost.current ? measureStatement(statementHost.current) : null;
+    if (!statement) return;
+    const measure = () => { const height = statement.height(); setStatementHeight(current => current === height ? current : height); };
     measure();
     const observer = new ResizeObserver(measure);
-    observer.observe(text);
+    observer.observe(statement.text);
     return () => observer.disconnect();
   }, [phoneStatement, focus]);
   const away = critters.filter(critter => critter.away).length;

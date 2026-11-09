@@ -64,3 +64,9 @@ export const PILE_RULE: 'exact' | 'proportional' = 'exact';
  *  floor: at ten critters it fell to 36 px on a 320 x 568 phone, faces too small to tell apart. A stir tilts the head
  *  up to stirTilt degrees and back and sways the body stirSway degrees either way, over stirMs. */
 export const CIRCLE_FEEL = { presentationMs:100,turnMs:320, stirMs:850, stirTilt:18, stirSway:5, sleepGlyphMs:1100,sleepReleaseMs:130,sleepLifeMs:840,sleepDriftX:16,sleepDriftY:32, playEveryMs:[900,2100], playMs:480, phone:{focus:140,back:66,front:100,backMin:56}, desktop:{focus:248,back:120,front:172}, huddle:{phone:66,desktop:150} } as const;
+/** A stir `age` ms after the touch, in degrees: the head tilting up and back and the body swaying once either way, both
+ *  at rest from stirMs. Your own critter in the game and every critter on a painted floor stir by it. */
+export function stirPose(age: number) {
+  const t = Math.min(1, Math.max(0, age / CIRCLE_FEEL.stirMs));
+  return { headTilt: CIRCLE_FEEL.stirTilt * Math.sin(Math.PI * t), lean: CIRCLE_FEEL.stirSway * Math.sin(2 * Math.PI * t) };
+}
