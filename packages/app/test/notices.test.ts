@@ -23,7 +23,7 @@ describe('the standing notices', () => {
   });
 
   it("leave the game's floor to the game's own notice", () => {
-    expect(renderToStaticMarkup(createElement(NoticeProvider, { notices: appNotices(12, 'err.ensUnavailable'), children: createElement(ScreenNotices, { overFloor: true }) }))).toBe('');
+    expect(renderToStaticMarkup(createElement(NoticeProvider, { notices: appNotices(12, 'err.ensUnavailable'), children: createElement(ScreenNotices, { game: true }) }))).toBe('');
   });
 
   it('show nothing when there is none, or outside the app', () => {

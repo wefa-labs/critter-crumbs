@@ -48,16 +48,16 @@ export function useGameNotice(notice: StandingNotice | null) {
 }
 
 /**
- * The stack, where a screen shows it: the app's notices at the head of its sheet; or `overFloor`, over the top of the
- * game's floor, the game's own (the simple view, where it always lay). They stay apart: a whole session of a wrong
- * device clock never covers the circle, and a screen drawn over a game (your critter's profile) does not offer to retry
- * the game's 3D beneath it (docs/decisions.md, 2026-11-09).
+ * The stack, where a screen shows it: the app's notices at the head of its sheet; or with `game`, the game's own (the
+ * simple view), which the game stands over the top of its floor (`className`), where its notice always lay. They stay
+ * apart: a whole session of a wrong device clock never covers the circle, and a screen drawn over a game (your critter's
+ * profile) does not offer to retry the game's 3D beneath it (docs/decisions.md, 2026-11-09).
  */
-export function ScreenNotices({ overFloor = false }: { overFloor?: boolean }) {
-  const { app, posted } = useContext(Notices), notices = overFloor ? posted : app;
+export function ScreenNotices({ game = false, className }: { game?: boolean; className?: string }) {
+  const { app, posted } = useContext(Notices), notices = game ? posted : app;
   if (!notices.length) return null;
   return (
-    <div className={overFloor ? 'screen-notices game-notices' : 'screen-notices'}>
+    <div className={className ? `screen-notices ${className}` : 'screen-notices'}>
       {notices.map(notice => (
         <SheetNotice key={notice.key} trouble={notice.trouble}>
           <span>{notice.text}</span>
