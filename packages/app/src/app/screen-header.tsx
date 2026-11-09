@@ -21,8 +21,9 @@ export function BetaChip() {
  * The 64 px header over every screen with a floor (flow page, hdr()): a back chevron where the screen has somewhere to
  * go back to, the burrow's line over the screen's title, and at the right your critter's face, or Connect, or the Music
  * toggle (`end`). A screen with no place of its own yet (the first meeting, the first steps) has the wordmark instead
- * of a title, and carries its h1 in its sheet. The beta chip stands beside the burrow line, or beside the title or the
- * wordmark where there is none. `children` go between the title and the right: the game's closing line on desktop.
+ * of a title, as plain words, and carries its h1 in its sheet. The beta chip stands beside the burrow line, or beside
+ * the title or the wordmark where there is none. `children` go between the title and the right: the game's closing
+ * line on desktop.
  */
 export function ScreenHeader({ title, burrow, href = '/', back, end, children }: {
   /** the screen's h1; without one, the wordmark */
@@ -37,7 +38,7 @@ export function ScreenHeader({ title, burrow, href = '/', back, end, children }:
     <header className="game-header">
       {back ? <button type="button" className="screen-back" aria-label={copy['action.back']} onClick={back}><GameIcon name="left" /></button> : null}
       {title === undefined
-        ? <div className="screen-mark"><Link href="/" className="wordmark">{copy['app.name']}</Link><BetaChip /></div>
+        ? <div className="screen-mark"><span className="wordmark">{copy['app.name']}</span><BetaChip /></div>
         : burrow
           ? <div className="game-context"><div className="game-line"><Link className="game-burrow" href={href}>{burrow}</Link><BetaChip /></div><h1>{title}</h1></div>
           : <div className="screen-title"><h1>{title}</h1><BetaChip /></div>}

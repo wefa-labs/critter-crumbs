@@ -1,6 +1,3 @@
-/** Your critter's profile, which opens over the screen its face was pressed on and goes back to it (app.tsx). */
-export const YOUR_CRITTER_PATH = '/your-critter';
-
 /**
  * Where Skip and Got it lead, and where your critter's profile goes back to. `navigate` (ui.tsx) records the screen a
  * link was pressed on, so the steps return to it: the feast for someone who came by its link, or the profile for a
