@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { feastAction, feastDay, feastProgress, feastsUnderWay, otherFeasts, phasesKey, youLast, type BurrowFeast, type BurrowMember } from '../src/app/burrow-view.js';
+import { feastAction, feastDay, feastProgress, feastsUnderWay, otherFeasts, phasesKey, progressFaces, youLast, type BurrowFeast, type BurrowMember } from '../src/app/burrow-view.js';
 import { CLOVER, FERN, JUNIPER, MOSS } from '../src/app/painted-scene.js';
 
 /* What the burrow's page reads off its view and its feasts' views: which feasts are under way, who has done this phase's
@@ -57,7 +57,18 @@ describe("a feast's progress, as the burrow sees it", () => {
   });
 });
 
-describe("the one action on a feast's card", () => {
+describe("a feast's progress as faces", () => {
+  it("names each by the burrow's member, and by the short address one the burrow no longer lists", () => {
+    const members = [{ address: MOSS, variant: 2, displayName: 'Moss', ensName: null }, { address: FERN, variant: 0, displayName: null, ensName: 'fern.eth' }] as unknown as BurrowMember[];
+    expect(progressFaces([{ address: FERN.toLowerCase(), done: true }, { address: MOSS, done: false }, { address: CLOVER, done: false }], members)).toEqual([
+      { key: FERN.toLowerCase(), address: FERN.toLowerCase(), variant: 0, name: 'fern.eth', done: true },
+      { key: MOSS, address: MOSS, variant: 2, name: 'Moss', done: false },
+      { key: CLOVER, address: CLOVER, variant: 0, name: '0x1efF…A718', done: false },
+    ]);
+  });
+});
+
+describe("the action on a feast's card", () => {
   const feastOf = (kind: 'people' | 'options', createdBy: string, participants: string[] = []) => ({ kind, createdBy: createdBy as `0x${string}`, participants: participants as `0x${string}`[] });
 
   it('is Scatter crumbs while scattering for everyone taking part, also before the feast\'s own view has arrived', () => {

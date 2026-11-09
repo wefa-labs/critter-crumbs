@@ -28,7 +28,10 @@ describe("a burrow's own screens", () => {
   });
 
   it('stand at the entrance until the burrow has had a feast, and in the room after', () => {
-    expect([burrowPainting(0), burrowPainting(1), burrowPainting(5)]).toEqual(['entrance', 'window', 'window']);
+    const feast = (status: 'draft' | 'open' | 'cancelled') => ({ status, gatheringEndsAt: 1, scatteringEndsAt: 2 });
+    expect([burrowPainting([]), burrowPainting([feast('open')]), burrowPainting([feast('cancelled'), feast('open')])]).toEqual(['entrance', 'window', 'window']);
+    // a draft is only its creator's to see, so it moves nobody into the room
+    expect(burrowPainting([feast('draft')])).toBe('entrance');
   });
 });
 
@@ -52,7 +55,7 @@ describe("the burrow's critters on its floor", () => {
     expect(seats(8).slice(6).map(spot => spot.face)).toEqual(['right', 'left']);
   });
 
-  it('puts the last of the burrow at the right of the front row, where the burrow puts you', () => {
+  it('puts the last of the burrow at the right, where the burrow puts you: the end of the row, or the right of the front row', () => {
     const last = (count: number) => burrowFloor(count).find(spot => spot.index === count - 1)!;
     for (const count of [2, 5]) expect(last(count).x).toBe(Math.max(...burrowFloor(count).map(spot => spot.x)));
     for (const count of [6, 8, 12, 49]) expect(last(count).x).toBe(Math.max(...burrowFloor(count).filter(spot => spot.y >= 92).map(spot => spot.x)));

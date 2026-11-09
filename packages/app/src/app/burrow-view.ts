@@ -1,6 +1,8 @@
 import { phaseAt } from '@critter-crumbs/core';
 import type { CopyId, FeastClock, MemberRemoval, Phase, Profile } from '@critter-crumbs/shared';
 import type { MemberFeast } from './feast-view.js';
+import type { RowFace } from './place-screen.js';
+import { displayName, shortAddress } from './ui.js';
 
 /** A member as the burrow's view gives them: their profile, and when they joined and left. A pre-added member has not joined. */
 export interface BurrowMember extends Profile { membershipVersion: number; joinedAt: number | null; leftAt: number | null }
@@ -12,7 +14,7 @@ export interface BurrowView { id: string; name: string; createdBy: string; remov
 export const sameAddress = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 /** The members a burrow has now, pre-added ones among them; those who left or were removed are its past members. */
 export const activeMembers = (view: BurrowView) => view.members.filter(member => member.leftAt === null);
-/** The burrow's members in its own order, with you last, so that on its floor you stand at the right of the front row (burrow-scenes.ts). */
+/** The burrow's members in its own order, with you last, so that on its floor you stand at its right (burrow-scenes.ts, burrowFloor). */
 export const youLast = (members: readonly BurrowMember[], you: string) => [...members.filter(member => !sameAddress(member.address, you)), ...members.filter(member => sameAddress(member.address, you))];
 
 export type OpenPhase = 'gathering' | 'scattering';
@@ -31,9 +33,9 @@ export const phasesKey = (feasts: readonly FeastClock[], now: number) => feasts.
 export const otherFeasts = (feasts: readonly BurrowFeast[], now: number) => feasts.filter(feast => !isOpen(phaseAt(feast, now))).sort((a, b) => b.scatteringEndsAt - a.scatteringEndsAt);
 /** The day a feast's row gives: when scattering closed, for one that feasted; else when its gathering closed, or would. */
 export const feastDay = (feast: FeastClock, phase: Phase) => phase === 'feast' ? feast.scatteringEndsAt : feast.gatheringEndsAt;
-/** "Sat 12 Apr" and "2 Sep", in the viewer's own way of writing a day. Formatting reads no clock. */
-export const dayLabel = (at: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' }).format(at);
-export const dateLabel = (at: number) => new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short' }).format(at);
+/** A day as a feast's row gives it, "Sat 12 Apr", and as the membership history does, "2 Sep", each in the viewer's own way. Formatting reads no clock. */
+export const weekdayDate = (at: number) => new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' }).format(at);
+export const shortDate = (at: number) => new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short' }).format(at);
 
 /** One critter in a feast's progress: whose, and whether they have done this phase's part. */
 export interface Progress { address: string; done: boolean }
@@ -48,6 +50,14 @@ export function feastProgress(feast: Pick<MemberFeast, 'kind' | 'participants' |
   if (feast.kind !== 'people') return null;
   return feast.targets.flatMap(target => target.ownerAddress ? [{ address: target.ownerAddress, done: feast.participation.written.includes(target.id) }] : []);
 }
+/**
+ * Each critter in a feast's progress as a face for FaceRow (place-screen.tsx): the burrow's member, by name and drawing,
+ * or the short address of one the burrow no longer lists.
+ */
+export const progressFaces = (progress: readonly Progress[], members: readonly BurrowMember[]): RowFace[] => progress.map(({ address, done }) => {
+  const member = members.find(one => sameAddress(one.address, address));
+  return { key: address, address, variant: member?.variant ?? 0, name: member ? displayName(member) : shortAddress(address), done };
+});
 /**
  * The action on a feast's card, which leads to the feast's page: Scatter crumbs while scattering, for those taking
  * part, and nothing for a member who joined after the set froze (they are in the next feast); while gathering, your

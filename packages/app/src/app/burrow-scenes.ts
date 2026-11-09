@@ -1,3 +1,4 @@
+import type { FeastClock } from '@critter-crumbs/shared';
 import type { Facing, Painting, Standing } from './painted-scene.js';
 
 /**
@@ -21,10 +22,11 @@ export const UNKNOWN_BURROW_SCENE: YourPlace = { painting: 'entrance', critter: 
 
 /**
  * The sheet's height on a burrow's own screens: with its feasts, with none yet, the one that asks you to join, and
- * its critters. Their floor is the room once the burrow has had a feast, and its entrance before (`burrowPainting`).
+ * its critters. Their floor is the room once the burrow has had a feast, and its entrance before (`burrowPainting`);
+ * a draft, which only its creator sees, does not count, so every member stands in the same place.
  */
 export const BURROW_SHEETS = { feasts: 500, quiet: 400, join: 280, critters: 700 } as const;
-export const burrowPainting = (feasts: number): Painting => feasts ? 'window' : 'entrance';
+export const burrowPainting = (feasts: readonly FeastClock[]): Painting => feasts.some(feast => feast.status !== 'draft') ? 'window' : 'entrance';
 
 /** Where one of a burrow's critters stands: `index` is its place in the burrow's own order. */
 export interface FloorSpot extends Standing { index: number; face: Facing }
@@ -40,7 +42,7 @@ const ONE_ROW = 5;
  * critter a step nearer and a little larger (flow page, row(): SCREENS['burrow-quiet'] draws five). A larger one stands
  * in a back row bowed toward you in the middle and smaller at its ends, with a quarter of it in a row before that
  * (SCREENS.burrow draws eight: six behind, two in front). Each is turned toward the middle; the last in the burrow's
- * order stands at the right of the front row.
+ * order stands at the right: the end of the one row, or the right of the front row.
  */
 export function burrowFloor(n: number): FloorSpot[] {
   const turned = (x: number, middle: number): Facing => x < middle - 1 ? 'right' : x > middle + 1 ? 'left' : null;

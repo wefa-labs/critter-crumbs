@@ -116,7 +116,7 @@ async function appShots(device, dark, seed) {
   state = 'burrow';
   await show('burrow', `/burrows/${seed.burrowId}`, () => page.getByText('5 of 8 have scattered', { exact: true }).waitFor());
   await show('who-scattered', `/burrows/${seed.burrowId}`, () => page.getByText('5 of 8 have scattered', { exact: true }).waitFor(),
-    async () => { await page.getByText('5 of 8 have scattered', { exact: true }).click(); await page.getByRole('dialog').waitFor(); });
+    async () => { await page.getByRole('button', { name: /^5 of 8 have scattered/ }).click(); await page.getByRole('dialog').waitFor(); });
   await show('burrow-quiet', `/burrows/${QUIET}`, () => heading('No feasts yet'));
   state = 'members';
   await show('members', `/burrows/${seed.burrowId}/critters`, () => page.getByText('Juniper (you)', { exact: true }).waitFor());
