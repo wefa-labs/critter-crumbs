@@ -21,8 +21,9 @@ import { CritterFace, ProfileButton } from './ui.js';
  *   their feet in percent of the floor and sized in the design's phone pixels.
  * - `sheetHeight` is the sheet's height on the design's 812 px phone; a shorter phone gets a shorter one.
  * - `actions` stay pinned at the sheet's foot while the rest of the sheet scrolls.
- * - `over` is for a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx, which also
- *   returns the focus): it takes the focus, Escape goes back, and on leaving it the page's title is the beneath one's.
+ * - `over` is for a screen drawn over the rest of the app, which app.tsx makes inert beneath it: the first meeting, and
+ *   your critter's profile over the screen it was opened from, to which app.tsx returns the focus. It takes the focus,
+ *   Escape goes back where it has a back chevron, and on leaving it the page's title is the beneath one's again.
  */
 export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewer, painting, floor, sheetHeight, actions, over = false, className = '', children }: {
   title: string; wordmark?: boolean; burrow?: string; href?: string; back?: () => void;

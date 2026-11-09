@@ -387,7 +387,7 @@ Portraits are `role="img"` with the critter's name as `<title>` when they stand 
 ```
 
 - `<header>` holds the burrow name (display face), the phase chip, and the **deadline strip**: both deadlines, always, in the viewer's local time, each tappable to reveal the absolute time (§8, `DeadlineStrip`). On `xs`/`base` the strip wraps to its own line.
-- `<main id="content" tabindex="-1">` receives focus on every route change. A skip link precedes the header.
+- `<main id="content" tabindex="-1">` receives focus on every route change. A skip link precedes the header. A screen drawn over the rest (the first meeting, your critter's profile, D33 and D34) stands outside `<main>`, which is inert beneath it with the header and the skip link, and takes the focus itself; closing the profile returns the focus to the face that opened it.
 - The pile bar is `position: sticky; bottom: 0` on `xs`–`md`, height 64 px + `env(safe-area-inset-bottom)`, with `--cc-shadow-up`; on `lg`+ it becomes a `position: sticky; top: var(--cc-space-6)` rail to the right of the grid.
 - Viewport height uses `dvh` where it matters (the feast's centred layout), never `vh`.
 
@@ -466,10 +466,10 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `Button` | Primary / secondary / quiet | `<button>` | all | Primary: Burrow on Oat; secondary: Surface with strong border; quiet: text-only Soil, underlined on hover/focus |
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
-| `Sheet` / `Dialog` | Confirmations, settings, connection | native `<dialog>` opened with `showModal()`; stable header, scrolling body, reserved feedback area, and action footer | loading / choices / waiting / error retain their outer frame | No hand-rolled focus trap; Esc closes unless busy; focus returns to the opener. Bottom sheet on phone; centred card on desktop. One way out (decision of 2026-11-03): the foot's Cancel, or Back where the dialog's action is itself a cancellation, as a text button left of the primary action; the heading carries a Close only where the foot has no way out |
-| `ProfileNavigation` | Identity and app navigation | the same 44 px critter-face button in page and game headers opens a native dialog | profile / settings | Your burrows, Start a burrow, Copy address, Settings, How it works, Disconnect; keeping/meeting behavior remains unchanged |
+| `Sheet` / `Dialog` | Confirmations, connection | native `<dialog>` opened with `showModal()`; stable header, scrolling body, reserved feedback area, and action footer | loading / choices / waiting / error retain their outer frame | No hand-rolled focus trap; Esc closes unless busy; focus returns to the opener. Bottom sheet on phone; centred card on desktop. One way out (decision of 2026-11-03): the foot's Cancel, or Back where the dialog's action is itself a cancellation, as a text button left of the primary action; the heading carries a Close only where the foot has no way out |
+| `ProfileNavigation` | Identity and settings | the same 44 px critter-face button in page and game headers opens your critter's profile, a screen with its own address drawn over the one the face was pressed on (D34) | the profile | Copy address, the settings as switches, How it works, Disconnect; its back chevron, Escape and the browser's Back return to the screen beneath, with the focus on the face |
 | `Notification` | Confirm discrete actions | leaf, outcome text, dismiss control; inside the active dialog when one is open | success / dismissed | One polite announcement; no focus theft. Visible for six seconds, paused while hovered/focused; repeated actions replace the message and restart its lifetime. Errors stay visible; scatter-count announcements do not become toasts |
-| `SoundControls` | Two toggles | effects switch, music switch, still-critters switch, simple-view switch | — | Sounds and Music both default on (decision of 2026-10-08); each persisted |
+| `SoundControls` | Two toggles | effects switch, music switch, still-critters switch, and the simple-view switch while some critter has a 3D mesh (D34), on your critter's profile | — | Sounds and Music both default on (decision of 2026-10-08); each persisted |
 | `RerollControl` | Meet your critter | big portrait, re-roll button with remaining count, keep button | 4 → 0 re-rolls left / locked | The portrait swap is announced: "New critter. 3 re-rolls left." |
 | `MemberList` | Burrow critters | list of portrait + name + address | — | `role="list"` restored when styled (Safari) |
 | `BurrowList` | Home | list of burrows with critter counts and the next deadline | empty | Each complete card is one semantic link, including its metadata and padding; visible keyboard focus |
@@ -892,7 +892,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 
 - Landmarks: `<header>` (top bar), `<main id="content" tabindex="-1">`, `<aside aria-label="Your crumbs">` (pile bar), `<footer>` on the home. One `<h1>` per screen; heading levels never skip.
 - Critter grids, member lists, feast lists, and the read pass are real lists with `role="list"` restored where CSS strips it (Safari).
-- Skip link to `#content`; `<title>` is "{screen} · {burrow} · Critter Crumbs" and updates on every route change, then `#content` receives focus.
+- Skip link to `#content`; `<title>` is "{screen} · {burrow} · Critter Crumbs" and updates on every route change, then `#content` receives focus, or a screen drawn over the rest receives it (§6.2).
 - `<html lang="en">`.
 
 ### 12.2 Contrast
@@ -934,7 +934,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 ### 12.5 Focus
 
 - `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too.
-- Focus management: route change → `#content`; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
+- Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
 - Nothing steals focus while typing or pouring.
 
 ### 12.6 Screen readers over a canvas
@@ -996,8 +996,8 @@ Still required in implementation, not resolvable in a document: axe-core in CI o
 The Game Design document owns every sound token. This document fixes what is shared:
 
 - The character brief is Game Design §5.1: bright, bouncy, melodic and playful, grounded in the burrow. It replaced the six palette words for sound on 8 October 2026.
-- Two toggles, in this order in settings: **Sounds** (effects, stings and the feast cue, default on) and **Music** (the loops, default on), followed by **Still critters** and **Simple view**. All four persist per browser.
-- Each toggle is a labelled checkbox with one sentence of help; neither is a bare speaker icon.
+- Two toggles, in this order in settings on your critter's profile: **Sounds** (effects, stings and the feast cue, default on) and **Music** (the loops, default on), followed by **Still critters**, **Simple view** while some critter has a 3D mesh (D34), and **Dark mode** (D26). Each persists per browser.
+- Each toggle is a labelled switch (a checkbox with the switch role) with one sentence of help; neither is a bare speaker icon.
 - Every sound token maps to exactly one DOM state or announcement in §12.6; the Game Design table must carry that column.
 - Under reduced motion or Still critters, effects are damped, never disabled — the user's own toggle is the only thing that disables them.
 
