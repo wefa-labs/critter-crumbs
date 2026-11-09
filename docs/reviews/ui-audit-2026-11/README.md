@@ -290,6 +290,15 @@ Tracer bullets, each shippable and reviewable on its own. Workstream B throughou
 
 Checks for each: the e2e suite (setup, gathering, the launcher, the shared shell and the first steps have specs of their own), the screens suite for anything that touches the game, captures at 375 × 812 and 1280 × 800 in both looks beside the mock frame, every visible target at 44 px, and the copy lint. Steps 4 to 9 each replace one screen whole, so a half-done state never ships.
 
+**Built, 9 November 2026.** All twelve steps are on main and in production (the deployment of 9 November in `docs/build/deployment.md`), as their PRs record:
+- #73: step 1's dialogs, cards, accent and plural.
+- #74: steps 2, 3, 7 and 9, the frame with the first meeting and the profile.
+- #79: steps 4 and 5, home and the burrow, with the start of step 8 and the burrow's notices.
+- #80: step 6, gathering, with the draft, X1 and X10, the feast's notices and the writer's nod.
+- #78: step 8's setup.
+- #81: the rest of steps 10 to 12.
+#78 to #81 were merged together as #82; #75 repaired the screens suite first. On #82 the e2e suite passed 61 of 61 and the screens suite 113 of 113. The shell stands at 119,878 of 120,000 gzip bytes, so the next change to it or to any stylesheet has to make room first.
+
 ## Decisions for Afolabi
 
 | | Decision | Recommendation |
