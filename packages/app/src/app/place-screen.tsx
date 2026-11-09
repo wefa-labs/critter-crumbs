@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { formatCopy } from '@critter-crumbs/shared';
 import { sceneCircle } from './invite-circle.js';
+import { ScreenNotices } from './notices.js';
 import { FloorCritter, PaintedFloor } from './painted-floor.js';
 import { sheetScreenStyle, type Painting } from './painted-scene.js';
 import { ScreenHeader } from './screen-header.js';
@@ -47,7 +48,7 @@ export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewe
       <div className="sheet-screen" style={sheetScreenStyle(sheetHeight)}>
         <PaintedFloor painting={painting} className="screen-floor">{floor}</PaintedFloor>
         <div className="screen-sheet place-sheet">
-          <div className="place-words">{children}</div>
+          <div className="place-words"><ScreenNotices />{children}</div>
           {actions ? <div className="place-actions">{actions}</div> : null}
         </div>
       </div>

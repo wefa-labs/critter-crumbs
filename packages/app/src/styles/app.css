@@ -3,6 +3,7 @@
 @import './game.css';
 @import './screens.css';
 @import './shell.css';
+@import './feel.css';
 /* dark follows the device unless someone has chosen for themselves, as the tokens do (tokens.css) */
 /* native radios, checkboxes and pickers take the palette's on-state, as Settings' switches do (Design System §7.1) */
 :root { color-scheme:light; accent-color:var(--cc-ok); }

@@ -60,8 +60,14 @@ export function WaitingScene({ feast, settings, announce, error, retry }: { feas
   useEffect(() => runtime.setSettings(settings), [runtime, settings]);
   /* the reason the feast cannot be laid out yet is read out once; other errors reach the app's alert */
   useEffect(() => { if (error === 'feast.keyNotYet') announce(copy[error]); }, [error]);
-  const view = gameView({ phase: feast.phase, remaining: 0, keyPending: error === 'feast.keyNotYet' });
-  return <WorldProvider world={runtime.world}><section className="game-flow"><GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={view.state} editable={false} announce={announce} remaining={0} surfaces={{ sheet: <WaitingSheet error={error} retry={retry} /> }} /></section></WorldProvider>;
+  /* any reason the feast cannot be laid out yet is flow 43's sheet, which has room for it, the count and Try again */
+  const view = gameView({ phase: feast.phase, remaining: 0, keyPending: error !== null });
+  return <WorldProvider world={runtime.world}><section className="game-flow"><GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={view.state} editable={false} announce={announce} remaining={0} surfaces={{ sheet: <WaitingSheet error={error} retry={retry} scattered={scatteredLine(feast)} /> }} /></section></WorldProvider>;
+}
+/** How many of the feast's participants have a scatter in, from the feast as the burrow sees it, before anything is opened. */
+function scatteredLine(feast: MemberFeast) {
+  const scattered = new Set(feast.participation.scattered.map(address => address.toLowerCase()));
+  return formatCopy('scatter.participation', { done: feast.participants.filter(address => scattered.has(address.toLowerCase())).length, total: feast.participants.length });
 }
 
 /** The results' first lines: how many scattered and how many crumbs, as the burrow or a visitor may know it. */
@@ -81,7 +87,7 @@ export function ResultActions({ replay, download, short }: { replay: () => void;
  * The ranked list (scatter page resultsList, with the flow page's lines for one scatterer, a tie, the record and a public
  * result): who scattered, the critters that received crumbs largest first, the lines about the list, the privacy line.
  */
-function ResultsList({ feast, opened, record, givers, actions }: { feast: PublicFeast; opened: OpenedFeast; record?: ReactNode; givers?: () => void; actions?: ReactNode }) {
+function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; opened: OpenedFeast; record?: ReactNode; givers?: () => void }) {
   const { result } = opened, member = isMemberFeast(feast);
   const rows = [...result.totals].filter(row => row.crumbs > 0).sort((a, b) => b.crumbs - a.crumbs || feast.targets.findIndex(t => t.id === a.targetId) - feast.targets.findIndex(t => t.id === b.targetId));
   const one = member && result.counted.length === 1, ties = result.ties.filter(group => result.totalScattered > 0 && group.length > 1);
@@ -101,7 +107,6 @@ function ResultsList({ feast, opened, record, givers, actions }: { feast: Public
       {record ?? <p className="results-sum">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>}
       {givers ? <button type="button" className="quiet left" onClick={givers}>{copy['results.givers.title']}</button> : null}
       {member ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><code className="receipt-evidence">{result.resultHash}</code></details> : null}
-      {actions ? <div className="results-actions">{actions}</div> : null}
     </div>
   );
 }
@@ -168,12 +173,13 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
   const toggle = () => { setReading(false); setView(value => value === 'closed' ? resultsViews.results : resultsViews.closed); };
   const givers = member?.individualOpen ? () => setView(resultsViews.givers) : undefined;
   const title = copy[view === 'givers' ? 'results.givers.title' : 'results.title'];
-  const content = (phone: boolean) => view === 'givers' && member
-    ? <><GiverTable feast={member} opened={opened} {...(viewer ? { viewer } : {})} />{phone ? <div className="results-actions single"><button type="button" className="pill soft wide" onClick={() => downloadCsv(document, feast.title, giverCsv(member, opened), true)}>{copy['results.export.givers']}</button></div> : null}</>
-    : <ResultsList feast={feast} opened={opened} record={record} {...(givers ? { givers } : {})} {...(phone ? { actions: <ResultActions replay={replay} download={download} short /> } : {})} />;
-  const panelActions = view === 'givers' && member
+  const content = view === 'givers' && member
+    ? <GiverTable feast={member} opened={opened} {...(viewer ? { viewer } : {})} />
+    : <ResultsList feast={feast} opened={opened} record={record} {...(givers ? { givers } : {})} />;
+  /* pinned under the list, at the foot of the phone's card and in the desktop panel's bar */
+  const actions = (phone: boolean) => view === 'givers' && member
     ? <button type="button" className="pill soft wide" onClick={() => downloadCsv(document, feast.title, giverCsv(member, opened), true)}>{copy['results.export.givers']}</button>
-    : <ResultActions replay={replay} download={download} short={false} />;
+    : <ResultActions replay={replay} download={download} short={phone} />;
   /* the phone's close icon folds the results back into the bar; from who gave what it returns to the results */
   const close = view === 'givers' ? () => setView(resultsViews.results) : member ? () => setView(resultsViews.closed) : undefined;
   return (
@@ -190,8 +196,8 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
               middle: <ResultsPill open={view !== 'closed'} toggle={toggle} />,
               ...(member ? { statement: statementSurfaces({ feast: member, runtime, focus, close: () => setReading(false) }) } : {}),
               results: {
-                card: <ResultsCard title={title} heading={heading} {...(close ? { close } : {})}>{content(true)}</ResultsCard>,
-                panel: <ResultsPanel title={title} heading={heading} actions={panelActions} {...(view === 'givers' ? { close: () => setView(resultsViews.results) } : {})}>{content(false)}</ResultsPanel>,
+                card: <ResultsCard title={title} heading={heading} actions={actions(true)} {...(close ? { close } : {})}>{content}</ResultsCard>,
+                panel: <ResultsPanel title={title} heading={heading} actions={actions(false)} {...(view === 'givers' ? { close: () => setView(resultsViews.results) } : {})}>{content}</ResultsPanel>,
               },
             }} />
       </section>

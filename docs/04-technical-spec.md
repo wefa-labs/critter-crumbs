@@ -379,7 +379,7 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `GET /feasts/:id/ballots` | member, after close | Counted ballots' ciphertexts + attestations + the close record |
 | `GET /feasts/:id/key` | member, after close | Cached decryption key; `503 err.keyUnreachable` with `Retry-After` while Shutter has not released it |
 | `POST /feasts/:id/result-attestation` | member, after close, public feasts | Record `{ txHash, attester }` after verifying the tx on Base |
-| `GET /dev/config`, `POST /dev/seed`, `POST /dev/time`, `POST /dev/release-key` | dev only | §14; `config` tells the browser whether the rehearsal accounts may be offered |
+| `GET /dev/config`, `POST /dev/seed`, `POST /dev/time`, `POST /dev/release-key` | dev only | §14; `config` tells the browser whether the rehearsal accounts may be offered. Once a seed or `time` has moved the server's clock, every reply of that mock server says by how much (`X-Dev-Clock-Offset`, milliseconds), and the client leaves it out of its clock-skew check, so `err.clockSkew` stays about the device's own clock |
 | `POST /dev/result-transaction` | dev only, local API only | Stands in for the Base transaction when a result is recorded in the local rehearsal. Only `scripts/local-api.ts` can answer it, so it has no route file |
 
 Validation is a hand-written set of small parsers in `/src/shared/validate.ts` (no schema library). A display name and an option name are 1 to 16 Unicode code points once trimmed (`MAX_NAME_LENGTH`; `docs/decisions.md`, 2026-11-03); the limit applies to new saves, so names stored under the earlier limit of 80 stay as they are, with no database constraint and nothing migrated. Every write is wrapped in a transaction; every phase gate calls `phaseAt(feast, serverNow)`.
@@ -451,6 +451,7 @@ critter-crumbs/
 | `EAS_CHAIN_ID`, `EAS_ADDRESS`, `EAS_BALLOT_SCHEMA_UID`, `EAS_RESULT_SCHEMA_UID` | Base Sepolia | Base |
 | `BASE_RPC_URL` (server verification), `VITE_BASE_RPC_URL` (client) | Sepolia public RPC | a provider key |
 | `MAINNET_RPC_URL` | any | a provider key (ENS) |
+| `LOCAL_ENS` | the local API (`scripts/local-api.ts`) has no mainnet RPC and finds no names, as production finds none for most addresses; `unavailable` fails every lookup instead, to show the ENS notice (`err.ensUnavailable`) | not read |
 | `DATABASE_URL` | Neon dev branch | Neon main |
 | `SESSION_SECRET`, `MOCK_SECRET` | random | random; mock unused |
 | `DEV_ENDPOINTS_ENABLED` | `1` | unset |

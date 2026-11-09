@@ -46,7 +46,7 @@ export const LAUNCHER_SCENE: { painting: Painting; critters: readonly (SceneCrit
   heap: { crumbs: 10, x: 51, y: 95, size: 80, side: -1, beside: 64 },
 };
 
-/** Arriving by a link: the feast's own critters asleep in a ring, over a sheet 400 pixels tall on the phone. */
+/** Arriving by a link: the feast's own critters asleep in a ring on the window's plate, over a sheet 400 pixels tall on the phone. */
 export const INVITE_SCENE: { painting: Painting; sheetHeight: number } = { painting: 'window', sheetHeight: 400 };
 
 /**

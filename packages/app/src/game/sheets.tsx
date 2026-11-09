@@ -27,12 +27,16 @@ export function RevealSheet({ crumbs, ready, start }: { crumbs: number; ready: b
   );
 }
 
-/** Flow 42 and 43: the feast being laid out, with three bobbing crumbs, or why it cannot be yet and Try again. */
-export function WaitingSheet({ error, retry }: { error: CopyId | null; retry: () => void }) {
+/**
+ * Flow 42 and 43: the feast being laid out, with three bobbing crumbs, or why it cannot be yet and Try again. Under the
+ * first lines, how many have scattered ("7 of 8 have scattered"), so the wait shows how full the feast will be.
+ */
+export function WaitingSheet({ error, retry, scattered }: { error: CopyId | null; retry: () => void; scattered: string }) {
   return error ? (
     <>
       <h2>{copy['feast.waiting.title']}</h2>
       <SheetNotice trouble>{copy[error]}</SheetNotice>
+      <p className="sheet-help">{scattered}</p>
       <Grow />
       <button type="button" className="pill soft wide" onClick={retry}>{copy['action.retry']}</button>
     </>
@@ -40,6 +44,7 @@ export function WaitingSheet({ error, retry }: { error: CopyId | null; retry: ()
     <>
       <h2>{copy['feast.waiting.title']}</h2>
       <p>{copy['feast.waiting.body']}</p>
+      <p className="sheet-help">{scattered}</p>
       <Loader crumb={<CrumbGlyph />} />
       <Grow />
     </>

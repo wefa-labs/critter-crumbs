@@ -46,9 +46,14 @@ export function fixtureAllocation(state: GameScreenState, count: number) {
   return state === 'reveal' ? cast.scattering.map(() => 0) : state === 'scatter' || state === 'reading' ? cast.scattering : cast.given;
 }
 
+/** Who has scattered by the feast, by position: everyone but the cast's one who did not; one for the tie; nobody. */
+const scatterersAt = (state: GameScreenState, count: number) => state === 'nobody' ? [] : state === 'tie' ? [1] : Array.from({ length: count }, (_, index) => index).filter(index => index !== referenceCast(count).zero);
+
 export function fixtureFeast(count: number, state: GameScreenState = 'scatter'): MemberFeast {
+  /* past the close: the feast is laid out, played or read, and everyone but the cast's one has scattered */
+  const feasting = isResultState(state) || state === 'feast' || state === 'feasted' || state === 'waiting' || state === 'key';
   const people = members.slice(0, count), targets = people.map((p, index) => ({ id: ('0x' + p.address.toLowerCase().slice(2).padStart(64, '0')) as Hex, ownerAddress: parseAddress(p.address), name: p.name, position: index, kind: 'person' as const }));
-  return { id: '00000000-0000-4000-8000-000000000026', burrowId: 'rehearsal', burrowName: 'Rehearsal burrow', title: 'Our shared work', context: '', kind: 'people', status: 'open', phase: isResultState(state) || state === 'feast' || state === 'feasted' || state === 'waiting' || state === 'key' ? 'feast' : 'scattering', serverNow: SERVER_NOW, createdBy: (targets[VIEWER] ?? targets[0]!).ownerAddress!, crumbsPerCritter: 100, gatheringEndsAt: SERVER_NOW - 86400000, scatteringEndsAt: CLOSES_AT, aggregatePublic: state === 'recording' || state === 'recorded' || state === 'public', individualOpen: state === 'givers', gatheringExtended: false, openedAt: SERVER_NOW - 5 * 86400000, cancelledAt: null, participantsFrozenAt: SERVER_NOW - 86400000, registration: null, closeRecord: null, resultAttestation: null, aggregate: null, targets, participants: targets.map(t => t.ownerAddress!), portraits: targets.map(t => ({ targetId: t.id, variant: 0 })), statements: targets.map((t, i) => ({ targetId: t.id, authorAddress: t.ownerAddress!, body: people[i]!.statement, updatedAt: SERVER_NOW - 2 * 86400000 })), participation: { written: targets.map(t => t.id), scattered: [] }, ownBallotUids: [], ownReceipts: [] };
+  return { id: '00000000-0000-4000-8000-000000000026', burrowId: 'rehearsal', burrowName: 'Rehearsal burrow', title: 'Our shared work', context: '', kind: 'people', status: 'open', phase: feasting ? 'feast' : 'scattering', serverNow: SERVER_NOW, createdBy: (targets[VIEWER] ?? targets[0]!).ownerAddress!, crumbsPerCritter: 100, gatheringEndsAt: SERVER_NOW - 86400000, scatteringEndsAt: CLOSES_AT, aggregatePublic: state === 'recording' || state === 'recorded' || state === 'public', individualOpen: state === 'givers', gatheringExtended: false, openedAt: SERVER_NOW - 5 * 86400000, cancelledAt: null, participantsFrozenAt: SERVER_NOW - 86400000, registration: null, closeRecord: null, resultAttestation: null, aggregate: null, targets, participants: targets.map(t => t.ownerAddress!), portraits: targets.map(t => ({ targetId: t.id, variant: 0 })), statements: targets.map((t, i) => ({ targetId: t.id, authorAddress: t.ownerAddress!, body: people[i]!.statement, updatedAt: SERVER_NOW - 2 * 86400000 })), participation: { written: targets.map(t => t.id), scattered: feasting ? scatterersAt(state, count).map(index => targets[index]!.ownerAddress!) : [] }, ownBallotUids: [], ownReceipts: [] };
 }
 
 /**
@@ -59,7 +64,7 @@ export function fixtureFeast(count: number, state: GameScreenState = 'scatter'):
 export function fixtureOpened(feast: MemberFeast, state: GameScreenState): OpenedFeast {
   const ballots: TallyCandidate[] = [], givers: OpenedFeast['givers'] = [], n = feast.targets.length, cast = referenceCast(n);
   const participants = participantSetHash(feast.participants);
-  const scatterers = state === 'nobody' ? [] : state === 'tie' ? [1] : feast.participants.map((_, index) => index).filter(index => index !== cast.zero);
+  const scatterers = scatterersAt(state, n);
   scatterers.forEach((g, i) => {
     const attester = feast.participants[g]!;
     const amounts = state === 'tie' ? feast.targets.map((_, c) => c === 0 || c === 3 ? 50 : 0) : distribute(feast.targets.map((_, c) => c === g ? 0 : cast.received[c]! * (1 + (((g * 5 + c * 3) % 7) - 3) * 0.08)), 100);

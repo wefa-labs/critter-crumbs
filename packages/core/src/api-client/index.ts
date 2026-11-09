@@ -18,7 +18,9 @@ export function createApiClient(options: ApiClientOptions = {}) {
       body = parsed as Record<string, unknown>;
       if (!Number.isSafeInteger(body.serverNow) || (body.serverNow as number) < 0) throw new Error();
     } catch { throw new ApiClientError('err.generic', response.status); }
-    const skew = Math.abs(time.accept(body.serverNow as number));
+    /* a development server may have moved its own clock to reach a phase; only the rest is the device's clock being off */
+    const moved = Number(response.headers.get('X-Dev-Clock-Offset')) || 0;
+    const skew = Math.abs(time.accept(body.serverNow as number) - moved);
     if (skew > 300000 && !skewShown) { skewShown = true; options.onClockSkew?.('err.clockSkew', skew); }
     if (!response.ok) {
       const id = typeof body.error === 'string' && Object.hasOwn(copy, body.error) ? body.error as CopyId : 'err.generic';
