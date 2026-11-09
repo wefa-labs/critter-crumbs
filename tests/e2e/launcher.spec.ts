@@ -123,16 +123,32 @@ test('How it works walks five steps, with practice crumbs, the week and a worked
   await expect(page.getByRole('heading', { level: 1, name: 'Where they go stays private', exact: true })).toBeFocused();
   await expect(page.locator('.screen-floor .scene-paint')).toHaveAttribute('data-painting', 'dusk');
   await expect(page.locator('.screen-floor svg.portrait[data-asleep="true"]')).toHaveCount(4);
+  // the private step leads to the page behind Why nobody can peek, at the foot of its words over the actions, and the
+  // page comes back to this step
+  const why = page.getByRole('link', { name: 'Why nobody can peek', exact: true });
+  const foot = (await why.boundingBox())!, actions = (await page.locator('.learn-actions').boundingBox())!;
+  expect(foot.y + foot.height).toBeLessThanOrEqual(actions.y);
+  expect(actions.y - (foot.y + foot.height)).toBeLessThanOrEqual(16);
+  await why.click();
+  await expect(page).toHaveURL(/\/how-it-works\/why$/);
+  await expect(page).toHaveTitle('Why nobody can peek · Critter Crumbs');
+  await expect(page.getByRole('heading', { level: 1, name: 'Why nobody can peek', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Got it', exact: true }).click();
+  await expect(page).toHaveURL(/\/how-it-works$/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Where they go stays private', exact: true })).toBeFocused();
+  await expect(page.getByRole('img', { name: 'Step 4 of 5', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'When the feast opens', exact: true })).toBeFocused();
+  await expect(why).toHaveAttribute('href', '/how-it-works/why');
   await expect(page.getByRole('img', { name: 'Step 5 of 5', exact: true })).toBeVisible();
   await expect(page.getByRole('table', { name: 'Practice feast results', exact: true })).toContainText('120');
   await expect(page.getByRole('row', { name: 'Moss 120 40.0%', exact: true })).toBeVisible();
   await expect(page.getByRole('row', { name: 'Fern 30 10.0%', exact: true })).toBeVisible();
   await expect(page.getByText('Shares come from the crumbs actually given, 300 in all, so Moss’s 120 is 40.0%.', { exact: true })).toBeVisible();
   await expect(page.getByText('Fern didn’t scatter and still receives a share.', { exact: true })).toBeVisible();
+  // the visit to the page leaves the steps' own way out as it was: back to the launcher, where they were opened
   await page.getByRole('button', { name: 'Got it', exact: true }).click();
-  await expect(page).toHaveURL(/127\.0\.0\.1:5173\/$/);
+  await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
   await expect(page.getByRole('heading', { level: 1, name: 'Critter Crumbs', exact: true })).toBeVisible();
 
   // Skip leaves from the first step, and the browser's Back returns to the steps

@@ -62,8 +62,9 @@ const COMPOSITIONS: Record<GameScreenState, Composition> = {
   /* flow 41; the dusk sting plays as the music stops */
   closed: { surface: { kind: 'dock' }, scene: { ...scattering, scene: 'dusk', mood: 'asleep', bubbles: 'none', controls: 'disabled' }, music: null },
   /* flow 42, 43; the key's sheet is 20 px taller than the flow page's 250, for the count of who has scattered under its
-     notice, with Try again still at its foot (docs/decisions.md, 2026-11-09) */
-  waiting: { surface: { kind: 'sheet', height: 250 }, scene: sleeping, music: null },
+     notice, with Try again still at its foot (docs/decisions.md, 2026-11-09), and the waiting sheet 40 px taller, for its
+     line to the page behind Why nobody can peek (the first-steps review, F8) */
+  waiting: { surface: { kind: 'sheet', height: 290 }, scene: sleeping, music: null },
   key: { surface: { kind: 'sheet', height: 270 }, scene: sleeping, music: null },
   /* flow 44; the feast heap stays while the crumbs fly from it (Game Design G6), though the flow page's still omits it.
      The feast plays its own cue on the effects bus. */

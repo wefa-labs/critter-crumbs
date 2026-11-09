@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { copy, formatCopy, type CopyId } from '@critter-crumbs/shared';
 import { IsOwn } from '../world/index.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
-import { targetLabel } from '../app/ui.js';
+import { Link, targetLabel } from '../app/ui.js';
 import type { MemberFeast } from '../app/feast-view.js';
 import { critterElement, type GameSurfaces } from './parts.js';
 import { GameDialog, Grow, Loader, PanelStatement, PhoneStatement, SheetNotice } from './surface.js';
@@ -44,6 +44,7 @@ export function WaitingSheet({ error, retry, scattered }: { error: CopyId | null
     <>
       <h2>{copy['feast.waiting.title']}</h2>
       <p>{copy['feast.waiting.body']}</p>
+      <Link className="quiet left" href="/how-it-works/why">{copy['why.title']}</Link>
       <p className="sheet-help">{scattered}</p>
       <Loader crumb={<CrumbGlyph />} />
       <Grow />

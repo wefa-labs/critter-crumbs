@@ -49,9 +49,10 @@ describe('core game compositions', () => {
     expect(stateControls('feasted')).toBe('none');
   });
 
-  it('lays out the feast on a 250 px sheet over the sleeping dusk circle, with no dock; 270 px while the key is not out', () => {
-    /* the key's sheet holds the count of who has scattered under its notice as well as Try again (docs/decisions.md, 2026-11-09) */
-    for (const [state, height] of [['waiting', 250], ['key', 270]] as const) expect(composeGame(state, 'phone')).toEqual({
+  it('lays out the feast on a 290 px sheet over the sleeping dusk circle, with no dock; 270 px while the key is not out', () => {
+    /* the key's sheet holds the count of who has scattered under its notice as well as Try again (docs/decisions.md, 2026-11-09);
+       the waiting sheet holds the way to Why nobody can peek as well as the count (the first-steps review, F8) */
+    for (const [state, height] of [['waiting', 290], ['key', 270]] as const) expect(composeGame(state, 'phone')).toEqual({
       surface: { kind: 'sheet', height },
       scene: { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' },
       music: null,

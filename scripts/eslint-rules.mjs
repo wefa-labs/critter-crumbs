@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const copyIds = new Set([...readFileSync(path.join(root, 'packages/shared/src/copy.ts'), 'utf8').matchAll(/^\s*["']([^"']+)["']:/gm)].map(match => match[1]));
+/* the copy a member is shown: copy.ts, and copy-why.ts, the one page whose lines stay out of the shell */
+const copyIds = new Set(['copy.ts', 'copy-why.ts'].flatMap(file => [...readFileSync(path.join(root, 'packages/shared/src', file), 'utf8').matchAll(/^\s*["']([^"']+)["']:/gm)].map(match => match[1])));
 const programStates = new Set(['person', 'option', 'people', 'options', 'draft', 'gathering', 'scattering', 'feast', 'cancelled', 'void', 'open', 'extend', 'cancel']);
 const htmlNames = new Set(['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'dangerouslySetInnerHTML']);
 export const clockAdapters = new Set([
@@ -140,7 +141,7 @@ export default {
           }
           if (parent.type === 'Property' && parent.key.name === 'critterVersion' && ['1','2'].includes(value)) return true;
           if (parent.type === 'Property' && parent.key === current && !parent.computed) return true;
-          if (parent.type === 'MemberExpression' && ['copy', 'devCopy'].includes(parent.object.name) && parent.property === current) return true;
+          if (parent.type === 'MemberExpression' && ['copy', 'devCopy', 'whyCopy'].includes(parent.object.name) && parent.property === current) return true;
           if (parent.type === 'CallExpression' && parent.callee.name === 'copy') return true;
           if (parent.type === 'JSXAttribute') {
             const name = parent.name.name;

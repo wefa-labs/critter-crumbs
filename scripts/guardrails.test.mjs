@@ -63,6 +63,8 @@ test('copy guard permits protocol syntax and real copy IDs, not wording hidden i
     'const provider = await import("../dev/account-provider.js");',
     'const view = <option>{devCopy[`preview.game.${state}`]}</option>;',
     'const view = <p>{formatDevCopy("preview.name", { n: 1 })}</p>;',
+    // the page behind Why nobody can peek keeps its lines in their own module, copy-why.ts
+    'const PROMISES = [["why.promise.read.lead", "why.promise.read.body"]] as const; const view = <h2>{whyCopy["why.promises.title"]}</h2>;',
   ]) assert.equal(await has(code, 'packages/app/src/probe.tsx', 'copy-ids'), false, code);
   for (const code of [
     'const view = <button onClick={() => alert("Hello")}>{copy["action.connect"]}</button>;',

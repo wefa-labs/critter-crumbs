@@ -21,7 +21,7 @@ import type { RunAction } from './burrows.js';
 import { joinNames, percentShare } from './time.js';
 import { browserReceiptBook } from './receipts.js';
 import { createHops } from './heap.js';
-import { CritterFace, PortraitImage, targetLabel } from './ui.js';
+import { CritterFace, Link, PortraitImage, targetLabel } from './ui.js';
 import { gameView, isMemberFeast, portraitVariant, resultStates, resultsViews, type MemberFeast, type PublicFeast, type ResultsView } from './feast-view.js';
 import type { OpenedFeast } from './feast-session.js';
 import type { AppApi, Me } from './session.js';
@@ -85,7 +85,9 @@ export function ResultActions({ replay, download, short }: { replay: () => void;
 
 /**
  * The ranked list (scatter page resultsList, with the flow page's lines for one scatterer, a tie, the record and a public
- * result): who scattered, the critters that received crumbs largest first, the lines about the list, the privacy line.
+ * result): who scattered and the way to Why nobody can peek under it (the first-steps review, F8), the critters that
+ * received crumbs largest first, the lines about the list, the privacy line, and for a member the result's fingerprint
+ * with what it is for.
  */
 function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; opened: OpenedFeast; record?: ReactNode; givers?: () => void }) {
   const { result } = opened, member = isMemberFeast(feast);
@@ -94,6 +96,7 @@ function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; op
   return (
     <div className="results-list">
       <p className="results-sum"><span>{summaryOf(feast, result)}</span>{member && !one ? <><br />{result.didNotScatter.length ? formatCopy('results.didNotScatter', { names: joinNames(result.didNotScatter.map(address => memberName(feast, address))) }) : copy['results.everyone']}</> : null}</p>
+      <Link className="quiet left" href="/how-it-works/why">{copy['why.title']}</Link>
       <ol className="results-rows">
         {rows.map(row => {
           const target = feast.targets.find(t => t.id === row.targetId)!;
@@ -106,7 +109,7 @@ function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; op
       {opened.missingUids.map(uid => <p className="results-note receipt-evidence" key={uid}>{formatCopy('err.uidMissing', { uid })}</p>)}
       {record ?? <p className="results-sum">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>}
       {givers ? <button type="button" className="quiet left" onClick={givers}>{copy['results.givers.title']}</button> : null}
-      {member ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><code className="receipt-evidence">{result.resultHash}</code></details> : null}
+      {member ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><p className="results-sum">{copy['results.verification.help']}</p><code className="receipt-evidence">{result.resultHash}</code></details> : null}
     </div>
   );
 }
