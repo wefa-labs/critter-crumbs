@@ -6,6 +6,7 @@ import { SceneBackdrop } from '../game/scenes.js';
 import { Grow } from '../game/sheet-parts.js';
 import { deadlineLine } from './deadlines.js';
 import { portraitVariant, type PublicFeast } from './feast-view.js';
+import { ScreenNotices } from './notices.js';
 import { PaintedFloor } from './painted-floor.js';
 import { INVITE_SCENE, sheetScreenStyle } from './painted-scene.js';
 import { FloorRing } from './place-screen.js';
@@ -62,6 +63,7 @@ export function Invite({ feast, now, connect, sound }: { feast: PublicFeast; now
           <p className="floor-caption">{copy['arrive.asleep']}</p>
         </PaintedFloor>
         <section className="screen-sheet">
+          <ScreenNotices />
           {feast.context ? <p className="invite-context">{feast.context}</p> : null}
           <div className="invite-deadlines"><InviteDeadline phase="gathering" at={feast.gatheringEndsAt} now={now} /><InviteDeadline phase="scattering" at={feast.scatteringEndsAt} now={now} /></div>
           <p>{copy['arrive.explainer']}</p>

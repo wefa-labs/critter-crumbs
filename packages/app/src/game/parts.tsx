@@ -7,6 +7,7 @@ import { Asleep, Count, Identity, IsOwn, Name, Pile, Received } from '../world/i
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameStage } from '../app/game-stage.js';
 import { ScreenHeader } from '../app/screen-header.js';
+import { ScreenNotices } from '../app/notices.js';
 import { ProfileButton, targetLabel } from '../app/ui.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import type { PublicFeast, GameScreenState } from '../app/feast-view.js';
@@ -197,6 +198,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
         <SceneBackdrop id={treatment.scene === 'dusk' ? 'dusk' : sceneId} desktop={desktop} size={layout.scene} backRow={circleBackRow(viewport, critters.length)} />
         <div className="scene-dusk-light" aria-hidden="true" />
         <div className="scene-feast-light" aria-hidden="true" />
+        <ScreenNotices overFloor />
         {layout.slots.map(slot => (
           <div key={slot.index} className="circle-spot" data-spot={slot.index} data-slot={slot.slot} data-face={slot.face} data-away={slot.away} style={{ ...rectStyle(slot.stage), zIndex: slot.depth }}>
             <CritterSpot entity={runtime.critters[slot.index]!} runtime={runtime} onFocus={() => turnTo(slot.index)} gathered={gathered} editable={editable && !reading && !gathered} announce={announce} {...(reading && onClose ? { onOutside: onClose } : {})} />

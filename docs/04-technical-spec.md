@@ -294,7 +294,7 @@ interface Timelock {
 
 **Proof before use.** Shutter's code reaches the page as a script and a WebAssembly file fetched on first use. Before the page encrypts a scatter or opens a feast it has that code open one known scatter from the SDK's test data. If the code did not arrive or does not run, a scatter is reported as not saved (`err.saveFailed`) and a feast waits (`err.keyUnreachable`); it never opens with every scatter counted as unreadable.
 
-**A local Shutter.** `scripts/local-shutter.ts` stands in for the keypers with real keys made from the local server's secret; `LOCAL_TIMELOCK=shutter` selects it for the local API. The page runs Shutter's own code against it, which is how a production build is taken through a whole feast offline (`tests/api/browser-shutter.test.ts` does the same without a browser).
+**A local Shutter.** `scripts/local-shutter.ts` stands in for the keypers with real keys made from the local server's secret; `LOCAL_TIMELOCK=shutter` selects it for the local API. The local API finds no ENS names, as production finds none for most addresses; `LOCAL_ENS=unavailable` fails every lookup instead, to show the ENS notice (`err.ensUnavailable`). The page runs Shutter's own code against it, which is how a production build is taken through a whole feast offline (`tests/api/browser-shutter.test.ts` does the same without a browser).
 
 ## 7. EAS
 

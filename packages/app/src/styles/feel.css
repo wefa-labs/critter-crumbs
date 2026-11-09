@@ -8,3 +8,17 @@
 /* ------------------------------------------------------------------ the invite's floor: the game's window plate in a
    box the size of the game's scene (invite.tsx), its foot under the sheet */
 .invite-plate { position:absolute; inset:0 0 auto; height:100%; }
+
+/* ------------------------------------------------------------------ the standing notices (app/notices.tsx), stacked as
+   the flow page stacks them (SCREENS.notices): at the head of a screen's sheet, or over the top of the game's floor,
+   where the simple view's notice has always lain clear of the game's row */
+.screen-notices { display:grid; gap:10px; }
+.screen-notices .sheet-notice > span { display:grid; gap:4px; justify-items:start; }
+.game-notices { position:absolute; top:8px; left:16px; z-index:2700; width:min(calc(100% - 32px), 22.5rem); }
+.game-notices .sheet-notice { background:var(--cc-bg); box-shadow:var(--cc-shadow-1); }
+
+/* ------------------------------------------------------------------ offline (flow page, SCREENS.offline): the ink band
+   under the 64 px header, over whatever the screen shows there; light in the dark look, as the game's toast is. The
+   controls under it stay usable. On a page with the app's own header it takes its place under it */
+.offline-band { flex:none; max-width:none; margin:0; padding:10px 16px; background:var(--cc-text); color:var(--cc-bg); font-size:var(--cc-text-sm); font-weight:700; line-height:1.4; text-align:center; text-wrap:balance; }
+body:has(main .core-game) .offline-band, #root:has(> .screen-layer) > .offline-band { position:fixed; top:64px; left:0; right:0; z-index:4500; }
