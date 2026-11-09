@@ -7,7 +7,7 @@ import { portraitVariant, type MemberFeast } from './feast-view.js';
 import { FloorCritter } from './painted-floor.js';
 import { PlaceScreen } from './place-screen.js';
 import type { AppApi, Me } from './session.js';
-import { absoluteDeadline, absoluteTime, localDateTime, localTimeZone, relativeTime } from './time.js';
+import { absoluteDeadline, localDateTime, localTimeZone, relativeTime } from './time.js';
 import { Dialog, Field, navigate } from './ui.js';
 import '../styles/feast-pages.css';
 
@@ -20,8 +20,9 @@ function shownDeadline(value: string) {
 /**
  * The creator's actions on a draft and while gathering, each asking first in a dialog with one way out: Cancel this
  * feast beside Open the feast at the draft's foot, Open left out once the draft's gathering deadline has passed (`late`,
- * QA copy-08); Extend gathering (once) and Cancel this feast as quiet links at the end of gathering. The extend field
- * shows the new close as the flow page does and becomes the browser's own picker while it is being changed.
+ * QA copy-08); Extend gathering (once) and Cancel this feast as quiet links at the end of gathering. The dialogs write
+ * times as the flow page does ("Wed 7 Oct, 18:00 (PDT)"), and the extend field shows the new close that way too,
+ * becoming the browser's own picker while it is being changed.
  */
 export function FeastActions({ feast, me, api, run, busy, refresh, announce, late = false }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void; late?: boolean }) {
   const [action, setAction] = useState<'open' | 'extend' | 'cancel' | null>(null), [deadline, setDeadline] = useState(() => localDateTime(feast.gatheringEndsAt + 3600000));
@@ -31,7 +32,7 @@ export function FeastActions({ feast, me, api, run, busy, refresh, announce, lat
   const title = action === 'open' ? formatCopy('setup.open.title', { feastTitle: feast.title }) : action === 'cancel' ? formatCopy('gathering.cancel.title', { feastTitle: feast.title }) : copy['gathering.extend.title'];
   const shown = shownDeadline(deadline);
   const dialog = action ? <Dialog title={title} onClose={() => setAction(null)} busy={busy} dismiss={action === 'cancel' ? 'action.back' : 'action.cancel'} actions={<button form={formId} disabled={busy}>{action === 'open' ? copy['setup.open.cta'] : action === 'cancel' ? copy['gathering.cancel.cta'] : copy['gathering.extend.cta']}</button>}>
-    <p>{action === 'open' ? formatCopy('setup.open.body', { gatheringDeadline: absoluteTime(feast.gatheringEndsAt) }) : action === 'cancel' ? copy['gathering.cancel.body'] : formatCopy('gathering.extend.body', { scatteringDeadline: absoluteTime(feast.scatteringEndsAt) })}</p>
+    <p>{action === 'open' ? formatCopy('setup.open.body', { gatheringDeadline: absoluteDeadline(feast.gatheringEndsAt) }) : action === 'cancel' ? copy['gathering.cancel.body'] : formatCopy('gathering.extend.body', { scatteringDeadline: absoluteDeadline(feast.scatteringEndsAt) })}</p>
     <form id={formId} onSubmit={event => { event.preventDefault(); void run(async () => { const at = new Date(deadline).getTime(); await api.write(`/api/feasts/${feast.id}/${action}`, 'POST', action === 'extend' ? { gatheringEndsAt: at } : undefined); if (action === 'extend') announce(formatCopy('gathering.extended', { relative: relativeTime(at, api.now() ?? feast.serverNow) })); setAction(null); refresh(); }); }}>
       {action === 'extend' ? <><Field label="setup.field.gathering"><span className="extend-box" data-shown={!editing && shown !== ''}>
         <input type="datetime-local" required value={deadline} onInput={event => setDeadline(event.currentTarget.value)} onChange={event => setDeadline(event.target.value)} min={localDateTime(feast.gatheringEndsAt + 60000)} max={localDateTime(feast.scatteringEndsAt - 60000)}
@@ -42,7 +43,7 @@ export function FeastActions({ feast, me, api, run, busy, refresh, announce, lat
   </Dialog> : null;
   if (feast.phase === 'draft') return <><button className="quiet" disabled={busy} onClick={() => setAction('cancel')}>{copy['gathering.cancel']}</button>{late ? null : <button data-sound="ui.tap" className="pill" disabled={busy} onClick={() => setAction('open')}>{copy['setup.open']}</button>}{dialog}</>;
   return <div className="creator-links">
-    {feast.gatheringExtended ? null : <button data-sound="ui.tap" className="quiet left" disabled={busy} onClick={() => setAction('extend')}>{copy['gathering.extend']}</button>}
+    {feast.gatheringExtended ? null : <button data-sound="ui.tap" className="quiet left" disabled={busy} onClick={() => { setEditing(false); setAction('extend'); }}>{copy['gathering.extend']}</button>}
     <button className="quiet left" disabled={busy} onClick={() => setAction('cancel')}>{copy['gathering.cancel']}</button>{dialog}
   </div>;
 }
@@ -75,7 +76,7 @@ export function Draft({ feast, me, viewer, now, trouble, children, ...acting }: 
       {trouble ? <SheetNotice trouble>{trouble}</SheetNotice> : null}
       <span className="chip draft-chip">{copy['setup.draft.chip']}</span>
       {late ? <SheetNotice trouble>{copy['setup.open.late']}</SheetNotice> : <SheetNotice>{copy['setup.saved']}</SheetNotice>}
-      <dl className="draft-rows">{rows.map(([label, value]) => <div key={label}><dt>{copy[label]}</dt><dd>{value}</dd></div>)}</dl>
+      <dl className="draft-rows">{rows.filter(([, value]) => value !== '').map(([label, value]) => <div key={label}><dt>{copy[label]}</dt><dd>{value}</dd></div>)}</dl>
       <p className="feast-help">{copy['setup.saved.help']}</p>
       {children}
     </PlaceScreen>

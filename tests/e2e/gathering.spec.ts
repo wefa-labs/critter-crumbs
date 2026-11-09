@@ -5,6 +5,17 @@ test('statements remain private, cap safely, then reveal and read without WebGL 
   const { feasts, accounts } = await seed.json(), feast = feasts[0];
   const errors: string[] = [], requests: string[] = []; page.on('pageerror', error => errors.push(error.message)); page.on('request', request => requests.push(request.url()));
   await page.goto(`/feasts/${feast.id}`); await connectLocal(page, 1);
+  // The header names the burrow and the feast only; the phase and the close lead the sheet, the absolute time a tap away (the audit's X1).
+  await expect(page.locator('.game-header')).not.toContainText('Gathering');
+  await expect(page.locator('.phase-row .chip')).toHaveText('Gathering');
+  await page.locator('.phase-row button').click(); await expect(page.locator('.phase-row time')).toBeVisible();
+  // The hidden line is said once, and says who cannot read the statement: statements are not secret from the host (Technical Spec §2).
+  await expect(page.getByText('Nobody else in the burrow sees this until scattering opens.', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('8 of 8 statements written', { exact: true })).toBeVisible();
+  // The creator extends gathering in a field that shows the new close as the flow page writes it, "Mon 5 Oct, 18:00 (PDT)".
+  await page.getByRole('button', { name: 'Extend gathering (once)', exact: true }).click();
+  await expect(page.locator('.extend-shown')).toHaveText(/^\w{3} \d{1,2} \w{3}, \d{2}:\d{2} \(.+\)$/);
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
   const own = page.getByRole('textbox', { name: 'Your statement', exact: true });
   await own.fill('🦊'.repeat(2001)); await expect(page.getByText('2000 / 2,000', { exact: true })).toBeVisible();
   await expect(page.locator('#announce')).toContainText('2,000 characters');
@@ -38,4 +49,15 @@ test('words still unsaved when gathering closes are not lost without a word', as
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
   await expect(page.locator('.statement-editor')).toHaveCount(0, { timeout: 15000 });
   await expect(page.locator('.app-toast')).toContainText('Gathering closed before your latest words were saved. Anything you saved earlier still stands.');
+});
+
+/* Members of an options feast write nothing (PRD P1), so they are offered no prompt for a statement of their own (QA
+   lifecycle-10); they see how many of the option statements are written. */
+test('a member of an options feast sees how many option statements are written, and no prompt to write one', async ({ page }) => {
+  const seed = await page.request.post('/api/dev/seed', { data: { kind: 'options', phase: 'gathering' } }); expect(seed.ok()).toBe(true);
+  const { feasts } = await seed.json();
+  await page.goto(`/feasts/${feasts[0].id}`); await connectLocal(page, 2);
+  await expect(page.getByText('3 of 3 statements written', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Start from your notes', exact: true })).toHaveCount(0);
+  await expect(page.locator('.statement-editor')).toHaveCount(0);
 });

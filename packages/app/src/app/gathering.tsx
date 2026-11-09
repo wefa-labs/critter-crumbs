@@ -12,7 +12,7 @@ import type { AppApi, Me } from './session.js';
 import { cappedStatement, statementParts } from './statements.js';
 import { absoluteDeadline } from './time.js';
 import { targetLabel } from './ui.js';
-import { nod } from './writer-nod.js';
+import { useSaveReply } from './writer-nod.js';
 import '../styles/feast-pages.css';
 
 /** A statement as text, links as elements (never HTML). `paragraphs` sets each blank-line-separated part as its own
@@ -45,12 +45,14 @@ function StatementEditor({ target, feast, api, run, busy, refresh, announce, sav
     if (current.current !== storedRef.current && now !== null && now >= closesAt.current) notify(copy['gathering.closed']);
   }, [api, notify]);
   const person = feast.kind === 'people', unsaved = body === '' || body !== stored;
-  function submit(event: FormEvent) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const submitted = current.current;
+    const submitted = current.current, form = event.currentTarget;
     void run(async () => {
       await api.write(`/api/feasts/${feast.id}/statements/${target.id}`, 'PUT', { body: submitted });
       setStored(submitted); storedRef.current = submitted; announce(copy['gathering.saved']); saved(); refresh();
+      /* an option's Save gives way to "Saved.", so the focus it held stays in the card, on that line */
+      requestAnimationFrame(() => { if (form.isConnected && !form.contains(document.activeElement)) form.querySelector<HTMLElement>('.statement-saved')?.focus(); });
     });
   }
   const field = <textarea aria-labelledby={heading} {...(person ? { 'aria-describedby': prompt } : { placeholder: copy['setup.option.statement'] })} value={body} onChange={event => {
@@ -73,7 +75,7 @@ function StatementEditor({ target, feast, api, run, busy, refresh, announce, sav
     : <form className="statement-editor feast-card" onSubmit={submit}>
         <h3 id={heading}>{targetLabel(target)}</h3>
         {field}
-        <div className="statement-state">{count}{unsaved ? <button className="pill soft small" disabled={busy}>{copy['gathering.save']}</button> : <span>{copy['gathering.saved']}</span>}</div>
+        <div className="statement-state">{count}{unsaved ? <button className="pill soft small" disabled={busy}>{copy['gathering.save']}</button> : <span className="statement-saved" tabIndex={-1}>{copy['gathering.saved']}</span>}</div>
         {limit}
       </form>;
 }
@@ -131,17 +133,15 @@ function NotesCard({ feast, announce }: { feast: MemberFeast; announce: (text: s
  * take the prompt for your own assistant from your notes, and see who has written; in an options feast the creator
  * writes a card for each option, and the members, who write nothing (PRD P1), see only how many are written (QA
  * lifecycle-10). The creator's own actions (`creator`) end the sheet. Statements are not secret from the host (Technical
- * Spec §2), so the hidden line says nobody else in the burrow sees them. `still` keeps the writer's critter from nodding
- * when its statement saves; `trouble` is a refresh the store did not answer.
+ * Spec §2), so the hidden line says nobody else in the burrow sees them. The writer's critter smiles and nods when its
+ * statement saves; `still` keeps it from moving. `trouble` is a refresh the store did not answer.
  */
 export function Gathering({ feast, me, viewer, now, still, trouble, creator, ...writing }: Writing & {
   me: Me; viewer: Viewer; now: number; still: boolean; trouble: string; creator: ReactNode;
 }) {
   const people = feast.kind === 'people', written = new Set(feast.participation.written);
   const own = people ? feast.targets.find(target => sameAddress(target.ownerAddress, me.address)) : undefined;
-  const writer = useRef<HTMLSpanElement>(null);
-  /* the writer's critter is found through a mark inside it, since the floor's critters take no ref */
-  const saved = () => nod(writer.current?.parentElement?.querySelector('.stage'), still);
+  const writer = useSaveReply(still);
   const faces = feast.targets.map(target => ({ key: target.id, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), name: targetLabel(target), done: written.has(target.id) }));
   const progress = <FaceRow count={formatCopy('gathering.participation', { written: faces.filter(face => face.done).length, total: faces.length })} faces={faces} notYet="gathering.notYet" />;
   const spots = (people ? gatheringRow : optionsRow)(feast.targets.length);
@@ -149,14 +149,14 @@ export function Gathering({ feast, me, viewer, now, still, trouble, creator, ...
     <PlaceScreen {...feastFrame(feast, viewer)} painting={GATHERING_SCENE.painting} sheetHeight={GATHERING_SCENE.sheetHeight} className="feast-page feast-gathering"
       floor={spots.map(({ index, ...spot }) => {
         const target = feast.targets[index]!;
-        return <FloorCritter key={target.id} critter={{ ...spot, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), asleep: !people || !written.has(target.id) }}>
-          {target === own ? <span ref={writer} hidden /> : null}
+        return <FloorCritter key={target.id} critter={{ ...spot, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), asleep: !people || !written.has(target.id) }} delighted={target === own && writer.pleased}>
+          {target === own ? <span ref={writer.mark} hidden /> : null}
         </FloorCritter>;
       })}>
       {trouble ? <SheetNotice trouble>{trouble}</SheetNotice> : null}
       <div className="phase-row"><span className="chip">{copy['phase.gathering']}</span><CloseLine phase="gathering" at={feast.gatheringEndsAt} now={now} /></div>
       {people
-        ? <>{own ? <StatementEditor target={own} feast={feast} {...writing} saved={saved} /> : null}<NotesCard feast={feast} announce={writing.announce} />{progress}</>
+        ? <>{own ? <StatementEditor target={own} feast={feast} {...writing} saved={writer.reply} /> : null}<NotesCard feast={feast} announce={writing.announce} />{progress}</>
         : sameAddress(feast.createdBy, me.address)
           ? <><OptionStatements feast={feast} {...writing} /><SheetNotice>{copy['gathering.hidden']}</SheetNotice></>
           : <>{progress}<SheetNotice>{copy['gathering.hidden']}</SheetNotice></>}

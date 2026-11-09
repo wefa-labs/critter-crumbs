@@ -12,9 +12,11 @@ import type { Me } from './session.js';
 import { Link, shortAddress, targetLabel } from './ui.js';
 import '../styles/feast-pages.css';
 
-/** A feast's critters standing in their ring, all awake or all asleep. */
+/** A feast's critters standing in their ring, all awake or all asleep; one or two, which make no ring, stand together at the front. */
 function ring(feast: PublicFeast, asleep: boolean) {
-  return <FloorRing critters={feast.targets.map(target => ({ key: target.id, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), asleep }))} />;
+  const critters = feast.targets.map(target => ({ key: target.id, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), asleep }));
+  const few = critters.length === 1 ? ENDED_SCENE.one : critters.length === 2 ? ENDED_SCENE.two : null;
+  return few ? <>{critters.map(({ key, ...critter }, index) => <FloorCritter key={key} critter={{ ...few[index]!, ...critter }} />)}</> : <FloorRing critters={critters} />;
 }
 
 /**

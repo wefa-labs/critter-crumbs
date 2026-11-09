@@ -49,8 +49,16 @@ export const DRAFT_SCENE: { painting: Painting; sheetHeight: number; viewer: Flo
 /** Joined too late: the feast's critters in their ring and you at the edge of the floor, watching, over a sheet 250 pixels tall. */
 export const LATE_SCENE: { painting: Painting; sheetHeight: number; viewer: FloorSpot } = { painting: 'window', sheetHeight: 250, viewer: { x: 91, y: 97, size: 62, face: 'left' } };
 
-/** A cancelled or void feast: its critters asleep in their ring, over a sheet as tall as the late one's. The flow page draws neither. */
-export const ENDED_SCENE: { painting: Painting; sheetHeight: number } = { painting: 'window', sheetHeight: 250 };
+/**
+ * A cancelled or void feast, which the flow page does not draw: its critters asleep in their ring, over a sheet as tall
+ * as the late one's. A ring needs three, and a void people feast has fewer (PRD P11), so one or two stand as the flow
+ * page draws the critters left in such a burrow (SCREENS.offline): one in the middle, or two facing each other.
+ */
+export const ENDED_SCENE: { painting: Painting; sheetHeight: number; one: readonly [FloorSpot]; two: readonly [FloorSpot, FloorSpot] } = {
+  painting: 'window', sheetHeight: 250,
+  one: [{ x: 50, y: 84, size: 76, face: null }],
+  two: [{ x: 30, y: 80, size: 70, face: 'right' }, { x: 70, y: 80, size: 70, face: 'left' }],
+};
 
 /**
  * A feast's link that is not yours to follow, or leads nowhere (SCREENS.unknown): one critter at the left of the floor,
