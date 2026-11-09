@@ -1,7 +1,8 @@
 /**
- * Where Skip and Got it lead. `navigate` (ui.tsx) records the screen a link was pressed on, so the steps return to it:
- * the feast for someone who came by its link, home or a burrow for a member who opened them from Settings. Opened by
- * their own address, with nothing recorded, they lead to the launcher, which is home for a connected member.
+ * Where Skip and Got it lead, and where your critter's profile goes back to. `navigate` (ui.tsx) records the screen a
+ * link was pressed on, so the steps return to it: the feast for someone who came by its link, or the profile for a
+ * member who opened them there. Opened by their own address, with nothing recorded, they lead to the launcher, which is
+ * home for a connected member.
  */
 export function returnPath(state: unknown): string {
   const from = typeof state === 'object' && state !== null && 'from' in state ? state.from : undefined;

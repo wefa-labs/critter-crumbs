@@ -36,6 +36,15 @@ test('validators normalize address case', () => {
 test('validators parse a profile edit without coercion', () => {
   expect(parseProfileUpdate({ displayName: ' Ada ', variant: 4 })).toEqual({ displayName: 'Ada', variant: 4 });
 });
+// Names are 16 characters, counted in code points, on every new save (decision D10 of the November UI audit).
+test('display names and option names are 1 to 16 characters once trimmed', () => {
+  expect(parseProfileUpdate({ displayName: ` ${'🌱'.repeat(16)} ` })).toEqual({ displayName: '🌱'.repeat(16) });
+  expect(() => parseProfileUpdate({ displayName: 'Bartholomew Bramb' })).toThrow('name.limit');
+  expect(() => parseProfileUpdate({ displayName: '  ' })).toThrow('name.limit');
+  const named = (name: string) => parseFeastSetup({ ...input, kind: 'options', options: [{ name }] }).options[0]!.name;
+  expect(named('Knowledge Commons'.slice(0, 16))).toBe('Knowledge Common');
+  expect(() => named('Knowledge Commons')).toThrow('setup.option.unnamed');
+});
 test('validators reject more than four re-rolls', () => {
   expect(() => parseProfileUpdate({ variant: 5 })).toThrow(ValidationError);
 });

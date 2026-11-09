@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { sceneCircle } from '../src/app/invite-circle.js';
 import { LEARN_SHEET_HEIGHT, LEARN_STEPS } from '../src/app/learn-steps.js';
-import { INVITE_SCENE, LAUNCHER_SCENE, sheetScreenStyle } from '../src/app/painted-scene.js';
+import { INVITE_SCENE, LAUNCHER_SCENE, MEETING_SCENE, PROFILE_SCENE, sheetScreenStyle } from '../src/app/painted-scene.js';
 
 /* Expected values are read off the flow page, never off the app (docs/explorations/app-screens/index.html):
    launcherScene(), circle(), and SCREENS.invite, ['learn-handful'], ['learn-tap'] and ['learn-private']. The launcher's
@@ -110,5 +110,20 @@ describe('the first steps', () => {
     expect(opened!.painting).toBe('window');
     expect(opened!.critters.every(critter => !critter.asleep)).toBe(true);
     expect(sheetScreenStyle(LEARN_SHEET_HEIGHT)).toEqual({ '--sheet-h': '410px', '--floor-h': 362 });
+  });
+});
+
+describe('your critter', () => {
+  it('meets you large at the front of the floor, over a sheet that also holds the name and Disconnect, and names a kept critter smaller', () => {
+    expect(MEETING_SCENE.painting).toBe('window');
+    // SCREENS.meet draws 210 at (50, 92) over a 260 px sheet; the app's meeting adds the name field, so its sheet is 360
+    expect(place(MEETING_SCENE.meet)).toEqual([50, 92, 210]);
+    expect(sheetScreenStyle(MEETING_SCENE.meet.sheetHeight)).toEqual({ '--sheet-h': '360px', '--floor-h': 412 });
+    // SCREENS.name: 150 at (50, 90) over 330, which grows by Disconnect's row to the meeting's 360
+    expect([...place(MEETING_SCENE.name), MEETING_SCENE.name.sheetHeight]).toEqual([50, 90, 150, 360]);
+  });
+
+  it('stands on its profile where the flow page stands it, over a 520 px sheet', () => {
+    expect(PROFILE_SCENE).toEqual({ painting: 'window', critter: { x: 50, y: 92, size: 150 }, sheetHeight: 520 });
   });
 });

@@ -44,6 +44,16 @@ test('API profile persists a display name and four monotonic re-rolls', async ()
   expect((await api({ method: 'GET', path: '/api/me', headers })).body).toMatchObject({ variant: 4, rerollsUsed: 4, displayName: 'Juniper' });
 });
 
+test('API profile takes a new display name of up to 16 characters and says so when one is longer', async () => {
+  const { api, connect, close } = await apiHarness(); disposals.push(close);
+  const { headers } = await connect();
+  expect((await api({ method: 'PUT', path: '/api/me', headers, body: { displayName: ' Hazel Montgomery ' } })).status).toBe(200);
+  const refused = await api({ method: 'PUT', path: '/api/me', headers, body: { displayName: 'Hazel Montgomery!', keepCritter: true } });
+  expect(refused.status).toBe(400); expect(refused.body.error).toBe('name.limit');
+  // nothing of the refused update was kept: neither the name nor the lock
+  expect((await api({ method: 'GET', path: '/api/me', headers })).body).toMatchObject({ displayName: 'Hazel Montgomery', critterLocked: false });
+});
+
 test('API profile caches forward-confirmed ENS names for exactly 24 hours', async () => {
   let calls = 0;
   const { api, connect, close, clock, advance } = await apiHarness({ ens: {
