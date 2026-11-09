@@ -38,29 +38,66 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 720 
   });
 }
 
-test('the critter menu reaches burrows, settings and creation, and a whole burrow card opens', async ({ page }) => {
+test('your critter is one screen over the page it was opened from, with the settings as switches, and goes back to it', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'gathering' } });
   expect(seed.ok()).toBe(true);
   const { burrowId } = await seed.json();
   await page.goto(`/burrows/${burrowId}`);
   await connectLocal(page, 1);
-  const profile = page.getByRole('button', { name: 'Your critter and settings', exact: true });
-  await profile.click();
-  const menu = page.getByRole('dialog', { name: 'Your critter', exact: true });
-  await expect(menu.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible();
-  await menu.getByRole('button', { name: 'Settings', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible();
-  await page.keyboard.press('Escape');
+  const face = page.getByRole('button', { name: 'Your critter and settings', exact: true }), adding = page.getByRole('textbox', { name: 'Address or ENS name', exact: true });
+  // something typed on the page beneath is still there when the profile goes back to it
+  await adding.fill('fern.eth');
+  await face.click();
+  const profile = page.getByRole('region', { name: 'Your critter', exact: true });
+  await expect(page).toHaveURL(/\/your-critter$/);
+  await expect(profile.getByRole('heading', { level: 1, name: 'Your critter', exact: true })).toBeVisible();
+  await expect(profile.getByRole('note', { name: 'Development status', exact: true })).toContainText('Beta · Testnet');
   await expect(profile).toBeFocused();
-  await profile.click();
-  await menu.getByRole('link', { name: 'Your burrows', exact: true }).click();
+  await expect(profile.getByText('0x7E5F…5Bdf', { exact: true })).toBeVisible();
+  await expect(profile.getByText("This one's yours.", { exact: true })).toBeVisible();
+  await expect(profile.getByRole('button', { name: 'Close' })).toHaveCount(0);
+  // the settings are switches; Simple view waits for critters with a 3D mesh (Design System D34)
+  await expect(profile.getByRole('switch')).toHaveCount(4);
+  for (const name of ['Sounds', 'Music', 'Still critters', 'Dark mode']) await expect(profile.getByRole('switch', { name, exact: true })).toBeVisible();
+  const still = profile.getByRole('switch', { name: 'Still critters', exact: true });
+  await still.check();
+  expect(await page.evaluate(() => [localStorage.getItem('cc.motion.still'), document.documentElement.dataset.still])).toEqual(['1', 'true']);
+  await still.uncheck();
+  expect(await page.evaluate(() => localStorage.getItem('cc.motion.still'))).toBe('0');
+  await expect(profile.getByRole('button', { name: 'Disconnect', exact: true })).toBeVisible();
+  await expect(profile.getByRole('link', { name: 'How it works', exact: true })).toHaveAttribute('href', '/how-it-works');
+  // the back chevron, Escape and the browser's Back each return to the burrow as it was, with the focus on the face
+  await profile.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
+  await expect(adding).toHaveValue('fern.eth');
+  await expect(face).toBeFocused();
+  await face.click();
+  await expect(profile).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(profile).toHaveCount(0);
+  await expect(face).toBeFocused();
+  await face.click();
+  await expect(profile).toBeVisible();
+  await page.goBack();
+  await expect(profile).toHaveCount(0);
+  await expect(adding).toHaveValue('fern.eth');
+  // a visit to the first steps from the profile, which return to it, keeps the way back to the burrow
+  await face.click();
+  await profile.getByRole('link', { name: 'How it works', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(profile).toBeVisible();
+  await profile.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
+
+  // home: a whole burrow card opens its burrow, and Start a burrow makes one
+  await page.getByRole('link', { name: 'Critter Crumbs', exact: true }).click();
   const card = page.locator(`a[href="/burrows/${burrowId}"]`);
   await card.getByText('8 critters', { exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
   expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([390, 844]);
-  await profile.click();
-  await menu.getByRole('link', { name: 'Start a burrow', exact: true }).click();
+  await page.getByRole('link', { name: 'Critter Crumbs', exact: true }).click();
+  await page.getByRole('link', { name: 'Start a burrow', exact: true }).click();
   await page.getByRole('textbox', { name: 'Burrow name', exact: true }).fill(`Shell ${burrowId.slice(0, 8)}`);
   await page.getByRole('button', { name: 'Create burrow', exact: true }).click();
   await expect(page.getByRole('heading', { name: `Shell ${burrowId.slice(0, 8)}`, exact: true })).toBeVisible();
@@ -70,14 +107,16 @@ test('the critter menu reaches burrows, settings and creation, and a whole burro
     await page.setViewportSize(viewport);
     expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([viewport.width, viewport.height]);
     await page.screenshot({ path: `.scratch/shared-shell/burrow-${viewport.width}.png` });
-    await profile.click();
+    await face.click();
+    await expect(profile).toBeVisible();
     await page.screenshot({ path: `.scratch/shared-shell/profile-${viewport.width}.png` });
-    const frame = (await menu.boundingBox())!;
-    expect(frame.y).toBeGreaterThanOrEqual(0);
-    expect(frame.y + frame.height).toBeLessThanOrEqual(viewport.height);
-    const disconnect = (await menu.getByRole('button', { name: 'Disconnect', exact: true }).boundingBox())!;
-    expect(disconnect.y + disconnect.height).toBeLessThanOrEqual(frame.y + frame.height);
+    expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([viewport.width, viewport.height]);
+    // the foot's actions stay on the screen however short it is
+    const disconnect = (await profile.getByRole('button', { name: 'Disconnect', exact: true }).boundingBox())!;
+    expect(disconnect.y).toBeGreaterThanOrEqual(0);
+    expect(disconnect.y + disconnect.height).toBeLessThanOrEqual(viewport.height);
     await page.keyboard.press('Escape');
+    await expect(profile).toHaveCount(0);
   }
 });
 
@@ -100,14 +139,16 @@ test('copy success is visible, repeatable and announced once, including inside t
   await expect(toast).toHaveCount(0);
   await expect(copyLink).toBeFocused();
   await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
-  const profile = page.getByRole('dialog', { name: 'Your critter', exact: true });
+  const profile = page.getByRole('region', { name: 'Your critter', exact: true });
   await profile.getByRole('button', { name: 'Copy address', exact: true }).click();
-  await expect(profile.locator('.app-toast')).toContainText('Address copied.');
-  await expect(profile.locator('#announce')).toHaveText('Address copied.');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf');
+  // the page's own notice and live regions stand over the profile, outside the page beneath it
+  await expect(toast).toContainText('Address copied.');
+  await expect(page.locator('#announce')).toHaveText('Address copied.');
   await expect(page.locator('#announce')).toHaveCount(1);
   await expect(page.locator('#alert')).toHaveCount(1);
   await page.screenshot({ path: '.scratch/shared-shell/profile-notification.png' });
-  await profile.locator('.app-toast').getByRole('button', { name: 'Dismiss notification', exact: true }).click();
+  await toast.getByRole('button', { name: 'Dismiss notification', exact: true }).click();
   await expect(profile.getByRole('button', { name: 'Copy address', exact: true })).toBeFocused();
 });
 
@@ -147,13 +188,21 @@ test('the first meeting saves the name and chosen critter together from its fixe
   await page.goto('/');
   await page.getByRole('button', { name: 'Connect', exact: true }).click();
   await page.getByRole('button', { name: 'Rehearsal critter 8', exact: true }).click();
-  const critter = page.getByRole('dialog', { name: 'Meet your critter', exact: true });
+  const critter = page.getByRole('region', { name: 'Meet your critter', exact: true });
   await expect(critter).toBeVisible();
-  const frame = await critter.boundingBox();
+  const keep = critter.getByRole('button', { name: 'Keep this one', exact: true }), frame = await keep.boundingBox();
   await expect(critter.locator('svg.portrait')).toHaveCount(1);
-  await critter.getByRole('textbox', { name: 'Display name', exact: true }).fill('Avery');
-  expect(await critter.boundingBox()).toEqual(frame);
-  await critter.getByRole('button', { name: 'Keep this one', exact: true }).click();
+  // the name counts to 16 and stops there (Design System D35)
+  const name = critter.getByRole('textbox', { name: 'Display name', exact: true });
+  await name.fill('Avery');
+  await expect(critter.getByText('5 / 16', { exact: true })).toBeVisible();
+  await name.fill('Bartholomew Brambleworth');
+  await expect(name).toHaveValue('Bartholomew Bram');
+  await expect(critter.getByText('16 / 16', { exact: true })).toBeVisible();
+  await name.fill('Avery');
+  expect(await keep.boundingBox()).toEqual(frame);
+  await keep.click();
+  await expect(critter).toHaveCount(0);
   await expect(page.getByRole('dialog')).toHaveCount(0);
   expect(named && kept).toBe(true);
 });

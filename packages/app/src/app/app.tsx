@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { ApiClientError, createApiClient, type AccountOption, type AccountProvider } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, ValidationError } from '@critter-crumbs/shared';
-import { browserSettings, MUSIC_SETTING, saveSetting, settingKeys, type StoredSetting } from '../sim/settings.js';
+import { browserSettings, MUSIC_SETTING, saveSetting, type StoredSetting } from '../sim/settings.js';
 import { createSession } from './session.js';
 import { createAudio, UNLOCK_EVENTS, type MusicTrack } from '../audio/index.js';
 import { AudioProvider } from '../audio/context.js';
@@ -11,15 +11,21 @@ import { Launcher } from './launcher.js';
 import { MusicButton } from './music-button.js';
 import { createPressWatch } from './music-choice.js';
 import { screenMusic } from './screen-music.js';
-import { ProfileMenu } from './profile.js';
-import { Onboarding } from './onboarding.js';
 import { readDarkChoice, saveDarkChoice, showDarkChoice } from './theme.js';
 const FeastRoute=lazy(()=>import('./feast.js').then(module=>({default:module.FeastRoute})));
 const LearnRoute=lazy(()=>import('./learn.js').then(module=>({default:module.Learn})));
 /* starting a feast is a creator's occasional page, so its code arrives when it is opened */
 const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.SetupRoute})));
-import { Burrow, CreateBurrow, Home } from './burrows.js';
-import { Dialog, Link, Opening, ProfileButton } from './ui.js';
+/* the screens a connected member sees outside a feast arrive once someone has connected, so the launcher and the
+   invite, which most people open first, do not carry them (scripts/build-budget.mjs) */
+const HomeRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Home})));
+const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
+const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
+const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
+const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
+import { returnPath } from './learn-return.js';
+import { BetaChip } from './screen-header.js';
+import { Link, Opening, ProfileButton, navigate } from './ui.js';
 
 type Choice = { provider: AccountProvider; option: AccountOption };
 function message(error: unknown, fallback: CopyId = 'err.generic') { return error instanceof ApiClientError || error instanceof ValidationError ? copy[error.copyId].replace(/\{[^}]+\}/g, '…') : copy[fallback]; }
@@ -33,16 +39,20 @@ export function App() {
   });
   const { api, session, audio, pressWatch } = services, state = useSyncExternalStore(session.subscribe, session.snapshot);
   const [path, setPath] = useState(location.pathname), [busy, setBusy] = useState(false), running = useRef(false), resumeAfterConnect = useRef(false);
+  /* the screen your critter's profile was opened over, which is where its back chevron leads, and what opened it: the
+     face that was pressed, to have the focus back; a profile opened by its own address has neither beneath it. A visit
+     to the first steps from the profile, which return to it, keeps the way back. */
+  const [under, setUnder] = useState(() => returnPath(history.state)), [opener, setOpener] = useState<Element | null>(null);
   const [connecting, setConnecting] = useState(false), [choices, setChoices] = useState<Choice[]>([]), [discovering, setDiscovering] = useState(false), [connectReason, setConnectReason] = useState('');
   /* the choice the connect sheet is waiting on, from its press until the app it names has answered */
   const [waiting, setWaiting] = useState<AccountOption | null>(null);
-  const [settingsOpen, setSettingsOpen] = useState(false), [settings, setSettings] = useState(services.preferences.settings);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const profileOpener = useRef<HTMLElement | null>(null);
+  const [settings, setSettings] = useState(services.preferences.settings);
   /* dark follows the device until someone chooses (theme.ts) */
   const [darkChoice, setDarkChoice] = useState(() => readDarkChoice(services.preferences.storage)), [deviceDark, setDeviceDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches);
   const sounding = useSyncExternalStore(audio.subscribe, audio.running);
-  const [onboardingDismissed, dismissOnboarding] = useState(false);
+  /* whose first meeting comes before the screen they connected on: it stays until Keep or Disconnect, even once the
+     fourth re-roll has locked the critter (onboarding.tsx) */
+  const [meetingFor, setMeetingFor] = useState<string | null>(null);
   const [online, setOnline] = useState(navigator.onLine);
   const providers = useRef<Promise<AccountProvider[]> | undefined>(undefined);
   const working = busy || state.busy;
@@ -54,7 +64,8 @@ export function App() {
   }
   useEffect(() => { void session.restore().catch(error => setAlert(message(error))); }, [session]);
   useEffect(() => {
-    const changed = () => { audio.stop(); setPath(location.pathname); setAlert(''); setSettingsOpen(false); setProfileOpen(false); };
+    /* the profile's way back is read on arriving at it, except from the first steps, which return to it */
+    const changed = () => { audio.stop(); setPath(location.pathname); if (location.pathname === '/your-critter') setUnder(under => history.state?.from === '/how-it-works' ? under : returnPath(history.state)); setAlert(''); };
     const network = () => { setOnline(navigator.onLine); setAlert(navigator.onLine ? '' : copy['err.offline']); if (navigator.onLine) announce(copy['err.online']); };
     const media = matchMedia('(prefers-reduced-motion: reduce)'), scheme = matchMedia('(prefers-color-scheme: dark)');
     const motion = () => setSettings(value => ({ ...value, reducedMotion: media.matches })), device = () => setDeviceDark(scheme.matches);
@@ -95,50 +106,63 @@ export function App() {
     if (!provider) return;
     setWaiting(option);
     void run(async () => {
-      try { await session.connect(provider, option); audio.play('connect'); dismissOnboarding(false); setConnecting(false); setConnectReason(''); if (resumeAfterConnect.current) { resumeAfterConnect.current = false; setAlert(copy['connect.resumed']); } }
+      try { await session.connect(provider, option); audio.play('connect'); setConnecting(false); setConnectReason(''); if (resumeAfterConnect.current) { resumeAfterConnect.current = false; setAlert(copy['connect.resumed']); } }
       catch (error) { closeConnect(); setAlert(message(error, 'connect.rejected')); }
       finally { setWaiting(null); }
     });
   }
   function chooseSetting(key: StoredSetting, value: boolean) { saveSetting(services.preferences.storage, key, value); setSettings(settings => ({ ...settings, [key]: value })); }
+  /* disconnecting leaves the member where a signed-out visitor would be: on the screen beneath your critter's profile,
+     or on the page they connected on, which the first meeting comes before: the launcher, or a feast's invite */
+  function disconnect(to?: string) { void run(async () => { await session.disconnect(); if (to) navigate(to); }); }
   function chooseDark(value: boolean) { saveDarkChoice(services.preferences.storage, value); showDarkChoice(document.documentElement, value); setDarkChoice(value); }
-  const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(path);
-  const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(path);
-  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(path);
-  const openProfile = () => { profileOpener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setProfileOpen(true); };
-  const closeSettings = () => { setSettingsOpen(false); requestAnimationFrame(() => profileOpener.current?.isConnected && profileOpener.current.focus()); };
+  /* the screen in view, or the one beneath your critter's profile while that is open */
+  const profileOpen = path === '/your-critter', screen = profileOpen ? under : path;
+  const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(screen);
+  const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(screen);
+  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen);
+  /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
+  if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
+  const meetingShown = me !== null && meetingFor === me.address;
+  const openProfile = () => { setOpener(document.activeElement); navigate('/your-critter'); };
   /* the Music toggle wherever there is no Settings to open: the launcher, the first steps and a visitor's header */
   const musicButton = <MusicButton on={settings.music} sounding={sounding} soundAtPress={pressWatch.soundAtPress} choose={value => chooseSetting(MUSIC_SETTING, value)} />;
   /* the launcher says its own trouble, in its sheet */
-  const launching = state.ready && !feastRoute && path !== '/how-it-works' && !me;
+  const launching = state.ready && !feastRoute && screen !== '/how-it-works' && !me;
   /* each screen's music; a feast's pages name their own, and loading leaves playing whatever was */
   let content, music: MusicTrack | undefined;
   if (!state.ready) content = <Opening bare />;
-  else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={openProfile} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={path} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
-  else if (path === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
+  else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={openProfile} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={screen} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
+  else if (screen === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
-  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={path} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
-  else if (path === '/burrows/new') { music = screenMusic.burrow; content = <CreateBurrow api={api} session={session} run={run} busy={working} />; }
-  else if (burrow) { music = screenMusic.burrow; content = <Burrow key={path} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} />; }
-  else { music = screenMusic.home; content = <Home me={me} api={api} />; }
+  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
+  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute api={api} session={session} run={run} busy={working} /></Suspense>; }
+  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
+  else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
+  /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
+  const layer = !me ? null
+    : meetingShown ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} disconnect={() => disconnect()} /></Suspense>
+    : profileOpen ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={() => navigate(under)} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
+      disconnect={() => disconnect(under)} run={run} busy={working} /></Suspense>
+    : null;
+  /* the screen beneath a layer stays as it was only when it was there before: your critter's profile, opened from it.
+     The first meeting stands over nothing, and the screen it was opened on arrives once it is done. */
+  const layered = layer !== null, beneath = !layered || (profileOpen && !meetingShown && opener !== null);
+  useEffect(() => {
+    if (layered || !opener) return;
+    if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    setOpener(null);
+  }, [layered, opener]);
   return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
-    <a href="#content" className="skip-link">{copy['skip.content']}</a>
-    <aside className="environment-notice" aria-label={copy['app.environment.label']}><strong>{copy['app.environment.badge']}</strong><span>{copy['app.environment.help']}</span></aside>
-    <header className="app-header"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><nav className="actions" aria-label={copy['app.navigation']}>
+    <a href="#content" className="skip-link" inert={layered}>{copy['skip.content']}</a>
+    <header className="app-header" inert={layered}><div className="screen-mark"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><BetaChip /></div><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
     </nav><div id="feast-header" /></header>
     {!online && !launching ? <p className="notice">{copy['err.offline']}</p> : null}
-    <main id="content" tabIndex={-1}>{content}</main>
-    {profileOpen && me ? <ProfileMenu me={me} close={() => setProfileOpen(false)} settings={() => { setProfileOpen(false); setSettingsOpen(true); }} meet={() => { setProfileOpen(false); dismissOnboarding(false); }} disconnect={() => void run(async () => { await session.disconnect(); setProfileOpen(false); })} run={run} busy={working} /> : null}
+    <main id="content" tabIndex={-1} inert={layered}>{beneath ? content : null}</main>
+    {layered ? <div className="screen-layer">{layer}</div> : null}
     {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} /> : null}
-    {me ? <Onboarding key={me.address} me={me} session={session} run={run} busy={working} visible={!connecting && !onboardingDismissed} close={() => dismissOnboarding(true)} announce={announce} /> : null}
-    {settingsOpen ? <Dialog title={copy['settings.title']} onClose={closeSettings}><div className="stack">{(Object.keys(settingKeys) as StoredSetting[]).map(key => {
-      const labels = { effects: 'sound.effects.label', music: 'sound.music.label', still: 'motion.still.label', simple: 'view.simple.label' } as const;
-      const help = { effects: 'sound.effects.help', music: 'sound.music.help', still: 'motion.still.help', simple: 'view.simple.help' } as const;
-      return <label className="setting" key={key}><input type="checkbox" checked={settings[key]} onChange={event => chooseSetting(key, event.target.checked)} /><span><strong>{copy[labels[key]]}</strong><small>{copy[help[key]]}</small></span></label>;
-    })}<label className="setting"><input type="checkbox" checked={darkChoice ?? deviceDark} onChange={event => chooseDark(event.target.checked)} /><span><strong>{copy['view.dark.label']}</strong><small>{copy['view.dark.help']}</small></span></label>
-      <Link href="/how-it-works">{copy['launch.learn']}</Link></div></Dialog> : null}
   </Announcements></AudioProvider>;
 }

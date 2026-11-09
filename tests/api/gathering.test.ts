@@ -114,6 +114,7 @@ test.each([
   ['deadline order', { gatheringEndsAt: 1800000002123, scatteringEndsAt: 1800000001123 }],
   ['empty options', { kind: 'options', options: [] }],
   ['duplicate option names', { kind: 'options', options: [{ name: 'Oak' }, { name: 'oak' }] }],
+  ['option names over 16 characters', { kind: 'options', options: [{ name: 'Knowledge Commons' }] }],
 ])('API draft rejects invalid %s', async (_, change) => {
   const { api, connect, close, clock } = await apiHarness(); disposals.push(close);
   const owner = await connect();

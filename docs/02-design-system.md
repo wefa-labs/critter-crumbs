@@ -319,6 +319,7 @@ The generator produces the critter's *identity*. Its *state* is a small vector t
 ### 5.5 Names
 
 - Name = ENS reverse record, else the display name typed at first connect (PRD F2). Options are named by the creator.
+- A display name or an option name is 1 to 16 characters on every new save, counted in code points as the server counts them; its field counts to 16 and stops there (**D35**). Names saved before the limit stay as they are.
 - Display: display face in the grid; body face in tables and lists. Truncate at 24 characters with an ellipsis; the full name is the element's `title` and accessible name.
 - Addresses are never a critter's visible name except as a fallback for a member who has neither ENS nor a display name yet: `0x1234…abcd` (6 + 4), in the data face.
 
@@ -386,7 +387,7 @@ Portraits are `role="img"` with the critter's name as `<title>` when they stand 
 ```
 
 - `<header>` holds the burrow name (display face), the phase chip, and the **deadline strip**: both deadlines, always, in the viewer's local time, each tappable to reveal the absolute time (§8, `DeadlineStrip`). On `xs`/`base` the strip wraps to its own line.
-- `<main id="content" tabindex="-1">` receives focus on every route change. A skip link precedes the header.
+- `<main id="content" tabindex="-1">` receives focus on every route change. A skip link precedes the header. A screen drawn over the rest (the first meeting, your critter's profile, D33 and D34) stands outside `<main>`, which is inert beneath it with the header and the skip link, and takes the focus itself; closing the profile returns the focus to the face that opened it.
 - The pile bar is `position: sticky; bottom: 0` on `xs`–`md`, height 64 px + `env(safe-area-inset-bottom)`, with `--cc-shadow-up`; on `lg`+ it becomes a `position: sticky; top: var(--cc-space-6)` rail to the right of the grid.
 - Viewport height uses `dvh` where it matters (the feast's centred layout), never `vh`.
 
@@ -465,10 +466,10 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `Button` | Primary / secondary / quiet | `<button>` | all | Primary: Burrow on Oat; secondary: Surface with strong border; quiet: text-only Soil, underlined on hover/focus |
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
-| `Sheet` / `Dialog` | Confirmations, settings, connection | native `<dialog>` opened with `showModal()`; stable header, scrolling body, reserved feedback area, and action footer | loading / choices / waiting / error retain their outer frame | No hand-rolled focus trap; Esc closes unless busy; focus returns to the opener. Bottom sheet on phone; centred card on desktop. One way out (decision of 2026-11-03): the foot's Cancel, or Back where the dialog's action is itself a cancellation, as a text button left of the primary action; the heading carries a Close only where the foot has no way out |
-| `ProfileNavigation` | Identity and app navigation | the same 44 px critter-face button in page and game headers opens a native dialog | profile / settings | Your burrows, Start a burrow, Copy address, Settings, How it works, Disconnect; keeping/meeting behavior remains unchanged |
+| `Sheet` / `Dialog` | Confirmations, connection | native `<dialog>` opened with `showModal()`; stable header, scrolling body, reserved feedback area, and action footer | loading / choices / waiting / error retain their outer frame | No hand-rolled focus trap; Esc closes unless busy; focus returns to the opener. Bottom sheet on phone; centred card on desktop. One way out (decision of 2026-11-03): the foot's Cancel, or Back where the dialog's action is itself a cancellation, as a text button left of the primary action; the heading carries a Close only where the foot has no way out |
+| `ProfileNavigation` | Identity and settings | the same 44 px critter-face button in page and game headers opens your critter's profile, a screen with its own address drawn over the one the face was pressed on (D34) | the profile | Copy address, the settings as switches, How it works, Disconnect; its back chevron, Escape and the browser's Back return to the screen beneath, with the focus on the face |
 | `Notification` | Confirm discrete actions | leaf, outcome text, dismiss control; inside the active dialog when one is open | success / dismissed | One polite announcement; no focus theft. Visible for six seconds, paused while hovered/focused; repeated actions replace the message and restart its lifetime. Errors stay visible; scatter-count announcements do not become toasts |
-| `SoundControls` | Two toggles | effects switch, music switch, still-critters switch, simple-view switch | — | Sounds and Music both default on (decision of 2026-10-08); each persisted |
+| `SoundControls` | Two toggles | effects switch, music switch, still-critters switch, and the simple-view switch while some critter has a 3D mesh (D34), on your critter's profile | — | Sounds and Music both default on (decision of 2026-10-08); each persisted |
 | `RerollControl` | Meet your critter | big portrait, re-roll button with remaining count, keep button | 4 → 0 re-rolls left / locked | The portrait swap is announced: "New critter. 3 re-rolls left." |
 | `MemberList` | Burrow critters | list of portrait + name + address | — | `role="list"` restored when styled (Safari) |
 | `BurrowList` | Home | list of burrows with critter counts and the next deadline | empty | Each complete card is one semantic link, including its metadata and padding; visible keyboard focus |
@@ -517,12 +518,13 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 
 | Screen / state | What shows | Copy (§10) |
 |---|---|---|
-| Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark and the tagline on a plate, four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `action.connect`, `launch.learn` |
-| Arrive by a link, not connected | Header with the burrow line and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
+| Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark, the tagline and the beta line on a plate (D32), four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `app.environment.*`, `action.connect`, `launch.learn` |
+| Arrive by a link, not connected | Header with the burrow line, the beta chip and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
-| First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen and Settings: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*` |
-| First connect, no ENS | Name and critter choice share the same stable first-meeting dialog; Keep saves both together | `name.*`, `critter.*` |
-| Meet your critter | Selected portrait on a painted stage with `RerollControl`, name field when needed, and pinned Keep action. Rerolls preserve the draft name; existing locks remain in force | `critter.*`, `name.*` |
+| First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen and your critter's profile: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*` |
+| Meet your critter (first connect) | A whole screen (D33): the wordmark and the beta chip in the header; the critter large on the painted floor; in the sheet the title with the element chip, the line, the name field with its 16-character counter when there is no ENS name (the ENS name otherwise), and Re-roll and Keep this one pinned at the foot, with Disconnect as a quiet link under them. No Close: Keep is the way past it, and saves the name and the lock in one update; Disconnect signs out as the profile does and leaves the member where a signed-out visitor would be, on the launcher or, from a feast's link, its invite. Rerolls keep the draft name; the fourth locks on the server and the screen stays until Keep. The page the member connected on, a feast from its link, comes after | `critter.*`, `name.*`, `action.disconnect` |
+| A kept critter with no name (no ENS) | The same screen asking only for the name: the critter smaller and asleep, `name.title`, `name.help`, the field with its counter, Save name, and the same Disconnect under it | `name.*`, `action.disconnect` |
+| Your critter (the profile) | One screen in place of the profile and Settings dialogs (D34), over the screen whose face was pressed, which stays as it was beneath it: a back chevron and “Your critter” in the header; the critter on the floor under its element chip; the name and `critter.locked`; the short address with Copy address; Settings as switches (Sounds, Music, Still critters, Dark mode; Simple view only while some critter has a 3D mesh); How it works and Disconnect at the foot. The chevron, Escape and the browser’s Back return to the screen beneath | `profile.*`, `settings.title`, `sound.*`, `motion.*`, `view.*`, `critter.locked`, `launch.learn`, `action.disconnect` |
 | Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
 | Burrow, only you | Member list with one row; add-critter field focused | `burrow.empty.*` |
 | Burrow, no feasts | Feast list empty state | `burrow.feasts.empty.*` |
@@ -541,7 +543,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
 | Results, tie | Tied rows share a line under the table | `results.tie` |
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
-| Simple view (fallback or chosen) | Portraits in stages; one notice line | `fallback.*` |
+| Simple view (fallback or chosen) | Portraits in stages; one notice line. Its switch is on your critter's profile only while some critter has a 3D mesh (D34) | `fallback.*` |
 | Offline | Banner; controls stay usable; submit shows why it waits | `err.offline` |
 | A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
 | Not in the burrow | Burrow name and the ask-a-member line | `burrow.unknown.*` |
@@ -549,7 +551,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Feast cancelled | Listed in past feasts with a "Cancelled" chip | `feast.cancelled` |
 | People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
 
-First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen and in Settings. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
+First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen and on your critter's profile. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
 
 ## 10. UX copy
 
@@ -572,9 +574,10 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | ID | Text |
 |---|---|
 | `app.name` | Critter Crumbs |
-| `app.environment.label` | Development status |
-| `app.environment.badge` | Beta · Testnet |
+| `app.environment.label` | Development status (the name of the header chip and of the launcher's beta line) |
+| `app.environment.badge` | Beta · Testnet (the line on the launcher's plate; with `app.environment.help`, what the chip reads to a screen reader) |
 | `app.environment.help` | Still in development. Rehearsal only. |
+| `app.environment.chip` | Beta (the chip beside the burrow line in every header, D32) |
 | `app.tagline` | Everyone gets a handful of crumbs to share. |
 | `action.connect` | Connect |
 | `action.disconnect` | Disconnect |
@@ -626,6 +629,8 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `name.help` | There's no ENS name on this address, so pick a name. |
 | `name.label` | Display name |
 | `name.save` | Save name |
+| `name.counter` | {n} / {max} (the name field's counter; `max` is 16) |
+| `name.limit` | Pick a name, up to 16 characters. |
 | `critter.meet.title` | Meet your critter |
 | `critter.meet.body` | Made from your address. Re-roll up to {max} times, then it's yours. |
 | `critter.reroll` | Re-roll ({remaining} left) |
@@ -696,7 +701,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.deadline.order` | Scattering has to close after gathering. |
 | `setup.deadline.past` | That gathering deadline has already passed. Choose a later time. |
 | `setup.title.missing` | The feast needs a title, up to 80 characters. |
-| `setup.option.unnamed` | Every option needs a name, up to 80 characters. |
+| `setup.option.unnamed` | Every option needs a name, up to 16 characters. |
 | `setup.option.duplicate` | Two options have the same name. Give each one its own. |
 | `setup.privacy.title` | Who sees the result? |
 | `setup.privacy.aggregate.label` | The result |
@@ -818,7 +823,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 
 | ID | Text |
 |---|---|
-| `settings.title` | Settings |
+| `settings.title` | Settings (the heading over the switches on your critter's profile) |
 | `sound.effects.label` | Sounds |
 | `sound.effects.help` | Little crumb noises. |
 | `sound.music.label` | Music |
@@ -857,7 +862,7 @@ The Technical Spec's edge-state table references these IDs and may add `err.*` s
 
 Simple view is a first-class mode, not an error page. It is the same app with the §5.7 portraits in the stages instead of meshes.
 
-**Two ways in.** (1) Automatic: WebGL is unavailable, context creation fails, the 3D module fails to load, or the context is lost and not restored within 2 seconds. (2) Chosen: the **Simple view** switch in settings (**D9**), persisted; useful on low-end devices and for anyone who prefers it.
+**Two ways in.** (1) Automatic: WebGL is unavailable, context creation fails, the 3D module fails to load, or the context is lost and not restored within 2 seconds. (2) Chosen: the **Simple view** switch in settings (**D9**), persisted; useful on low-end devices and for anyone who prefers it. The switch is on your critter's profile only while some critter has a 3D mesh, since with none it would change nothing (**D34**).
 
 **Progressive, not defensive.** Every stage renders its portrait first. In 3D-capable browsers, the 3D module lazy-loads, creates the context, and crossfades each critter from portrait to mesh over `--cc-dur-3` when ready. If any step fails, nothing happens: the portraits are already there. This is the whole fallback strategy — there is no separate error path to design, and the arrival and read screens never load 3D at all (**D6**).
 
@@ -885,7 +890,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 
 - Landmarks: `<header>` (top bar), `<main id="content" tabindex="-1">`, `<aside aria-label="Your crumbs">` (pile bar), `<footer>` on the home. One `<h1>` per screen; heading levels never skip.
 - Critter grids, member lists, feast lists, and the read pass are real lists with `role="list"` restored where CSS strips it (Safari).
-- Skip link to `#content`; `<title>` is "{screen} · {burrow} · Critter Crumbs" and updates on every route change, then `#content` receives focus.
+- Skip link to `#content`; `<title>` is "{screen} · {burrow} · Critter Crumbs" and updates on every route change, then `#content` receives focus, or a screen drawn over the rest receives it (§6.2).
 - `<html lang="en">`.
 
 ### 12.2 Contrast
@@ -927,7 +932,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 ### 12.5 Focus
 
 - `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too.
-- Focus management: route change → `#content`; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
+- Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
 - Nothing steals focus while typing or pouring.
 
 ### 12.6 Screen readers over a canvas
@@ -989,8 +994,8 @@ Still required in implementation, not resolvable in a document: axe-core in CI o
 The Game Design document owns every sound token. This document fixes what is shared:
 
 - The character brief is Game Design §5.1: bright, bouncy, melodic and playful, grounded in the burrow. It replaced the six palette words for sound on 8 October 2026.
-- Two toggles, in this order in settings: **Sounds** (effects, stings and the feast cue, default on) and **Music** (the loops, default on), followed by **Still critters** and **Simple view**. All four persist per browser.
-- Each toggle is a labelled checkbox with one sentence of help; neither is a bare speaker icon.
+- Two toggles, in this order in settings on your critter's profile: **Sounds** (effects, stings and the feast cue, default on) and **Music** (the loops, default on), followed by **Still critters**, **Simple view** while some critter has a 3D mesh (D34), and **Dark mode** (D26). Each persists per browser.
+- Each toggle is a labelled switch (a checkbox with the switch role) with one sentence of help; neither is a bare speaker icon.
 - Every sound token maps to exactly one DOM state or announcement in §12.6; the Game Design table must carry that column.
 - Under reduced motion or Still critters, effects are damped, never disabled — the user's own toggle is the only thing that disables them.
 
@@ -1008,7 +1013,7 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D6 | 3D only where feeding happens; portraits everywhere else; portraits render first and crossfade to 3D | Reading never waits for WebGL; the fallback is the default path, not an error path |
 | D7 | One canvas rendered into DOM-tracked stage rects; drei `View` is the candidate mechanism | The DOM owns layout; the Technical Spec confirms the mechanism against the performance budget |
 | D8 | cyrb53 + mulberry32, fixed draw order, `GEN_VERSION`, frozen before the rehearsal | Zero dependencies; identical output on every device; identity never changes under a code update |
-| D9 | Simple view is also a user setting | Low-end devices and preference, not only failure |
+| D9 | Simple view is also a user setting (amended by D34: offered while some critter has a 3D mesh) | Low-end devices and preference, not only failure |
 | D10 | A visible Still critters setting in addition to reduced-motion detection | WCAG 2.2.2 pause requirement for persistent motion |
 | D11 | `xs` breakpoint (< 360 px) collapses the grid to one column | 200 % zoom on small phones must reflow without horizontal scroll |
 | D12 | Statement links open in the same tab with `rel="noopener nofollow ugc"` | Predictable; user-generated links are never endorsed |
@@ -1030,6 +1035,11 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D28 | Where there is no Settings to open (the launcher, the first steps, a visitor’s header) a Music toggle sits at the top right. It shows music as on only once it can be heard, because a browser lets none play before the first press, and a press that starts the sound leaves the setting on | "Once we add music there should be a toggle" (Afolabi, 11 October 2026) |
 | D29 | The Window and Dusk scenes are painted plates, one for the phone and one for desktop: the room seen from above, its wall arching around the circle and its floor filling the rest, under the look’s wash and grain. The app raises a plate until its wall ends 8 px above the circle’s back row, so no critter stands on a wall at any screen size. Entrance is still drawn from crops | "Better background images for the gameplay that has more of a floor and wall" (Afolabi, 11 October 2026): the painted floor plate the decision of 5 October waited for. How they were painted and the rule a new one follows are in `docs/explorations/floor-plates` |
 | D30 | The first steps are five screens: the handful, the practice tap, the week (three phases and two deadlines, every statement open in a bubble beside each head), the private pods and the worked result. They open from the launcher, the invite screen and Settings, and Skip and Got it return to the screen that opened them, else the launcher | Afolabi’s review request of 3 November 2026 against *Don’t Make Me Think* and *Refactoring UI* (`docs/reviews/first-steps-2026-11`); amends D27’s four screens |
+| D31 | The connected screens are built on one frame (`PlaceScreen`, `app/place-screen.tsx`): the 64 px header with a back chevron where there is a parent, the burrow's line over the screen's title (or the wordmark where a screen has no place yet), the beta chip and your critter's face; the painted floor with critters standing on it; one sheet on the phone and the side panel on desktop, its words scrolling above actions pinned at its foot. Its kit holds a ring of critters, each awake or asleep, and a row of faces with a count and a Not yet line. The header is the game's own | Decision D1 of the November UI audit (`docs/reviews/ui-audit-2026-11`), accepted by Afolabi on 3 November 2026: the flow page's anatomy, "a header with your critter's face, the painted floor with critters on it, and one surface for the content" (design pass §23) |
+| D32 | The beta banner over every screen becomes a chip, “Beta”, beside the burrow line in every header (beside the title or the wordmark where there is none), and a line, “Beta · Testnet”, under the tagline on the launcher's plate. Both are named “Development status” and read the whole status to a screen reader | Audit decision D2: honest without taking the floor's 36 px or the place a game puts its title |
+| D33 | The first meeting is a whole screen, not a dialog: the critter large on the floor with its element chip, the line, the name with its counter, Re-roll and Keep this one pinned, no Close, and a quiet Disconnect under them that leaves the member signed out where a visitor would be. It stands over nothing; the page the member connected on comes after Keep | Audit decision D6: the one close-up a member gets of their own critter (Schell's lenses 45 and 75); the flow page's screens 7 and 8 |
+| D34 | Your critter's profile is one screen, in place of the profile and Settings dialogs, with its own address (`/your-critter`) and drawn over the screen whose face was pressed, which stays as it was beneath it; the settings are switches, and Simple view is left out while no critter has a 3D mesh | The flow page's screen 51 and audit decision D7 (Garden Spirits have no mesh, ADR 0006); amends D9. Why the screen beneath stays: `docs/decisions.md`, 2026-11-03 |
+| D35 | Names are 1 to 16 characters on every new save, display names and option names alike, and their fields count to 16 | Audit decision D10, carrying out the decision of 5 October 2026 (`docs/decisions.md`); 16 is what the circle's tags and the dock were designed around |
 
 **October adoption (2026-10-06).** D14–D24 override the earlier grid, type, control, heap and reading descriptions in §1, §3, §6 and §7 for core game screens. The generated token source is normative for Inked daylight values. Other screens inherit these tokens and keep their existing layouts.
 
@@ -1038,6 +1048,8 @@ The Game Design document owns every sound token. This document fixes what is sha
 **Painted floors (2026-10-11).** D29 replaces the cropped, mirrored floor of the core game screens with painted plates for the two scenes the game shows. The launcher’s critters are drawn about 1.4 times the flow page’s, at the height of the painting’s table (`docs/decisions.md`, 2026-10-11).
 
 **Five first steps (2026-11-03).** D30 adds the week to the first steps and a way into them from the invite screen, which is most members’ first screen (PRD F1). The first screen now defines a feast before using the word, the private screen says who cannot peek and why, and the result screen says what its table cannot: that every device adds the scatters up and that shares come from the crumbs actually given. Not yet built from the review: the page behind "Why nobody can peek" and the links to it from the waiting screen and the results (`docs/reviews/first-steps-2026-11/README.md`, build order 4 to 7).
+
+**The connected frame (2026-11-03).** D31 to D35 begin the treatment the connected screens were waiting for (*Before connecting*, above). The first meeting and your critter's profile are built on the frame; home, a burrow and its members, starting a burrow and a feast, the saved draft and gathering follow on it (`docs/reviews/ui-audit-2026-11/README.md`, build order 4 to 8), and keep their earlier layouts until then, with the beta chip beside the wordmark in their header.
 
 ### Open — confirm before implementation
 

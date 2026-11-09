@@ -1,6 +1,6 @@
 import { test, expect, type Page } from 'playwright/test';
 import { listen } from './listen.js';
-import { connectLocal, openSettings } from './session.js';
+import { connectLocal, openProfile } from './session.js';
 
 /*
  * Before connecting, as the flow page draws it (docs/explorations/app-screens: SCREENS.launch, invite, connect,
@@ -51,16 +51,17 @@ test('the launcher is a title screen: the wordmark, the tagline once, one Connec
   expect(Math.round(sheet.y + sheet.height)).toBe(812);
 });
 
-test('on desktop the painting fills the space below the beta notice and the critters gather either side of the card', async ({ page }) => {
+test('on desktop the painting fills the screen, the plate says the app is in beta, and the critters gather either side of the card', async ({ page }) => {
   for (const viewport of [{ width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 900, height: 700 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeEnabled();
     const scene = await box(page, '.launch-scene'), card = await box(page, '.launch-sheet'), plate = await box(page, '.launch-plate'), critters = await boxes(page, '.launch-scene .floor-critter'), heap = await box(page, '.launch-scene .floor-prop');
-    const notice = await box(page, '.environment-notice');
-    await expect(page.getByRole('complementary', { name: 'Development status' })).toContainText('Beta · Testnet');
+    // the banner that was over every screen is now a line on the plate (D2 of the November UI audit)
+    await expect(page.locator('.environment-notice')).toHaveCount(0);
+    await expect(page.locator('.launch-plate').getByRole('note', { name: 'Development status', exact: true })).toContainText('Beta · Testnet');
     expect(scene.x).toBe(0); expect(scene.width).toBe(viewport.width);
-    expect(scene.y).toBe(notice.y + notice.height);
+    expect(scene.y).toBe(0);
     expect(scene.y + scene.height).toBe(viewport.height);
     expect(card.width).toBe(420);
     expect(Math.abs(card.x + card.width / 2 - viewport.width / 2)).toBeLessThan(1);
@@ -227,27 +228,30 @@ test('dark follows the device until Settings chooses, and the choice is kept', a
 
   await page.emulateMedia({ colorScheme: 'dark' });
   await connectLocal(page, 1);
-  await openSettings(page);
-  const dark = page.getByRole('checkbox', { name: /^Dark mode/ });
+  let profile = await openProfile(page);
+  const dark = profile.getByRole('switch', { name: 'Dark mode', exact: true });
   await expect(dark).toBeChecked();
   await dark.uncheck();
   expect(await ground(page)).toBe(LIGHT);
+  await profile.getByRole('button', { name: 'Back', exact: true }).click();
   await page.reload();
   await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
   expect(await ground(page)).toBe(LIGHT);
   // and the other way: dark chosen on a device that is light
   await page.emulateMedia({ colorScheme: 'light' });
-  await openSettings(page);
+  profile = await openProfile(page);
   await expect(dark).not.toBeChecked();
   await dark.check();
   expect(await ground(page)).toBe(DARK);
+  // the profile has its own address, so it is still there after a reload
   await page.reload();
-  await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
+  await expect(profile).toBeVisible();
   expect(await ground(page)).toBe(DARK);
-  // Settings also leads back to the first steps
-  await openSettings(page);
-  await page.getByRole('dialog').getByRole('link', { name: 'How it works', exact: true }).click();
+  // it also leads to the first steps, which return to it
+  await profile.getByRole('link', { name: 'How it works', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(profile).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
 
@@ -259,6 +263,8 @@ test('a feast opened from a link shows the burrow, the feast, both deadlines and
     await page.goto(`/feasts/${feast.id}`);
     await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /^Rehearsal burrow · 8 critters$/ })).toBeVisible();
+    // the beta chip stands beside the burrow line, in place of the banner (Design System D32)
+    await expect(page.locator('.game-line').getByRole('note', { name: 'Development status', exact: true })).toHaveText(/^Beta/);
     await expect(page.getByText(/^Gathering closes /)).toBeVisible();
     await expect(page.getByText(/^Scattering closes /)).toBeVisible();
     await expect(page.locator('.invite-deadlines time')).toHaveCount(2);
