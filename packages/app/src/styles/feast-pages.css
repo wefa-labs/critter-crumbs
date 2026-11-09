@@ -1,0 +1,43 @@
+/* A feast's pages before scattering, on the shared frame (place-screen.tsx, screens.css): gathering, the saved draft, a
+   cancelled or void feast, joining too late, and a link that leads nowhere (gathering.tsx, feast-actions.tsx,
+   feast-states.tsx). Only what the frame does not already draw: the flow page's chip, the closes, the statement field,
+   cards and rows (docs/explorations/app-screens, SCREENS.gathering, ['gathering-options'] and draft). */
+
+.feast-page .chip { width:max-content; padding:4px 10px; font-size:var(--cc-text-xs); font-weight:700; line-height:1.5; color:var(--cc-text); }
+.feast-page .draft-chip { background:var(--cc-bg); border:1.5px dashed var(--cc-line-strong); }
+.feast-page a.pill { text-decoration:none; }
+/* the Music toggle for someone who has not connected, in the floor's corner as on the launcher */
+.floor-sound { position:absolute; top:16px; right:16px; z-index:2; }
+.feast-help { font-size:var(--cc-text-sm); line-height:1.45; color:var(--cc-text-2); }
+
+/* the sheet's first row: the phase, and both closes with their absolute times a tap away (the audit's X1, PRD §6) */
+.phase-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.close-lines { display:grid; justify-items:end; gap:2px; min-height:44px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; color:var(--cc-text-2); font-size:var(--cc-text-xs); font-weight:400; line-height:1.4; text-align:right; }
+.close-lines:active { translate:none; }
+.close-lines > span, .close-lines time { display:block; }
+.close-lines time { color:var(--cc-text); }
+
+/* writing: the field, then its count and whether it is saved on one line; an option's statement is a card */
+.feast-page .statement-editor { display:flex; flex-direction:column; gap:12px; max-width:none; margin:0; }
+.feast-page .statement-editor textarea { width:100%; min-height:200px; padding:12px 14px; border:1.5px solid var(--cc-line-strong); border-radius:16px; background:var(--cc-bg-raised); color:var(--cc-text); font-size:var(--cc-text-md); line-height:1.5; resize:vertical; }
+.feast-page .feast-card textarea { min-height:72px; }
+.statement-state { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:20px; font-size:var(--cc-text-xs); color:var(--cc-text-2); font-variant-numeric:tabular-nums; }
+.feast-card { display:grid; gap:10px; padding:16px; border:var(--cc-border-strong); border-radius:var(--cc-radius-lg); background:var(--cc-bg-sunken); box-shadow:var(--cc-shadow-1); }
+.creator-links { display:grid; justify-items:start; }
+/* the writer's critter nods from its feet when its statement saves (writer-nod.ts) */
+.feast-gathering .floor-critter .stage { transform-origin:50% 93.3%; }
+
+/* the draft's details, each a row: the name at the left, the value at the right */
+.draft-rows { display:grid; margin:0; }
+.draft-rows > div { display:flex; align-items:baseline; justify-content:space-between; gap:16px; min-height:44px; padding-block:10px; }
+.draft-rows > div + div { border-top:1px solid var(--cc-line); }
+.draft-rows dt { flex:none; margin:0; font-size:var(--cc-text-sm); font-weight:700; color:var(--cc-text); }
+.draft-rows dd { margin:0; font-size:var(--cc-text-sm); color:var(--cc-text-2); text-align:right; }
+
+/* extending gathering: the field shows the new close as the flow page writes it, and the browser's own picker while it is being changed */
+.extend-box { position:relative; display:block; }
+.extend-box[data-shown="true"] input { color:transparent; }
+.extend-shown { position:absolute; left:calc(var(--cc-space-3) + 1.5px); top:50%; translate:0 -50%; color:var(--cc-text); pointer-events:none; }
+.extend-box[data-shown="false"] .extend-shown { display:none; }
+/* forced colours paint the field's own text whatever its colour, so there it shows alone */
+@media (forced-colors:active) { .extend-shown { display:none; } }

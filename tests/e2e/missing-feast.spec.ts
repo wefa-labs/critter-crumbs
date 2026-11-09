@@ -9,6 +9,8 @@ for (const [title, id] of [['a link to a feast the store does not have says ther
   await expect(page.getByRole('heading', { name: "There's no feast at this link", exact: true })).toBeVisible();
   await expect(page.getByText('Check the link with whoever sent it.', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', '/');
+  // someone who has not connected keeps the Music toggle, in the floor's corner as on the launcher
+  await expect(page.getByRole('button', { name: 'Music', exact: true })).toBeVisible();
   await expect(page.getByText("Can't reach the burrow right now. Try again in a moment.")).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Try again', exact: true })).toHaveCount(0);
 });
