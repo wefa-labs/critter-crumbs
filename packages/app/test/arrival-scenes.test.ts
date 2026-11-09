@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { sceneCircle } from '../src/app/invite-circle.js';
 import { LEARN_SHEET_HEIGHT, LEARN_STEPS } from '../src/app/learn-steps.js';
-import { INVITE_SCENE, LAUNCHER_SCENE, MEETING_SCENE, PROFILE_SCENE, sheetScreenStyle } from '../src/app/painted-scene.js';
+import { INVITE_SCENE, LAUNCHER_SCENE, MEETING_SCENE, PROFILE_SCENE, SETUP_SCENE, sheetScreenStyle } from '../src/app/painted-scene.js';
 
 /* Expected values are read off the flow page, never off the app (docs/explorations/app-screens/index.html):
    launcherScene(), circle(), and SCREENS.invite, ['learn-handful'], ['learn-tap'] and ['learn-private']. The launcher's
@@ -125,5 +125,20 @@ describe('your critter', () => {
 
   it('stands on its profile where the flow page stands it, over a 520 px sheet', () => {
     expect(PROFILE_SCENE).toEqual({ painting: 'window', critter: { x: 50, y: 92, size: 150 }, sheetHeight: 520 });
+  });
+});
+
+describe('starting a feast', () => {
+  it('leaves a strip of the room over a 610 px sheet, you in the middle and two of the burrow turned to you', () => {
+    // SCREENS.setup: m0 at (32, 96, 64) facing right, VIEWER at (50, 98, 70), m1 at (68, 96, 64) facing left; sheetH 610
+    expect(SETUP_SCENE.painting).toBe('window');
+    expect(sheetScreenStyle(SETUP_SCENE.sheetHeight)).toEqual({ '--sheet-h': '610px', '--floor-h': 162 });
+    expect(place(SETUP_SCENE.you)).toEqual([50, 98, 70]);
+    expect(SETUP_SCENE.beside.map(spot => [...place(spot), spot.face])).toEqual([[32, 96, 64, 'right'], [68, 96, 64, 'left']]);
+  });
+
+  it('keeps the too-few frame’s two spots for a burrow of two, facing each other', () => {
+    // SCREENS['setup-few']: VIEWER at (40, 97, 70) facing right, m5 at (60, 97, 70) facing left
+    expect(SETUP_SCENE.pair.map(spot => [...place(spot), spot.face])).toEqual([[40, 97, 70, 'right'], [60, 97, 70, 'left']]);
   });
 });

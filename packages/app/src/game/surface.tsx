@@ -52,6 +52,19 @@ export function PhoneStatement({ name, element, body, empty, close }: { name: st
   );
 }
 
+/**
+ * How tall an open phone statement (a PhoneStatement inside `host`) stands with all of its text showing: the bubble's
+ * frame and heading, the text's own height and the padding under it. The text's height is its laid-out height, which
+ * the bubble's opening scale does not change; a pixel more covers the frame's measures, which the browser rounds.
+ * `text` is the element to watch for its height changing; null until the statement has rendered.
+ */
+export function measureStatement(host: HTMLElement) {
+  const bubble = host.firstElementChild, text = bubble?.querySelector<HTMLElement>('.statement-scroll > *');
+  if (!(bubble instanceof HTMLElement) || !text) return null;
+  const scroll = text.parentElement!, room = getComputedStyle(scroll), measured = getComputedStyle(text);
+  return { text, height: () => bubble.offsetHeight - scroll.offsetHeight + parseFloat(room.paddingTop) + parseFloat(room.paddingBottom) + parseFloat(measured.height) + 1 };
+}
+
 /** On desktop the side panel always holds the focused critter's statement: its name, element and "You" for your own. */
 export function PanelStatement({ name, element, own, body, empty }: { name: string; element: CritterElement | null; own: boolean; body: string | undefined; empty: string }) {
   return (
@@ -66,8 +79,11 @@ export function PanelStatement({ name, element, own, body, empty }: { name: stri
   );
 }
 
-/** The phone's results: the dock grown into a card with its heading and close icon, the list scrolling under a fade. */
-export function ResultsCard({ title, close, heading, children }: { title: string; close?: () => void; heading?: React.RefObject<HTMLHeadingElement | null>; children: ReactNode }) {
+/**
+ * The phone's results: the dock grown into a card with its heading and close icon, the list scrolling under a fade, and
+ * its actions pinned at its foot, so a long list never pushes the download below the fold (decision D9).
+ */
+export function ResultsCard({ title, close, heading, actions, children }: { title: string; close?: () => void; heading?: React.RefObject<HTMLHeadingElement | null>; actions?: ReactNode; children: ReactNode }) {
   return (
     <section className="results-card" aria-label={title}>
       <div className="results-heading">
@@ -75,6 +91,7 @@ export function ResultsCard({ title, close, heading, children }: { title: string
         {close ? <button className="icon-button statement-close" type="button" aria-label={copy['action.close']} onClick={close}><GameIcon name="close" /></button> : null}
       </div>
       <div className="results-scroll">{children}</div>
+      {actions ? <div className="results-actions">{actions}</div> : null}
     </section>
   );
 }

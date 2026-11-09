@@ -455,6 +455,7 @@ The DOM's durations are the Design System's motion tokens (§3.6). The three tha
 | The hop | `--cc-dur-2` (200 ms), `--cc-ease-hop` | Quadratic arc from the heap to the count, apex 70 px above the higher endpoint; the glyph rotates 200° in flight and fades in the last 20 % |
 | A statement expanding | `--cc-dur-3` (320 ms), `--cc-ease-in-out` | Height animates from the one-line summary; the chevron rotates 180° |
 | The done line after *Scatter these* | `--cc-dur-4` (600 ms) | The pile bar's controls crossfade out and the line fades in; nothing slides, nothing pops |
+| A touch on a critter standing on a painted floor (the launcher, the invite, every framed screen) | `CIRCLE_FEEL.stirMs` (850 ms) | The game's stir (`world/circle.ts`): the head tilts up to 18° and back and the body sways 5° either way once; a sleeper lets out three z's 130 ms apart, each rising and fading over 840 ms. Decoration only: no focus, nothing said, nothing kept, and none under reduced motion or Still critters (§3.5); a critter with its own control keeps its presses |
 
 Buttons press down 1 px (`translateY`), never scale. Hover states exist only for pointer devices. Nothing in the DOM animates on load except the two designed moments.
 

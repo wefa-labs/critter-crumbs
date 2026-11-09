@@ -1,5 +1,5 @@
 import { trait, type Entity, type World } from 'koota';
-import { CIRCLE_FEEL } from '@critter-crumbs/shared';
+import { CIRCLE_FEEL, stirPose } from '@critter-crumbs/shared';
 import { Clock, Identity, Rig, Settings } from './traits.js';
 const Facing = trait({side:1});
 const Play = trait({startedAt:0});
@@ -20,7 +20,7 @@ export function createCircleMotion(world:World,critters:readonly Entity[]){
   sleeping(entity:Entity){return entity.has(Stir);},
   isAnimating(){return world.get(Circle)!.progress<1||world.query(Stir).length>0||world.query(Play).length>0;},
   tick(){const now=world.get(Clock)!.now,state=world.get(Circle)!;const t=quiet()?1:Math.min(1,(now-state.startedAt)/CIRCLE_FEEL.turnMs);world.set(Circle,{progress:t*t*(3-2*t)});
-   for(const entity of critters){const rig=entity.get(Rig)!,stir=entity.get(Stir);if(stir){const age=now-stir.startedAt;if(age>=CIRCLE_FEEL.sleepGlyphMs)entity.remove(Stir);else if(!quiet())entity.set(Rig,{headTilt:rig.headTilt+18*Math.sin(Math.PI*Math.min(1,age/CIRCLE_FEEL.stirMs)),leanZ:rig.leanZ+5*Math.sin(age/CIRCLE_FEEL.stirMs*Math.PI*2)});}
+   for(const entity of critters){const rig=entity.get(Rig)!,stir=entity.get(Stir);if(stir){const age=now-stir.startedAt;if(age>=CIRCLE_FEEL.sleepGlyphMs)entity.remove(Stir);else if(!quiet()){const pose=stirPose(age);entity.set(Rig,{headTilt:rig.headTilt+pose.headTilt,leanZ:rig.leanZ+pose.lean});}}
     const play=entity.get(Play);if(play){const age=now-play.startedAt;if(age>=CIRCLE_FEEL.playMs||quiet())entity.remove(Play);else entity.set(Rig,{liftY:rig.liftY+6/46*Math.sin(Math.PI*age/CIRCLE_FEEL.playMs)});}
     if(state.huddle&&!quiet()){const seed=entity.get(Identity)!.parameters.idlePhase,period=CIRCLE_FEEL.playEveryMs[0]+seed*(CIRCLE_FEEL.playEveryMs[1]-CIRCLE_FEEL.playEveryMs[0]),age=(now+seed*period)%period;if(age<CIRCLE_FEEL.playMs)entity.set(Rig,{liftY:rig.liftY+6/46*Math.sin(Math.PI*age/CIRCLE_FEEL.playMs),headTilt:rig.headTilt+5*Math.sin(age/CIRCLE_FEEL.playMs*Math.PI*2)});}
    }

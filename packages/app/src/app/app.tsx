@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ApiClientError, createApiClient, type AccountOption, type AccountProvider } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, ValidationError } from '@critter-crumbs/shared';
 import { browserSettings, MUSIC_SETTING, saveSetting, type StoredSetting } from '../sim/settings.js';
@@ -9,6 +9,7 @@ import { Announcements } from './announcements.js';
 import { ConnectSheet } from './connect.js';
 import { Launcher } from './launcher.js';
 import { MusicButton } from './music-button.js';
+import { appNotices, NoticeProvider } from './notices.js';
 import { createPressWatch } from './music-choice.js';
 import { screenMusic } from './screen-music.js';
 import { readDarkChoice, saveDarkChoice, showDarkChoice } from './theme.js';
@@ -21,6 +22,7 @@ const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.Set
 const HomeRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Home})));
 const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
 const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
+const BurrowCrittersRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.BurrowCritters})));
 const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
 const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
 import { returnPath } from './learn-return.js';
@@ -31,8 +33,10 @@ type Choice = { provider: AccountProvider; option: AccountOption };
 function message(error: unknown, fallback: CopyId = 'err.generic') { return error instanceof ApiClientError || error instanceof ValidationError ? copy[error.copyId].replace(/\{[^}]+\}/g, '…') : copy[fallback]; }
 export function App() {
   const [alert, setAlert] = useState(''), [announcement, announce] = useState('');
+  /* how many minutes the device's clock is off, once a response has shown it: said once, and kept in view (notices.tsx) */
+  const [skew, setSkew] = useState<number | null>(null);
   const [services] = useState(() => {
-    const api = createApiClient({ onClockSkew: (_id, milliseconds) => announce(formatCopy('err.clockSkew', { minutes: Math.round(milliseconds / 60000) })) });
+    const api = createApiClient({ onClockSkew: (_id, milliseconds) => { const minutes = Math.round(milliseconds / 60000); setSkew(minutes); announce(formatCopy('err.clockSkew', { minutes })); } });
     const preferences = browserSettings(window);
     const audio = createAudio(preferences.settings);
     return { api, session: createSession(api), preferences, audio, pressWatch: createPressWatch(audio.running) };
@@ -120,7 +124,7 @@ export function App() {
   const profileOpen = path === '/your-critter', screen = profileOpen ? under : path;
   const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(screen);
   const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(screen);
-  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen);
+  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen), critters = /^\/burrows\/([^/]+)\/critters$/.exec(screen);
   /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
   const meetingShown = me !== null && meetingFor === me.address;
@@ -129,16 +133,19 @@ export function App() {
   const musicButton = <MusicButton on={settings.music} sounding={sounding} soundAtPress={pressWatch.soundAtPress} choose={value => chooseSetting(MUSIC_SETTING, value)} />;
   /* the launcher says its own trouble, in its sheet */
   const launching = state.ready && !feastRoute && screen !== '/how-it-works' && !me;
+  /* the notices that stand while their cause lasts, at the head of each screen's sheet (notices.tsx) */
+  const notices = useMemo(() => appNotices(skew, me?.warning), [skew, me?.warning]);
   /* each screen's music; a feast's pages name their own, and loading leaves playing whatever was */
   let content, music: MusicTrack | undefined;
   if (!state.ready) content = <Opening bare />;
   else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={openProfile} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={screen} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
   else if (screen === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
-  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
-  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute api={api} session={session} run={run} busy={working} /></Suspense>; }
-  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
-  else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} /></Suspense>; }
+  else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} me={me} onProfile={openProfile} run={run} busy={working} /></Suspense>; }
+  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><CreateBurrowRoute me={me} api={api} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else if (critters) { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><BurrowCrittersRoute key={screen} id={critters[1]!} api={api} me={me} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else { music = screenMusic.home; content = <Suspense fallback={<Opening bare />}><HomeRoute me={me} api={api} onProfile={openProfile} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
   const layer = !me ? null
@@ -154,15 +161,17 @@ export function App() {
     if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
     setOpener(null);
   }, [layered, opener]);
-  return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={!launching} announcement={announcement} clearAnnouncement={announce}>
+  /* offline is said at once (Design System §12.6) and shown by the band, so its alert is read but not shown again */
+  const alertSeen = !launching && (online || alert !== copy['err.offline']);
+  return <AudioProvider value={audio}><Announcements alert={alert} alertSeen={alertSeen} announcement={announcement} clearAnnouncement={announce}><NoticeProvider notices={notices}>
     <a href="#content" className="skip-link" inert={layered}>{copy['skip.content']}</a>
     <header className="app-header" inert={layered}><div className="screen-mark"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><BetaChip /></div><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
     </nav><div id="feast-header" /></header>
-    {!online && !launching ? <p className="notice">{copy['err.offline']}</p> : null}
+    {!online && !launching ? <p className="offline-band">{copy['err.offline']}</p> : null}
     <main id="content" tabIndex={-1} inert={layered}>{beneath ? content : null}</main>
     {layered ? <div className="screen-layer">{layer}</div> : null}
     {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} /> : null}
-  </Announcements></AudioProvider>;
+  </NoticeProvider></Announcements></AudioProvider>;
 }

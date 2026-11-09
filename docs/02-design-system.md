@@ -376,7 +376,7 @@ Portraits are `role="img"` with the critter's name as `<title>` when they stand 
 
 ```
 ┌─────────────────────────────────────────┐
-│ ◆ Burrow name        Gathering · Scatt. │  <header>  top bar: burrow, phase chip, deadline strip
+│ ◆ Burrow name                   (face) │  <header>  burrow line, title, your critter's face (D31)
 ├─────────────────────────────────────────┤
 │                                         │  <main>    content column / critter grid
 │                                         │
@@ -386,7 +386,7 @@ Portraits are `role="img"` with the critter's name as `<title>` when they stand 
 └─────────────────────────────────────────┘
 ```
 
-- `<header>` holds the burrow name (display face), the phase chip, and the **deadline strip**: both deadlines, always, in the viewer's local time, each tappable to reveal the absolute time (§8, `DeadlineStrip`). On `xs`/`base` the strip wraps to its own line.
+- `<header>` on a screen with a floor is the frame's (D31): the burrow line over the title, and your critter's face. While gathering, a feast's phase and both closes are the first row of its sheet, their absolute times a tap away (§8, `Closes`); the game's screens carry the scattering close in their header and dock.
 - `<main id="content" tabindex="-1">` receives focus on every route change. A skip link precedes the header. A screen drawn over the rest (the first meeting, your critter's profile, D33 and D34) stands outside `<main>`, which is inert beneath it with the header and the skip link, and takes the focus itself; closing the profile returns the focus to the face that opened it.
 - The pile bar is `position: sticky; bottom: 0` on `xs`–`md`, height 64 px + `env(safe-area-inset-bottom)`, with `--cc-shadow-up`; on `lg`+ it becomes a `position: sticky; top: var(--cc-space-6)` rail to the right of the grid.
 - Viewport height uses `dvh` where it matters (the feast's centred layout), never `vh`.
@@ -440,9 +440,9 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | Component | Purpose | Anatomy | States | Accessibility notes |
 |---|---|---|---|---|
 | `AppShell` | Page frame | skip link, `<header>`, `<main>`, `<aside>` (pile), announcers | — | Two live regions: `#announce` (polite) and `#alert` (assertive), atomic |
-| `TopBar` | Burrow + phase + deadlines | burrow name, `PhaseChip`, `DeadlineStrip`, settings button | — | `<header>`; burrow name is not a heading |
+| `ScreenHeader` | Where you are | back chevron where there is a parent, the burrow line over the title (or the wordmark), the beta chip, your critter's face | — | `<header>`; the burrow line is a link, not a heading; the title is the screen's `<h1>` (D31) |
 | `PhaseChip` | Current phase | text chip | draft / gathering / scattering / feast | Text, not colour alone |
-| `DeadlineStrip` | Both deadlines, unmissable | two `DeadlineItem`s | upcoming / closing-soon (< 6 h) / closed | Each item is a `<button aria-expanded>` that reveals the absolute time; relative time refreshes every minute, silently (`aria-live="off"`) |
+| `Closes` | Both deadlines while gathering, in the first row of the sheet beside the `PhaseChip` | the gathering close over the scattering close, each relative | upcoming / closing-soon (< 6 h) / closed; open shows each absolute time under it | One `<button aria-expanded>`; relative time refreshes every minute, silently (`aria-live="off"`) |
 | `ConnectButton` | Enter the app | primary button | default / loading; after connecting, the shared critter-face control opens profile navigation | Label is "Connect", never mentions a wallet (PRD §3) |
 | `CritterCell` | A critter in the grid | stage, name row, statement line, controls row | asleep / awake / own / done (viewer has submitted) / fed levels (results) | The cell is a `<li>`; the stage is `aria-hidden`; the name row carries the accessible summary (§12.6) |
 | `ScatterControls` | Give and take crumbs | `−` button, `NumberField`, `+` button | default / at-zero-remaining (`+` aria-disabled) / at-zero-here (`−` aria-disabled) / pouring | 44 × 44 targets; tap-and-hold on both; accessible names "Give a crumb to Fern" / "Take a crumb back from Fern" |
@@ -452,20 +452,22 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `Heap` | The signature (§7.4) | SVG mound of crumb glyphs | full → empty (24 → 0 visible crumbs) | `aria-hidden`; the count carries the meaning |
 | `SubmitScatter` | Finalise | primary button | aria-disabled until the pile is empty / loading (signing, saving) / done | Helper text explains why it is not yet available |
 | `ParticipationLine` | Who has (not) scattered / written | count + names | live | Text list; portraits decorative; refreshes politely at most once a minute |
-| `StatementEditor` | Write your statement | label, prompt, `<textarea>`, counter, save | empty / editing / saved / over-limit (blocked at 2,000) | `field-sizing: content` with `min-block-size: 6lh; max-block-size: 24lh`, fixed width; counter is `aria-live="off"` text; over-limit announced politely once |
+| `StatementEditor` | Write your statement | heading, the prompt above the field, `<textarea>`, the counter and the saved state on one line, save; an option's is a card | empty / editing / saved / over-limit (blocked at 2,000) | `field-sizing: content` with `min-block-size: 6lh; max-block-size: 24lh` (your own starts at 200 px, an option's card at three lines, as the flow page draws them), fixed width; counter is `aria-live="off"` text; over-limit announced politely once |
 | `StatementCard` | Read pass card | portrait, name, statement, links | default / empty | `<article aria-labelledby>`; links `rel="noopener nofollow ugc"`, same tab |
 | `StatementText` | Plain text renderer | paragraphs from line breaks, URLs → links | — | Never injects HTML; auto-link only `http(s)://`; visible URL truncated at 48 chars, full in `title` |
 | `Carousel` | Read pass container | list, position, prev/next | — | §6.4 |
 | `ResultsTable` | Totals and shares | `<table>` with `<caption>` | default / tie rows | `<th scope="col">`; numbers tabular; share as percentage to one decimal in the UI (CSV carries full precision) |
 | `GiverMatrix` | Who gave what | table, sticky first column | — | Only when individual scatters are open; caption states that |
 | `CsvButton` | Export | secondary button with `download` icon | default / loading | Filename `feast-{slug}-results.csv` |
-| `PrivacyControls` | Two switches | aggregate segmented control, individual switch, explainer | the two switches are independent; every combination is valid (PRD P14) | No forced or disabled state: each switch stands alone and the explainer describes what the current pair means |
+| `PrivacyControls` | Two choices | the result (Public, or Burrow only) and who gave what (Closed, or Open to the burrow after the feast), each a `SegmentedControl` of two cards | the two are independent; every combination is valid (PRD P14) | No forced or disabled state; each card says what it means, so no explainer follows them |
 | `Switch` | On/off | `<button role="switch" aria-checked>` | on / off | Track `--cc-line-strong` off, `--cc-moss` on, thumb Surface; 3 : 1 in both states |
-| `SegmentedControl` | One of two/three | `<fieldset>` of radios styled as segments | — | Native radios; visible legend |
-| `DeadlinePicker` | Pick a time | `<input type="datetime-local">` + time-zone line | default / invalid (order violated) | Native picker; the time-zone line names the viewer's zone explicitly |
+| `SegmentedControl` | One of two/three | `<fieldset>` of radios, each drawn as a card side by side; the feast type's two carry a line under their name | checked (Sunken, hard shadow) / focus-visible on the card | Native radios, unseen, each covering its card; visible legend; the card's name names its radio and its line describes it; arrow keys move the choice |
+| `DeadlinePicker` | Pick a time | on Start a feast, the absolute time (§8, "Wed 7 Oct, 18:00 (PDT)") in the field, over an `<input type="datetime-local">`, and the time-zone line under the pair; the extend dialog keeps the bare native picker, with the zone by its IANA id, until it moves to the frame | default / focused (the platform's own text) / invalid (order violated) | Native picker, whose own text shows while it has the focus, and alone in forced colours; on Start a feast the time-zone line names the viewer's zone and its short form when scattering closes ("Pacific Time (PDT)") |
+| `CrumbStepper` | Crumbs per critter at setup | `−` button, number field, `+` button, the help line | default / at 10 (`−` aria-disabled) / at 1,000 (`+` aria-disabled) | The game's 44 px icon buttons, "Fewer crumbs" and "More crumbs", move to the next ten and announce it (`setup.crumbs.announce`), and do nothing at their bound; the field is a native `<input type="number">` (10 to 1,000) named by its label, described by the help line, and drawn as the bold count until it has the focus |
 | `Button` | Primary / secondary / quiet | `<button>` | all | Primary: Burrow on Oat; secondary: Surface with strong border; quiet: text-only Soil, underlined on hover/focus |
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
+| `ScreenNotices` | Notices that stand on a screen (`app/notices.tsx`) | at the head of each framed screen's sheet and the invite's, the flow page's stack (screen 53): the device's clock (cloud), then ENS names not looked up (cloud); over the top of the game's floor, only the game's own (the simple view, leaf, with Try 3D again) | clock / names / simple view | Each is said once through the polite announcer as it arrives; the stack itself is not a live region. A development server's own clock move does not count as the device's clock being off |
 | `Sheet` / `Dialog` | Confirmations, connection | native `<dialog>` opened with `showModal()`; stable header, scrolling body, reserved feedback area, and action footer | loading / choices / waiting / error retain their outer frame | No hand-rolled focus trap; Esc closes unless busy; focus returns to the opener. Bottom sheet on phone; centred card on desktop. One way out (decision of 2026-11-03): the foot's Cancel, or Back where the dialog's action is itself a cancellation, as a text button left of the primary action; the heading carries a Close only where the foot has no way out |
 | `ProfileNavigation` | Identity and settings | the same 44 px critter-face button in page and game headers opens your critter's profile, a screen with its own address drawn over the one the face was pressed on (D34) | the profile | Copy address, the settings as switches, How it works, Disconnect; its back chevron, Escape and the browser's Back return to the screen beneath, with the focus on the face |
 | `Notification` | Confirm discrete actions | leaf, outcome text, dismiss control; inside the active dialog when one is open | success / dismissed | One polite announcement; no focus theft. Visible for six seconds, paused while hovered/focused; repeated actions replace the message and restart its lifetime. Errors stay visible; scatter-count announcements do not become toasts |
@@ -476,8 +478,8 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `FeastList` | Past and current feasts | list with phase chips and dates | empty | Cancelled feasts are listed, labelled |
 | `EmptyState` | Nothing here yet | portrait (asleep), title, body, one action | — | §9 |
 | `Skeleton` | Loading | Oat/Sunken shimmer blocks | — | `aria-hidden`; not announced |
-| `OfflineNotice` | Network state | banner | offline / back | Assertive on offline, polite on return |
-| `FallbackNotice` | Simple view is on | one line + retry link | initial / mid-session | §11 |
+| `OfflineNotice` | Network state | the flow page's ink band under the 64 px header (screen 52), over the top of the screen; light in the dark look, as the game's toast | offline / back | Assertive on offline, polite on return; the band shows it, so the alert is read and not shown a second time |
+| `FallbackNotice` | Simple view is on | one line + retry link, on the `ScreenNotices` stack over the game's floor | initial / mid-session | §11 |
 
 ### 7.2 Canvas components
 
@@ -509,7 +511,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 ## 8. Time and deadlines
 
 - Relative first, absolute one tap away: "Gathering closes in 2 days" · tap → "Tue 14 Oct, 18:00 (BST)". Relative strings come from `Intl.RelativeTimeFormat`; absolute from `Intl.DateTimeFormat` with `timeZoneName: "short"` in the viewer's zone.
-- Both deadlines are always visible in the top bar during gathering and scattering; the past one is shown as "closed {relative}" so the timeline stays legible. A cancelled or void feast shows neither.
+- While gathering, the sheet's first row carries the phase chip and both closes, the next one first, their absolute times a tap away, and the header only the burrow line, the title and your face (the November UI audit's X1); the saved draft lists both closes as rows, and the invite both deadlines. While scattering, the game's header and dock carry the scattering close. A past deadline reads "closed {relative}". A cancelled or void feast shows neither.
 - "Closing soon" (< 6 h) replaces the next deadline's line with `deadline.soon`, said once rather than beside it; the later deadline keeps its own line so the two stay apart. It adds the `clock` icon; never colour alone.
 - Countdown text refreshes every minute with `aria-live="off"`; deadlines are never announced spontaneously.
 - All times come from the trusted timestamp (PRD R13). If the device clock disagrees by more than 5 minutes, `err.clockSkew` shows once per session as a polite notice.
@@ -519,37 +521,49 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Screen / state | What shows | Copy (§10) |
 |---|---|---|
 | Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark, the tagline and the beta line on a plate (D32), four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `app.environment.*`, `action.connect`, `launch.learn` |
-| Arrive by a link, not connected | Header with the burrow line, the beta chip and the feast title; the feast’s critters asleep in a ring on the painted floor, with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
+| Arrive by a link, not connected | Header with the burrow line, the beta chip and the feast title; the feast’s critters asleep in a ring on the window plate the game stands its circle on, raised as the game raises it so they stand on the floor (the November UI audit, screen 2), with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
 | First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen and your critter's profile: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*` |
 | Meet your critter (first connect) | A whole screen (D33): the wordmark and the beta chip in the header; the critter large on the painted floor; in the sheet the title with the element chip, the line, the name field with its 16-character counter when there is no ENS name (the ENS name otherwise), and Re-roll and Keep this one pinned at the foot, with Disconnect as a quiet link under them. No Close: Keep is the way past it, and saves the name and the lock in one update; Disconnect signs out as the profile does and leaves the member where a signed-out visitor would be, on the launcher or, from a feast's link, its invite. Rerolls keep the draft name; the fourth locks on the server and the screen stays until Keep. The page the member connected on, a feast from its link, comes after | `critter.*`, `name.*`, `action.disconnect` |
 | A kept critter with no name (no ENS) | The same screen asking only for the name: the critter smaller and asleep, `name.title`, `name.help`, the field with its counter, Save name, and the same Disconnect under it | `name.*`, `action.disconnect` |
 | Your critter (the profile) | One screen in place of the profile and Settings dialogs (D34), over the screen whose face was pressed, which stays as it was beneath it: a back chevron and “Your critter” in the header; the critter on the floor under its element chip; the name and `critter.locked`; the short address with Copy address; Settings as switches (Sounds, Music, Still critters, Dark mode; Simple view only while some critter has a 3D mesh); How it works and Disconnect at the foot. The chevron, Escape and the browser’s Back return to the screen beneath | `profile.*`, `settings.title`, `sound.*`, `motion.*`, `view.*`, `critter.locked`, `launch.learn`, `action.disconnect` |
-| Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
-| Burrow, only you | Member list with one row; add-critter field focused | `burrow.empty.*` |
-| Burrow, no feasts | Feast list empty state | `burrow.feasts.empty.*` |
-| Feast draft (creator) | Setup form with a "Draft — only you can see this" chip | `setup.draft.chip` |
-| Gathering, statement empty | Editor with the prompt; counter at 0 / 2,000 | `gathering.prompt` |
-| Gathering, options feast (creator) | One editor per option, in a list | `gathering.options.title` |
-| Gathering, member view of others | Participation line only; no statements | `gathering.hidden`, `gathering.participation` |
+| Home (your burrows) | On the frame (D31), with the wordmark: your critter at the burrow's entrance; each burrow a card that opens it, with three of its critters' faces, its name, how many critters with the phase of its feast under way, and when that closes in words ("Scattering closes in 2 days"), or `home.noDeadline`; Start a burrow at the foot | `home.*`, `phase.*`, `deadline.*` |
+| Home, no burrows | Your critter asleep at the entrance, a "z" over its head; the title, the line, and Start a burrow as the one action | `home.empty.*` |
+| Start a burrow | A back chevron home; your critter at the entrance; the name and the line under it; Cancel and Create burrow at the foot. The new burrow opens on its own page | `burrow.create.*`, `burrow.name.label`, `action.cancel` |
+| Joining a burrow (added, not yet joined) | A back chevron home and the burrow's name; its critters on the floor, those not yet joined asleep; Ready to join; faces and how many; one gold Join this burrow. The flow page's line naming who added you waits for the burrow's view to say who did | `burrow.preAdded`, `burrow.join`, `home.critterCount` |
+| A burrow | A back chevron home and the burrow's name; its critters on its floor, you at their right (its entrance until its first feast, the room after, drafts not counting); each feast under way as a card, the one closing next first: its title and phase, its close line, who has done this phase's part with their faces (PRD R5 and P3), and one action for the phase, gold on the card that closes next (Scatter crumbs for those taking part; your statement, or the option statements for an options feast's creator); the other feasts as rows with their day and a chip; a Critters card; Copy burrow link and Start a feast at the foot, Start a feast gold when no feast is under way | `burrow.*`, `phase.*`, `deadline.line`, `scatter.participation`, `gathering.participation`, `scatter.title`, `gathering.yours.title`, `gathering.options.title` |
+| Who has scattered | While scattering, the count on the feast's card opens a sheet: the count as its title, those who have scattered by name with you marked, those who have not yet with their faces dimmed in one line, and Close | `scatter.participation`, `scatter.notYet`, `burrow.members.you`, `action.close` |
+| Burrow, only you | Your critter at the entrance; the title and the line; the add field, focused; Copy burrow link; the empty card, whose Start a feast is soft until more critters join | `burrow.empty.*`, `burrow.add.*` |
+| Burrow, no feasts | The empty card holds the gold Start a feast; the Critters card; Copy burrow link at the foot | `burrow.feasts.empty.*` |
+| The burrow's critters | A screen of its own behind the Critters card, with a back chevron to the burrow: the add field; each member's face, name and short address (§5.5), you first and marked, Ready to join under a member not yet joined; Remove as a quiet link, for the creator only; the past members; the membership history; Leave this burrow last; Copy burrow link at the foot. Removing and leaving each ask first, with Cancel as the way out | `burrow.*`, `burrow.removals.*` |
+| Start a feast (creator) | On the frame (D31): a back chevron and the burrow's line over the title; a strip of the room with you awake in the middle and two of the burrow either side; in the sheet the "Draft — only you can see this" chip, the title, the line for the invite, the type as two cards, for options a card for each (the name with its 16-character counter, the line, Remove option) and Add an option, crumbs per critter as a stepper, both deadlines with the absolute time in the field and the time-zone line, and the result and who gave what as two-card choices; Cancel and Save draft pinned at the foot, with a refused save's reason beside them | `setup.*` |
+| Start a feast, too few critters | A people feast in a burrow of fewer than three: Save draft is held, with the reason beside it (PRD R6); the pair face each other on the floor. An options feast saves | `setup.min.people` |
+| Feast draft (creator) | On the frame (the November UI audit's screen 26): a back chevron, the burrow line and the title; a strip of floor with your critter between two of the feast's; the "Draft — only you can see this" chip, `setup.saved` as a leaf notice, every detail as a row with both closes, `setup.saved.help`, and Cancel this feast beside Open the feast at the foot. An options draft's statements follow the rows. Once the draft's gathering deadline has passed, `setup.open.late` takes the place of `setup.saved` and Open is left out | `setup.draft.chip`, `setup.saved`, `setup.saved.help`, `setup.open.*` |
+| Gathering (people) | On the frame (screens 28 and 29): the burrow line, the title and your face in the header, nothing else; the burrow's critters in two rows on the floor, those who have written awake and the rest asleep; the sheet's first row the phase chip and both closes, their absolute times a tap away; Your statement with the prompt above the field, the counter (0 / 2,000 when empty) and `gathering.saved` on one line, `gathering.hidden` once as a leaf notice, and the gold Save; the notes card with Copy prompt; how many have written, with faces and `gathering.notYet`; the creator's Extend and Cancel as quiet links. Your critter smiles and nods when your statement saves, and only smiles under Still critters | `gathering.*`, `phase.gathering`, `deadline.*` |
+| Gathering, options feast (creator) | Each option a card with its field, its counter and `gathering.saved`, or Save until it is saved; one help line above the cards and `gathering.hidden` once under them; the options' critters asleep on the floor (screen 30) | `gathering.options.title`, `setup.type.options.help` |
+| Gathering, member view of others | No statements: how many are written, with faces and who has not yet. A member of an options feast, who writes nothing, gets no notes card (QA lifecycle-10) | `gathering.hidden`, `gathering.participation`, `gathering.notYet` |
 | Scattering opens (first visit) | The reveal moment (Game Design), then `reveal.*` and the read pass | `reveal.*` |
+| Reading a statement on the phone | A thought bubble across the top of the floor, as tall as its text up to 378 px, past which the text scrolls inside it; a short statement leaves more of the floor in view, and the trail of puffs rises to the bubble's foot (audit decision D8) | `read.*` |
 | Read pass, critter without statement | Card with portrait and `read.noStatement` | `read.noStatement` |
 | Scatter pass, nobody has scattered | Participation "0 of 8 have scattered" | `scatter.participation` |
 | Scatter pass, own critter | Cell asleep with `scatter.own.*` instead of controls | `scatter.own.*` |
 | After scattering | The done line in the pile bar; controls stay live | `scatter.done.*` |
-| Scattering closed, feast not yet computed | Waiting screen with critters asleep in `dusk` | `feast.waiting.*`, `feast.keyNotYet` |
+| Scattering closed, feast not yet computed | Waiting screen with critters asleep in `dusk`; the sheet counts who has scattered (“7 of 8 have scattered”) while the feast is laid out and while the key is not out | `feast.waiting.*`, `feast.keyNotYet`, `scatter.participation` |
 | The feast | Sequence, then results | `feast.*` |
+| Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9) | `feast.replay`, `results.export.*` |
 | Results, nobody scattered | Grid unchanged, table empty, `results.nobody` | `results.nobody` |
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
 | Results, tie | Tied rows share a line under the table | `results.tie` |
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
-| Simple view (fallback or chosen) | Portraits in stages; one notice line. Its switch is on your critter's profile only while some critter has a 3D mesh (D34) | `fallback.*` |
-| Offline | Banner; controls stay usable; submit shows why it waits | `err.offline` |
-| A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
-| Not in the burrow | Burrow name and the ask-a-member line | `burrow.unknown.*` |
-| A link to no feast (the store has no such feast, or the link was cut short in copying) | Heading, the check-the-link line and Back; no Try again, since trying again cannot help | `feast.missing.*` |
-| Feast cancelled | Listed in past feasts with a "Cancelled" chip | `feast.cancelled` |
-| People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
+| Simple view (fallback or chosen) | Portraits in stages; one notice line, a leaf with Try 3D again over the top of the game's floor (`ScreenNotices`). Its switch is on your critter's profile only while some critter has a 3D mesh (D34) | `fallback.*` |
+| Offline | The ink band under the header (flow page, screen 52); controls stay usable; submit shows why it waits | `err.offline` |
+| The device's clock is off, or ENS names could not be looked up | Cloud notices at the head of the screen's sheet, the clock first (flow page, screen 53), each said once: the clock line for the rest of the session, as the clock is checked once a session; the names line while the profile carries the warning | `err.clockSkew`, `err.ensUnavailable` |
+| A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Your critter asleep at the entrance, as on an empty home; the heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
+| Not in the burrow | The burrow's name in the header; you at its entrance; the ask-a-member line; your short address with Copy your address, the one thing to do next; Back. From a feast's link, the same frame with the burrow's name as the title and your critter on the floor (screen 22) | `burrow.unknown.*`, `profile.address.copy` |
+| A link to no feast (the store has no such feast, or the link was cut short in copying) | The frame with the wordmark in the header and a critter asleep on the floor, yours once you have connected; the heading, the check-the-link line and Back; no Try again, since trying again cannot help | `feast.missing.*` |
+| Feast cancelled | A row under the burrow's feasts with a "Cancelled" chip; its own page is the frame with its critters asleep, the chip, what the feast was for, and Back | `feast.cancelled` |
+| People feast below three critters at scattering open | Feast ends; its row on the burrow carries the line as a leaf notice, under its "Ended before scattering" chip; its own page is the frame with its critters asleep and `feast.tooFew` as a leaf notice, with no deadline left to count down (QA edge-states-15) | `feast.tooFew`, `phase.void` |
+| Joined too late (added after scattering opened) | The frame with the feast's critters in their ring and yours at the edge of the floor; `err.notParticipant` as a leaf notice before anything invites reading or scattering (screen 33, QA edge-states-07); how many have scattered, with their faces; Back to the burrow | `err.notParticipant`, `scatter.participation` |
 
 First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen and on your critter's profile. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
 
@@ -650,10 +664,13 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `burrow.create.title` | Start a burrow |
 | `burrow.name.label` | Burrow name |
 | `burrow.create.cta` | Create burrow |
+| `burrow.create.help` | Then add critters by address or ENS name, and share the burrow link. |
 | `burrow.members.title` | Critters |
+| `burrow.members.you` | {name} (you) |
 | `burrow.empty.title` | Just you so far |
 | `burrow.empty.body` | Add critters by address or ENS name. They get in with the burrow link. |
 | `burrow.add.label` | Address or ENS name |
+| `burrow.add.placeholder` | sorrel.eth |
 | `burrow.add.cta` | Add |
 | `burrow.add.done` | {name} added. |
 | `burrow.link.copy` | Copy burrow link |
@@ -668,6 +685,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `burrow.leave.cta` | Leave burrow |
 | `burrow.unknown.title` | This burrow doesn't know you yet |
 | `burrow.unknown.body` | Ask someone in {burrowName} to add {shortAddress}. |
+| `burrow.unknown.copy` | Copy your address |
 | `burrow.missing.title` | There's no burrow at this link |
 | `burrow.missing.body` | Check the link with whoever sent it. |
 | `feast.cancelled` | Cancelled |
@@ -695,9 +713,13 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.option.statement` | What this option is |
 | `setup.field.crumbs` | Crumbs per critter |
 | `setup.crumbs.help` | 100 keeps the maths simple. Anything from 10 to 1,000. |
+| `setup.crumbs.fewer` | Fewer crumbs (the stepper's −, ten fewer) |
+| `setup.crumbs.more` | More crumbs (the stepper's +, ten more) |
+| `setup.crumbs.announce` | {n} crumbs per critter (said politely after each − or +) |
 | `setup.field.gathering` | Gathering closes |
 | `setup.field.scattering` | Scattering closes |
 | `setup.deadline.help` | Everyone sees these in their own time zone. Yours is {tz}. |
+| `setup.deadline.zone` | {zone} ({tz}) (the time zone in `setup.deadline.help`: its name and short form, "Pacific Time (PDT)") |
 | `setup.deadline.order` | Scattering has to close after gathering. |
 | `setup.deadline.past` | That gathering deadline has already passed. Choose a later time. |
 | `setup.title.missing` | The feast needs a title, up to 80 characters. |
@@ -710,7 +732,6 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.privacy.individual.label` | Who gave what |
 | `setup.privacy.individual.closed` | Closed — nobody sees individual scatters |
 | `setup.privacy.individual.open` | Open to the burrow after the feast |
-| `setup.privacy.individual.burrow` | Your burrow sees who gave what. Nothing goes public. |
 | `setup.min.people` | A people feast needs at least 3 critters. This burrow has {n}. |
 | `setup.save` | Save draft |
 | `setup.open` | Open the feast |
@@ -730,7 +751,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `gathering.save` | Save statement |
 | `gathering.saved` | Saved. |
 | `gathering.closed` | Gathering closed before your latest words were saved. Anything you saved earlier still stands. (A statement saved too late, and words left unsaved when gathering closes.) |
-| `gathering.hidden` | Nobody sees this until scattering opens. |
+| `gathering.hidden` | Nobody else in the burrow sees this until scattering opens. (Statements are not secret from the host, Technical Spec §2.) |
 | `gathering.participation` | {written} of {total} statements written |
 | `gathering.notYet` | Not yet: {names} |
 | `gathering.options.title` | Option statements |
@@ -923,6 +944,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Everywhere | Tab / Shift+Tab | Visual order: header → main → pile bar. Never a positive `tabindex` |
 | `+` / `−` buttons | Enter, Space | One crumb. Holding the key pours with the same curve as pointer hold: start on `keydown` (ignoring repeats), stop on `keyup` |
 | `NumberField` | Digits; ↑/↓ ±1; Shift+↑/↓ ±10; Enter commits; Esc reverts | Clamped to `[0, current + remaining]` |
+| `CrumbStepper` (setup) | Enter, Space on `−` / `+`; digits and ↑/↓ in the field | The buttons move to the next ten; the field takes any whole number from 10 to 1,000 and steps by one |
 | `StatementLine` (`<details>`) | Enter, Space on the summary | Expand / collapse in place |
 | Read pass list | ←/→, Home/End; Tab reaches links inside the card | Snap position follows; focus does not move on snap |
 | Dialogs | Esc | Closes; focus returns to the opener (native `<dialog>`) |
@@ -952,6 +974,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Phase closed while on screen | polite | `scatter.closed` | Once |
 | Simple view engaged mid-session | polite | `fallback.midSession` | Once |
 | Re-roll | polite | `critter.reroll.announce` | Each re-roll |
+| Crumbs per critter stepped at setup | polite | `setup.crumbs.announce` | Each press of − or + that moves it |
 | Loading, saving, countdown ticks | none | — | Never announced |
 
 - Results are a `<table>` with `<caption>`; the feast is summarised in one sentence. Sound never carries state alone (PRD §9): every cue in the Game Design document maps to one of the DOM states above.
