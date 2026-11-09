@@ -28,7 +28,7 @@ let records:LocalResultTransaction[]=[];
 try { records=JSON.parse(await readFile(resultPath,'utf8')) as LocalResultTransaction[]; } catch(error) { if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error; }
 const localChain=createLocalResultChain({clock:clock.now,records,save:async value=>{const temporary=resultPath+'.pending';await writeFile(temporary,JSON.stringify(value),{mode:0o600});await rename(temporary,resultPath);}});
 const api = createApi({ db: data.db, clock: clock.now, sessionSecret: data.sessionSecret, timelock, eas, resultReader:localChain.reader, ...(ens ? { ens } : {}), origin: process.env.APP_ORIGIN || 'http://127.0.0.1:5173',
-  dev: { recordTransaction:localChain.send, enabled: parseDevEndpointsEnabled(process.env.DEV_ENDPOINTS_ENABLED), production: false, mode: 'mock', setTime: clock.setTime, releaseKey: timelock.release } });
+  dev: { recordTransaction:localChain.send, enabled: parseDevEndpointsEnabled(process.env.DEV_ENDPOINTS_ENABLED), production: false, mode: 'mock', setTime: clock.setTime, clockOffset: clock.offset, releaseKey: timelock.release } });
 const port = Number(process.env.LOCAL_API_PORT || '3000');
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('LOCAL_API_PORT must be between 1024 and 65535');
 const server = createServer(nodeHandler(api, clock.now));

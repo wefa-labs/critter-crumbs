@@ -50,3 +50,10 @@ test('API client reports skew above five minutes once, including on error respon
   await client.get('/api/me').catch(() => {});
   expect(warnings).toEqual([['err.clockSkew', 600001]]); expect(client.now()).toBe(601001);
 });
+
+test('API client leaves out a development server moving its own clock, and still keeps its time', async () => {
+  const warnings: unknown[] = [];
+  const client = createApiClient({ clock: () => 1000, onClockSkew: (...args) => warnings.push(args), fetch: async () => Response.json({ serverNow: 3601000 + 2000 }, { headers: { 'X-Dev-Clock-Offset': '3600000' } }) });
+  await client.get('/api/me');
+  expect(warnings).toEqual([]); expect(client.now()).toBe(3603000);
+});

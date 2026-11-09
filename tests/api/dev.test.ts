@@ -16,6 +16,17 @@ test('API dev time sets the shared injected clock and release-key uses only the 
   expect((await api({ method: 'POST', path: '/api/dev/release-key', body: { identity: 'bad' } })).status).toBe(400);
 });
 
+test('only a mock development server that has moved its clock says by how much', async () => {
+  let offset = 0;
+  const controls = { enabled: true, production: false, mode: 'mock', setTime() {}, releaseKey() {}, clockOffset: () => offset };
+  const { api, close } = await apiHarness({ dev: controls }); disposals.push(close);
+  const moved = async () => (await api({ method: 'GET', path: '/api/session/nonce' })).headers['X-Dev-Clock-Offset'];
+  expect(await moved()).toBeUndefined();
+  offset = 3600000;
+  expect(await moved()).toBe('3600000');
+  for (const other of [{ production: true }, { enabled: false }, { mode: 'chiado' }]) { Object.assign(controls, { enabled: true, production: false, mode: 'mock' }, other); expect(await moved()).toBeUndefined(); }
+});
+
 test.each([undefined, { enabled: false, production: false, mode: 'mock' }, { enabled: true, production: true, mode: 'mock' }, { enabled: true, production: false, mode: 'chiado' }])('API dev controls are hidden when disabled, production or real mode: %j', async config => {
   const { api, close } = await apiHarness(config ? { dev: { ...config, setTime() { throw new Error('Disabled'); }, releaseKey() { throw new Error('Disabled'); } } } : {}); disposals.push(close);
   for (const route of ['seed', 'time', 'release-key']) {

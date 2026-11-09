@@ -16,7 +16,7 @@ import { responseHeaders } from './http.js';
 import { seedFixtures } from './seed.js';
 export interface ApiRequest { method: string; path: string; headers?: Record<string, string | undefined>; body?: unknown }
 export interface ApiReply { status: number; headers: Record<string, string>; body: Record<string, unknown> }
-export interface DevControls { recordTransaction?: (actor: Address, input: unknown) => Promise<{txHash:Hex}>; enabled: boolean; production: boolean; mode: string; setTime: (now: number) => void | Promise<void>; releaseKey: (identity: Hex) => void | Promise<void> }
+export interface DevControls { recordTransaction?: (actor: Address, input: unknown) => Promise<{txHash:Hex}>; enabled: boolean; production: boolean; mode: string; setTime: (now: number) => void | Promise<void>; releaseKey: (identity: Hex) => void | Promise<void>; clockOffset?: () => number }
 export interface ApiDependencies { db: Database; clock: () => number; sessionSecret: string; origin: string; connectOrigins?: string[]; ens?: EnsResolver; timelock?: Timelock; eas?: EasConfig; dev?: DevControls; resultReader?: EasReader }
 export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promise<ApiReply> {
   const store = createStore(deps.db), cookies = sessionCookies(deps.sessionSecret);
@@ -29,7 +29,10 @@ export function createApi(deps: ApiDependencies): (request: ApiRequest) => Promi
   const handle = async (request: ApiRequest): Promise<ApiReply> => {
     const now = deps.clock();
     const headers = responseHeaders(deps.connectOrigins);
-    const reply = (status: number, body: Record<string, unknown>): ApiReply => ({ status, headers, body: { ...body, serverNow: body.serverNow ?? deps.clock() } });
+    /* a mock development server that has moved its clock to reach a phase says by how much, with the time it stamps, so the
+       client does not take the move for its own device's clock being off (Technical Spec §9) */
+    const moved = () => { const dev = deps.dev; return dev?.enabled && !dev.production && dev.mode === 'mock' ? dev.clockOffset?.() ?? 0 : 0; };
+    const reply = (status: number, body: Record<string, unknown>): ApiReply => { const offset = moved(); return { status, headers: offset ? { ...headers, 'X-Dev-Clock-Offset': String(offset) } : headers, body: { ...body, serverNow: body.serverNow ?? deps.clock() } }; };
     try {
       const incoming = Object.fromEntries(Object.entries(request.headers ?? {}).map(([name, value]) => [name.toLowerCase(), value]));
       if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && incoming.origin && incoming.origin !== deps.origin) throw new HttpError(403, 'err.generic');
