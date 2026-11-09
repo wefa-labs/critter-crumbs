@@ -73,10 +73,11 @@ export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
 /**
  * One stable frame for dialogs and phone sheets; only its body scrolls as content changes. A dialog has one way out
  * (Design System §7.1): `dismiss` puts Cancel, or Back where the dialog's action is itself a cancellation, at the left
- * of the foot, and the heading then has no Close. Without it the heading's Close is the way out, since a phone has no
- * Escape key. (Settings and the profile, which had no Cancel, are now one screen, profile.tsx.)
+ * of the foot, or Close in its middle where the dialog only shows something, and the heading then has no Close.
+ * Without it the heading's Close is the way out, since a phone has no Escape key. (Settings and the profile, which
+ * had no Cancel, are now one screen, profile.tsx.)
  */
-export function Dialog({ title, children, onClose, busy = false, actions, dismiss, className = '' }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; dismiss?: 'action.cancel' | 'action.back'; className?: string }) {
+export function Dialog({ title, children, onClose, busy = false, actions, dismiss, className = '' }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; dismiss?: 'action.cancel' | 'action.back' | 'action.close'; className?: string }) {
   const ref = useRef<HTMLDialogElement>(null), id = useId();
   useModalDialog(ref);
   return <dialog ref={ref} className={`app-dialog ${className}`} aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>

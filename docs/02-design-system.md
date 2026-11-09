@@ -526,9 +526,15 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Meet your critter (first connect) | A whole screen (D33): the wordmark and the beta chip in the header; the critter large on the painted floor; in the sheet the title with the element chip, the line, the name field with its 16-character counter when there is no ENS name (the ENS name otherwise), and Re-roll and Keep this one pinned at the foot, with Disconnect as a quiet link under them. No Close: Keep is the way past it, and saves the name and the lock in one update; Disconnect signs out as the profile does and leaves the member where a signed-out visitor would be, on the launcher or, from a feast's link, its invite. Rerolls keep the draft name; the fourth locks on the server and the screen stays until Keep. The page the member connected on, a feast from its link, comes after | `critter.*`, `name.*`, `action.disconnect` |
 | A kept critter with no name (no ENS) | The same screen asking only for the name: the critter smaller and asleep, `name.title`, `name.help`, the field with its counter, Save name, and the same Disconnect under it | `name.*`, `action.disconnect` |
 | Your critter (the profile) | One screen in place of the profile and Settings dialogs (D34), over the screen whose face was pressed, which stays as it was beneath it: a back chevron and “Your critter” in the header; the critter on the floor under its element chip; the name and `critter.locked`; the short address with Copy address; Settings as switches (Sounds, Music, Still critters, Dark mode; Simple view only while some critter has a 3D mesh); How it works and Disconnect at the foot. The chevron, Escape and the browser’s Back return to the screen beneath | `profile.*`, `settings.title`, `sound.*`, `motion.*`, `view.*`, `critter.locked`, `launch.learn`, `action.disconnect` |
-| Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
-| Burrow, only you | Member list with one row; add-critter field focused | `burrow.empty.*` |
-| Burrow, no feasts | Feast list empty state | `burrow.feasts.empty.*` |
+| Home (your burrows) | On the frame (D31), with the wordmark: your critter at the burrow's entrance; each burrow a card that opens it, with three of its critters' faces, its name, how many critters with the phase of its feast under way, and when that closes in words ("Scattering closes in 2 days"), or `home.noDeadline`; Start a burrow at the foot | `home.*`, `phase.*`, `deadline.*` |
+| Home, no burrows | Your critter asleep at the entrance, a "z" over its head; the title, the line, and Start a burrow as the one action | `home.empty.*` |
+| Start a burrow | A back chevron home; your critter at the entrance; the name and the line under it; Cancel and Create burrow at the foot. The new burrow opens on its own page | `burrow.create.*`, `burrow.name.label`, `action.cancel` |
+| Joining a burrow (added, not yet joined) | A back chevron home and the burrow's name; its critters on the floor, those not yet joined asleep; Ready to join; faces and how many; one gold Join this burrow. The flow page's line naming who added you waits for the burrow's view to say who did | `burrow.preAdded`, `burrow.join`, `home.critterCount` |
+| A burrow | A back chevron home and the burrow's name; its critters on its floor, you at their right (its entrance until its first feast, the room after, drafts not counting); each feast under way as a card, the one closing next first: its title and phase, its close line, who has done this phase's part with their faces (PRD R5 and P3), and one action for the phase, gold on the card that closes next (Scatter crumbs for those taking part; your statement, or the option statements for an options feast's creator); the other feasts as rows with their day and a chip; a Critters card; Copy burrow link and Start a feast at the foot, Start a feast gold when no feast is under way | `burrow.*`, `phase.*`, `deadline.line`, `scatter.participation`, `gathering.participation`, `scatter.title`, `gathering.yours.title`, `gathering.options.title` |
+| Who has scattered | While scattering, the count on the feast's card opens a sheet: the count as its title, those who have scattered by name with you marked, those who have not yet with their faces dimmed in one line, and Close | `scatter.participation`, `scatter.notYet`, `burrow.members.you`, `action.close` |
+| Burrow, only you | Your critter at the entrance; the title and the line; the add field, focused; Copy burrow link; the empty card, whose Start a feast is soft until more critters join | `burrow.empty.*`, `burrow.add.*` |
+| Burrow, no feasts | The empty card holds the gold Start a feast; the Critters card; Copy burrow link at the foot | `burrow.feasts.empty.*` |
+| The burrow's critters | A screen of its own behind the Critters card, with a back chevron to the burrow: the add field; each member's face, name and short address (§5.5), you first and marked, Ready to join under a member not yet joined; Remove as a quiet link, for the creator only; the past members; the membership history; Leave this burrow last; Copy burrow link at the foot. Removing and leaving each ask first, with Cancel as the way out | `burrow.*`, `burrow.removals.*` |
 | Start a feast (creator) | On the frame (D31): a back chevron and the burrow's line over the title; a strip of the room with you awake in the middle and two of the burrow either side; in the sheet the "Draft — only you can see this" chip, the title, the line for the invite, the type as two cards, for options a card for each (the name with its 16-character counter, the line, Remove option) and Add an option, crumbs per critter as a stepper, both deadlines with the absolute time in the field and the time-zone line, and the result and who gave what as two-card choices; Cancel and Save draft pinned at the foot, with a refused save's reason beside them | `setup.*` |
 | Start a feast, too few critters | A people feast in a burrow of fewer than three: Save draft is held, with the reason beside it (PRD R6); the pair face each other on the floor. An options feast saves | `setup.min.people` |
 | Gathering, statement empty | Editor with the prompt; counter at 0 / 2,000 | `gathering.prompt` |
@@ -547,11 +553,11 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
 | Simple view (fallback or chosen) | Portraits in stages; one notice line. Its switch is on your critter's profile only while some critter has a 3D mesh (D34) | `fallback.*` |
 | Offline | Banner; controls stay usable; submit shows why it waits | `err.offline` |
-| A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
-| Not in the burrow | Burrow name and the ask-a-member line | `burrow.unknown.*` |
+| A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Your critter asleep at the entrance, as on an empty home; the heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
+| Not in the burrow | The burrow's name in the header; you at its entrance; the ask-a-member line; your short address with Copy your address, the one thing to do next; Back | `burrow.unknown.*` |
 | A link to no feast (the store has no such feast, or the link was cut short in copying) | Heading, the check-the-link line and Back; no Try again, since trying again cannot help | `feast.missing.*` |
-| Feast cancelled | Listed in past feasts with a "Cancelled" chip | `feast.cancelled` |
-| People feast below three critters at scattering open | Feast ends; notice on the burrow home | `feast.tooFew` |
+| Feast cancelled | A row under the burrow's feasts with a "Cancelled" chip | `feast.cancelled` |
+| People feast below three critters at scattering open | Feast ends; its row on the burrow carries the line as a leaf notice, under its "Ended before scattering" chip | `feast.tooFew`, `phase.void` |
 
 First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen and on your critter's profile. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
 
@@ -652,10 +658,13 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `burrow.create.title` | Start a burrow |
 | `burrow.name.label` | Burrow name |
 | `burrow.create.cta` | Create burrow |
+| `burrow.create.help` | Then add critters by address or ENS name, and share the burrow link. |
 | `burrow.members.title` | Critters |
+| `burrow.members.you` | {name} (you) |
 | `burrow.empty.title` | Just you so far |
 | `burrow.empty.body` | Add critters by address or ENS name. They get in with the burrow link. |
 | `burrow.add.label` | Address or ENS name |
+| `burrow.add.placeholder` | sorrel.eth |
 | `burrow.add.cta` | Add |
 | `burrow.add.done` | {name} added. |
 | `burrow.link.copy` | Copy burrow link |
@@ -670,6 +679,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `burrow.leave.cta` | Leave burrow |
 | `burrow.unknown.title` | This burrow doesn't know you yet |
 | `burrow.unknown.body` | Ask someone in {burrowName} to add {shortAddress}. |
+| `burrow.unknown.copy` | Copy your address |
 | `burrow.missing.title` | There's no burrow at this link |
 | `burrow.missing.body` | Check the link with whoever sent it. |
 | `feast.cancelled` | Cancelled |

@@ -21,6 +21,7 @@ const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.Set
 const HomeRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Home})));
 const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
 const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
+const BurrowCrittersRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.BurrowCritters})));
 const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
 const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
 import { returnPath } from './learn-return.js';
@@ -120,7 +121,7 @@ export function App() {
   const profileOpen = path === '/your-critter', screen = profileOpen ? under : path;
   const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(screen);
   const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(screen);
-  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen);
+  const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen), critters = /^\/burrows\/([^/]+)\/critters$/.exec(screen);
   /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
   const meetingShown = me !== null && meetingFor === me.address;
@@ -136,9 +137,10 @@ export function App() {
   else if (screen === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
   else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} me={me} onProfile={openProfile} run={run} busy={working} /></Suspense>; }
-  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute api={api} session={session} run={run} busy={working} /></Suspense>; }
-  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} session={session} run={run} busy={working} /></Suspense>; }
-  else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} /></Suspense>; }
+  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><CreateBurrowRoute me={me} api={api} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else if (critters) { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><BurrowCrittersRoute key={screen} id={critters[1]!} api={api} me={me} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else { music = screenMusic.home; content = <Suspense fallback={<Opening bare />}><HomeRoute me={me} api={api} onProfile={openProfile} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
   const layer = !me ? null

@@ -9,9 +9,13 @@ test('an invited first-time member keeps their destination, draft name and critt
   expect(seed.ok()).toBe(true);
   const { burrowId, serverNow } = await seed.json();
   await page.goto(`/burrows/${burrowId}`); await connectLocal(page, 1);
+  // the burrow's critters are added on their own screen, and its back chevron returns to the burrow
+  await page.getByRole('link', { name: /^Critters/ }).click();
   await page.getByRole('textbox', { name: 'Address or ENS name', exact: true }).fill(account.address);
   await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await expect(page.locator('.member-list')).toContainText(account.address);
+  await expect(page.locator('.burrow-rows')).toContainText(`${account.address.slice(0, 6)}…${account.address.slice(-4)}`);
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
   await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
   await page.getByRole('button', { name: 'Disconnect', exact: true }).click();
 
