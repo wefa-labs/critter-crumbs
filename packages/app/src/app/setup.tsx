@@ -15,10 +15,10 @@ import { absoluteDeadline, localDateTime, zoneName } from './time.js';
 /** Crumbs per critter (PRD P9): 10 to 1,000 and 100 by default; the stepper moves in tens, and any whole number can be typed. */
 const CRUMBS = { fewest: 10, most: 1000, norm: 100, step: 10 } as const;
 
-export function SetupRoute({ burrowId, api, run, busy, announce, me, onProfile }: { burrowId: string; api: AppApi; run: RunAction; busy: boolean; announce: (text: string) => void; me?: Me; onProfile?: () => void }) {
+export function SetupRoute({ burrowId, api, me, onProfile, run, busy, announce }: { burrowId: string; api: AppApi; me: Me; onProfile: () => void; run: RunAction; busy: boolean; announce: (text: string) => void }) {
   const resource = useResource<BurrowView>(api, `/api/burrows/${burrowId}`);
   if (!resource.data) return <Page title={resource.error ? copy['burrow.unknown.title'] : copy['app.loading']}>{resource.error ? <button onClick={resource.refresh}>{copy['action.retry']}</button> : null}</Page>;
-  return <SetupForm burrow={resource.data} api={api} run={run} busy={busy} announce={announce} {...(me ? { me } : {})} {...(onProfile ? { onProfile } : {})} />;
+  return <SetupForm burrow={resource.data} api={api} me={me} onProfile={onProfile} run={run} busy={busy} announce={announce} />;
 }
 
 /**
@@ -29,7 +29,7 @@ export function SetupRoute({ burrowId, api, run, busy, announce, me, onProfile }
  * time in the field. Save draft and Cancel stay at the foot; a people feast in a burrow of fewer than three critters
  * holds Save draft, with the reason beside it (PRD R6).
  */
-function SetupForm({ burrow, api, run, busy, announce, me, onProfile }: { burrow: BurrowView; api: AppApi; run: RunAction; busy: boolean; announce: (text: string) => void; me?: Me; onProfile?: () => void }) {
+function SetupForm({ burrow, api, me, onProfile, run, busy, announce }: { burrow: BurrowView; api: AppApi; me: Me; onProfile: () => void; run: RunAction; busy: boolean; announce: (text: string) => void }) {
   const [title, setTitle] = useState(''), [context, setContext] = useState(''), [kind, setKind] = useState<FeastKind>('people');
   const [crumbs, setCrumbs] = useState<number>(CRUMBS.norm), [gathering, setGathering] = useState(() => localDateTime(burrow.serverNow + 86400000)), [scattering, setScattering] = useState(() => localDateTime(burrow.serverNow + 172800000));
   const [aggregatePublic, setAggregate] = useState(false), [individualOpen, setIndividual] = useState(false);
@@ -52,8 +52,8 @@ function SetupForm({ burrow, api, run, busy, announce, me, onProfile }: { burrow
   }
   return (
     <PlaceScreen title={copy['setup.title']} burrow={burrow.name} href={`/burrows/${burrow.id}`} back={() => navigate(`/burrows/${burrow.id}`)}
-      {...(me && onProfile ? { viewer: { address: me.address, variant: me.variant, open: onProfile } } : {})}
-      painting={SETUP_SCENE.painting} sheetHeight={SETUP_SCENE.sheetHeight} className="start-feast" floor={<SetupFloor members={burrow.members} you={me?.address} />}
+      viewer={{ address: me.address, variant: me.variant, open: onProfile }}
+      painting={SETUP_SCENE.painting} sheetHeight={SETUP_SCENE.sheetHeight} className="start-feast" floor={<SetupFloor members={burrow.members} you={me.address} />}
       actions={<>
         {held ? <p id={reason} className="notice"><GameIcon name="leaf" /><span>{held}</span></p> : error ? <p id={reason} className="notice error">{error}</p> : null}
         <div className="place-choices"><Link className="quiet" href={`/burrows/${burrow.id}`}>{copy['action.cancel']}</Link>
@@ -109,8 +109,8 @@ function SetupForm({ burrow, api, run, busy, announce, me, onProfile }: { burrow
 }
 
 /** Who stands in the strip of the room: you in the middle with two of the burrow either side, the two of you, or you alone. */
-function SetupFloor({ members, you }: { members: BurrowView['members']; you: string | undefined }) {
-  const here = members.filter(member => member.leftAt === null), own = here.find(member => member.address.toLowerCase() === you?.toLowerCase()) ?? here[0];
+function SetupFloor({ members, you }: { members: BurrowView['members']; you: string }) {
+  const here = members.filter(member => member.leftAt === null), own = here.find(member => member.address.toLowerCase() === you.toLowerCase()) ?? here[0];
   if (!own) return null;
   const [left, right] = here.filter(member => member !== own), middle = { ...SETUP_SCENE.you, face: null };
   const standing: [BurrowView['members'][number], Standing & { face: Facing }][] = !left ? [[own, middle]]

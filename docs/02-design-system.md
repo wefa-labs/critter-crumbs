@@ -459,10 +459,11 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `ResultsTable` | Totals and shares | `<table>` with `<caption>` | default / tie rows | `<th scope="col">`; numbers tabular; share as percentage to one decimal in the UI (CSV carries full precision) |
 | `GiverMatrix` | Who gave what | table, sticky first column | — | Only when individual scatters are open; caption states that |
 | `CsvButton` | Export | secondary button with `download` icon | default / loading | Filename `feast-{slug}-results.csv` |
-| `PrivacyControls` | Two switches | aggregate segmented control, individual switch, explainer | the two switches are independent; every combination is valid (PRD P14) | No forced or disabled state: each switch stands alone and the explainer describes what the current pair means |
+| `PrivacyControls` | Two choices | the result (Public, or Burrow only) and who gave what (Closed, or Open to the burrow after the feast), each a `SegmentedControl` of two cards | the two are independent; every combination is valid (PRD P14) | No forced or disabled state; each card says what it means, so no explainer follows them |
 | `Switch` | On/off | `<button role="switch" aria-checked>` | on / off | Track `--cc-line-strong` off, `--cc-moss` on, thumb Surface; 3 : 1 in both states |
-| `SegmentedControl` | One of two/three | `<fieldset>` of radios styled as segments | — | Native radios; visible legend |
-| `DeadlinePicker` | Pick a time | `<input type="datetime-local">` + time-zone line | default / invalid (order violated) | Native picker; the time-zone line names the viewer's zone explicitly |
+| `SegmentedControl` | One of two/three | `<fieldset>` of radios, each drawn as a card side by side; the feast type's two carry a line under their name | checked (Sunken, hard shadow) / focus-visible on the card | Native radios, unseen, each covering its card; visible legend; the card's name names its radio and its line describes it; arrow keys move the choice |
+| `DeadlinePicker` | Pick a time | the absolute time (§8, "Wed 7 Oct, 18:00 (PDT)") in the field, over an `<input type="datetime-local">`; the time-zone line under the pair | default / focused (the platform's own text) / invalid (order violated) | Native picker, whose own text shows while it has the focus; the time-zone line names the viewer's zone and its short form ("Pacific Time (PDT)") |
+| `CrumbStepper` | Crumbs per critter at setup | `−` button, number field, `+` button, the help line | default / at 10 (`−` aria-disabled) / at 1,000 (`+` aria-disabled) | The game's 44 px icon buttons, "Fewer crumbs" and "More crumbs", move to the next ten and announce the number; the field is a native `<input type="number">` (10 to 1,000) named by its label, described by the help line, and drawn as the bold count until it has the focus |
 | `Button` | Primary / secondary / quiet | `<button>` | all | Primary: Burrow on Oat; secondary: Surface with strong border; quiet: text-only Soil, underlined on hover/focus |
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
@@ -528,7 +529,8 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Home, no burrows | Empty state with an asleep portrait of the viewer's own critter | `home.empty.*` |
 | Burrow, only you | Member list with one row; add-critter field focused | `burrow.empty.*` |
 | Burrow, no feasts | Feast list empty state | `burrow.feasts.empty.*` |
-| Feast draft (creator) | Setup form with a "Draft — only you can see this" chip | `setup.draft.chip` |
+| Start a feast (creator) | On the frame (D31): a back chevron and the burrow's line over the title; a strip of the room with you awake in the middle and two of the burrow either side; in the sheet the "Draft — only you can see this" chip, the title, the line for the invite, the type as two cards, for options a card for each (the name with its 16-character counter, the line, Remove option) and Add an option, crumbs per critter as a stepper, both deadlines with the absolute time in the field and the time-zone line, and the result and who gave what as two-card choices; Cancel and Save draft pinned at the foot, with a refused save's reason beside them | `setup.*` |
+| Start a feast, too few critters | A people feast in a burrow of fewer than three: Save draft is held, with the reason beside it (PRD R6); the pair face each other on the floor. An options feast saves | `setup.min.people` |
 | Gathering, statement empty | Editor with the prompt; counter at 0 / 2,000 | `gathering.prompt` |
 | Gathering, options feast (creator) | One editor per option, in a list | `gathering.options.title` |
 | Gathering, member view of others | Participation line only; no statements | `gathering.hidden`, `gathering.participation` |
@@ -925,6 +927,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Everywhere | Tab / Shift+Tab | Visual order: header → main → pile bar. Never a positive `tabindex` |
 | `+` / `−` buttons | Enter, Space | One crumb. Holding the key pours with the same curve as pointer hold: start on `keydown` (ignoring repeats), stop on `keyup` |
 | `NumberField` | Digits; ↑/↓ ±1; Shift+↑/↓ ±10; Enter commits; Esc reverts | Clamped to `[0, current + remaining]` |
+| `CrumbStepper` (setup) | Enter, Space on `−` / `+`; digits and ↑/↓ in the field | The buttons move to the next ten; the field takes any whole number from 10 to 1,000 and steps by one |
 | `StatementLine` (`<details>`) | Enter, Space on the summary | Expand / collapse in place |
 | Read pass list | ←/→, Home/End; Tab reaches links inside the card | Snap position follows; focus does not move on snap |
 | Dialogs | Esc | Closes; focus returns to the opener (native `<dialog>`) |
