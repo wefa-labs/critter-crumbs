@@ -8,7 +8,7 @@ import { expect, test } from 'playwright/test';
  */
 /* settled layouts: reduced motion skips the bubble's and toast's opening scale, which would measure a target mid-way */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US', contextOptions: { reducedMotion: 'reduce' } });
-const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 270, feast: 144, nobody: 260 };
+const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260 };
 const DOCKS = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'feasted'];
 const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const VIEWPORTS = [{ width: 375, height: 812 }, { width: 430, height: 932 }, { width: 1280, height: 800 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }];

@@ -49,6 +49,7 @@ async function shots(device, dark) {
   /* the invite, signed out, whose How it works now centres its words in its target as the launcher's does */
   await page.goto(`/feasts/${seeded}`); await page.getByRole('button', { name: 'Connect to join', exact: true }).waitFor(); await take('invite');
   await page.goto('/dev/screens?capture&state=waiting&count=8&scene=dusk'); await heading('The feast is being laid out'); await take('waiting');
+  await page.goto('/dev/screens?capture&state=key&count=8&scene=dusk'); await page.getByRole('button', { name: 'Try again', exact: true }).waitFor(); await take('key');
   await page.goto('/dev/screens?capture&state=results&count=8&scene=window'); await page.getByRole('link', { name: 'Why nobody can peek', exact: true }).waitFor(); await take('results');
   const fingerprint = page.locator('.results-fingerprint summary').first();
   await fingerprint.scrollIntoViewIfNeeded(); await fingerprint.click();

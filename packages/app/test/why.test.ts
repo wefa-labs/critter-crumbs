@@ -43,10 +43,10 @@ describe('the page behind Why nobody can peek', () => {
     for (const [id, line] of Object.entries(whyCopy)) expect(shown, id).toContain(line);
   });
 
-  it('leaves the app only by the source’s two links, which say they go to GitHub', () => {
-    expect([...markup.matchAll(/<a ([^>]*)>(.*?)<\/a>/g)].map(([, attributes, label]) => [label, /href="([^"]*)"/.exec(attributes!)?.[1], /rel="([^"]*)"/.exec(attributes!)?.[1]])).toEqual([
-      ['Read the code on GitHub', 'https://github.com/wefa-labs/critter-crumbs', 'noopener'],
-      ['Read the technical spec on GitHub', 'https://github.com/wefa-labs/critter-crumbs/blob/main/docs/04-technical-spec.md', 'noopener'],
+  it('links out of the app only from the source, by two links that say they go to GitHub, each a full-size target', () => {
+    expect([...markup.matchAll(/<a ([^>]*)>(.*?)<\/a>/g)].map(([, attributes, label]) => [label, /href="([^"]*)"/.exec(attributes!)?.[1], /rel="([^"]*)"/.exec(attributes!)?.[1], /class="([^"]*)"/.exec(attributes!)?.[1]])).toEqual([
+      ['Read the code on GitHub', 'https://github.com/wefa-labs/critter-crumbs', 'noopener', 'quiet'],
+      ['Read the technical spec on GitHub', 'https://github.com/wefa-labs/critter-crumbs/blob/main/docs/04-technical-spec.md', 'noopener', 'quiet'],
     ]);
     expect(each(/<button[^>]*>(.*?)<\/button>/g)).toEqual(['Got it']);
   });

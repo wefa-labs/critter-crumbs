@@ -25,7 +25,7 @@ const WORDS: readonly Lead[] = [
 const RUNS: readonly Lead[] = [
   ['why.runs.device.lead', 'why.runs.device.body'],
   ['why.runs.store.lead', 'why.runs.store.body'],
-  ['why.runs.shutter.lead', 'why.runs.shutter.body'],
+  ['why.runs.gnosis.lead', 'why.runs.gnosis.body'],
   ['why.runs.base.lead', 'why.runs.base.body'],
   ['why.runs.ethereum.lead', 'why.runs.ethereum.body'],
 ];
@@ -38,9 +38,10 @@ function Leads({ lines }: { lines: readonly Lead[] }) {
 /**
  * The page behind "Why nobody can peek" (docs/reviews/first-steps-2026-11, F4; Design System §9): one column under the
  * wordmark, headed by the closed seed pod of the private step. What you are promised, the one thing the app will not
- * pretend, the words, what runs where in the secondary colour, and the source, whose two links are the only way out of
- * the app anywhere in it (decision D3 of the review). It is linked from the private step and the result of the first
- * steps, the waiting screen and the results, and it never opens unasked. Got it goes back where it was opened from.
+ * pretend, the words, what runs where in the secondary colour, and the source, the one section that links out of the
+ * app, to the code and the technical spec on GitHub (decision D3 of the review). It is linked from the private step and
+ * the result of the first steps, the waiting screen and the results, and it never opens unasked. Got it goes back where
+ * it was opened from.
  */
 export function Why({ sound }: { sound: ReactNode }) {
   const heading = useRef<HTMLHeadingElement>(null), headingId = useId();
@@ -66,8 +67,8 @@ export function Why({ sound }: { sound: ReactNode }) {
           <div className="why-machinery"><p>{whyCopy['why.runs.connect']}</p><Leads lines={RUNS} /></div>
           <h2>{whyCopy['why.source.title']}</h2>
           <p>{whyCopy['why.source.body']}</p>
-          <p><a href="https://github.com/wefa-labs/critter-crumbs" rel="noopener">{whyCopy['why.source.code']}</a></p>
-          <p><a href="https://github.com/wefa-labs/critter-crumbs/blob/main/docs/04-technical-spec.md" rel="noopener">{whyCopy['why.source.spec']}</a></p>
+          <p><a className="quiet" href="https://github.com/wefa-labs/critter-crumbs" rel="noopener">{whyCopy['why.source.code']}</a></p>
+          <p><a className="quiet" href="https://github.com/wefa-labs/critter-crumbs/blob/main/docs/04-technical-spec.md" rel="noopener">{whyCopy['why.source.spec']}</a></p>
         </div>
       </article>
       <div className="why-foot"><button type="button" className="pill wide" onClick={leave}>{copy['learn.done']}</button></div>

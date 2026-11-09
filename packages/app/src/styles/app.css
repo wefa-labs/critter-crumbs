@@ -60,8 +60,7 @@ main:focus { outline:none; }
 small { display:block; color:var(--cc-text-3); font-size:var(--cc-text-sm); font-weight:400; }
 dialog { color:var(--cc-text); background:var(--cc-bg-raised); border:var(--cc-border); border-radius:var(--cc-radius-lg); padding:var(--cc-space-6); width:min(560px,calc(100% - 32px)); max-height:calc(100svh - 32px); box-shadow:var(--cc-shadow-3); }
 dialog::backdrop { background:rgb(42 33 26 / .35); }
-.dialog-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--cc-space-4); flex-wrap:wrap; }
-.dialog-heading { margin-bottom:var(--cc-space-4); }
+.dialog-heading { display:flex; align-items:center; justify-content:space-between; gap:var(--cc-space-4); flex-wrap:wrap; margin-bottom:var(--cc-space-4); }
 .dialog-heading h2 { margin:0; flex:1; }
 .setting { display:flex; gap:var(--cc-space-4); align-items:center; min-height:56px; }
 .setting input { width:24px; height:24px; accent-color:var(--cc-ok); }

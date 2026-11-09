@@ -107,7 +107,7 @@ export default {
         },
       };
     }),
-    'copy-ids': definition('Keep visible wording in packages/shared/src/copy.ts and use its copy IDs.', (context) => {
+    'copy-ids': definition('Keep visible wording in packages/shared/src/copy.ts (or copy-why.ts, for the page behind Why nobody can peek) and use its copy IDs.', (context) => {
 
       function permitted(node) {
         const value = staticString(node);

@@ -50,8 +50,15 @@ export default function Results({ feast, api, me, settings, announce, report, ac
     void load(); return () => { active = false; clearTimeout(delayed); clearTimeout(timer); };
   }, [api, feast.id, me.address, retry]);
   if (!opened) return <WaitingScene feast={feast} settings={settings} announce={announce} error={error} retry={() => setRetry(value => value + 1)} />;
-  return <FeastResults feast={feast} opened={opened} settings={settings} announce={announce} viewer={me.address} {...(feast.aggregatePublic ? { record: <ResultRecord feast={feast} result={opened.result} api={api} me={me} account={account} run={run} busy={busy} /> } : {})} />;
+  return <FeastResults feast={feast} opened={opened} settings={settings} announce={announce} viewer={me.address} initialPlaying={!feastedHere(history.state)} {...(feast.aggregatePublic ? { record: <ResultRecord feast={feast} result={opened.result} api={api} me={me} account={account} run={run} busy={busy} /> } : {})} />;
 }
+
+/**
+ * Whether the feast has already played at this place in the browser's history (FeastResults keeps it there): coming back
+ * to it, from the page behind Why nobody can peek or by the browser's Back, opens the results settled rather than
+ * playing the feast again, and Replay Feast still plays it. A feast opened afresh plays.
+ */
+const feastedHere = (state: unknown) => typeof state === 'object' && state !== null && (state as { feasted?: unknown }).feasted === true;
 
 /** Flow 42 and 43: the circle asleep at dusk while the key is fetched, the sheet saying so. */
 export function WaitingScene({ feast, settings, announce, error, retry }: { feast: MemberFeast; settings: GameSettings; announce: (text: string) => void; error: CopyId | null; retry: () => void }) {
@@ -168,6 +175,8 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
   }, [runtime]);
   useEffect(() => { runtime.setSettings(settings); if (settings.still || settings.reducedMotion) hops.clear(); }, [runtime, settings]);
   useEffect(() => { if (!playing && view !== 'closed') heading.current?.focus(); }, [playing, view]);
+  /* once the feast has played, or been skipped, this place in the history remembers it (Results, feastedHere) */
+  useEffect(() => { if (!playing) history.replaceState({ ...history.state, feasted: true }, ''); }, [playing]);
   const member = isMemberFeast(feast) ? feast : null, nobody = !result.totalScattered;
   const state = gameView({ phase: feast.phase, remaining: 0, opened: true, playing, resultsOpen: view !== 'closed', ...(nobody ? { resultState: resultStates.nobody } : view === 'givers' ? { resultState: resultStates.givers } : {}) }).state;
   const replay = () => { audio.stop(); hops.clear(); setPlaying(true); setFocus(0); setView(resultsViews.results); runtime.actions.replayFeast(); runtime.animateFor(FEAST.maxMs); };

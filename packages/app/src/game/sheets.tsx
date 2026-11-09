@@ -36,6 +36,7 @@ export function WaitingSheet({ error, retry, scattered }: { error: CopyId | null
     <>
       <h2>{copy['feast.waiting.title']}</h2>
       <SheetNotice trouble>{copy[error]}</SheetNotice>
+      <Link className="quiet left" href="/how-it-works/why">{copy['why.title']}</Link>
       <p className="sheet-help">{scattered}</p>
       <Grow />
       <button type="button" className="pill soft wide" onClick={retry}>{copy['action.retry']}</button>

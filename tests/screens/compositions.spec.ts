@@ -5,14 +5,14 @@ import { expect, test, type Page } from 'playwright/test';
  * the flow page's SCREENS (docs/explorations/app-screens/index.html: sheetH, .toast, .modal, .d-desktop .sheet) and
  * the scatter page, pass eleven (docs/explorations/scatter-layouts/index.html: DOCK_BASE 130, RESULTS_FLOOR 196, the
  * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). Two
- * numbers are the app's own: the key's sheet is 20 px taller than the flow page's, for the count of who has scattered
- * (docs/decisions.md, 2026-11-09), and the waiting sheet 40 px taller, for its line to Why nobody can peek (2026-11-09).
+ * numbers are the app's own: the waiting sheet is 40 px taller than the flow page's 250, for its line to Why nobody can
+ * peek, and the key's 80 px taller, for that line and the count of who has scattered (docs/decisions.md, 2026-11-09).
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US' });
 const PHONE = { width: 375, height: 812 }, DESKTOP = { width: 1440, height: 900 }, HEADER = 64;
-/* the key's sheet is the flow page's 250 and the 20 px its count of who has scattered needs (docs/decisions.md, 2026-11-09);
-   the waiting sheet is 40 px more than the flow page's, for its line to Why nobody can peek (the first-steps review, F8) */
-const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 270, feast: 144, nobody: 260 };
+/* the waiting sheet is the flow page's 250 and the 40 px its line to Why nobody can peek needs (the first-steps review, F8);
+   the key's adds the count of who has scattered under its notice as well (docs/decisions.md, 2026-11-09) */
+const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260 };
 const DOCKS = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'feasted'];
 const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const TOASTS: Record<string, string> = { scattered: 'Your scatter is in.', rejected: "Not confirmed. Your crumbs are still here — try again when you're ready.", failed: "Couldn't save your scatter. Check your connection and try again — nothing was lost." };
@@ -100,9 +100,10 @@ test('the waiting sheet and the results lead to Why nobody can peek, and the fin
     const link = (await why.boundingBox())!;
     expect(link.height).toBeGreaterThanOrEqual(44);
     expect(link.y).toBeGreaterThan((await box(page, viewport === PHONE ? '.game-sheet p' : '.side-sheet p')).y);
-    // the key's sheet keeps to its reason, the count and Try again
+    // the key's sheet leads there too, under its reason, with the count and Try again still in it
     await open(page, 'key', viewport);
-    await expect(why).toHaveCount(0);
+    await expect(why).toHaveAttribute('href', '/how-it-works/why');
+    await expect(page.getByRole('button', { name: 'Try again', exact: true })).toBeVisible();
     await open(page, 'results', viewport);
     await expect(why).toBeVisible();
     // under the summary, over the ranked critters
