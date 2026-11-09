@@ -8,7 +8,8 @@ import { expect, test, type Page } from 'playwright/test';
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US' });
 const PHONE = { width: 375, height: 812 }, DESKTOP = { width: 1440, height: 900 }, HEADER = 64;
-const SHEETS: Record<string, number> = { reveal: 230, waiting: 250, key: 250, feast: 144, nobody: 260 };
+/* the key's sheet is the flow page's 250 and the 20 px its count of who has scattered needs (docs/decisions.md, 2026-11-09) */
+const SHEETS: Record<string, number> = { reveal: 230, waiting: 250, key: 270, feast: 144, nobody: 260 };
 const DOCKS = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'feasted'];
 const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const TOASTS: Record<string, string> = { scattered: 'Your scatter is in.', rejected: "Not confirmed. Your crumbs are still here — try again when you're ready.", failed: "Couldn't save your scatter. Check your connection and try again — nothing was lost." };
