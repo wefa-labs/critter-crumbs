@@ -1,5 +1,4 @@
 import { useId } from 'react';
-import { generateCritter } from '@critter-crumbs/core';
 import { copy, type CopyId } from '@critter-crumbs/shared';
 import { ElementChip } from '../game/icons.js';
 import { critterVersion, supportsMesh } from '../portraits/version.js';
@@ -12,7 +11,7 @@ import { FloorCritter } from './painted-floor.js';
 import { PROFILE_SCENE } from './painted-scene.js';
 import { PlaceScreen } from './place-screen.js';
 import type { Me } from './session.js';
-import { Link, displayName, shortAddress } from './ui.js';
+import { Link, critterElementOf, displayName, shortAddress } from './ui.js';
 
 /** Each stored setting's name and the line under it */
 const WORDS = {
@@ -22,22 +21,22 @@ const WORDS = {
 
 /**
  * Your critter's profile, one screen in place of the profile and Settings dialogs (flow page, SCREENS.profile; the
- * November UI audit's screen 51): your critter on the floor under its element, your name and "This one's yours.", the
+ * November UI audit's screen 51): your critter on the floor, delighted, under its element, your name and "This one's yours.", the
  * short address with Copy address, the settings as switches, and How it works and Disconnect at the foot. The face in
  * every header opens it over the screen it was pressed on, and its back chevron returns there (app.tsx). Simple view is
- * left out while no critter has a 3D mesh (decision D7); dark mode stays (D26).
+ * left out while no critter has a 3D mesh (Design System D34); dark mode stays (D26).
  */
 export function YourCritter({ me, back, settings, choose, dark, chooseDark, disconnect, run, busy }: {
   me: Me; back: () => void; settings: GameSettings; choose: (key: StoredSetting, on: boolean) => void;
   dark: boolean; chooseDark: (on: boolean) => void; disconnect: () => void; run: RunAction; busy: boolean;
 }) {
   const notify = useNotification();
-  const drawn = generateCritter(me.address, me.variant, critterVersion), element = drawn.version === '2' ? drawn.element : null;
+  const element = critterElementOf(me.address, me.variant);
   const shown = (Object.keys(settingKeys) as StoredSetting[]).filter(key => key !== 'simple' || supportsMesh(critterVersion));
   return (
     <PlaceScreen over title={copy['profile.title']} back={back} painting={PROFILE_SCENE.painting} sheetHeight={PROFILE_SCENE.sheetHeight} className="your-critter"
       floor={<>
-        <FloorCritter critter={{ ...PROFILE_SCENE.critter, address: me.address, variant: me.variant, asleep: false, face: null }} />
+        <FloorCritter critter={{ ...PROFILE_SCENE.critter, address: me.address, variant: me.variant, asleep: false, face: null }} delighted />
         {element ? <div className="floor-chip"><ElementChip element={element} /></div> : null}
       </>}
       actions={<><Link className="quiet" href="/how-it-works">{copy['launch.learn']}</Link><button type="button" className="quiet" disabled={busy} onClick={disconnect}>{copy['action.disconnect']}</button></>}>

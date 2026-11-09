@@ -37,19 +37,24 @@ export function Opening({ bare = false }: { bare?: boolean }) {
 export function PendingPage({ error, retry, bare = false }: { error: unknown; retry: () => void; bare?: boolean }) {
   return error ? <Page title={copy['app.unavailable']}><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></Page> : <Opening bare={bare} />;
 }
-export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0 }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number }) {
+export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0, delighted = false }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number; delighted?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const svg = paintCritter(document, generateCritter(address, variant, critterVersion), { name, size, asleep, decorative, fed });
+    const svg = paintCritter(document, generateCritter(address, variant, critterVersion), { name, size, asleep, decorative, fed, delighted });
     host.current?.replaceChildren(svg);
     return () => { disposePortrait(svg); svg.remove(); };
-  }, [address, variant, name, size, asleep, decorative, fed]);
+  }, [address, variant, name, size, asleep, decorative, fed, delighted]);
   return <div className={size === 'stage' ? 'stage' : 'portrait-slot'} ref={host} />;
 }
 /** A face crop around the head; the review art supplies its own head centre and radius (game/styles.ts). */
 function faceStyle(address: string, variant: number, size: number) {
   const extent = portraitMetrics(generateCritter(address, variant, critterVersion)).extent;
   return faceCrop(size, extent.headY, extent.headX, extent.headX === undefined ? undefined : extent.headRadius);
+}
+/** A critter's element, for its chip (Design System §10, `element.*`); a version 1 critter has none. */
+export function critterElementOf(address: string, variant: number) {
+  const drawn = generateCritter(address, variant, critterVersion);
+  return drawn.version === '2' ? drawn.element : null;
 }
 /** A critter's face cropped to the head, as the flow page draws the givers' table (face()). */
 export function CritterFace({ address, variant, name, size }: { address: string; variant: number; name: string; size: number }) {
