@@ -120,7 +120,6 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 /* a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx) */
 .screen-layer { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:var(--cc-bg); }
 .screen-layer > .core-game { flex:1; height:auto; min-height:0; }
-#root:has(> .screen-layer) > .notice { position:fixed; top:64px; left:16px; right:16px; z-index:5000; }
 /* who has done something, at a glance: the count, the faces in a row with those not yet dimmed, then their names */
 .face-row { display:grid; gap:4px; }
 .face-row-count { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }

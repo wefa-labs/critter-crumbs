@@ -168,7 +168,7 @@ export function App() {
     <header className="app-header" inert={layered}><div className="screen-mark"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><BetaChip /></div><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
-    </nav><div id="feast-header" /></header>
+    </nav></header>
     {!online && !launching ? <p className="offline-band">{copy['err.offline']}</p> : null}
     <main id="content" tabIndex={-1} inert={layered}>{beneath ? content : null}</main>
     {layered ? <div className="screen-layer">{layer}</div> : null}

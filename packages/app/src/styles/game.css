@@ -194,8 +194,6 @@ dialog.game-dialog[open] { display:grid; gap:14px; }
 dialog.game-dialog::backdrop { background:color-mix(in srgb, var(--cc-burrow) 40%, transparent); }
 .game-dialog h2 { margin:0; font-family:var(--cc-font-display); font-weight:800; font-size:var(--cc-text-xl); line-height:1.25; letter-spacing:-.01em; }
 .game-dialog p { margin:0; max-width:none; }
-.game-dialog-actions { display:flex; gap:10px; align-items:center; }
-.game-dialog-actions .pill { flex:1; min-height:52px; padding:0 24px; border-radius:var(--cc-radius-pill); border:var(--cc-border-strong); background:var(--cc-action); color:var(--cc-action-text); font-weight:700; font-size:var(--cc-text-md); box-shadow:var(--cc-shadow-2); }
 @media (min-width:900px) { dialog.game-dialog { width:460px; margin:auto; padding:28px; border:var(--cc-border-strong); border-radius:24px; box-shadow:var(--cc-shadow-2), 0 20px 40px color-mix(in srgb, var(--cc-burrow) 20%, transparent); } }
 
 /* ------------------------------------------------------------------ results: on the phone the dock grows into a card
