@@ -1,4 +1,4 @@
-import { useState, type Ref } from 'react';
+import { useEffect, useRef, useState, type Ref } from 'react';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { GameIcon } from '../game/icons.js';
 import { useNotification } from './announcements.js';
@@ -10,6 +10,18 @@ import { FloorCritter } from './painted-floor.js';
 import { standingStyle, type Standing } from './painted-scene.js';
 import type { AppApi, Me } from './session.js';
 import { CritterFace, Link, displayName } from './ui.js';
+
+/**
+ * Reads a view again when `key` changes, once it has had one: the phases of a burrow's feasts by the trusted clock
+ * (burrow-view.ts, phasesKey), which the clock moves at a deadline before the store's answer is read again. The answer
+ * changes there too: scattering freezes who takes part, and a people feast left with fewer than three critters ends.
+ * Without it the screen would wait for its next half-minute poll, and a feast would show a scattering card with nobody
+ * taking part, or stay under way after it ended.
+ */
+export function useRereadOnChange(key: string, reread: () => void) {
+  const last = useRef(key);
+  useEffect(() => { if (last.current && key && last.current !== key) reread(); last.current = key; }, [key, reread]);
+}
 
 /** Your critter on a screen's floor, where the screen's scene puts it (burrow-scenes.ts). */
 export function YourCritter({ me, place, asleep = false }: { me: Me; place: YourPlace; asleep?: boolean }) {

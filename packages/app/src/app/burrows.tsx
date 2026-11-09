@@ -6,9 +6,9 @@ import { GameIcon } from '../game/icons.js';
 import { useNotification } from './announcements.js';
 import { CrittersScreen } from './burrow-critters.js';
 import { FeastCard, FeastRows } from './burrow-feasts.js';
-import { AddCritter, BurrowFloor, CopyLink, CrittersCard, Faces, NoFeasts, SleepingZ, YourCritter } from './burrow-parts.js';
+import { AddCritter, BurrowFloor, CopyLink, CrittersCard, Faces, NoFeasts, SleepingZ, YourCritter, useRereadOnChange } from './burrow-parts.js';
 import { ASLEEP_SCENE, BURROW_SHEETS, FRESH_BURROW_SCENE, HOME_SCENE, NEW_BURROW_SCENE, UNKNOWN_BURROW_SCENE, burrowPainting } from './burrow-scenes.js';
-import { activeMembers, feastsUnderWay, otherFeasts, sameAddress, type BurrowView } from './burrow-view.js';
+import { activeMembers, feastsUnderWay, otherFeasts, phasesKey, sameAddress, type BurrowView } from './burrow-view.js';
 import { copyText } from './clipboard.js';
 import { deadlineLine, phaseCopy, useTrustedTime } from './deadlines.js';
 import { PlaceScreen } from './place-screen.js';
@@ -53,8 +53,9 @@ export function Home({ me, api, onProfile }: Pick<Screen, 'me' | 'api' | 'onProf
  * has with the phase of its feast under way, and when that closes in words, or that nothing is due. The card opens it.
  */
 function BurrowCard({ burrow, api, now }: { burrow: Me['burrows'][number]; api: AppApi; now: number | null }) {
-  const { data: view, error } = useResource<BurrowView>(api, `/api/burrows/${burrow.id}`);
+  const { data: view, error, refresh } = useResource<BurrowView>(api, `/api/burrows/${burrow.id}`);
   const members = view ? activeMembers(view) : [], at = now ?? view?.serverNow ?? 0, next = view ? feastsUnderWay(view.feasts, at)[0] : undefined;
+  useRereadOnChange(view ? phasesKey(view.feasts, at) : '', refresh);
   const count = formatCopy('home.critterCount', { n: members.length });
   return (
     <li><Link className="link-card" href={`/burrows/${burrow.id}`}>
@@ -96,6 +97,7 @@ export function CreateBurrow({ me, api, session, run, busy, onProfile }: Screen 
  */
 export function Burrow({ id, ...screen }: Screen & { id: string }) {
   const resource = useResource<BurrowView>(screen.api, `/api/burrows/${id}`), now = useTrustedTime(screen.api);
+  useRereadOnChange(resource.data ? phasesKey(resource.data.feasts, now ?? resource.data.serverNow) : '', resource.refresh);
   if (!resource.data) return <Unloaded error={resource.error} retry={resource.refresh} {...screen} />;
   const view = resource.data, members = activeMembers(view), you = members.find(member => sameAddress(member.address, screen.me.address));
   if (you?.joinedAt === null) return <JoinBurrow view={view} refresh={resource.refresh} {...screen} />;
@@ -122,7 +124,7 @@ function BurrowPage({ view, now, ...screen }: Screen & { view: BurrowView; now: 
   return (
     <PlaceScreen title={view.name} back={goHome} viewer={viewerOf(screen)} painting={burrowPainting(view.feasts.length)} sheetHeight={feasted ? BURROW_SHEETS.feasts : BURROW_SHEETS.quiet} className="burrow-screen"
       floor={<BurrowFloor view={view} you={screen.me.address} />}>
-      {underWay.map(item => <FeastCard key={item.feast.id} underWay={item} view={view} api={screen.api} you={screen.me.address} now={now} />)}
+      {underWay.map((item, index) => <FeastCard key={item.feast.id} underWay={item} primary={index === 0} view={view} api={screen.api} you={screen.me.address} now={now} />)}
       {feasted ? null : <NoFeasts id={view.id} primary />}
       {others.length ? <FeastRows feasts={others} now={now} /> : null}
       <CrittersCard view={view} />
@@ -172,13 +174,17 @@ function JoinBurrow({ view, refresh, ...screen }: Screen & { view: BurrowView; r
   );
 }
 
-/** A burrow that could not be read: one that does not know you, a link that leads to no burrow, or the store out of reach, with Try again. */
+/**
+ * A burrow that could not be read: one that does not know you, a link that leads to no burrow, or the store out of
+ * reach, with Try again. While it is on its way the crumbs fill the screen, as the frame does, so moving between the
+ * burrow and its critters never shows the app's own header for a moment.
+ */
 function Unloaded({ error, retry, ...screen }: Screen & { error: unknown; retry: () => void }) {
   if (error instanceof ApiClientError && error.status === 403) return <NotInBurrow burrowName={(error.detail as { burrowName?: string } | undefined)?.burrowName} {...screen} />;
   /* the store has no burrow by that id (404), or the id is not one at all, as when a link is cut short in copying
      (400); trying again cannot help, so the screen says so in place of Try again */
   if (error instanceof ApiClientError && (error.status === 404 || error.status === 400)) return <NoBurrow {...screen} />;
-  return <PendingPage error={error} retry={retry} />;
+  return <PendingPage error={error} retry={retry} bare />;
 }
 
 /**

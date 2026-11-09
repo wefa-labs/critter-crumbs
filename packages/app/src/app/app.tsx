@@ -137,10 +137,10 @@ export function App() {
   else if (screen === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
   else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} run={run} busy={working} /></Suspense>; }
-  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><CreateBurrowRoute me={me} api={api} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
-  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
-  else if (critters) { music = screenMusic.burrow; content = <Suspense fallback={<Opening />}><BurrowCrittersRoute key={screen} id={critters[1]!} api={api} me={me} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
-  else { music = screenMusic.home; content = <Suspense fallback={<Opening />}><HomeRoute me={me} api={api} onProfile={openProfile} /></Suspense>; }
+  else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><CreateBurrowRoute me={me} api={api} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else if (burrow) { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><BurrowRoute key={screen} id={burrow[1]!} api={api} me={me} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else if (critters) { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><BurrowCrittersRoute key={screen} id={critters[1]!} api={api} me={me} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
+  else { music = screenMusic.home; content = <Suspense fallback={<Opening bare />}><HomeRoute me={me} api={api} onProfile={openProfile} /></Suspense>; }
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
   const layer = !me ? null

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { phaseAt } from '@critter-crumbs/core';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { SheetNotice } from '../game/sheet-parts.js';
+import { useRereadOnChange } from './burrow-parts.js';
 import { dayLabel, feastAction, feastDay, feastProgress, sameAddress, type BurrowFeast, type BurrowView, type UnderWay } from './burrow-view.js';
 import { deadlineLine, phaseCopy } from './deadline-lines.js';
 import type { MemberFeast } from './feast-view.js';
@@ -14,10 +15,13 @@ import { CritterFace, Dialog, Link, displayName, shortAddress, useResource } fro
  * A feast under way, first on the burrow's page (flow page, feastCard(); the November UI audit's screen 17): its title
  * and phase, when it closes, who has done this phase's part so far with their faces (PRD R5 and P3), and the one gold
  * action for the phase (burrow-view.ts, feastAction). While scattering, the count opens the list of who has scattered
- * and who has not (audit decision D5). Who has done what is the feast's own view, asked for again every half minute.
+ * and who has not (audit decision D5). Who has done what is the feast's own view, asked for again every half minute
+ * and when the feast's phase changes. Only the card closing next has its action in gold (`primary`), so a burrow with
+ * two feasts under way still has one gold action (the audit's X5).
  */
-export function FeastCard({ underWay: { feast, phase, closes }, view, api, you, now }: { underWay: UnderWay; view: BurrowView; api: AppApi; you: string; now: number }) {
-  const { data } = useResource<MemberFeast>(api, `/api/feasts/${feast.id}`), [listing, setListing] = useState(false);
+export function FeastCard({ underWay: { feast, phase, closes }, primary, view, api, you, now }: { underWay: UnderWay; primary: boolean; view: BurrowView; api: AppApi; you: string; now: number }) {
+  const { data, refresh } = useResource<MemberFeast>(api, `/api/feasts/${feast.id}`), [listing, setListing] = useState(false);
+  useRereadOnChange(phase, refresh);
   const progress = data ? feastProgress(data, phase) : null, action = feastAction(phase, data, you);
   const faces = progress?.map(({ address, done }): RowFace => {
     const member = view.members.find(one => sameAddress(one.address, address));
@@ -29,11 +33,11 @@ export function FeastCard({ underWay: { feast, phase, closes }, view, api, you, 
     <section className="feast-card">
       <div className="place-heading"><h3>{feast.title}</h3><span className="chip">{copy[phaseCopy[phase]]}</span></div>
       <p className="feast-card-line">{formatCopy('deadline.line', { deadline: deadlineLine(phase, closes, now, true), date: absoluteDeadline(closes) })}</p>
-      {faces ? phase === 'scattering'
+      {faces?.length ? phase === 'scattering'
         ? <button type="button" className="feast-card-who" onClick={() => setListing(true)}><FaceRow count={count} faces={faces} notYet="scatter.notYet" /></button>
         : <FaceRow count={count} faces={faces} notYet="gathering.notYet" /> : null}
-      {action ? <Link className="pill wide" href={`/feasts/${feast.id}`}>{copy[action]}</Link> : null}
-      {listing && faces ? <WhoScattered count={count} faces={faces} you={you} close={() => setListing(false)} /> : null}
+      {action ? <Link className={primary ? 'pill wide' : 'pill soft wide'} href={`/feasts/${feast.id}`}>{copy[action]}</Link> : null}
+      {listing && faces?.length ? <WhoScattered count={count} faces={faces} you={you} close={() => setListing(false)} /> : null}
     </section>
   );
 }

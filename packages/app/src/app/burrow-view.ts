@@ -25,6 +25,8 @@ export function feastsUnderWay(feasts: readonly BurrowFeast[], now: number): Und
     return isOpen(phase) ? [{ feast, phase, closes: phase === 'gathering' ? feast.gatheringEndsAt : feast.scatteringEndsAt }] : [];
   }).sort((a, b) => a.closes - b.closes);
 }
+/** The phase of each of the burrow's feasts at `now`, as one key: it changes when a deadline passes. */
+export const phasesKey = (feasts: readonly FeastClock[], now: number) => feasts.map(feast => phaseAt(feast, now)).join();
 /** The burrow's other feasts, the latest first: a creator's drafts, and those that have feasted, been cancelled or ended. */
 export const otherFeasts = (feasts: readonly BurrowFeast[], now: number) => feasts.filter(feast => !isOpen(phaseAt(feast, now))).sort((a, b) => b.scatteringEndsAt - a.scatteringEndsAt);
 /** The day a feast's row gives: when scattering closed, for one that feasted; else when its gathering closed, or would. */
@@ -47,13 +49,14 @@ export function feastProgress(feast: Pick<MemberFeast, 'kind' | 'participants' |
   return feast.targets.flatMap(target => target.ownerAddress ? [{ address: target.ownerAddress, done: feast.participation.written.includes(target.id) }] : []);
 }
 /**
- * The one gold action on a feast's card, which leads to the feast's page: Scatter crumbs while scattering; while
- * gathering, your statement in a people feast, and the option statements for the creator of an options feast, whose
- * other members have nothing to do until scattering opens. Until the feast's own view arrives its kind is not known,
- * and a gathering feast is taken to be a people feast.
+ * The action on a feast's card, which leads to the feast's page: Scatter crumbs while scattering, for those taking
+ * part, and nothing for a member who joined after the set froze (they are in the next feast); while gathering, your
+ * statement in a people feast, and the option statements for the creator of an options feast, whose other members
+ * have nothing to do until scattering opens. Until the feast's own view arrives, its kind and who takes part are not
+ * known: a gathering feast is taken to be a people feast, and a scattering one to include you.
  */
-export function feastAction(phase: OpenPhase, feast: Pick<MemberFeast, 'kind' | 'createdBy'> | null, you: string): CopyId | null {
-  if (phase === 'scattering') return 'scatter.title';
+export function feastAction(phase: OpenPhase, feast: Pick<MemberFeast, 'kind' | 'createdBy' | 'participants'> | null, you: string): CopyId | null {
+  if (phase === 'scattering') return feast?.participants.length && !feast.participants.some(one => sameAddress(one, you)) ? null : 'scatter.title';
   if (!feast || feast.kind === 'people') return 'gathering.yours.title';
   return sameAddress(feast.createdBy, you) ? 'gathering.options.title' : null;
 }

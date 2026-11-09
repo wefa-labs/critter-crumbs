@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { feastAction, feastDay, feastProgress, feastsUnderWay, otherFeasts, youLast, type BurrowFeast, type BurrowMember } from '../src/app/burrow-view.js';
+import { feastAction, feastDay, feastProgress, feastsUnderWay, otherFeasts, phasesKey, youLast, type BurrowFeast, type BurrowMember } from '../src/app/burrow-view.js';
 import { CLOVER, FERN, JUNIPER, MOSS } from '../src/app/painted-scene.js';
 
 /* What the burrow's page reads off its view and its feasts' views: which feasts are under way, who has done this phase's
@@ -58,19 +58,32 @@ describe("a feast's progress, as the burrow sees it", () => {
 });
 
 describe("the one action on a feast's card", () => {
-  it('is Scatter crumbs while scattering, whoever you are', () => {
+  const feastOf = (kind: 'people' | 'options', createdBy: string, participants: string[] = []) => ({ kind, createdBy: createdBy as `0x${string}`, participants: participants as `0x${string}`[] });
+
+  it('is Scatter crumbs while scattering for everyone taking part, also before the feast\'s own view has arrived', () => {
     expect(feastAction('scattering', null, MOSS)).toBe('scatter.title');
-    expect(feastAction('scattering', { kind: 'options', createdBy: FERN as `0x${string}` }, MOSS)).toBe('scatter.title');
+    expect(feastAction('scattering', feastOf('options', FERN, [FERN, MOSS]), MOSS.toLowerCase())).toBe('scatter.title');
+  });
+
+  it('is nothing while scattering for a member who joined after the set froze: they are in the next feast', () => {
+    expect(feastAction('scattering', feastOf('people', FERN, [FERN, JUNIPER]), MOSS)).toBeNull();
   });
 
   it("is your statement while a people feast gathers, also before the feast's own view has arrived", () => {
-    expect(feastAction('gathering', { kind: 'people', createdBy: FERN as `0x${string}` }, MOSS)).toBe('gathering.yours.title');
+    expect(feastAction('gathering', feastOf('people', FERN), MOSS)).toBe('gathering.yours.title');
     expect(feastAction('gathering', null, MOSS)).toBe('gathering.yours.title');
   });
 
   it("is the option statements for an options feast's creator, and nothing for its other members while it gathers", () => {
-    expect(feastAction('gathering', { kind: 'options', createdBy: MOSS as `0x${string}` }, MOSS.toLowerCase())).toBe('gathering.options.title');
-    expect(feastAction('gathering', { kind: 'options', createdBy: MOSS as `0x${string}` }, FERN)).toBeNull();
+    expect(feastAction('gathering', feastOf('options', MOSS), MOSS.toLowerCase())).toBe('gathering.options.title');
+    expect(feastAction('gathering', feastOf('options', MOSS), FERN)).toBeNull();
+  });
+});
+
+describe('the phases of the burrow\'s feasts', () => {
+  it('change as one key when a deadline passes, and not before', () => {
+    expect(phasesKey(feasts, now)).toBe(phasesKey(feasts, now + HOUR));
+    expect(phasesKey(feasts, now + 3 * HOUR)).not.toBe(phasesKey(feasts, now));
   });
 });
 
