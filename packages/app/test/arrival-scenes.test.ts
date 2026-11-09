@@ -137,7 +137,7 @@ describe('starting a feast', () => {
     expect(SETUP_SCENE.beside.map(spot => [...place(spot), spot.face])).toEqual([[32, 96, 64, 'right'], [68, 96, 64, 'left']]);
   });
 
-  it('faces a burrow of two to each other, as the too-few frame does', () => {
+  it('keeps the too-few frame’s two spots for a burrow of two, facing each other', () => {
     // SCREENS['setup-few']: VIEWER at (40, 97, 70) facing right, m5 at (60, 97, 70) facing left
     expect(SETUP_SCENE.pair.map(spot => [...place(spot), spot.face])).toEqual([[40, 97, 70, 'right'], [60, 97, 70, 'left']]);
   });

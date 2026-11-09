@@ -1,5 +1,5 @@
 import type { CopyId } from './copy.js';
-import { MAX_FEAST_TARGETS, MAX_NAME_LENGTH } from './limits.js';
+import { CRUMBS_PER_CRITTER, MAX_FEAST_TARGETS, MAX_NAME_LENGTH } from './limits.js';
 import type { FeastSetup, Hex } from './types.js';
 
 export class ValidationError extends Error {
@@ -50,7 +50,7 @@ export function parseFeastSetup(value: unknown): FeastSetup {
     }
   }
   return { title: text(input.title, 1, 80, 'setup.title.missing', true), context: text(input.context ?? '', 0, 140), kind,
-    crumbsPerCritter: integer(input.crumbsPerCritter ?? 100, 10, 1000, 'setup.crumbs.help'),
+    crumbsPerCritter: integer(input.crumbsPerCritter ?? CRUMBS_PER_CRITTER.norm, CRUMBS_PER_CRITTER.fewest, CRUMBS_PER_CRITTER.most, 'setup.crumbs.help'),
     gatheringEndsAt, scatteringEndsAt, aggregatePublic, individualOpen, options };
 }
 export function parseAddress(value: unknown): Hex { return hex(value, 20); }

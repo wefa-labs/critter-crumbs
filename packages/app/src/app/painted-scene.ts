@@ -10,6 +10,8 @@ import { gardenSpirits } from '../portraits/version.js';
 export type Painting = 'window' | 'dusk';
 export type Facing = 'left' | 'right' | null;
 export interface Standing { x: number; y: number; size: number }
+/** Where a critter stands and which way it is turned. */
+export interface Spot extends Standing { face: Facing }
 export interface SceneCritter extends Standing { address: string; /** which of the address's drawings, for a critter someone re-rolled; the first unless given */ variant?: number; asleep: boolean; face: Facing }
 export interface SceneHeap extends Standing { crumbs: number }
 /**
@@ -66,7 +68,7 @@ export const PROFILE_SCENE: { painting: Painting; critter: Standing; sheetHeight
  * with you awake in the middle of it and two of the burrow either side, turned to you; in a burrow of two the pair
  * face each other, and alone you stand in the middle.
  */
-export const SETUP_SCENE: { painting: Painting; sheetHeight: number; you: Standing; beside: readonly (Standing & { face: Facing })[]; pair: readonly (Standing & { face: Facing })[] } = {
+export const SETUP_SCENE: { painting: Painting; sheetHeight: number; you: Standing; beside: readonly [Spot, Spot]; pair: readonly [Spot, Spot] } = {
   painting: 'window',
   sheetHeight: 610,
   you: { x: 50, y: 98, size: 70 },

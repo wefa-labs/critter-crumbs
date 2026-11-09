@@ -1,7 +1,7 @@
 /* Start a feast, splitting a budget and too few critters, each beside its frame on the flow page, for wave two of the
    build (README.md, build order 8; screens 23 to 25). Adapted from capture-frame.mjs. Run from the repository root
    with a mock stack (bun run dev:local on 5173, or another of your own whose address is BASE) and the flow page on
-   4185 (launch configuration app-screens):
+   4185 (launch configuration app-screens, or another address as FLOW):
      BASE=http://127.0.0.1:5175 node docs/reviews/ui-audit-2026-11/capture-setup.mjs [outDir]
    Each image is the flow page's frame, then the app in the light look and in the dark one, at 375 × 812 on the phone
    and 1280 × 800 on desktop (shown at half size). The seeded burrow's owner, rehearsal critter 1, starts a feast in
@@ -10,7 +10,7 @@
 import { chromium } from 'playwright';
 import { mkdirSync } from 'node:fs';
 
-const BASE = process.env.BASE ?? 'http://127.0.0.1:5173', FLOW = 'http://localhost:4185/';
+const BASE = process.env.BASE ?? 'http://127.0.0.1:5173', FLOW = process.env.FLOW ?? 'http://localhost:4185/';
 const OUT = process.argv[2] ?? 'docs/reviews/ui-audit-2026-11/images/frame';
 mkdirSync(OUT, { recursive: true });
 const DEVICES = { phone: { width: 375, height: 812 }, desktop: { width: 1280, height: 800 } };

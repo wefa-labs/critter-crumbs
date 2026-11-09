@@ -462,8 +462,8 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `PrivacyControls` | Two choices | the result (Public, or Burrow only) and who gave what (Closed, or Open to the burrow after the feast), each a `SegmentedControl` of two cards | the two are independent; every combination is valid (PRD P14) | No forced or disabled state; each card says what it means, so no explainer follows them |
 | `Switch` | On/off | `<button role="switch" aria-checked>` | on / off | Track `--cc-line-strong` off, `--cc-moss` on, thumb Surface; 3 : 1 in both states |
 | `SegmentedControl` | One of two/three | `<fieldset>` of radios, each drawn as a card side by side; the feast type's two carry a line under their name | checked (Sunken, hard shadow) / focus-visible on the card | Native radios, unseen, each covering its card; visible legend; the card's name names its radio and its line describes it; arrow keys move the choice |
-| `DeadlinePicker` | Pick a time | the absolute time (§8, "Wed 7 Oct, 18:00 (PDT)") in the field, over an `<input type="datetime-local">`; the time-zone line under the pair | default / focused (the platform's own text) / invalid (order violated) | Native picker, whose own text shows while it has the focus; the time-zone line names the viewer's zone and its short form ("Pacific Time (PDT)") |
-| `CrumbStepper` | Crumbs per critter at setup | `−` button, number field, `+` button, the help line | default / at 10 (`−` aria-disabled) / at 1,000 (`+` aria-disabled) | The game's 44 px icon buttons, "Fewer crumbs" and "More crumbs", move to the next ten and announce the number; the field is a native `<input type="number">` (10 to 1,000) named by its label, described by the help line, and drawn as the bold count until it has the focus |
+| `DeadlinePicker` | Pick a time | on Start a feast, the absolute time (§8, "Wed 7 Oct, 18:00 (PDT)") in the field, over an `<input type="datetime-local">`, and the time-zone line under the pair; the extend dialog keeps the bare native picker, with the zone by its IANA id, until it moves to the frame | default / focused (the platform's own text) / invalid (order violated) | Native picker, whose own text shows while it has the focus, and alone in forced colours; on Start a feast the time-zone line names the viewer's zone and its short form when scattering closes ("Pacific Time (PDT)") |
+| `CrumbStepper` | Crumbs per critter at setup | `−` button, number field, `+` button, the help line | default / at 10 (`−` aria-disabled) / at 1,000 (`+` aria-disabled) | The game's 44 px icon buttons, "Fewer crumbs" and "More crumbs", move to the next ten and announce it (`setup.crumbs.announce`), and do nothing at their bound; the field is a native `<input type="number">` (10 to 1,000) named by its label, described by the help line, and drawn as the bold count until it has the focus |
 | `Button` | Primary / secondary / quiet | `<button>` | all | Primary: Burrow on Oat; secondary: Surface with strong border; quiet: text-only Soil, underlined on hover/focus |
 | `Chip` | Small status | text + optional icon | ok / neutral / error | Never colour alone; ok chips carry the `check` icon |
 | `Notice` | Inline message | icon, text, optional action | info / error / offline | Errors use `role="alert"` only when they block the current action; otherwise polite |
@@ -699,6 +699,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `setup.crumbs.help` | 100 keeps the maths simple. Anything from 10 to 1,000. |
 | `setup.crumbs.fewer` | Fewer crumbs (the stepper's −, ten fewer) |
 | `setup.crumbs.more` | More crumbs (the stepper's +, ten more) |
+| `setup.crumbs.announce` | {n} crumbs per critter (said politely after each − or +) |
 | `setup.field.gathering` | Gathering closes |
 | `setup.field.scattering` | Scattering closes |
 | `setup.deadline.help` | Everyone sees these in their own time zone. Yours is {tz}. |
@@ -957,6 +958,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Phase closed while on screen | polite | `scatter.closed` | Once |
 | Simple view engaged mid-session | polite | `fallback.midSession` | Once |
 | Re-roll | polite | `critter.reroll.announce` | Each re-roll |
+| Crumbs per critter stepped at setup | polite | `setup.crumbs.announce` | Each press of − or + that moves it |
 | Loading, saving, countdown ticks | none | — | Never announced |
 
 - Results are a `<table>` with `<caption>`; the feast is summarised in one sentence. Sound never carries state alone (PRD §9): every cue in the Game Design document maps to one of the DOM states above.

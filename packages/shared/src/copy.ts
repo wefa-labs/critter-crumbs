@@ -185,6 +185,7 @@ export const copy = {
   "setup.crumbs.help": "100 keeps the maths simple. Anything from 10 to 1,000.",
   "setup.crumbs.fewer": "Fewer crumbs",
   "setup.crumbs.more": "More crumbs",
+  "setup.crumbs.announce": "{n} crumbs per critter",
   "setup.field.gathering": "Gathering closes",
   "setup.field.scattering": "Scattering closes",
   "setup.deadline.help": "Everyone sees these in their own time zone. Yours is {tz}.",

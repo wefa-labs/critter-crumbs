@@ -1,5 +1,5 @@
 import { test, expect, type Page } from 'playwright/test';
-import { connectLocal } from './session.js';
+import { connectLocal, readJson } from './session.js';
 
 /** The seeded burrow's owner, rehearsal critter 1, opens Start a feast for an options feast with three options. */
 async function openOptionsSetup(page: Page, request: Parameters<Parameters<typeof test>[2]>[0]['request']) {
@@ -40,9 +40,32 @@ test('the set-up form’s cards are radios and its stepper keeps to the bounds',
   await expect(crumbs).toHaveValue('100');
   await page.getByRole('button', { name: 'More crumbs', exact: true }).click();
   await expect(crumbs).toHaveValue('110');
-  for (let press = 0; press < 11; press++) await fewer.click();
+  for (let press = 0; press < 10; press++) await fewer.click();
   await expect(crumbs).toHaveValue('10');
   await expect(fewer).toHaveAttribute('aria-disabled', 'true');
+  await fewer.click({ force: true });
+  await expect(crumbs).toHaveValue('10');
+  const more = page.getByRole('button', { name: 'More crumbs', exact: true });
+  await crumbs.fill('995');
+  await more.click();
+  await expect(crumbs).toHaveValue('1000');
+  await expect(more).toHaveAttribute('aria-disabled', 'true');
+});
+
+// What the cards and the stepper choose is what the draft keeps (PRD F4), saved through the form as a member would.
+test('a draft saved from the cards and the stepper keeps what they chose', async ({ page, request }) => {
+  await openOptionsSetup(page, request);
+  await page.getByRole('textbox', { name: 'Feast title', exact: true }).fill('Autumn budget');
+  const names = page.getByRole('textbox', { name: 'Option name', exact: true });
+  for (const [index, name] of ['Garden', 'Library', 'Workshop'].entries()) await names.nth(index).fill(name);
+  await page.getByRole('button', { name: 'More crumbs', exact: true }).click();
+  await page.getByRole('radio', { name: 'Public — anyone with the link, and recorded on-chain', exact: true }).check();
+  await page.getByRole('radio', { name: 'Open to the burrow after the feast', exact: true }).check();
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await expect(page).toHaveURL(/\/feasts\/[0-9a-f-]{36}$/);
+  const { body } = await readJson<{ kind: string; crumbsPerCritter: number; aggregatePublic: boolean; individualOpen: boolean; targets: { name: string }[] }>(page, `/api/feasts/${page.url().split('/').pop()}`);
+  expect(body).toMatchObject({ kind: 'options', crumbsPerCritter: 110, aggregatePublic: true, individualOpen: true });
+  expect(body.targets.map(target => target.name)).toEqual(['Garden', 'Library', 'Workshop']);
 });
 
 // A deadline already past used to read "Scattering has to close after gathering." (QA edge-states-09).
@@ -55,7 +78,7 @@ test('saving a draft whose gathering deadline has already passed says so', async
   await page.getByLabel('Gathering closes', { exact: true }).fill('2020-01-01T12:00');
   const save = page.getByRole('button', { name: 'Save draft', exact: true });
   await save.click();
-  await expect(page.locator('.place-actions .notice.error')).toHaveText('That gathering deadline has already passed. Choose a later time.');
+  await expect(page.locator('.place-actions .sheet-notice')).toHaveText('That gathering deadline has already passed. Choose a later time.');
   await expect(save).toHaveAccessibleDescription('That gathering deadline has already passed. Choose a later time.');
 });
 
@@ -70,9 +93,16 @@ test('a people feast in a burrow of two holds Save draft and says why, and an op
     return id;
   });
   await page.goto(`/burrows/${burrowId}/feasts/new`);
+  // the pair face each other on the floor, as the flow page's too-few frame draws them
+  await expect(page.locator('.screen-floor .floor-critter')).toHaveCount(2);
+  expect(await page.locator('.screen-floor .floor-critter').evaluateAll(critters => critters.map(critter => critter.getAttribute('data-face')))).toEqual(['right', 'left']);
   const save = page.getByRole('button', { name: 'Save draft', exact: true });
   await expect(save).toHaveAttribute('aria-disabled', 'true');
   await expect(save).toHaveAccessibleDescription('A people feast needs at least 3 critters. This burrow has 2.');
+  await page.getByRole('textbox', { name: 'Feast title', exact: true }).fill('Our shared work');
+  await save.click({ force: true });
+  await page.getByRole('textbox', { name: 'Feast title', exact: true }).press('Enter');
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}/feasts/new$`));
   await page.getByRole('radio', { name: 'To options', exact: true }).check();
   await expect(save).toHaveAttribute('aria-disabled', 'false');
   await expect(page.getByText('A people feast needs at least 3 critters. This burrow has 2.', { exact: true })).toHaveCount(0);
