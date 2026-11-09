@@ -4,14 +4,13 @@ import { ElementChip } from '../game/icons.js';
 import { critterVersion, supportsMesh } from '../portraits/version.js';
 import { settingKeys, type StoredSetting } from '../sim/settings.js';
 import type { GameSettings } from '../world/index.js';
-import { useNotification } from './announcements.js';
 import type { RunAction } from './burrows.js';
-import { copyText } from './clipboard.js';
+import { CopyAddress } from './copy-address.js';
 import { FloorCritter } from './painted-floor.js';
 import { PROFILE_SCENE } from './painted-scene.js';
 import { PlaceScreen } from './place-screen.js';
 import type { Me } from './session.js';
-import { Link, critterElementOf, displayName, shortAddress } from './ui.js';
+import { Link, critterElementOf, displayName } from './ui.js';
 
 /** Each stored setting's name and the line under it */
 const WORDS = {
@@ -30,7 +29,6 @@ export function YourCritter({ me, back, settings, choose, dark, chooseDark, disc
   me: Me; back: () => void; settings: GameSettings; choose: (key: StoredSetting, on: boolean) => void;
   dark: boolean; chooseDark: (on: boolean) => void; disconnect: () => void; run: RunAction; busy: boolean;
 }) {
-  const notify = useNotification();
   const element = critterElementOf(me.address, me.variant);
   const shown = (Object.keys(settingKeys) as StoredSetting[]).filter(key => key !== 'simple' || supportsMesh(critterVersion));
   return (
@@ -41,10 +39,7 @@ export function YourCritter({ me, back, settings, choose, dark, chooseDark, disc
       </>}
       actions={<><Link className="quiet" href="/how-it-works">{copy['launch.learn']}</Link><button type="button" className="quiet" disabled={busy} onClick={disconnect}>{copy['action.disconnect']}</button></>}>
       <div className="place-heading"><h2>{displayName(me)}</h2><span className="profile-kept">{copy['critter.locked']}</span></div>
-      <div className="critter-address">
-        <span className="address">{shortAddress(me.address)}</span>
-        <button type="button" className="quiet" disabled={busy} onClick={event => { const origin = event.currentTarget; void run(async () => { await copyText(me.address); notify(copy['profile.address.copied'], origin); }); }}>{copy['profile.address.copy']}</button>
-      </div>
+      <CopyAddress address={me.address} run={run} busy={busy} />
       <h3>{copy['settings.title']}</h3>
       <div className="switches">
         {shown.map(key => <Switch key={key} label={WORDS[key][0]} help={WORDS[key][1]} on={settings[key]} choose={on => choose(key, on)} />)}

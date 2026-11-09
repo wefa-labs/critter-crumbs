@@ -5,7 +5,7 @@ import { DRAFT_SCENE, ENDED_SCENE, GATHERING_SCENE, gatheringRow, LATE_SCENE, NO
    gatheringScene() calls it, optionCritters(), and SCREENS.gathering, draft, late, unknown and offline. */
 const place = ({ x, y, size }: { x: number; y: number; size: number }) => [x, y, size].map(value => Math.round(value * 10) / 10);
 const byIndex = (spots: RowSpot[]) => [...spots].sort((a, b) => a.index - b.index);
-const backToFront = (spots: RowSpot[]) => spots.every((spot, index) => !index || spot.y >= spots[index - 1]!.y);
+const drawnFromTheBack = (spots: RowSpot[]) => spots.every((spot, index) => !index || spot.y >= spots[index - 1]!.y);
 
 describe('gathering for people', () => {
   it('stands eight critters in two staggered rows, the second nearer and larger, the first half turned right', () => {
@@ -18,7 +18,7 @@ describe('gathering for people', () => {
     for (const count of [3, 8, 10, 30]) {
       const spots = gatheringRow(count);
       expect(spots.map(spot => spot.index).sort((a, b) => a - b)).toEqual(Array.from({ length: count }, (_, index) => index));
-      expect(backToFront(spots)).toBe(true);
+      expect(drawnFromTheBack(spots)).toBe(true);
     }
   });
 
@@ -39,7 +39,7 @@ describe('gathering for options', () => {
     const spots = byIndex(optionsRow(4));
     expect(spots.map(place)).toEqual([[16, 86, 78], [38.6, 78, 70], [61.2, 86, 78], [83.8, 78, 70]]);
     expect(spots.map(spot => spot.face)).toEqual(['right', 'right', 'left', 'left']);
-    expect(backToFront(optionsRow(4))).toBe(true);
+    expect(drawnFromTheBack(optionsRow(4))).toBe(true);
   });
 
   it('shrinks more than four options so they still fit across the floor', () => {

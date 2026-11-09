@@ -67,33 +67,33 @@ export function FeastRoute({ id, api, me, connect, run, busy, announce, settings
   const refreshFailure = resource.error && !missing ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
   useEffect(() => { if (refreshFailure) announce(refreshFailure); }, [refreshFailure]);
   useMusic(feastPageMusic(resource.data, phase, !!me));
-  /* your critter's face at the right of every header outside the game, and what the pages before scattering say of a
-     refresh the store did not answer, in their sheet as the plain page once did under its heading */
-  const viewer = me ? { address: me.address, variant: me.variant, open: onProfile } : undefined;
+  /* your critter's face at the right of every header outside the game; the pages before scattering say a refresh the
+     store did not answer (refreshFailure) in their sheet, as the plain page once did under its heading */
+  const faceOf = (member: Me) => ({ address: member.address, variant: member.variant, open: onProfile }), viewer = me ? faceOf(me) : undefined;
   if (missing) return <NoFeastHere me={me} viewer={viewer} />;
   if (!resource.data) return <PendingPage error={resource.error} retry={resource.refresh} bare />;
   const feast = resource.data, now = trusted ?? feast.serverNow;
   const props = { api, run, busy, refresh: resource.refresh, announce };
-  const trouble = resource.error ? resource.error instanceof ApiClientError && resource.error.status === 401 ? copy['err.sessionExpired'] : copy['err.storeUnreachable'] : '';
   /* A member who joined the burrow after its critters were fixed as scattering opened (PRD R7) is told so before
      anything invites them to read or scatter (QA edge-states-07), until the feast. */
-  if (isMemberFeast(feast) && me && viewer && feast.phase === 'scattering' && feast.participantsFrozenAt !== null && !feast.participants.some(address => address.toLowerCase() === me.address.toLowerCase())) return <JoinedTooLate feast={feast} me={me} viewer={viewer} trouble={trouble} />;
+  if (isMemberFeast(feast) && me && feast.phase === 'scattering' && feast.participantsFrozenAt !== null && !feast.participants.some(address => address.toLowerCase() === me.address.toLowerCase())) return <JoinedTooLate feast={feast} me={me} viewer={faceOf(me)} trouble={refreshFailure} />;
   /* one element in one place, so a scattering screen stays mounted as scattering closes under it */
   const reveal = isMemberFeast(feast) && me ? <Suspense fallback={<p>{copy['app.loading']}</p>}><Reveal feast={feast} viewer={me.address} settings={settings} announce={announce} {...(leaving ? { read: pressedAlready } : {})} /></Suspense> : null;
   const scatter = (closed: boolean) => isMemberFeast(feast) && me ? <Suspense fallback={<p>{copy['app.loading']}</p>}><Scatter feast={feast} me={me} {...props} clearError={clearError} settings={settings} account={account} connect={connect} now={now} initialReading={shown.endsWith('/read')} closed={closed} /></Suspense> : null;
   let content;
   if ((staying || stillStaying) && isMemberFeast(feast) && me) content = scatterScreen ? scatter(true) : reveal;
-  else if (phase !== feast.phase) return <Opening bare />;
-  else if (phase === 'cancelled' || phase === 'void') return <EndedFeast feast={feast} viewer={viewer} trouble={trouble} />;
+  else if (phase !== feast.phase) content = <p>{copy['app.loading']}</p>;
+  else if (phase === 'cancelled' || phase === 'void') return <EndedFeast feast={feast} viewer={viewer} trouble={refreshFailure} />;
   else if (phase === 'feast' && feast.aggregatePublic && !isMemberFeast(feast)) content = <Suspense fallback={<h1>{copy['results.title']}</h1>}><PublicResults feast={feast} settings={settings} announce={announce}/></Suspense>;
   else if (!me) return <Invite feast={feast} now={now} connect={connect} sound={sound} />;
-  else if (!isMemberFeast(feast) || !viewer) return <NotInBurrow feast={feast} me={me} viewer={{ address: me.address, variant: me.variant, open: onProfile }} run={run} busy={busy} />;
-  else if (phase === 'draft') return <Draft feast={feast} me={me} viewer={viewer} now={now} trouble={trouble} {...props}>{feast.kind === 'options' ? <OptionStatements feast={feast} {...props} /> : null}</Draft>;
-  else if (phase === 'gathering') return <Gathering feast={feast} me={me} viewer={viewer} now={now} still={settings.still || settings.reducedMotion} trouble={trouble} {...props} creator={<FeastActions feast={feast} me={me} {...props} />} />;
+  else if (!isMemberFeast(feast)) return <NotInBurrow feast={feast} me={me} viewer={faceOf(me)} run={run} busy={busy} />;
+  else if (phase === 'draft') return <Draft feast={feast} me={me} viewer={faceOf(me)} now={now} trouble={refreshFailure} {...props}>{feast.kind === 'options' ? <OptionStatements feast={feast} {...props} /> : null}</Draft>;
+  else if (phase === 'gathering') return <Gathering feast={feast} me={me} viewer={faceOf(me)} now={now} still={settings.still || settings.reducedMotion} trouble={refreshFailure} {...props} creator={<FeastActions feast={feast} me={me} {...props} />} />;
   else if (phase === 'scattering') content = scatterScreen ? scatter(false) : reveal;
   else content = <Suspense fallback={<h1>{copy['feast.waiting.title']}</h1>}><Results feast={feast} api={api} me={me} settings={settings} announce={announce} account={account} run={run} busy={busy} clearError={clearError} report={error=>void run(async()=>{throw error;})}/></Suspense>;
   if(phase==='feast'&&feast.aggregatePublic&&!isMemberFeast(feast))return <GameFrame feast={feast} onConnect={connect}>{content}</GameFrame>;
   if(isMemberFeast(feast)&&me&&(phase==='scattering'||phase==='feast'))return <GameFrame feast={feast} viewer={{address:me.address,variant:me.variant}} onProfile={onProfile} when={phase==='scattering'?scatteringDeadline(feast.scatteringEndsAt,now):undefined}>{content}{refreshFailure?<Toast>{refreshFailure}</Toast>:null}</GameFrame>;
-  /* every page before scattering, and a cancelled or void feast, returned above */
+  /* a phase that has turned before the feast is read again, outside the game's screens: the pages before scattering and a
+     cancelled or void feast are returned above */
   return <Opening bare />;
 }

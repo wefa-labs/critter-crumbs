@@ -376,7 +376,7 @@ Portraits are `role="img"` with the critter's name as `<title>` when they stand 
 
 ```
 ┌─────────────────────────────────────────┐
-│ ◆ Burrow name        Gathering · Scatt. │  <header>  top bar: burrow, phase chip, deadline strip
+│ ◆ Burrow name                   (face) │  <header>  burrow line, title, your critter's face (D31)
 ├─────────────────────────────────────────┤
 │                                         │  <main>    content column / critter grid
 │                                         │
@@ -386,7 +386,7 @@ Portraits are `role="img"` with the critter's name as `<title>` when they stand 
 └─────────────────────────────────────────┘
 ```
 
-- `<header>` on a screen with a floor is the frame's (D31): the burrow line over the title, and your critter's face. A feast's phase and close are the first row of its sheet while gathering, the close's absolute time a tap away (§8, `CloseLine`); the game's screens carry the scattering close in their header and dock.
+- `<header>` on a screen with a floor is the frame's (D31): the burrow line over the title, and your critter's face. While gathering, a feast's phase and both closes are the first row of its sheet, their absolute times a tap away (§8, `Closes`); the game's screens carry the scattering close in their header and dock.
 - `<main id="content" tabindex="-1">` receives focus on every route change. A skip link precedes the header. A screen drawn over the rest (the first meeting, your critter's profile, D33 and D34) stands outside `<main>`, which is inert beneath it with the header and the skip link, and takes the focus itself; closing the profile returns the focus to the face that opened it.
 - The pile bar is `position: sticky; bottom: 0` on `xs`–`md`, height 64 px + `env(safe-area-inset-bottom)`, with `--cc-shadow-up`; on `lg`+ it becomes a `position: sticky; top: var(--cc-space-6)` rail to the right of the grid.
 - Viewport height uses `dvh` where it matters (the feast's centred layout), never `vh`.
@@ -440,9 +440,9 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | Component | Purpose | Anatomy | States | Accessibility notes |
 |---|---|---|---|---|
 | `AppShell` | Page frame | skip link, `<header>`, `<main>`, `<aside>` (pile), announcers | — | Two live regions: `#announce` (polite) and `#alert` (assertive), atomic |
-| `TopBar` | Burrow + phase + deadlines | burrow name, `PhaseChip`, `DeadlineStrip`, settings button | — | `<header>`; burrow name is not a heading |
+| `ScreenHeader` | Where you are | back chevron where there is a parent, the burrow line over the title (or the wordmark), the beta chip, your critter's face | — | `<header>`; the burrow line is a link, not a heading; the title is the screen's `<h1>` (D31) |
 | `PhaseChip` | Current phase | text chip | draft / gathering / scattering / feast | Text, not colour alone |
-| `CloseLine` | The next close, in the first row of a gathering sheet beside the `PhaseChip` | relative close, absolute time | upcoming / closing-soon (< 6 h) / closed | A `<button aria-expanded>` that reveals the absolute time; relative time refreshes every minute, silently (`aria-live="off"`) |
+| `Closes` | Both deadlines while gathering, in the first row of the sheet beside the `PhaseChip` | the gathering close over the scattering close, each relative | upcoming / closing-soon (< 6 h) / closed; open shows each absolute time under it | One `<button aria-expanded>`; relative time refreshes every minute, silently (`aria-live="off"`) |
 | `ConnectButton` | Enter the app | primary button | default / loading; after connecting, the shared critter-face control opens profile navigation | Label is "Connect", never mentions a wallet (PRD §3) |
 | `CritterCell` | A critter in the grid | stage, name row, statement line, controls row | asleep / awake / own / done (viewer has submitted) / fed levels (results) | The cell is a `<li>`; the stage is `aria-hidden`; the name row carries the accessible summary (§12.6) |
 | `ScatterControls` | Give and take crumbs | `−` button, `NumberField`, `+` button | default / at-zero-remaining (`+` aria-disabled) / at-zero-here (`−` aria-disabled) / pouring | 44 × 44 targets; tap-and-hold on both; accessible names "Give a crumb to Fern" / "Take a crumb back from Fern" |
@@ -452,7 +452,7 @@ States use the same names everywhere: `default`, `hover` (pointer devices only),
 | `Heap` | The signature (§7.4) | SVG mound of crumb glyphs | full → empty (24 → 0 visible crumbs) | `aria-hidden`; the count carries the meaning |
 | `SubmitScatter` | Finalise | primary button | aria-disabled until the pile is empty / loading (signing, saving) / done | Helper text explains why it is not yet available |
 | `ParticipationLine` | Who has (not) scattered / written | count + names | live | Text list; portraits decorative; refreshes politely at most once a minute |
-| `StatementEditor` | Write your statement | heading, the prompt above the field, `<textarea>`, the counter and the saved state on one line, save; an option's is a card | empty / editing / saved / over-limit (blocked at 2,000) | `field-sizing: content` with `min-block-size: 6lh; max-block-size: 24lh`, fixed width; counter is `aria-live="off"` text; over-limit announced politely once |
+| `StatementEditor` | Write your statement | heading, the prompt above the field, `<textarea>`, the counter and the saved state on one line, save; an option's is a card | empty / editing / saved / over-limit (blocked at 2,000) | `field-sizing: content` with `min-block-size: 6lh; max-block-size: 24lh` (your own starts at 200 px, an option's card at three lines, as the flow page draws them), fixed width; counter is `aria-live="off"` text; over-limit announced politely once |
 | `StatementCard` | Read pass card | portrait, name, statement, links | default / empty | `<article aria-labelledby>`; links `rel="noopener nofollow ugc"`, same tab |
 | `StatementText` | Plain text renderer | paragraphs from line breaks, URLs → links | — | Never injects HTML; auto-link only `http(s)://`; visible URL truncated at 48 chars, full in `title` |
 | `Carousel` | Read pass container | list, position, prev/next | — | §6.4 |
@@ -509,7 +509,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 ## 8. Time and deadlines
 
 - Relative first, absolute one tap away: "Gathering closes in 2 days" · tap → "Tue 14 Oct, 18:00 (BST)". Relative strings come from `Intl.RelativeTimeFormat`; absolute from `Intl.DateTimeFormat` with `timeZoneName: "short"` in the viewer's zone.
-- While gathering, the sheet's first row carries the phase chip and the gathering close, its absolute time a tap away, and the header only the burrow line, the title and your face (the November UI audit's X1); the saved draft lists both closes as rows, and the invite both deadlines. While scattering, the game's header and dock carry the scattering close. A past deadline reads "closed {relative}". A cancelled or void feast shows neither.
+- While gathering, the sheet's first row carries the phase chip and both closes, the next one first, their absolute times a tap away, and the header only the burrow line, the title and your face (the November UI audit's X1); the saved draft lists both closes as rows, and the invite both deadlines. While scattering, the game's header and dock carry the scattering close. A past deadline reads "closed {relative}". A cancelled or void feast shows neither.
 - "Closing soon" (< 6 h) replaces the next deadline's line with `deadline.soon`, said once rather than beside it; the later deadline keeps its own line so the two stay apart. It adds the `clock` icon; never colour alone.
 - Countdown text refreshes every minute with `aria-live="off"`; deadlines are never announced spontaneously.
 - All times come from the trusted timestamp (PRD R13). If the device clock disagrees by more than 5 minutes, `err.clockSkew` shows once per session as a polite notice.
@@ -529,7 +529,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Burrow, only you | Member list with one row; add-critter field focused | `burrow.empty.*` |
 | Burrow, no feasts | Feast list empty state | `burrow.feasts.empty.*` |
 | Feast draft (creator) | On the frame (the November UI audit's screen 26): a back chevron, the burrow line and the title; a strip of floor with your critter between two of the feast's; the "Draft — only you can see this" chip, `setup.saved` as a leaf notice, every detail as a row with both closes, `setup.saved.help`, and Cancel this feast beside Open the feast at the foot. An options draft's statements follow the rows. Once the draft's gathering deadline has passed, `setup.open.late` takes the place of `setup.saved` and Open is left out | `setup.draft.chip`, `setup.saved`, `setup.saved.help`, `setup.open.*` |
-| Gathering (people) | On the frame (screens 28 and 29): the burrow line, the title and your face in the header, nothing else; the burrow's critters in two rows on the floor, those who have written awake and the rest asleep; the sheet's first row the phase chip and the close, its absolute time a tap away; Your statement with the prompt above the field, the counter (0 / 2,000 when empty) and `gathering.saved` on one line, `gathering.hidden` once as a leaf notice, and the gold Save; the notes card with Copy prompt; how many have written, with faces and `gathering.notYet`; the creator's Extend and Cancel as quiet links. Your critter smiles and nods when your statement saves, and only smiles under Still critters | `gathering.*`, `phase.gathering`, `deadline.*` |
+| Gathering (people) | On the frame (screens 28 and 29): the burrow line, the title and your face in the header, nothing else; the burrow's critters in two rows on the floor, those who have written awake and the rest asleep; the sheet's first row the phase chip and both closes, their absolute times a tap away; Your statement with the prompt above the field, the counter (0 / 2,000 when empty) and `gathering.saved` on one line, `gathering.hidden` once as a leaf notice, and the gold Save; the notes card with Copy prompt; how many have written, with faces and `gathering.notYet`; the creator's Extend and Cancel as quiet links. Your critter smiles and nods when your statement saves, and only smiles under Still critters | `gathering.*`, `phase.gathering`, `deadline.*` |
 | Gathering, options feast (creator) | Each option a card with its field, its counter and `gathering.saved`, or Save until it is saved; one help line above the cards and `gathering.hidden` once under them; the options' critters asleep on the floor (screen 30) | `gathering.options.title`, `setup.type.options.help` |
 | Gathering, member view of others | No statements: how many are written, with faces and who has not yet. A member of an options feast, who writes nothing, gets no notes card (QA lifecycle-10) | `gathering.hidden`, `gathering.participation`, `gathering.notYet` |
 | Scattering opens (first visit) | The reveal moment (Game Design), then `reveal.*` and the read pass | `reveal.*` |

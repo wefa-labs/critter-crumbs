@@ -8,7 +8,9 @@ test('statements remain private, cap safely, then reveal and read without WebGL 
   // The header names the burrow and the feast only; the phase and the close lead the sheet, the absolute time a tap away (the audit's X1).
   await expect(page.locator('.game-header')).not.toContainText('Gathering');
   await expect(page.locator('.phase-row .chip')).toHaveText('Gathering');
-  await page.locator('.phase-row button').click(); await expect(page.locator('.phase-row time')).toBeVisible();
+  // Both closes stay on screen (PRD §6), each with its absolute time a tap away.
+  await expect(page.locator('.close-lines > span')).toHaveText([/^Closing soon — /, /^Scattering closes /]);
+  await page.locator('.close-lines').click(); await expect(page.locator('.close-lines time')).toHaveCount(2);
   // The hidden line is said once, and says who cannot read the statement: statements are not secret from the host (Technical Spec §2).
   await expect(page.getByText('Nobody else in the burrow sees this until scattering opens.', { exact: true })).toHaveCount(1);
   await expect(page.getByText('8 of 8 statements written', { exact: true })).toBeVisible();

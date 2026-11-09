@@ -1,12 +1,11 @@
 import { useId, useState, type ReactNode } from 'react';
 import { copy, formatCopy, type CopyId } from '@critter-crumbs/shared';
 import { SheetNotice } from '../game/sheet-parts.js';
-import type { RunAction } from './burrows.js';
-import { burrowPath, DRAFT_SCENE, feastFrame, type Viewer } from './feast-place.js';
-import { portraitVariant, type MemberFeast } from './feast-view.js';
+import { burrowPath, DRAFT_SCENE, feastFrame, type FeastWriting, type Viewer } from './feast-place.js';
+import { portraitVariant } from './feast-view.js';
 import { FloorCritter } from './painted-floor.js';
 import { PlaceScreen } from './place-screen.js';
-import type { AppApi, Me } from './session.js';
+import type { Me } from './session.js';
 import { absoluteDeadline, localDateTime, localTimeZone, relativeTime } from './time.js';
 import { Dialog, Field, navigate } from './ui.js';
 import '../styles/feast-pages.css';
@@ -24,7 +23,7 @@ function shownDeadline(value: string) {
  * times as the flow page does ("Wed 7 Oct, 18:00 (PDT)"), and the extend field shows the new close that way too,
  * becoming the browser's own picker while it is being changed.
  */
-export function FeastActions({ feast, me, api, run, busy, refresh, announce, late = false }: { feast: MemberFeast; me: Me; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void; late?: boolean }) {
+export function FeastActions({ feast, me, api, run, busy, refresh, announce, late = false }: FeastWriting & { me: Me; late?: boolean }) {
   const [action, setAction] = useState<'open' | 'extend' | 'cancel' | null>(null), [deadline, setDeadline] = useState(() => localDateTime(feast.gatheringEndsAt + 3600000));
   const [editing, setEditing] = useState(false);
   const formId = useId();
@@ -54,7 +53,8 @@ export function FeastActions({ feast, me, api, run, busy, refresh, announce, lat
  * detail as a row with both closes, and Cancel this feast beside Open the feast at the foot. A draft whose gathering
  * deadline has passed says so in place of "Draft saved…". An options draft's statements follow (`children`).
  */
-export function Draft({ feast, me, viewer, now, trouble, children, ...acting }: { feast: MemberFeast; me: Me; viewer: Viewer; now: number; trouble: string; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void; children?: ReactNode }) {
+export function Draft({ me, viewer, now, trouble, children, ...writing }: FeastWriting & { me: Me; viewer: Viewer; now: number; trouble: string; children?: ReactNode }) {
+  const { feast } = writing;
   const late = now >= feast.gatheringEndsAt, people = feast.kind === 'people';
   const beside = feast.targets.filter(target => target.ownerAddress?.toLowerCase() !== me.address.toLowerCase()).slice(0, DRAFT_SCENE.beside.length);
   const rows: [CopyId, string][] = [
@@ -72,7 +72,7 @@ export function Draft({ feast, me, viewer, now, trouble, children, ...acting }: 
         {beside.map((target, index) => <FloorCritter key={target.id} critter={{ ...DRAFT_SCENE.beside[index]!, address: target.ownerAddress ?? target.id, variant: portraitVariant(feast, target), asleep: !people }} />)}
         <FloorCritter critter={{ ...DRAFT_SCENE.viewer, address: me.address, variant: me.variant, asleep: false }} />
       </>}
-      actions={<FeastActions feast={feast} me={me} {...acting} late={late} />}>
+      actions={<FeastActions {...writing} me={me} late={late} />}>
       {trouble ? <SheetNotice trouble>{trouble}</SheetNotice> : null}
       <span className="chip draft-chip">{copy['setup.draft.chip']}</span>
       {late ? <SheetNotice trouble>{copy['setup.open.late']}</SheetNotice> : <SheetNotice>{copy['setup.saved']}</SheetNotice>}

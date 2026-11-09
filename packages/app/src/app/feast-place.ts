@@ -1,5 +1,9 @@
+import type { ComponentProps } from 'react';
+import type { RunAction } from './burrows.js';
+import { isMemberFeast, type MemberFeast, type PublicFeast } from './feast-view.js';
 import type { Facing, Painting, Standing } from './painted-scene.js';
-import type { MemberFeast, PublicFeast } from './feast-view.js';
+import type { PlaceScreen } from './place-screen.js';
+import type { AppApi } from './session.js';
 
 /**
  * Where a feast's pages before scattering stand, as the flow page draws them (docs/explorations/app-screens:
@@ -13,8 +17,8 @@ export interface RowSpot extends FloorSpot { index: number }
 
 /** As many critters as the flow page draws in each row; more shrink, as a larger burrow's ring does (invite-circle.ts). */
 const ROOMY_PEOPLE = 8, ROOMY_OPTIONS = 4;
-const crowd = (n: number, roomy: number) => n > roomy ? Math.sqrt(roomy / n) : 1;
-const backToFront = (spots: RowSpot[]) => spots.sort((a, b) => a.y - b.y);
+const crowdScale = (n: number, roomy: number) => n > roomy ? Math.sqrt(roomy / n) : 1;
+const fromTheBack = (spots: RowSpot[]) => spots.sort((a, b) => a.y - b.y);
 
 /**
  * Gathering for people (gatheringScene(), row()): the burrow's critters across the floor in two staggered rows, the
@@ -22,16 +26,16 @@ const backToFront = (spots: RowSpot[]) => spots.sort((a, b) => a.y - b.y);
  * short for the invite's ring, whose front critters would stand over the ones behind them.
  */
 export function gatheringRow(n: number): RowSpot[] {
-  const scale = crowd(n, ROOMY_PEOPLE);
-  return backToFront(Array.from({ length: n }, (_, index) => ({
+  const scale = crowdScale(n, ROOMY_PEOPLE);
+  return fromTheBack(Array.from({ length: n }, (_, index) => ({
     index, x: 8 + index * 84 / Math.max(1, n - 1), y: 72 + (index % 2 ? 10 : 0), size: (58 + (index % 2 ? 6 : 0)) * scale, face: index < n / 2 ? 'right' : 'left',
   })));
 }
 
 /** An options feast while gathering (optionCritters()): each option's critter across the front of the floor, alternately set back. */
 export function optionsRow(n: number): RowSpot[] {
-  const scale = crowd(n, ROOMY_OPTIONS);
-  return backToFront(Array.from({ length: n }, (_, index) => ({
+  const scale = crowdScale(n, ROOMY_OPTIONS);
+  return fromTheBack(Array.from({ length: n }, (_, index) => ({
     index, x: 16 + index * 67.8 / Math.max(1, n - 1), y: 86 - (index % 2) * 8, size: (78 - (index % 2) * 8) * scale, face: index < n / 2 ? 'right' : 'left',
   })));
 }
@@ -66,15 +70,18 @@ export const ENDED_SCENE: { painting: Painting; sheetHeight: number; one: readon
  */
 export const NOWHERE_SCENE: { painting: Painting; sheetHeight: number; critter: FloorSpot } = { painting: 'window', sheetHeight: 330, critter: { x: 34, y: 94, size: 112, face: 'right' } };
 
-/** Whose face is at the right of the header, and what pressing it opens. */
-export interface Viewer { address: string; variant: number; open: () => void }
+/** Whose face is at the right of the frame's header, and what pressing it opens. */
+export type Viewer = NonNullable<ComponentProps<typeof PlaceScreen>['viewer']>;
+
+/** What a feast's page needs to change the feast: the store, the app's one action at a time (`busy` while it runs), a fresh read of the feast after it, and the polite announcer. */
+export interface FeastWriting { feast: MemberFeast; api: AppApi; run: RunAction; busy: boolean; refresh: () => void; announce: (text: string) => void }
 
 /**
  * The frame's header on a feast's page (hdr({ burrow, title })): the burrow's name over the feast's title, leading to the
  * burrow for a member, who is the only one the feast tells which burrow that is, and the viewer's face.
  */
 export function feastFrame(feast: PublicFeast | MemberFeast, viewer: Viewer | undefined) {
-  return { title: feast.title, burrow: feast.burrowName, ...('burrowId' in feast ? { href: burrowPath(feast) } : {}), ...(viewer ? { viewer } : {}) };
+  return { title: feast.title, burrow: feast.burrowName, ...(isMemberFeast(feast) ? { href: burrowPath(feast) } : {}), ...(viewer ? { viewer } : {}) };
 }
 
 /** A member's way back from a feast: its burrow. */

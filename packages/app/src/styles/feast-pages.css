@@ -1,6 +1,6 @@
 /* A feast's pages before scattering, on the shared frame (place-screen.tsx, screens.css): gathering, the saved draft, a
    cancelled or void feast, joining too late, and a link that leads nowhere (gathering.tsx, feast-actions.tsx,
-   feast-states.tsx). Only what the frame does not already draw: the flow page's chip, close line, statement field,
+   feast-states.tsx). Only what the frame does not already draw: the flow page's chip, the closes, the statement field,
    cards and rows (docs/explorations/app-screens, SCREENS.gathering, ['gathering-options'] and draft). */
 
 .feast-page .chip { width:max-content; padding:4px 10px; font-size:var(--cc-text-xs); font-weight:700; line-height:1.5; color:var(--cc-text); }
@@ -8,12 +8,12 @@
 .feast-page a.pill { text-decoration:none; }
 .feast-help { font-size:var(--cc-text-sm); line-height:1.45; color:var(--cc-text-2); }
 
-/* the sheet's first row: the phase, and the close with its absolute time a tap away (the audit's X1) */
+/* the sheet's first row: the phase, and both closes with their absolute times a tap away (the audit's X1, PRD §6) */
 .phase-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.close-line { display:grid; justify-items:end; text-align:right; font-size:var(--cc-text-xs); color:var(--cc-text-2); }
-.close-line button { min-height:44px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; color:inherit; font-size:inherit; font-weight:400; }
-.close-line button:active { translate:none; }
-.close-line time { margin-top:-10px; }
+.close-lines { display:grid; justify-items:end; gap:2px; min-height:44px; padding:0; border:0; border-radius:0; background:none; box-shadow:none; color:var(--cc-text-2); font-size:var(--cc-text-xs); font-weight:400; line-height:1.4; text-align:right; }
+.close-lines:active { translate:none; }
+.close-lines > span, .close-lines time { display:block; }
+.close-lines time { color:var(--cc-text); }
 
 /* writing: the field, then its count and whether it is saved on one line; an option's statement is a card */
 .feast-page .statement-editor { display:flex; flex-direction:column; gap:12px; max-width:none; margin:0; }
@@ -37,3 +37,5 @@
 .extend-box[data-shown="true"] input { color:transparent; }
 .extend-shown { position:absolute; left:calc(var(--cc-space-3) + 1.5px); top:50%; translate:0 -50%; color:var(--cc-text); pointer-events:none; }
 .extend-box[data-shown="false"] .extend-shown { display:none; }
+/* forced colours paint the field's own text whatever its colour, so there it shows alone */
+@media (forced-colors:active) { .extend-shown { display:none; } }

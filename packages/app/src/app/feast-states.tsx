@@ -1,8 +1,7 @@
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { SheetNotice } from '../game/sheet-parts.js';
-import { useNotification } from './announcements.js';
 import type { RunAction } from './burrows.js';
-import { copyText } from './clipboard.js';
+import { CopyAddress } from './copy-address.js';
 import { burrowPath, ENDED_SCENE, feastFrame, LATE_SCENE, NOWHERE_SCENE, type Viewer } from './feast-place.js';
 import { isMemberFeast, portraitVariant, type MemberFeast, type PublicFeast } from './feast-view.js';
 import { FloorCritter } from './painted-floor.js';
@@ -78,17 +77,13 @@ export function NoFeastHere({ me, viewer }: { me: Me | null; viewer: Viewer | un
  * ask for, and your short address with Copy address, the one thing to send to someone in the burrow.
  */
 export function NotInBurrow({ feast, me, viewer, run, busy }: { feast: PublicFeast; me: Me; viewer: Viewer; run: RunAction; busy: boolean }) {
-  const notify = useNotification();
   return (
     <PlaceScreen title={feast.burrowName} viewer={viewer} painting={NOWHERE_SCENE.painting} sheetHeight={NOWHERE_SCENE.sheetHeight} className="feast-page feast-nowhere"
       floor={<FloorCritter critter={{ ...NOWHERE_SCENE.critter, address: me.address, variant: me.variant, asleep: false }} />}
       actions={<Link className="pill soft wide" href="/">{copy['action.back']}</Link>}>
       <h2>{copy['burrow.unknown.title']}</h2>
       <p>{formatCopy('burrow.unknown.body', { burrowName: feast.burrowName, shortAddress: shortAddress(me.address) })}</p>
-      <div className="critter-address">
-        <span className="address">{shortAddress(me.address)}</span>
-        <button type="button" className="quiet" disabled={busy} onClick={event => { const origin = event.currentTarget; void run(async () => { await copyText(me.address); notify(copy['profile.address.copied'], origin); }); }}>{copy['profile.address.copy']}</button>
-      </div>
+      <CopyAddress address={me.address} run={run} busy={busy} />
     </PlaceScreen>
   );
 }
