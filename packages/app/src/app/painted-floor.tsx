@@ -11,11 +11,11 @@ export function PaintedFloor({ painting, className, ref, children }: { painting:
   return <div className={className} ref={ref}><div className="scene-paint" data-painting={painting} /><div className="scene-wash" />{children}</div>;
 }
 
-/** A critter standing on the floor by its feet. */
-export function FloorCritter({ critter, beside, children, fed = 0 }: { critter: SceneCritter; beside?: Beside; children?: ReactNode; fed?: number }) {
+/** A critter standing on the floor by its feet; `delighted` smiles, as your critter does on its profile. */
+export function FloorCritter({ critter, beside, children, fed = 0, delighted = false }: { critter: SceneCritter; beside?: Beside; children?: ReactNode; fed?: number; delighted?: boolean }) {
   return (
     <div className="floor-critter" data-face={critter.face} style={standingStyle(critter, beside)}>
-      <PortraitImage address={critter.address} variant={critter.variant ?? 0} name="" size="stage" asleep={critter.asleep} fed={fed} />
+      <PortraitImage address={critter.address} variant={critter.variant ?? 0} name="" size="stage" asleep={critter.asleep} fed={fed} delighted={delighted} />
       {children}
     </div>
   );

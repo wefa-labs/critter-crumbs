@@ -263,7 +263,7 @@ test('a feast opened from a link shows the burrow, the feast, both deadlines and
     await page.goto(`/feasts/${feast.id}`);
     await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible();
     await expect(page.getByRole('link', { name: /^Rehearsal burrow · 8 critters$/ })).toBeVisible();
-    // the beta chip stands beside the burrow line, in place of the banner (D2)
+    // the beta chip stands beside the burrow line, in place of the banner (Design System D32)
     await expect(page.locator('.game-line').getByRole('note', { name: 'Development status', exact: true })).toHaveText(/^Beta/);
     await expect(page.getByText(/^Gathering closes /)).toBeVisible();
     await expect(page.getByText(/^Scattering closes /)).toBeVisible();

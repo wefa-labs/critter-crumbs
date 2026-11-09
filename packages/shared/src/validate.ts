@@ -9,12 +9,16 @@ export function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new ValidationError();
   return value as Record<string, unknown>;
 }
+/** Whether text is from `min` to `max` characters long, counted in Unicode code points. */
+const sized = (value: string, min: number, max: number) => { const length = Array.from(value).length; return length >= min && length <= max; };
 export function text(value: unknown, min: number, max: number, id: CopyId = 'err.generic', trim = false): string {
   if (typeof value !== 'string') throw new ValidationError(id);
   const result = trim ? value.trim() : value;
-  if (Array.from(result).length < min || Array.from(result).length > max) throw new ValidationError(id);
+  if (!sized(result, min, max)) throw new ValidationError(id);
   return result;
 }
+/** Whether a display name or an option name can be saved as it is: 1 to MAX_NAME_LENGTH characters once trimmed. */
+export const nameFits = (value: string) => sized(value.trim(), 1, MAX_NAME_LENGTH);
 export function integer(value: unknown, min: number, max: number, id: CopyId = 'err.generic'): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < min || value > max) throw new ValidationError(id);
   return value;

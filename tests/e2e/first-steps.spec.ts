@@ -94,6 +94,9 @@ test('the first meeting can be left by disconnecting, back where a signed-out vi
   await page.goto(`/feasts/${feast.id}`);
   await connect('Connect to join');
   await expect(meeting).toBeVisible();
+  // its wordmark is words, not a way home that would move the page waiting beneath it
+  await expect(meeting.getByText('Critter Crumbs', { exact: true })).toBeVisible();
+  await expect(meeting.getByRole('link', { name: 'Critter Crumbs', exact: true })).toHaveCount(0);
   // a quiet link, not a pill, under the choice it never competes with
   const leave = meeting.getByRole('button', { name: 'Disconnect', exact: true }), keep = meeting.getByRole('button', { name: 'Keep this one', exact: true });
   await expect(leave).toHaveClass(/\bquiet\b/);

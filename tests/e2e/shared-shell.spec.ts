@@ -57,7 +57,7 @@ test('your critter is one screen over the page it was opened from, with the sett
   await expect(profile.getByText('0x7E5F…5Bdf', { exact: true })).toBeVisible();
   await expect(profile.getByText("This one's yours.", { exact: true })).toBeVisible();
   await expect(profile.getByRole('button', { name: 'Close' })).toHaveCount(0);
-  // the settings are switches; Simple view waits for critters with a 3D mesh (D7)
+  // the settings are switches; Simple view waits for critters with a 3D mesh (Design System D34)
   await expect(profile.getByRole('switch')).toHaveCount(4);
   for (const name of ['Sounds', 'Music', 'Still critters', 'Dark mode']) await expect(profile.getByRole('switch', { name, exact: true })).toBeVisible();
   const still = profile.getByRole('switch', { name: 'Still critters', exact: true });
@@ -82,6 +82,13 @@ test('your critter is one screen over the page it was opened from, with the sett
   await page.goBack();
   await expect(profile).toHaveCount(0);
   await expect(adding).toHaveValue('fern.eth');
+  // a visit to the first steps from the profile, which return to it, keeps the way back to the burrow
+  await face.click();
+  await profile.getByRole('link', { name: 'How it works', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(profile).toBeVisible();
+  await profile.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
 
   // home: a whole burrow card opens its burrow, and Start a burrow makes one
   await page.getByRole('link', { name: 'Critter Crumbs', exact: true }).click();
@@ -185,7 +192,7 @@ test('the first meeting saves the name and chosen critter together from its fixe
   await expect(critter).toBeVisible();
   const keep = critter.getByRole('button', { name: 'Keep this one', exact: true }), frame = await keep.boundingBox();
   await expect(critter.locator('svg.portrait')).toHaveCount(1);
-  // the name counts to 16 and stops there (D10)
+  // the name counts to 16 and stops there (Design System D35)
   const name = critter.getByRole('textbox', { name: 'Display name', exact: true });
   await name.fill('Avery');
   await expect(critter.getByText('5 / 16', { exact: true })).toBeVisible();

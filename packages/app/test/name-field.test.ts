@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_NAME_LENGTH, parseProfileUpdate } from '@critter-crumbs/shared';
-import { fitName, nameFits } from '../src/app/name-field.js';
+import { MAX_NAME_LENGTH, nameFits, parseProfileUpdate } from '@critter-crumbs/shared';
+import { fitName } from '../src/app/name-field.js';
 
-/* Names are 16 characters, counted as the server counts them (decision D10 of the November UI audit). */
+/* Names are 16 characters, counted as the server counts them (Design System D35). */
 describe('a name field', () => {
   it('stops a typed or pasted name at 16 code points', () => {
     expect(MAX_NAME_LENGTH).toBe(16);

@@ -23,7 +23,7 @@ const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:m
 const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
 const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
 const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
-import { returnPath, YOUR_CRITTER_PATH } from './learn-return.js';
+import { returnPath } from './learn-return.js';
 import { BetaChip } from './screen-header.js';
 import { Link, Opening, ProfileButton, navigate } from './ui.js';
 
@@ -40,7 +40,8 @@ export function App() {
   const { api, session, audio, pressWatch } = services, state = useSyncExternalStore(session.subscribe, session.snapshot);
   const [path, setPath] = useState(location.pathname), [busy, setBusy] = useState(false), running = useRef(false), resumeAfterConnect = useRef(false);
   /* the screen your critter's profile was opened over, which is where its back chevron leads, and what opened it: the
-     face that was pressed, to have the focus back; a profile opened by its own address has neither beneath it */
+     face that was pressed, to have the focus back; a profile opened by its own address has neither beneath it. A visit
+     to the first steps from the profile, which return to it, keeps the way back. */
   const [under, setUnder] = useState(() => returnPath(history.state)), [opener, setOpener] = useState<Element | null>(null);
   const [connecting, setConnecting] = useState(false), [choices, setChoices] = useState<Choice[]>([]), [discovering, setDiscovering] = useState(false), [connectReason, setConnectReason] = useState('');
   /* the choice the connect sheet is waiting on, from its press until the app it names has answered */
@@ -49,8 +50,8 @@ export function App() {
   /* dark follows the device until someone chooses (theme.ts) */
   const [darkChoice, setDarkChoice] = useState(() => readDarkChoice(services.preferences.storage)), [deviceDark, setDeviceDark] = useState(() => matchMedia('(prefers-color-scheme: dark)').matches);
   const sounding = useSyncExternalStore(audio.subscribe, audio.running);
-  /* whose first meeting stands over the screen they connected on: it stays until Keep, even once the fourth re-roll has
-     locked the critter (onboarding.tsx) */
+  /* whose first meeting comes before the screen they connected on: it stays until Keep or Disconnect, even once the
+     fourth re-roll has locked the critter (onboarding.tsx) */
   const [meetingFor, setMeetingFor] = useState<string | null>(null);
   const [online, setOnline] = useState(navigator.onLine);
   const providers = useRef<Promise<AccountProvider[]> | undefined>(undefined);
@@ -63,7 +64,8 @@ export function App() {
   }
   useEffect(() => { void session.restore().catch(error => setAlert(message(error))); }, [session]);
   useEffect(() => {
-    const changed = () => { audio.stop(); setPath(location.pathname); setUnder(returnPath(history.state)); setAlert(''); };
+    /* the profile's way back is read on arriving at it, except from the first steps, which return to it */
+    const changed = () => { audio.stop(); setPath(location.pathname); if (location.pathname === '/your-critter') setUnder(under => history.state?.from === '/how-it-works' ? under : returnPath(history.state)); setAlert(''); };
     const network = () => { setOnline(navigator.onLine); setAlert(navigator.onLine ? '' : copy['err.offline']); if (navigator.onLine) announce(copy['err.online']); };
     const media = matchMedia('(prefers-reduced-motion: reduce)'), scheme = matchMedia('(prefers-color-scheme: dark)');
     const motion = () => setSettings(value => ({ ...value, reducedMotion: media.matches })), device = () => setDeviceDark(scheme.matches);
@@ -111,18 +113,18 @@ export function App() {
   }
   function chooseSetting(key: StoredSetting, value: boolean) { saveSetting(services.preferences.storage, key, value); setSettings(settings => ({ ...settings, [key]: value })); }
   /* disconnecting leaves the member where a signed-out visitor would be: on the screen beneath your critter's profile,
-     or on the page the first meeting stood over, which is the launcher, or the invite for a feast's link */
+     or on the page they connected on, which the first meeting comes before: the launcher, or a feast's invite */
   function disconnect(to?: string) { void run(async () => { await session.disconnect(); if (to) navigate(to); }); }
   function chooseDark(value: boolean) { saveDarkChoice(services.preferences.storage, value); showDarkChoice(document.documentElement, value); setDarkChoice(value); }
   /* the screen in view, or the one beneath your critter's profile while that is open */
-  const profile = path === YOUR_CRITTER_PATH, screen = profile ? under : path;
+  const profileOpen = path === '/your-critter', screen = profileOpen ? under : path;
   const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(screen);
   const feastRoute = /^\/feasts\/([^/]+)(?:\/.*)?$/.exec(screen);
   const me = state.me, burrow = /^\/burrows\/([^/]+)$/.exec(screen);
   /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
-  const meeting = me !== null && meetingFor === me.address;
-  const openProfile = () => { setOpener(document.activeElement); navigate(YOUR_CRITTER_PATH); };
+  const meetingShown = me !== null && meetingFor === me.address;
+  const openProfile = () => { setOpener(document.activeElement); navigate('/your-critter'); };
   /* the Music toggle wherever there is no Settings to open: the launcher, the first steps and a visitor's header */
   const musicButton = <MusicButton on={settings.music} sounding={sounding} soundAtPress={pressWatch.soundAtPress} choose={value => chooseSetting(MUSIC_SETTING, value)} />;
   /* the launcher says its own trouble, in its sheet */
@@ -140,13 +142,13 @@ export function App() {
   useEffect(() => { if (music) audio.music(music); }, [audio, music]);
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
   const layer = !me ? null
-    : meeting ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} disconnect={() => disconnect()} /></Suspense>
-    : profile ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={() => navigate(under)} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
+    : meetingShown ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} disconnect={() => disconnect()} /></Suspense>
+    : profileOpen ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={() => navigate(under)} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
       disconnect={() => disconnect(under)} run={run} busy={working} /></Suspense>
     : null;
   /* the screen beneath a layer stays as it was only when it was there before: your critter's profile, opened from it.
      The first meeting stands over nothing, and the screen it was opened on arrives once it is done. */
-  const layered = layer !== null, beneath = !layered || (profile && !meeting && opener !== null);
+  const layered = layer !== null, beneath = !layered || (profileOpen && !meetingShown && opener !== null);
   useEffect(() => {
     if (layered || !opener) return;
     if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
