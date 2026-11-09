@@ -523,12 +523,13 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark, the tagline and the beta line on a plate (D32), four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `app.environment.*`, `action.connect`, `launch.learn` |
 | Arrive by a link, not connected | Header with the burrow line, the beta chip and the feast title; the feast’s critters asleep in a ring on the window plate the game stands its circle on, raised as the game raises it so they stand on the floor (the November UI audit, screen 2), with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
-| First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen and your critter's profile: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*` |
+| First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen, your critter's profile and home with no burrows: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The private step and the result carry Why nobody can peek at the foot of their words, and the week its deadlines line, so the sheet has a top, a middle and a foot; the page comes back to the same step (D36). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*`, `why.title` |
+| Why nobody can peek (the page behind the link) | One column at `/how-it-works/why`, about 34 em wide, under the wordmark, the beta chip and the Music toggle, scrolling over Got it pinned at its foot: the closed seed pod of the private step, the title, What you are promised (five lines, each led by its promise in bold), One thing we will not pretend, The words (burrow, critters, scatter, feast), What runs where in the secondary colour (the one place Shutter, EAS, Gnosis Chain and Base are named), and The source, whose two links to GitHub are the only links out of the app. Got it goes back where the page was opened from, through the browser’s history, or to the launcher when it was opened by its address. It opens only from its links (D36) | `why.*`, `learn.done` |
 | Meet your critter (first connect) | A whole screen (D33): the wordmark and the beta chip in the header; the critter large on the painted floor; in the sheet the title with the element chip, the line, the name field with its 16-character counter when there is no ENS name (the ENS name otherwise), and Re-roll and Keep this one pinned at the foot, with Disconnect as a quiet link under them. No Close: Keep is the way past it, and saves the name and the lock in one update; Disconnect signs out as the profile does and leaves the member where a signed-out visitor would be, on the launcher or, from a feast's link, its invite. Rerolls keep the draft name; the fourth locks on the server and the screen stays until Keep. The page the member connected on, a feast from its link, comes after | `critter.*`, `name.*`, `action.disconnect` |
 | A kept critter with no name (no ENS) | The same screen asking only for the name: the critter smaller and asleep, `name.title`, `name.help`, the field with its counter, Save name, and the same Disconnect under it | `name.*`, `action.disconnect` |
 | Your critter (the profile) | One screen in place of the profile and Settings dialogs (D34), over the screen whose face was pressed, which stays as it was beneath it: a back chevron and “Your critter” in the header; the critter on the floor under its element chip; the name and `critter.locked`; the short address with Copy address; Settings as switches (Sounds, Music, Still critters, Dark mode; Simple view only while some critter has a 3D mesh); How it works and Disconnect at the foot. The chevron, Escape and the browser’s Back return to the screen beneath | `profile.*`, `settings.title`, `sound.*`, `motion.*`, `view.*`, `critter.locked`, `launch.learn`, `action.disconnect` |
 | Home (your burrows) | On the frame (D31), with the wordmark: your critter at the burrow's entrance; each burrow a card that opens it, with three of its critters' faces, its name, how many critters with the phase of its feast under way, and when that closes in words ("Scattering closes in 2 days"), or `home.noDeadline`; Start a burrow at the foot | `home.*`, `phase.*`, `deadline.*` |
-| Home, no burrows | Your critter asleep at the entrance, a "z" over its head; the title, the line, and Start a burrow as the one action | `home.empty.*` |
+| Home, no burrows | Your critter asleep at the entrance, a "z" over its head; the title, the line, and Start a burrow as the one action, with How it works as a quiet line under it, as on the launcher, never a dialog (D36) | `home.empty.*`, `launch.learn` |
 | Start a burrow | A back chevron home; your critter at the entrance; the name and the line under it; Cancel and Create burrow at the foot. The new burrow opens on its own page | `burrow.create.*`, `burrow.name.label`, `action.cancel` |
 | Joining a burrow (added, not yet joined) | A back chevron home and the burrow's name; its critters on the floor, those not yet joined asleep; Ready to join; faces and how many; one gold Join this burrow. The flow page's line naming who added you waits for the burrow's view to say who did | `burrow.preAdded`, `burrow.join`, `home.critterCount` |
 | A burrow | A back chevron home and the burrow's name; its critters on its floor, you at their right (its entrance until its first feast, the room after, drafts not counting); each feast under way as a card, the one closing next first: its title and phase, its close line, who has done this phase's part with their faces (PRD R5 and P3), and one action for the phase, gold on the card that closes next (Scatter crumbs for those taking part; your statement, or the option statements for an options feast's creator); the other feasts as rows with their day and a chip; a Critters card; Copy burrow link and Start a feast at the foot, Start a feast gold when no feast is under way | `burrow.*`, `phase.*`, `deadline.line`, `scatter.participation`, `gathering.participation`, `scatter.title`, `gathering.yours.title`, `gathering.options.title` |
@@ -548,8 +549,9 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Scatter pass, nobody has scattered | Participation "0 of 8 have scattered" | `scatter.participation` |
 | Scatter pass, own critter | Cell asleep with `scatter.own.*` instead of controls | `scatter.own.*` |
 | After scattering | The done line in the pile bar; controls stay live | `scatter.done.*` |
-| Scattering closed, feast not yet computed | Waiting screen with critters asleep in `dusk`; the sheet counts who has scattered (“7 of 8 have scattered”) while the feast is laid out and while the key is not out | `feast.waiting.*`, `feast.keyNotYet`, `scatter.participation` |
+| Scattering closed, feast not yet computed | Waiting screen with critters asleep in `dusk`; the sheet counts who has scattered (“7 of 8 have scattered”) while the feast is laid out and while the key is not out. While it is laid out, the sheet, 290 px on the phone, leads to Why nobody can peek under its line; the key’s sheet keeps to its reason, the count and Try again (D36) | `feast.waiting.*`, `feast.keyNotYet`, `scatter.participation`, `why.title` |
 | The feast | Sequence, then results | `feast.*` |
+| Results, the summary and the fingerprint | Under who scattered, Why nobody can peek, over the ranked critters; at the end of the list, for a member, the result’s fingerprint, a disclosure that says what to do with it (D36) | `results.summary`, `why.title`, `results.verification.*` |
 | Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9) | `feast.replay`, `results.export.*` |
 | Results, nobody scattered | Grid unchanged, table empty, `results.nobody` | `results.nobody` |
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
@@ -565,7 +567,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | People feast below three critters at scattering open | Feast ends; its row on the burrow carries the line as a leaf notice, under its "Ended before scattering" chip; its own page is the frame with its critters asleep and `feast.tooFew` as a leaf notice, with no deadline left to count down (QA edge-states-15) | `feast.tooFew`, `phase.void` |
 | Joined too late (added after scattering opened) | The frame with the feast's critters in their ring and yours at the edge of the floor; `err.notParticipant` as a leaf notice before anything invites reading or scattering (screen 33, QA edge-states-07); how many have scattered, with their faces; Back to the burrow | `err.notParticipant`, `scatter.participation` |
 
-First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen and on your critter's profile. Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
+First-run guidance is in-place copy: the explainer on arrival, the prompt in the editor, the one-line instruction above the scatter grid. The one tour is the first steps (D27, D30), and it is never shown unasked: it opens from How it works on the launcher, on the invite screen, on your critter's profile and on home with no burrows. The page behind Why nobody can peek is not a tour either: it opens only from its links (D36). Nothing pops up unasked except the two confirmations (open the feast, leave the burrow) and the signing step.
 
 ## 10. UX copy
 
@@ -631,6 +633,50 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `learn.phases.deadlines` | Both deadlines stay on screen, in your time zone. |
 | `learn.private.title` | Where they go stays private |
 | `learn.private.body` | Nobody sees where anyone’s crumbs went until the feast, not even us. The key that opens every scatter is released at the deadline, and not before. |
+| `why.title` | Why nobody can peek (the page’s name, and every link to it: the private step, the result step, the waiting screen and the results) |
+
+The page behind Why nobody can peek keeps its own lines in `packages/shared/src/copy-why.ts`, beside `copy.ts`, so the shell does not carry them (D36). Every claim on it is one PRD §8 and the pitch already make.
+
+| ID | Text |
+|---|---|
+| `why.promises.title` | What you are promised |
+| `why.promise.read.lead` | No one can read what you gave until the feast. (each promise’s lead is bold, and its line follows it) |
+| `why.promise.read.body` | Your crumbs are locked to a time, not to a person: independent key holders release the key when the deadline passes, and there is nobody to ask for it early. |
+| `why.promise.forge.lead` | We cannot make one up. |
+| `why.promise.forge.body` | Yours is signed by you, and one we made up would not carry your signature. |
+| `why.promise.drop.lead` | We cannot quietly lose one. |
+| `why.promise.drop.body` | The full list is published the moment scattering closes, and you can check that yours is on it. |
+| `why.promise.same.lead` | Everyone gets the same numbers. |
+| `why.promise.same.body` | The count runs on your own device, so there is no server answer for anyone to argue with. |
+| `why.promise.measure.lead` | Nothing about you is measured. |
+| `why.promise.measure.body` | No analytics and no telemetry: the app makes the network requests it needs to do its job, and nothing else. |
+| `why.limit.title` | One thing we will not pretend |
+| `why.limit.body` | Before the feast, nobody can read your scatter, because nobody has the key: not us, not the creator. After the feast the key exists, so keeping who gave what private is a rule we enforce, not something the lock does for us. |
+| `why.words.title` | The words |
+| `why.words.burrow.lead` | Burrow (each word in bold, then its line) |
+| `why.words.burrow.body` | Your group. It stays together from one feast to the next. |
+| `why.words.critters.lead` | Critters |
+| `why.words.critters.body` | The people or budget lines the crumbs are shared between. |
+| `why.words.scatter.lead` | Scatter |
+| `why.words.scatter.body` | What you give: all your crumbs, shared out as you choose. You can change it until scattering closes. |
+| `why.words.feast.lead` | Feast |
+| `why.words.feast.body` | The whole event, and the moment at its end when every scatter opens at once. |
+| `why.runs.title` | What runs where (the section is set in the secondary colour) |
+| `why.runs.connect` | You connect with the account app you already use. Signing is free. |
+| `why.runs.device.lead` | Your device (each place in bold, then its line) |
+| `why.runs.device.body` | Locks your scatter and signs it, then opens every scatter at the feast and adds them up. |
+| `why.runs.store.lead` | Critter Crumbs |
+| `why.runs.store.body` | Keeps the locked scatters, which it cannot open, posts a receipt for each, and hands them all back at the deadline. |
+| `why.runs.shutter.lead` | Gnosis Chain |
+| `why.runs.shutter.body` | Shutter’s key holders release the key at the deadline. It is split between them, so none of them can open a feast alone, and Shutter covers the fee. |
+| `why.runs.base.lead` | Base |
+| `why.runs.base.body` | Each scatter is signed as an EAS attestation and kept off the chain. Only a public result, if the burrow chooses one, is written to Base, and that is the one time anyone pays. |
+| `why.runs.ethereum.lead` | Ethereum |
+| `why.runs.ethereum.body` | Names, looked up once and only ever read. |
+| `why.source.title` | The source |
+| `why.source.body` | The software is open source under the MIT licence; the critter generator, the art, the sounds and the name are WEFA’s own. |
+| `why.source.code` | Read the code on GitHub (to https://github.com/wefa-labs/critter-crumbs) |
+| `why.source.spec` | Read the technical spec on GitHub (to `docs/04-technical-spec.md` on GitHub) |
 
 **Connect and critter (F2)**
 
@@ -839,6 +885,8 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `results.attest.help` | Anyone in the burrow can do this. It costs a little gas. |
 | `results.attest.done` | Recorded on-chain by {name}. |
 | `results.attest.view` | View the record |
+| `results.verification` | Result fingerprint (a disclosure at the end of a member’s results) |
+| `results.verification.help` | Compare it with another member’s. The same fingerprint means the same result. (the first line inside it, over the hash) |
 
 **Settings**
 
@@ -1063,6 +1111,7 @@ The Game Design document owns every sound token. This document fixes what is sha
 | D33 | The first meeting is a whole screen, not a dialog: the critter large on the floor with its element chip, the line, the name with its counter, Re-roll and Keep this one pinned, no Close, and a quiet Disconnect under them that leaves the member signed out where a visitor would be. It stands over nothing; the page the member connected on comes after Keep | Audit decision D6: the one close-up a member gets of their own critter (Schell's lenses 45 and 75); the flow page's screens 7 and 8 |
 | D34 | Your critter's profile is one screen, in place of the profile and Settings dialogs, with its own address (`/your-critter`) and drawn over the screen whose face was pressed, which stays as it was beneath it; the settings are switches, and Simple view is left out while no critter has a 3D mesh | The flow page's screen 51 and audit decision D7 (Garden Spirits have no mesh, ADR 0006); amends D9. Why the screen beneath stays: `docs/decisions.md`, 2026-11-03 |
 | D35 | Names are 1 to 16 characters on every new save, display names and option names alike, and their fields count to 16 | Audit decision D10, carrying out the decision of 5 October 2026 (`docs/decisions.md`); 16 is what the circle's tags and the dock were designed around |
+| D36 | The page behind Why nobody can peek (`/how-it-works/why`, its own chunk, its lines in `copy-why.ts`): what you are promised, the one thing we will not pretend, the words, what runs where and the source, whose two GitHub links are the only links out of the app. The private and result steps, the waiting screen and the results lead to it, and Got it goes back where it was opened from. Home with no burrows offers How it works as a line under Start a burrow | The first-steps review, F4, F8 and F10; Afolabi answered its D2 to D4 on 9 November 2026: the name, links out in the last section only, and the line on home, each as the review recommended |
 
 **October adoption (2026-10-06).** D14–D24 override the earlier grid, type, control, heap and reading descriptions in §1, §3, §6 and §7 for core game screens. The generated token source is normative for Inked daylight values. Other screens inherit these tokens and keep their existing layouts.
 
@@ -1070,7 +1119,7 @@ The Game Design document owns every sound token. This document fixes what is sha
 
 **Painted floors (2026-10-11).** D29 replaces the cropped, mirrored floor of the core game screens with painted plates for the two scenes the game shows. The launcher’s critters are drawn about 1.4 times the flow page’s, at the height of the painting’s table (`docs/decisions.md`, 2026-10-11).
 
-**Five first steps (2026-11-03).** D30 adds the week to the first steps and a way into them from the invite screen, which is most members’ first screen (PRD F1). The first screen now defines a feast before using the word, the private screen says who cannot peek and why, and the result screen says what its table cannot: that every device adds the scatters up and that shares come from the crumbs actually given. Not yet built from the review: the page behind "Why nobody can peek" and the links to it from the waiting screen and the results (`docs/reviews/first-steps-2026-11/README.md`, build order 4 to 7).
+**Five first steps (2026-11-03).** D30 adds the week to the first steps and a way into them from the invite screen, which is most members’ first screen (PRD F1). The first screen now defines a feast before using the word, the private screen says who cannot peek and why, and the result screen says what its table cannot: that every device adds the scatters up and that shares come from the crumbs actually given. The review’s build order 4 to 7 followed on 9 November (D36): the page behind "Why nobody can peek", the links to it, the fingerprint’s sentence, the foot of the steps’ sheet and How it works on home with no burrows. The desktop panel stays at 20 px over 16 px, the sizes the review asked for: its 16/14 was read off a capture taken at about 80% zoom (`docs/decisions.md`, 2026-11-09).
 
 **The connected frame (2026-11-03).** D31 to D35 begin the treatment the connected screens were waiting for (*Before connecting*, above). The first meeting and your critter's profile are built on the frame; home, a burrow and its members, starting a burrow and a feast, the saved draft and gathering follow on it (`docs/reviews/ui-audit-2026-11/README.md`, build order 4 to 8), and keep their earlier layouts until then, with the beta chip beside the wordmark in their header.
 
