@@ -524,6 +524,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark, the tagline and the beta line on a plate (D32), four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `app.environment.*`, `action.connect`, `launch.learn` |
 | Arrive by a link, not connected | Header with the burrow line, the beta chip and the feast title; the feast’s critters asleep in a ring on the window plate the game stands its circle on, raised as the game raises it so they stand on the floor (the November UI audit, screen 2), with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
+| Nothing to connect with (a phone's own browser, a chat app's, a computer with no app added) | The same sheet: one cloud notice that says so and what to do, open this page in the app you connect with, on the phone or on a computer; Copy link under it, which puts the page's address on the clipboard and says so in the sheet; then Cancel. How it works stays under Connect on the screen behind. If looking for a way to connect fails, the sheet closes and the screen behind says something went wrong (QA production-build-07) | `connect.empty`, `connect.link.*`, `err.generic` |
 | First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen, your critter's profile and home with no burrows: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The private step and the result carry Why nobody can peek at the foot of their words, and the week its deadlines line, so the sheet has a top, a middle and a foot; the page comes back to the same step. From 1,280 px the desktop panel is wider and a size up, 28 px over 20 px (§6.2, D36). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*`, `why.title` |
 | Why nobody can peek (the page behind the link) | One column at `/how-it-works/why`, about 34 em wide, under the wordmark, the beta chip and the Music toggle, scrolling over Got it pinned at its foot: the closed seed pod of the private step, the title, What you are promised (five lines, each led by its promise in bold), One thing we will not pretend, The words (burrow, critters, scatter, feast), What runs where in the secondary colour (the one place Shutter, EAS, Gnosis Chain and Base are named), and The source, the one section that links out, to the code and the technical spec on GitHub. Got it goes back where the page was opened from, through the browser’s history, or to the launcher when it was opened by its address. It opens only from its links (D36) | `why.*`, `learn.done` |
 | Meet your critter (first connect) | A whole screen (D33): the wordmark and the beta chip in the header; the critter large on the painted floor; in the sheet the title with the element chip, the line, the name field with its 16-character counter when there is no ENS name (the ENS name otherwise), and Re-roll and Keep this one pinned at the foot, with Disconnect as a quiet link under them. No Close: Keep is the way past it, and saves the name and the lock in one update; Disconnect signs out as the profile does and leaves the member where a signed-out visitor would be, on the launcher or, from a feast's link, its invite. Rerolls keep the draft name; the fourth locks on the server and the screen stays until Keep. The page the member connected on, a feast from its link, comes after | `critter.*`, `name.*`, `action.disconnect` |
@@ -560,6 +561,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
 | Simple view (fallback or chosen) | Portraits in stages; one notice line, a leaf with Try 3D again over the top of the game's floor (`ScreenNotices`). Its switch is on your critter's profile only while some critter has a 3D mesh (D34) | `fallback.*` |
 | Offline | The ink band under the header (flow page, screen 52); controls stay usable; submit shows why it waits | `err.offline` |
+| A screen that did not arrive (a tab opened before a deployment, or a request lost on a poor connection) | In the screen's place, under the header, the outage notice's title with its own line and Reload; over your critter's profile, Back as well, to the screen beneath. A lost request is asked for once more before it shows; nothing reloads by itself, and never a blank page (Technical Spec §15 E29, QA production-build-06) | `app.unavailable`, `err.screenLoad`, `action.reload`, `action.back` |
 | The device's clock is off, or ENS names could not be looked up | Cloud notices at the head of the screen's sheet, the clock first (flow page, screen 53), each said once: the clock line for the rest of the session, as the clock is checked once a session; the names line while the profile carries the warning | `err.clockSkew`, `err.ensUnavailable` |
 | A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Your critter asleep at the entrance, as on an empty home; the heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
 | Not in the burrow | The burrow's name in the header; you at its entrance; the ask-a-member line; your short address with Copy your address, the one thing to do next; Back. From a feast's link, the same frame with the burrow's name as the title and your critter on the floor (screen 22) | `burrow.unknown.*`, `profile.address.copy` |
@@ -600,6 +602,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `action.disconnect` | Disconnect |
 | `action.back` | Back |
 | `action.cancel` | Cancel |
+| `action.reload` | Reload (loads the page again, when a screen's code did not arrive) |
 | `action.settings` | Settings |
 | `phase.draft` / `phase.gathering` / `phase.scattering` / `phase.feast` | Draft / Gathering / Scattering / Feast |
 | `deadline.gathering` | Gathering closes {relative} |
@@ -683,6 +686,9 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 
 | ID | Text |
 |---|---|
+| `connect.empty` | No connection is available in this browser yet. Copy this page's link and open it in the app you connect with, on your phone or on a computer. (the connect sheet when the browser offers nothing) |
+| `connect.link.copy` | Copy link (the page's own address) |
+| `connect.link.copied` | Link copied. |
 | `connect.injected` | This browser (the connect choice offered when the browser has a provider that does not announce itself, as some phone apps' built-in browsers do) |
 | `connect.waiting` | Confirm in {name} |
 | `connect.sign.body` | You'll be asked to sign. It costs nothing and nothing goes on-chain. |
@@ -923,6 +929,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `err.storeUnreachable` | Can't reach the burrow right now. Try again in a moment. |
 | `err.keyUnreachable` | Can't fetch the key right now. Nothing is lost — try again in a few minutes. |
 | `err.generic` | Something went wrong. Nothing you did was lost. |
+| `err.screenLoad` | This screen didn't load. Reload to try again — nothing you saved is lost. (under `app.unavailable`, when a screen's code did not arrive) |
 | `err.notParticipant` | This feast started before you joined the burrow. You'll be in the next one. |
 | `results.unreadable` | {names} scattered, but their crumbs couldn't be read, so they count as not having scattered. |
 
