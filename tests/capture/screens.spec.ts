@@ -2,7 +2,7 @@ import {test,expect} from 'playwright/test';
 /* Captures every core state for the review record; fidelity is checked by tests/screens/compositions.spec.ts against
    the review pages' own numbers, not by these images. */
 test.use({timezoneId:'America/Los_Angeles',locale:'en-US'});
-const states=['reveal','scatter','reading','done','scattered','signing','saving','rejected','failed','closed','waiting','key','feast','feasted','results','nobody','tie','givers','recording','recorded','public'];
+const states=['reveal','scatter','reading','done','scattered','signing','saving','rejected','failed','closed','waiting','key','feast','feasted','results','nobody','unreadable','tie','givers','recording','recorded','public'];
 for(const viewport of [{width:390,height:844},{width:1440,height:900}])for(const state of states)test(`${state} at ${viewport.width}`,async({page})=>{
  const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));await page.setViewportSize(viewport);await page.goto(`/dev/screens?capture&count=8&state=${state}`);await expect(page.locator('.circle-spot')).toHaveCount(8);
  await page.waitForTimeout(400);await page.screenshot({path:`.scratch/screens/${state}-${viewport.width}.png`});expect(errors).toEqual([]);

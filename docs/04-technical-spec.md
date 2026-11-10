@@ -371,7 +371,7 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `POST /burrows/:id/leave` | member | R16 |
 | `POST /burrows/:id/removals` | creator | Remove another member; the burrow keeps a visible record of who was removed, by whom and when (decisions of 2026-09-05 and 2026-09-06) |
 | `POST /burrows/:id/feasts` | member | Create draft (validation §3) |
-| `GET /feasts/:id` | phase-aware | Public: title, context, deadlines, targets asleep. Member: plus statements per §4 gates, participation, own ballot UIDs, close record after close, `result_attestation` |
+| `GET /feasts/:id` | phase-aware | Public: title, context, deadlines, targets asleep. Member: plus statements per §4 gates, participation, own ballot UIDs, close record after close, `result_attestation`, and `participantNames`, each participant's name as the burrow's member list has it now (ENS, else the display name; `null` for neither), which names the members of an options feast in its results (QA lifecycle-04) |
 | `POST /feasts/:id/open` | creator | Registers Shutter identity; sets `opened_at` |
 | `POST /feasts/:id/cancel` | creator, gathering | R8 |
 | `POST /feasts/:id/extend` | creator, gathering, once | R13, P6 |
@@ -494,7 +494,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E11 | A UID missing from the published set | The client checks its own UIDs against the close record on every results load: `err.uidMissing` with the UID | Tell the burrow; the ballot exists in the store (signed) and the close record is immutable, so this is a bug or an outage to be reported, not silently absorbed | The feast completes for everyone else; the affected scatterer's ballot is provably theirs and the burrow decides |
 | E12 | Same address submits twice | Both stored; the latest `seq` counts (T11); the done line reflects the latest | Change again until close | Yes |
 | E13 | Shutter registration fails at open | `err.storeUnreachable` variant for open: the feast stays a draft | Retry *Open the feast*; the identity prefix is reused | Yes, once it succeeds |
-| E14 | A ballot fails to decrypt or validate at tally | `results.unreadable` names the scatterer; they count as not having scattered (T7) | The scatterer can show their signed ballot; nothing else | Yes |
+| E14 | A ballot fails to decrypt or validate at tally | `results.unreadable` names the scatterer; they count as not having scattered (T7). When not one ballot can be read, the results are their own state, `unreadable`: the nobody-scattered sheet with `results.unreadable.all` naming them, never `results.nobody` (QA copy-01) | The scatterer can show their signed ballot; nothing else | Yes |
 | E15 | Submission arrives after scattering closed | `scatter.closed`; the server rejects with the same id | Nothing; the last accepted ballot stands | Yes |
 | E16 | Ballot from a non-participant (joined after freeze) | Server rejects `err.notParticipant` (new string) | Wait for the next feast | Yes |
 | E17 | A member leaves during gathering | Removed from the feast; if a people feast drops below three at scattering open, status `void` and `feast.tooFew` (P11) | Start a new feast | The void case does not; every other case does |

@@ -430,7 +430,7 @@ A horizontally scrolling list of statement cards, one per critter in the same or
 
 ### 6.5 Results
 
-The settled critter grid (fed states applied, static) above a real `<table>`: Critter · Crumbs · Share, sorted by crumbs descending, ties sharing their line (`results.tie`). Below: the participation line, the did-not-scatter line, the CSV button(s), and — for public feasts — the on-chain record (PRD F9). The giver matrix, when individual scatters are open, is a second table in its own `overflow-x: auto` container with sticky first column.
+The settled critter grid (fed states applied, static) above a real `<table>`: Critter · Crumbs · Share, sorted by crumbs descending, ties sharing their line (`results.tie`). Below: the participation line, the did-not-scatter line, the CSV button(s), and — for public feasts — the on-chain record (PRD F9). The giver matrix, when individual scatters are open, is a second table in its own `overflow-x: auto` container with sticky first column. The container is a stop in the Tab order, a region named `results.givers.title`, and the arrows scroll it sideways rather than turning the circle; a statement's scrolling box in its bubble or panel is a named stop too, and takes focus as a phone statement opens, so every engine, Safari's included, can scroll both from the keyboard (QA accessibility-06).
 
 ## 7. Component inventory
 
@@ -555,6 +555,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Results, the summary and the fingerprint | Under who scattered, Why nobody can peek, over the ranked critters; at the end of the list, for a member, the result’s fingerprint, a disclosure that says what to do with it. Coming back to the results from the page, or by the browser’s Back, opens them settled; the feast plays when the results are opened afresh, and Replay Feast plays it again (D36) | `results.summary`, `why.title`, `results.verification.*` |
 | Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9) | `feast.replay`, `results.export.*` |
 | Results, nobody scattered | Grid unchanged, table empty, `results.nobody` | `results.nobody` |
+| Results, no scatter could be read | Scatters were saved but not one could be opened at the feast: the nobody-scattered sheet, 40 px taller on the phone, with `results.unreadable.all` naming whose crumbs could not be read as a cloud notice in place of `results.nobody`, and said aloud as the feast settles (QA copy-01). A scatter of your own missing from the published set shows `err.uidMissing` on either sheet | `results.unreadable.all`, `err.uidMissing` |
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
 | Results, tie | Tied rows share a line under the table | `results.tie` |
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
@@ -928,6 +929,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `err.generic` | Something went wrong. Nothing you did was lost. |
 | `err.notParticipant` | This feast started before you joined the burrow. You'll be in the next one. |
 | `results.unreadable` | {names} scattered, but their crumbs couldn't be read, so they count as not having scattered. |
+| `results.unreadable.all` | {names} scattered, but their crumbs couldn't be read, so there's nothing to share out. (when not one scatter saved could be read) |
 
 The Technical Spec's edge-state table references these IDs and may add `err.*` strings here; it must not invent inline copy.
 
@@ -999,14 +1001,16 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | `CrumbStepper` (setup) | Enter, Space on `−` / `+`; digits and ↑/↓ in the field | The buttons move to the next ten; the field takes any whole number from 10 to 1,000 and steps by one |
 | `StatementLine` (`<details>`) | Enter, Space on the summary | Expand / collapse in place |
 | Read pass list | ←/→, Home/End; Tab reaches links inside the card | Snap position follows; focus does not move on snap |
+| A statement's box (bubble or panel) | ↑/↓, Page Up/Down, Space, Home/End | Scroll its words; ←/→ still step through the circle. Opening a statement on the phone puts focus in its box |
+| Who gave what | ←/→ with its box focused | Scroll the table sideways; the circle stays where it is |
 | Dialogs | Esc | Closes; focus returns to the opener (native `<dialog>`) |
 | Deadline items | Enter, Space | Toggles the absolute time (`aria-expanded`) |
 | Feast | Enter on **Skip to results** | Ends the sequence; results heading focused |
 
 ### 12.5 Focus
 
-- `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too.
-- Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
+- `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too. A box that scrolls inside a card or panel that would clip the ring (who gave what, the desktop statement panel) draws it inside itself, `outline-offset: -3px` (QA accessibility-06).
+- Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; a statement opened on the phone → its words, the box that scrolls, so the keys scroll it; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
 - Nothing steals focus while typing or pouring.
 
 ### 12.6 Screen readers over a canvas

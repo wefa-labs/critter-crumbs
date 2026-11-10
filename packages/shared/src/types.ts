@@ -18,6 +18,12 @@ export interface FeastPortrait extends CritterIdentity {
 export interface Profile extends CritterIdentity { address: Address; rerollsUsed: number; critterLocked: boolean; displayName: string | null; ensName: string | null; ensCheckedAt: number | null; createdAt: number }
 export interface Target { id: Hex; ownerAddress: Address | null; name: string; position: number; kind: 'person' | 'option' }
 export interface Statement { targetId: Hex; authorAddress: Address; body: string; updatedAt: number }
+/**
+ * A participant named as the burrow knows them (PRD F2: their ENS name, else the name they typed), or null when they have
+ * neither. A member's read of a feast carries one for each participant, so an options feast, whose critters are the
+ * options, can still name who scattered (QA lifecycle-04). Names only: nothing about anyone's scatter.
+ */
+export interface ParticipantName { address: Address; name: string | null }
 export interface PublishedEntry { seq: string; uid: Hex; attester: Address }
 export interface CloseRecord { published: PublishedEntry[]; counted: PublishedEntry[]; publishedSetHash: Hex; closedAt: number }
 export interface Registration { identityPrefix: Hex; identity: Hex; eon: number; eonKey: Hex; txHash: Hex | null }

@@ -45,6 +45,8 @@ export interface Composition {
 const scattering: SceneTreatment = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: true, grown: false, bubbles: 'focus', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'live' };
 const sleeping: SceneTreatment = { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' };
 const gathered: SceneTreatment = { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' };
+/* no crumbs were counted: the critters stay as they were */
+const unfed: SceneTreatment = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' };
 
 const COMPOSITIONS: Record<GameScreenState, Composition> = {
   /* flow 34 */
@@ -72,7 +74,10 @@ const COMPOSITIONS: Record<GameScreenState, Composition> = {
   /* scatter page #feast with Results closed: everyone grown, the totals on their tags, Results in the bar */
   feasted: { surface: { kind: 'dock' }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' }, music: 'full' },
   /* flow 45 */
-  nobody: { surface: { kind: 'sheet', height: 260 }, scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' }, music: 'full' },
+  nobody: { surface: { kind: 'sheet', height: 260 }, scene: unfed, music: 'full' },
+  /* no scatter saved could be read at the feast: flow 45's circle, and its sheet taller for the line naming whose crumbs
+     could not be read, four lines for a burrow of ten (QA copy-01) */
+  unreadable: { surface: { kind: 'sheet', height: 300 }, scene: unfed, music: 'full' },
   /* scatter page #feast with Results open; flow 46–50 give each variant's contents */
   results: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
   tie: { surface: { kind: 'results' }, scene: gathered, music: 'full' },

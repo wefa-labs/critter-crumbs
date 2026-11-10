@@ -225,7 +225,10 @@ dialog.game-dialog::backdrop { background:color-mix(in srgb, var(--cc-burrow) 40
 .record-details dl { margin:4px 0 0; }
 .core-game .statement-text a { min-height:44px; min-width:44px; display:inline-flex; align-items:center; }
 /* who gave what: the table scrolls sideways with each giver held at the left */
-.giver-scroll { overflow-x:auto; margin:0 -4px; padding:0 4px 6px; }
+.giver-scroll { overflow-x:auto; margin:0 -4px; padding:3px 4px 6px; }
+/* the boxes that scroll are stops for the keys (QA accessibility-06): the ring is drawn inside them, where the card or panel round them cannot
+   clip it, and the table's box keeps 3 px above the table so the givers' column held at its left does not cover it */
+.giver-scroll:focus-visible, .panel-scroll:focus-visible { outline-offset:-3px; }
 .giver-matrix { border-collapse:separate; border-spacing:0; font-size:var(--cc-text-sm); line-height:1.4; font-variant-numeric:tabular-nums; }
 .giver-matrix th, .giver-matrix td { padding:6px 8px; text-align:right; white-space:nowrap; border-bottom:1px solid var(--cc-line); }
 .giver-matrix thead th { font-weight:700; vertical-align:bottom; }

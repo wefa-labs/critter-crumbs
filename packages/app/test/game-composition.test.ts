@@ -19,7 +19,7 @@ describe('core game compositions', () => {
     for (const device of ['phone', 'desktop'] as const) {
       for (const state of ['reveal', 'scatter', 'reading', 'done', 'signing', 'saving', 'scattered', 'rejected', 'failed'] as const) expect(composeGame(state, device).music).toBe('feeding');
       for (const state of ['closed', 'waiting', 'key', 'feast'] as const) expect(composeGame(state, device).music).toBeNull();
-      for (const state of ['feasted', 'nobody', 'results', 'tie', 'givers', 'recording', 'recorded', 'public'] as const) expect(composeGame(state, device).music).toBe('full');
+      for (const state of ['feasted', 'nobody', 'unreadable', 'results', 'tie', 'givers', 'recording', 'recorded', 'public'] as const) expect(composeGame(state, device).music).toBe('full');
     }
   });
 
@@ -88,6 +88,11 @@ describe('core game compositions', () => {
       scene: { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' },
       music: 'full',
     });
+  });
+
+  /* QA copy-01: scatters were saved and not one could be read; the line naming whose takes four lines for a burrow of ten */
+  it('shows no scatter readable over the same awake circle as nobody scattered, on a sheet 40 px taller', () => {
+    expect(composeGame('unreadable', 'phone')).toEqual({ ...composeGame('nobody', 'phone'), surface: { kind: 'sheet', height: 300 } });
   });
 
   it('grows every result into the results surface with the critters huddled on its edge', () => {
