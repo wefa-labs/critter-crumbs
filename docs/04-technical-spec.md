@@ -509,6 +509,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E26 | Two tabs, one scattering in each | Each submission gets its own `seq`; the latest counts; both tabs re-read and show the latest | — | Yes |
 | E27 | Statement over 2,000 characters pasted | Truncated at the cap client-side; `gathering.limit`; the server rejects longer | — | Yes |
 | E28 | Reveal opened before Shutter's timestamp on a fast clock | `feast.keyNotYet`; nothing decrypts | Wait | Yes |
+| E29 | A screen's code does not arrive: a tab opened before a deployment asks for files the deployment no longer has, or a request is lost on a poor connection | A lost module is asked for once more; then, in the screen's place, `app.unavailable` with `err.screenLoad`, never an empty page. Nothing reloads by itself (QA production-build-06) | *Reload*; Back as well over your critter's profile | Yes; statements and scatters already saved are on the store |
 
 New copy IDs introduced here (to be added to the Design System §10): `results.unreadable`, `err.notParticipant`, `err.feastCapacity` (“A feast can include at most 49 critters.”).
 

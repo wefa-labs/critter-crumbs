@@ -1,5 +1,5 @@
-import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
-import { generateCritter, ApiClientError } from '@critter-crumbs/core';
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
+import { generateCritter } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
 import { CrumbGlyph } from '../game/mound.js';
 import { Loader } from '../game/sheet-parts.js';
@@ -9,7 +9,6 @@ import { critterVersion } from '../portraits/version.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import { faceCrop } from '../game/styles.js';
 import { useModalAnnouncements } from './announcements.js';
-import type { AppApi } from './session.js';
 
 export const displayName = (profile: Pick<Profile, 'ensName' | 'displayName' | 'address'>) => profile.ensName || profile.displayName || shortAddress(profile.address);
 export const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -90,18 +89,4 @@ export function Dialog({ title, children, onClose, busy = false, actions, dismis
 export function Field({ label, children, help }: { label: CopyId; children: ReactNode; help?: CopyId }) {
   return <label className="field"><span>{copy[label]}</span>{children}{help ? <small>{copy[help]}</small> : null}</label>;
 }
-export function useResource<T>(api: AppApi, path: string, canReplace?: (previous: T, next: T) => boolean) {
-  const [value, setValue] = useState<{ data: T | null; error: unknown }>({ data: null, error: null });
-  const accept = useRef(canReplace); accept.current = canReplace;
-  const [version, setVersion] = useState(0);
-  useEffect(() => {
-    let active = true, request = 0;
-    const read = async () => { const current = ++request; api.invalidate(); try { const data = await api.get(path); if (active && current === request) setValue(previous => previous.data && accept.current?.(previous.data, data as unknown as T) === false ? { ...previous, error: new ApiClientError('err.sessionExpired', 401) } : { data: data as unknown as T, error: null }); } catch (error) { if (active && current === request) setValue(previous => ({ ...previous, error })); } };
-    void read();
-    const poll = window.setInterval(() => { if (!document.hidden) void read(); }, 30000);
-    const onVisible = () => { if (!document.hidden) void read(); };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => { active = false; clearInterval(poll); document.removeEventListener('visibilitychange', onVisible); };
-  }, [api, path, version]);
-  return { ...value, refresh: () => setVersion(value => value + 1) };
-}
+export { useResource } from './resource.js';

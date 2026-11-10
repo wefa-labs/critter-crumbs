@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { ApiClientError, createApiClient, type AccountOption, type AccountProvider } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, ValidationError } from '@critter-crumbs/shared';
 import { browserSettings, MUSIC_SETTING, saveSetting, type StoredSetting } from '../sim/settings.js';
@@ -8,25 +8,28 @@ import { AudioProvider } from '../audio/context.js';
 import { Announcements } from './announcements.js';
 import { ConnectSheet } from './connect.js';
 import { Launcher } from './launcher.js';
+import { lazyScreen, retryOnce, ScreenBoundary } from './lazy-screen.js';
 import { MusicButton } from './music-button.js';
 import { appNotices, NoticeProvider } from './notices.js';
 import { createPressWatch } from './music-choice.js';
 import { screenMusic } from './screen-music.js';
 import { readDarkChoice, saveDarkChoice, showDarkChoice } from './theme.js';
-const FeastRoute=lazy(()=>import('./feast.js').then(module=>({default:module.FeastRoute})));
-const LearnRoute=lazy(()=>import('./learn.js').then(module=>({default:module.Learn})));
+/* every screen below arrives when it is first opened; a lost request is asked for once more, and a screen that still
+   does not arrive says so with Reload (lazy-screen.tsx) */
+const FeastRoute=lazyScreen(()=>import('./feast.js').then(module=>({default:module.FeastRoute})));
+const LearnRoute=lazyScreen(()=>import('./learn.js').then(module=>({default:module.Learn})));
 /* the page behind Why nobody can peek, which few open: its words come with it (copy-why.ts) */
-const WhyRoute=lazy(()=>import('./why.js').then(module=>({default:module.Why})));
+const WhyRoute=lazyScreen(()=>import('./why.js').then(module=>({default:module.Why})));
 /* starting a feast is a creator's occasional page, so its code arrives when it is opened */
-const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.SetupRoute})));
+const SetupRoute=lazyScreen(()=>import('./setup.js').then(module=>({default:module.SetupRoute})));
 /* the screens a connected member sees outside a feast arrive once someone has connected, so the launcher and the
    invite, which most people open first, do not carry them (scripts/build-budget.mjs) */
-const HomeRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Home})));
-const CreateBurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
-const BurrowRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
-const BurrowCrittersRoute=lazy(()=>import('./burrows.js').then(module=>({default:module.BurrowCritters})));
-const Onboarding=lazy(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
-const YourCritter=lazy(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
+const HomeRoute=lazyScreen(()=>import('./burrows.js').then(module=>({default:module.Home})));
+const CreateBurrowRoute=lazyScreen(()=>import('./burrows.js').then(module=>({default:module.CreateBurrow})));
+const BurrowRoute=lazyScreen(()=>import('./burrows.js').then(module=>({default:module.Burrow})));
+const BurrowCrittersRoute=lazyScreen(()=>import('./burrows.js').then(module=>({default:module.BurrowCritters})));
+const Onboarding=lazyScreen(()=>import('./onboarding.js').then(module=>({default:module.Onboarding})));
+const YourCritter=lazyScreen(()=>import('./profile.js').then(module=>({default:module.YourCritter})));
 import { returnPath } from './learn-return.js';
 import { BetaChip } from './screen-header.js';
 import { Link, Opening, ProfileButton, navigate } from './ui.js';
@@ -98,12 +101,16 @@ export function App() {
           const local = createDevAccountProvider(api);
           if ((await local.discover()).length) return [local];
         }
-        const { createInjectedAccountProvider } = await import('../crypto/index.js');
+        const { createInjectedAccountProvider } = await retryOnce(() => import('../crypto/index.js'));
         return [createInjectedAccountProvider({ chainId: 84532 })];
       })();
       const found = await Promise.all((await providers.current).map(async provider => (await provider.discover()).map(option => ({ provider, option }))));
       setChoices(found.flat());
-    } catch (error) { setAlert(message(error)); } finally { setDiscovering(false); }
+    }
+    /* Looking for what the browser offers failed, as when the code that asks it does not arrive: the sheet closes and the
+       screen behind says so, rather than telling the member this browser has nothing to connect with; the next press
+       looks again */
+    catch (error) { providers.current = undefined; closeConnect(); setAlert(message(error)); } finally { setDiscovering(false); }
   }
   /* A connection that is refused or fails closes the sheet, and the screen behind says why (the launcher in its sheet). */
   function closeConnect() { resumeAfterConnect.current = false; setConnectReason(''); setConnecting(false); }
@@ -130,7 +137,7 @@ export function App() {
   /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
   const meetingShown = me !== null && meetingFor === me.address;
-  const openProfile = () => { setOpener(document.activeElement); navigate('/your-critter'); };
+  const openProfile = () => { setOpener(document.activeElement); navigate('/your-critter'); }, closeProfile = () => navigate(under);
   /* the Music toggle wherever there is no Settings to open: the launcher, the first steps, the page behind Why nobody
      can peek and a visitor's header */
   const musicButton = <MusicButton on={settings.music} sounding={sounding} soundAtPress={pressWatch.soundAtPress} choose={value => chooseSetting(MUSIC_SETTING, value)} />;
@@ -154,7 +161,7 @@ export function App() {
   /* a screen over the one beneath, which stays as it was, inert, until the screen over it goes */
   const layer = !me ? null
     : meetingShown ? <Suspense fallback={<Opening bare />}><Onboarding key={me.address} me={me} session={session} run={run} busy={working} announce={announce} done={() => setMeetingFor(null)} disconnect={() => disconnect()} /></Suspense>
-    : profileOpen ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={() => navigate(under)} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
+    : profileOpen ? <Suspense fallback={<Opening bare />}><YourCritter me={me} back={closeProfile} settings={settings} choose={chooseSetting} dark={darkChoice ?? deviceDark} chooseDark={chooseDark}
       disconnect={() => disconnect(under)} run={run} busy={working} /></Suspense>
     : null;
   /* the screen beneath a layer stays as it was only when it was there before: your critter's profile, opened from it.
@@ -174,8 +181,10 @@ export function App() {
         : musicButton}
     </nav></header>
     {!online && !launching ? <p className="offline-band">{copy['err.offline']}</p> : null}
-    <main id="content" tabIndex={-1} inert={layered}>{beneath ? content : null}</main>
-    {layered ? <div className="screen-layer">{layer}</div> : null}
-    {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} /> : null}
+    {/* a screen that did not arrive is said in its place until another is opened; a feast's addresses are one screen,
+       which must not start again between them (feast.tsx) */}
+    <main id="content" tabIndex={-1} inert={layered}>{beneath ? <ScreenBoundary key={feastRoute?.[1] ?? screen}>{content}</ScreenBoundary> : null}</main>
+    {layered ? <div className="screen-layer"><ScreenBoundary back={meetingShown ? undefined : closeProfile}>{layer}</ScreenBoundary></div> : null}
+    {connecting ? <ConnectSheet options={choices.map(choice => choice.option)} discovering={discovering} reason={connectReason} waiting={waiting} busy={working} choose={connectWith} cancel={closeConnect} run={run} /> : null}
   </NoticeProvider></Announcements></AudioProvider>;
 }
