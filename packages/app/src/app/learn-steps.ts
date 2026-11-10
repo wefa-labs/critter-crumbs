@@ -15,6 +15,8 @@ export interface LearnStep {
   phases?: true;
   /** a thought bubble beside each head, as the reveal screen draws them when statements open */
   bubbles?: readonly Standing[];
+  /** the step links to the page behind "Why nobody can peek", at the foot of its words (why.tsx) */
+  why?: true;
 }
 /**
  * Positions are in the painting, not the screen. x and y are percent of
@@ -53,6 +55,16 @@ export const LEARN_STEPS: readonly LearnStep[] = [
     ],
   },
   { painting: 'window', critters: QUARTET.map(critter => ({ ...critter, asleep: false })), heaps: [], pods: [], phases: true, bubbles: QUARTET.map(bubbleBy) },
-  { painting: 'dusk', critters: QUARTET.map(critter => ({ ...critter, asleep: true })), heaps: [], pods: AT_FEET.map(spot => ({ x: spot.x, y: spot.y - 0.5, size: 40 })) },
-  { painting: 'window', critters: QUARTET.map(critter => ({ ...critter, asleep: false })), heaps: [], pods: [] },
+  { painting: 'dusk', critters: QUARTET.map(critter => ({ ...critter, asleep: true })), heaps: [], pods: AT_FEET.map(spot => ({ x: spot.x, y: spot.y - 0.5, size: 40 })), why: true },
+  { painting: 'window', critters: QUARTET.map(critter => ({ ...critter, asleep: false })), heaps: [], pods: [], why: true },
 ];
+
+/**
+ * The step the first steps were on when they were left, kept with their place in the browser's history (learn.tsx), so
+ * coming back from the page behind "Why nobody can peek", or by the browser's Back, finds the same step. Anything else,
+ * and steps opened afresh, start at the first.
+ */
+export function stepFrom(state: unknown): number {
+  const step = typeof state === 'object' && state !== null && 'step' in state ? state.step : undefined;
+  return typeof step === 'number' && Number.isInteger(step) && step >= 0 && step < LEARN_STEPS.length ? step : 0;
+}

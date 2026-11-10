@@ -4,14 +4,15 @@ import { expect, test, type Page } from 'playwright/test';
  * Each core state's composition, checked against numbers read off the review pages, never off the app:
  * the flow page's SCREENS (docs/explorations/app-screens/index.html: sheetH, .toast, .modal, .d-desktop .sheet) and
  * the scatter page, pass eleven (docs/explorations/scatter-layouts/index.html: DOCK_BASE 130, RESULTS_FLOOR 196, the
- * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). One
- * number is the app's own: the key's sheet is 20 px taller than the flow page's, for the count of who has scattered
- * (docs/decisions.md, 2026-11-09).
+ * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). Two
+ * numbers are the app's own: the waiting sheet is 40 px taller than the flow page's 250, for its line to Why nobody can
+ * peek, and the key's 80 px taller, for that line and the count of who has scattered (docs/decisions.md, 2026-11-09).
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US' });
 const PHONE = { width: 375, height: 812 }, DESKTOP = { width: 1440, height: 900 }, HEADER = 64;
-/* the key's sheet is the flow page's 250 and the 20 px its count of who has scattered needs (docs/decisions.md, 2026-11-09) */
-const SHEETS: Record<string, number> = { reveal: 230, waiting: 250, key: 270, feast: 144, nobody: 260 };
+/* the waiting sheet is the flow page's 250 and the 40 px its line to Why nobody can peek needs (the first-steps review, F8);
+   the key's adds the count of who has scattered under its notice as well (docs/decisions.md, 2026-11-09) */
+const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260 };
 const DOCKS = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'feasted'];
 const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const TOASTS: Record<string, string> = { scattered: 'Your scatter is in.', rejected: "Not confirmed. Your crumbs are still here — try again when you're ready.", failed: "Couldn't save your scatter. Check your connection and try again — nothing was lost." };
@@ -86,6 +87,31 @@ test('waiting for the feast: the sheet counts who has scattered while the feast 
     const sheet = page.locator(viewport === PHONE ? '.game-sheet' : '.side-sheet');
     await expect(sheet.getByText('7 of 8 have scattered', { exact: true })).toBeVisible();
     if (viewport === PHONE) expect(await sheet.evaluate(node => node.scrollHeight <= node.clientHeight)).toBe(true);
+  }
+});
+
+/* the first-steps review, F8: waiting is one of the few moments a person reads, and the results are what they would
+   question, so both lead to Why nobody can peek; the fingerprint says what to do with it */
+test('the waiting sheet and the results lead to Why nobody can peek, and the fingerprint says what it is for', async ({ page }) => {
+  const why = page.getByRole('link', { name: 'Why nobody can peek', exact: true });
+  for (const viewport of [PHONE, DESKTOP]) {
+    await open(page, 'waiting', viewport);
+    await expect(why).toHaveAttribute('href', '/how-it-works/why');
+    const link = (await why.boundingBox())!;
+    expect(link.height).toBeGreaterThanOrEqual(44);
+    expect(link.y).toBeGreaterThan((await box(page, viewport === PHONE ? '.game-sheet p' : '.side-sheet p')).y);
+    // the key's sheet leads there too, under its reason, with the count and Try again still in it
+    await open(page, 'key', viewport);
+    await expect(why).toHaveAttribute('href', '/how-it-works/why');
+    await expect(page.getByRole('button', { name: 'Try again', exact: true })).toBeVisible();
+    await open(page, 'results', viewport);
+    await expect(why).toBeVisible();
+    // under the summary, over the ranked critters
+    const under = (await why.boundingBox())!, summary = await box(page, '.results-sum'), first = await box(page, '.results-row');
+    expect(under.y).toBeGreaterThanOrEqual(summary.y + summary.height);
+    expect(under.y + under.height).toBeLessThanOrEqual(first.y);
+    await page.locator('.results-fingerprint summary').first().click();
+    await expect(page.getByText('Compare it with another member’s. The same fingerprint means the same result.', { exact: true }).first()).toBeVisible();
   }
 });
 

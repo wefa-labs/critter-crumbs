@@ -34,6 +34,9 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   await first.request.post('/api/dev/time',{data:{now:feast.scatteringEndsAt}});
   await first.request.post('/api/dev/release-key',{data:{identity:updated.registration.identity}});
   for(const page of pages){await page.reload();await expect(page.locator('[data-result-hash]')).toBeVisible();const skip=page.getByRole('button',{name:'Skip to results',exact:true});if(await skip.isVisible())await skip.press('Enter');await expect(page.getByRole('heading',{name:'Results',exact:true})).toBeFocused();await expect(page.locator('h1')).toHaveCount(1);}
+  // the page behind Why nobody can peek, from the results, comes back to them settled, without playing the feast again
+  await first.getByRole('link',{name:'Why nobody can peek',exact:true}).click();await expect(first.getByRole('heading',{level:1,name:'Why nobody can peek',exact:true})).toBeFocused();
+  await first.getByRole('button',{name:'Got it',exact:true}).click();await expect(first.getByRole('heading',{name:'Results',exact:true})).toBeFocused();await expect(first.getByRole('button',{name:'Skip to results',exact:true})).toHaveCount(0);
   const hash=await first.locator('[data-result-hash]').getAttribute('data-result-hash');expect(hash).toMatch(/^0x[0-9a-f]{64}$/);await expect(second.locator('[data-result-hash]')).toHaveAttribute('data-result-hash',hash!);
   await expect(first.locator('.results-list').getByText('2 of 8 scattered · 200 crumbs in all',{exact:true})).toBeVisible();
   const downloadPromise=first.waitForEvent('download');await first.getByRole('button',{name:'Download CSV',exact:true}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/^feast-.+-results\.csv$/);const path=await download.path();const csv=await readFile(path!,'utf8');expect(csv).toContain('critter,address,crumbs,share\r\n');expect(csv.trim().split('\r\n')).toHaveLength(feast.targets.length+1);

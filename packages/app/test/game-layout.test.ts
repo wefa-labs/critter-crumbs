@@ -56,7 +56,7 @@ describe('October surfaces', () => {
   });
   it('keeps the empty heap but no tags while the feast is laid out', () => {
     const layout = at('waiting', { width: 375, height: 812 });
-    expect(layout.dock.height).toBe(250);
+    expect(layout.dock.height).toBe(290);
     expect(layout.heap).not.toBeNull();
     expect(layout.slots.every(slot => slot.tag.hidden)).toBe(true);
     expect(layout.bubbles).toEqual([]);

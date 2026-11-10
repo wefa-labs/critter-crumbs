@@ -163,3 +163,72 @@ test('all first-step actions stay in place on short phones and desktops in every
     }
   }
 });
+
+// The page behind Why nobody can peek (docs/reviews/first-steps-2026-11, F4, D2 and D3): one column of words under the
+// header, Got it always in reach at the foot, and back where it was opened from.
+test('the page behind Why nobody can peek reads as one column with Got it in reach, and goes back where it was opened from', async ({ page }) => {
+  const heading = page.getByRole('heading', { level: 1, name: 'Why nobody can peek', exact: true }), done = page.getByRole('button', { name: 'Got it', exact: true });
+  const words = page.locator('.why-page');
+  for (const viewport of [{ width: 320, height: 568 }, { width: 375, height: 812 }, { width: 1280, height: 800 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/how-it-works/why');
+    await expect(heading).toBeFocused();
+    await expect(page).toHaveTitle('Why nobody can peek · Critter Crumbs');
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText(['What you are promised', 'One thing we will not pretend', 'The words', 'What runs where', 'The source']);
+    // the words scroll under the header, and Got it stays where it is at the foot
+    expect(await words.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
+    const foot = (await done.boundingBox())!;
+    expect(foot.y + foot.height).toBeLessThanOrEqual(viewport.height);
+    await words.evaluate(node => { node.scrollTop = node.scrollHeight; });
+    await expect(page.getByRole('link', { name: 'Read the technical spec on GitHub', exact: true })).toBeInViewport();
+    expect(await done.boundingBox()).toEqual(foot);
+    // one column of about 34 em, and nothing wider than the screen
+    const column = (await page.locator('.why-column').boundingBox())!;
+    expect(column.width).toBeLessThanOrEqual(34 * 16);
+    expect(Math.abs(column.x + column.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(10);
+    expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight])).toEqual([viewport.width, viewport.height]);
+  }
+  // the source is the one way out of the app, and its links say where they go
+  await expect(page.getByRole('link', { name: 'Read the code on GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/wefa-labs/critter-crumbs');
+  await expect(page.getByRole('link', { name: 'Read the technical spec on GitHub', exact: true })).toHaveAttribute('href', 'https://github.com/wefa-labs/critter-crumbs/blob/main/docs/04-technical-spec.md');
+  await expect(page.locator('.why-page a')).toHaveCount(2);
+  // opened by its own address, Got it leads to the launcher
+  await done.click();
+  await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeVisible();
+  // opened from the result step, the browser's Back returns to that step as Got it does, and the steps still lead out to
+  // the launcher they were opened from
+  await page.getByRole('link', { name: 'How it works', exact: true }).click();
+  for (let step = 1; step < 5; step++) await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('link', { name: 'Why nobody can peek', exact: true }).click();
+  await expect(heading).toBeFocused();
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'When the feast opens', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Got it', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Connect', exact: true })).toBeVisible();
+});
+
+// Home with no burrows is the first screen a member without a link sees: it offers the steps as a line under its one
+// action, never as anything that opens unasked (the first-steps review, F10 and D4).
+test('home with no burrows offers How it works under Start a burrow, and the steps return to it', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  // the store's own profile for a member in no burrow yet, presented at the HTTP boundary
+  await page.route('**/api/me', async route => {
+    const response = await route.fetch();
+    if (route.request().method() !== 'GET' || !response.ok()) { await route.fulfill({ response }); return; }
+    await route.fulfill({ response, json: { ...await response.json(), burrows: [] } });
+  });
+  await page.goto('/');
+  await connectLocal(page, 5);
+  await expect(page.getByRole('heading', { name: 'No burrows yet', exact: true })).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const start = page.getByRole('link', { name: 'Start a burrow', exact: true }), learn = page.getByRole('link', { name: 'How it works', exact: true });
+  await expect(learn).toHaveClass(/\bquiet\b/);
+  const [starting, learning] = [(await start.boundingBox())!, (await learn.boundingBox())!];
+  expect(learning.y).toBeGreaterThanOrEqual(starting.y + starting.height);
+  expect(learning.height).toBeGreaterThanOrEqual(44);
+  expect(learning.y + learning.height).toBeLessThanOrEqual(812);
+  await learn.click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Everyone gets the same handful', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Skip', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'No burrows yet', exact: true })).toBeVisible();
+});

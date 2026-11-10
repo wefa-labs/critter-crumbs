@@ -111,6 +111,10 @@ describe('the first steps', () => {
     expect(opened!.critters.every(critter => !critter.asleep)).toBe(true);
     expect(sheetScreenStyle(LEARN_SHEET_HEIGHT)).toEqual({ '--sheet-h': '410px', '--floor-h': 362 });
   });
+
+  it('leads to the page behind Why nobody can peek from the private step and the result, and from no other', () => {
+    expect(LEARN_STEPS.map(step => step.why === true)).toEqual([false, false, false, true, true]);
+  });
 });
 
 describe('your critter', () => {

@@ -22,13 +22,14 @@ const goHome = () => navigate('/');
 /**
  * Home (flow page, SCREENS.home and ['home-empty']; the November UI audit's screens 12 and 13): your critter at the
  * burrow's entrance and your burrows, each a card that opens it, with Start a burrow at the foot (audit decision D4).
- * With no burrows yet, your critter sleeps there over the one action.
+ * With no burrows yet, your critter sleeps there over the one action, with How it works under it, as on the launcher: a
+ * line a member can take or leave, never a dialog (the first-steps review, F10 and D4).
  */
 export function Home({ me, api, onProfile }: Pick<ScreenProps, 'me' | 'api' | 'onProfile'>) {
   const now = useTrustedTime(api);
   if (!me.burrows.length) return (
-    <PlaceScreen wordmark title={copy['home.title']} viewer={viewerOf({ me, onProfile })} {...yourPlace(me, ASLEEP_SCENE, true)} className="burrow-screen"
-      actions={<Link className="pill wide" href="/burrows/new">{copy['home.empty.cta']}</Link>}>
+    <PlaceScreen wordmark title={copy['home.title']} viewer={viewerOf({ me, onProfile })} {...yourPlace(me, ASLEEP_SCENE, true)} className="burrow-screen home-empty"
+      actions={<><Link className="pill wide" href="/burrows/new">{copy['home.empty.cta']}</Link><Link className="quiet" href="/how-it-works">{copy['launch.learn']}</Link></>}>
       <h1 className="sr-only">{copy['home.title']}</h1>
       <h2>{copy['home.empty.title']}</h2>
       <p>{copy['home.empty.body']}</p>

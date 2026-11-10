@@ -18,7 +18,7 @@ A private way for a group (a **burrow**) to decide how something is shared out. 
 | Crumbs | What you have to give. The same handful for everyone. |
 | Scatter | The act of giving crumbs to a critter. |
 
-**Never in user-facing copy:** seal, round, cache, vote, ballot, wallet. Say "connect", never "connect your wallet". `ballot` is allowed as a code identifier only. All copy lives in `packages/shared/src/copy.ts` with the IDs from `02-design-system.md` §10 — never inline a string in a component.
+**Never in user-facing copy:** seal, round, cache, vote, ballot, wallet. Say "connect", never "connect your wallet". `ballot` is allowed as a code identifier only. All copy lives in `packages/shared/src/copy.ts` with the IDs from `02-design-system.md` §10 (one exception, `copy-why.ts` beside it, holds the lines of the page behind Why nobody can peek, so the shell does not carry them; `docs/decisions.md`, 2026-11-09) — never inline a string in a component.
 
 ## Rules the code must enforce (PRD §5)
 

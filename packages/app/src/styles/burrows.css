@@ -9,7 +9,6 @@
 .burrow-z::after { content:'z'; }
 
 .burrow-screen a.pill { text-decoration:none; }
-.burrow-screen .place-actions a.quiet { display:inline-flex; align-items:center; }
 .burrow-screen .chip { display:inline-flex; align-items:center; width:max-content; height:26px; padding:0 10px; font-size:var(--cc-text-xs); font-weight:700; color:var(--cc-text); }
 .burrow-screen .place-words > .chip { align-self:flex-start; margin:0; }
 .burrow-screen .field > span { font-size:var(--cc-text-sm); font-weight:700; color:var(--cc-text); }

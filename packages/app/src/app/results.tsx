@@ -21,7 +21,7 @@ import type { RunAction } from './burrows.js';
 import { joinNames, percentShare } from './time.js';
 import { browserReceiptBook } from './receipts.js';
 import { createHops } from './heap.js';
-import { CritterFace, PortraitImage, targetLabel } from './ui.js';
+import { CritterFace, Link, PortraitImage, targetLabel } from './ui.js';
 import { gameView, isMemberFeast, portraitVariant, resultStates, resultsViews, type MemberFeast, type PublicFeast, type ResultsView } from './feast-view.js';
 import type { OpenedFeast } from './feast-session.js';
 import type { AppApi, Me } from './session.js';
@@ -50,8 +50,15 @@ export default function Results({ feast, api, me, settings, announce, report, ac
     void load(); return () => { active = false; clearTimeout(delayed); clearTimeout(timer); };
   }, [api, feast.id, me.address, retry]);
   if (!opened) return <WaitingScene feast={feast} settings={settings} announce={announce} error={error} retry={() => setRetry(value => value + 1)} />;
-  return <FeastResults feast={feast} opened={opened} settings={settings} announce={announce} viewer={me.address} {...(feast.aggregatePublic ? { record: <ResultRecord feast={feast} result={opened.result} api={api} me={me} account={account} run={run} busy={busy} /> } : {})} />;
+  return <FeastResults feast={feast} opened={opened} settings={settings} announce={announce} viewer={me.address} initialPlaying={!feastedHere(history.state)} {...(feast.aggregatePublic ? { record: <ResultRecord feast={feast} result={opened.result} api={api} me={me} account={account} run={run} busy={busy} /> } : {})} />;
 }
+
+/**
+ * Whether the feast has already played at this place in the browser's history (FeastResults keeps it there): coming back
+ * to it, from the page behind Why nobody can peek or by the browser's Back, opens the results settled rather than
+ * playing the feast again, and Replay Feast still plays it. A feast opened afresh plays.
+ */
+const feastedHere = (state: unknown) => typeof state === 'object' && state !== null && (state as { feasted?: unknown }).feasted === true;
 
 /** Flow 42 and 43: the circle asleep at dusk while the key is fetched, the sheet saying so. */
 export function WaitingScene({ feast, settings, announce, error, retry }: { feast: MemberFeast; settings: GameSettings; announce: (text: string) => void; error: CopyId | null; retry: () => void }) {
@@ -85,7 +92,9 @@ export function ResultActions({ replay, download, short }: { replay: () => void;
 
 /**
  * The ranked list (scatter page resultsList, with the flow page's lines for one scatterer, a tie, the record and a public
- * result): who scattered, the critters that received crumbs largest first, the lines about the list, the privacy line.
+ * result): who scattered and the way to Why nobody can peek under it (the first-steps review, F8), the critters that
+ * received crumbs largest first, the lines about the list, the privacy line, and for a member the result's fingerprint
+ * with what it is for.
  */
 function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; opened: OpenedFeast; record?: ReactNode; givers?: () => void }) {
   const { result } = opened, member = isMemberFeast(feast);
@@ -94,6 +103,7 @@ function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; op
   return (
     <div className="results-list">
       <p className="results-sum"><span>{summaryOf(feast, result)}</span>{member && !one ? <><br />{result.didNotScatter.length ? formatCopy('results.didNotScatter', { names: joinNames(result.didNotScatter.map(address => memberName(feast, address))) }) : copy['results.everyone']}</> : null}</p>
+      <Link className="quiet left" href="/how-it-works/why">{copy['why.title']}</Link>
       <ol className="results-rows">
         {rows.map(row => {
           const target = feast.targets.find(t => t.id === row.targetId)!;
@@ -106,7 +116,7 @@ function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; op
       {opened.missingUids.map(uid => <p className="results-note receipt-evidence" key={uid}>{formatCopy('err.uidMissing', { uid })}</p>)}
       {record ?? <p className="results-sum">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>}
       {givers ? <button type="button" className="quiet left" onClick={givers}>{copy['results.givers.title']}</button> : null}
-      {member ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><code className="receipt-evidence">{result.resultHash}</code></details> : null}
+      {member ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><p className="results-sum">{copy['results.verification.help']}</p><code className="receipt-evidence">{result.resultHash}</code></details> : null}
     </div>
   );
 }
@@ -165,6 +175,8 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
   }, [runtime]);
   useEffect(() => { runtime.setSettings(settings); if (settings.still || settings.reducedMotion) hops.clear(); }, [runtime, settings]);
   useEffect(() => { if (!playing && view !== 'closed') heading.current?.focus(); }, [playing, view]);
+  /* once the feast has played, or been skipped, this place in the history remembers it (Results, feastedHere) */
+  useEffect(() => { if (!playing) history.replaceState({ ...history.state, feasted: true }, ''); }, [playing]);
   const member = isMemberFeast(feast) ? feast : null, nobody = !result.totalScattered;
   const state = gameView({ phase: feast.phase, remaining: 0, opened: true, playing, resultsOpen: view !== 'closed', ...(nobody ? { resultState: resultStates.nobody } : view === 'givers' ? { resultState: resultStates.givers } : {}) }).state;
   const replay = () => { audio.stop(); hops.clear(); setPlaying(true); setFocus(0); setView(resultsViews.results); runtime.actions.replayFeast(); runtime.animateFor(FEAST.maxMs); };

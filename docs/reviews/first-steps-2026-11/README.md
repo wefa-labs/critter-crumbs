@@ -183,6 +183,8 @@ Tracer bullets, each one shippable and reviewable on its own. Workstream B throu
 
 Steps 1 to 3 were built on 3 November on the branch `claude/first-steps-explain` (`docs/decisions.md`, 2026-11-03): the invite link and the return path, the copy pass, and the week as a third step with every statement open in a thought bubble beside each head. One thing the build changed from the plan: the private step says "not even us" but does not yet link to the page, which does not exist until step 4. The step 3 captures beside this review predate one later change: the gathering line now says nobody else *in the burrow* can read a statement, because the host can (Technical spec §2).
 
+Steps 4 to 7 were built on 9 November on the branch `claude/why-nobody-can-peek` (`docs/decisions.md`, 2026-11-09), after Afolabi took the recommendations for D2 to D4 below. What the build changed from the plan: the page's lines live in their own module, `copy-why.ts`, beside `copy.ts`, because the shell carries `copy` whole and had 122 bytes to spare; both waiting sheets link to the page, so on the phone they grow from 250 to 290 px while the feast is laid out and from 270 to 330 while the key is not out; Got it goes back through the browser's history, and the steps and the results remember where they were, so the steps return to the same step and the results do not play the feast again; and two lines say no more than PRD §8 does (the store cannot open a scatter *before the deadline*, and once the key exists anyone in the burrow could work out who gave what). The desktop panel already set the 20/16 that F7 asks for (the 16/14 above was read off a capture taken at about 80% zoom), so Afolabi chose to go a size further: from 1,280 px the panel widens to 480 to 620 px and sets 28/20, which keeps 44 to 60 characters to a line. Settings (your critter's profile) does not link to the page: *In short* lists it and the table of links does not, and Afolabi chose to leave it out. Open, for Afolabi: captions for the foot of steps 1 and 2, which would be new words. Captures of the build, at 375 × 812 and 1280 × 800 in both looks, are in `images/why/`, made by `capture-why.mjs`. Step 8 is Afolabi's to run.
+
 Constraints that hold throughout: every string is a copy ID with its row in §10; the generator and the tally are untouched (the worked example still runs through the production tally); no `Date.now()`; the shell stays within its budget (it is at about 104 KB of 120 KB; the page is lazy); nothing opens unasked; the vocabulary rules.
 
 ## Decisions for Afolabi
@@ -195,6 +197,8 @@ Constraints that hold throughout: every string is a copy ID with its row in §10
 | D4 | Offer the steps on the home empty state | Yes, as a line, never a dialog |
 | D5 | 40% or 40.0% in the worked example | 40.0%, to match the real table |
 | D6 | The new step's scene: thought bubbles or the quartet awake alone | Bubbles if they come cheaply, else awake alone |
+
+**Answered.** D1, D5 and D6 with steps 1 to 3 on 3 November, and D2, D3 and D4 on 9 November before steps 4 to 7, each as recommended (`docs/decisions.md`).
 
 ## How to check it
 

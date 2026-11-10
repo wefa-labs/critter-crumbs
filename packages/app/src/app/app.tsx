@@ -15,6 +15,8 @@ import { screenMusic } from './screen-music.js';
 import { readDarkChoice, saveDarkChoice, showDarkChoice } from './theme.js';
 const FeastRoute=lazy(()=>import('./feast.js').then(module=>({default:module.FeastRoute})));
 const LearnRoute=lazy(()=>import('./learn.js').then(module=>({default:module.Learn})));
+/* the page behind Why nobody can peek, which few open: its words come with it (copy-why.ts) */
+const WhyRoute=lazy(()=>import('./why.js').then(module=>({default:module.Why})));
 /* starting a feast is a creator's occasional page, so its code arrives when it is opened */
 const SetupRoute=lazy(()=>import('./setup.js').then(module=>({default:module.SetupRoute})));
 /* the screens a connected member sees outside a feast arrive once someone has connected, so the launcher and the
@@ -129,10 +131,11 @@ export function App() {
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName))) setMeetingFor(me.address);
   const meetingShown = me !== null && meetingFor === me.address;
   const openProfile = () => { setOpener(document.activeElement); navigate('/your-critter'); };
-  /* the Music toggle wherever there is no Settings to open: the launcher, the first steps and a visitor's header */
+  /* the Music toggle wherever there is no Settings to open: the launcher, the first steps, the page behind Why nobody
+     can peek and a visitor's header */
   const musicButton = <MusicButton on={settings.music} sounding={sounding} soundAtPress={pressWatch.soundAtPress} choose={value => chooseSetting(MUSIC_SETTING, value)} />;
   /* the launcher says its own trouble, in its sheet */
-  const launching = state.ready && !feastRoute && screen !== '/how-it-works' && !me;
+  const launching = state.ready && !feastRoute && screen !== '/how-it-works' && screen !== '/how-it-works/why' && !me;
   /* the notices that stand while their cause lasts, at the head of each screen's sheet (notices.tsx) */
   const notices = useMemo(() => appNotices(skew, me?.warning), [skew, me?.warning]);
   /* each screen's music; a feast's pages name their own, and loading leaves playing whatever was */
@@ -140,6 +143,7 @@ export function App() {
   if (!state.ready) content = <Opening bare />;
   else if (feastRoute) content = <Suspense fallback={<Opening bare />}><FeastRoute onProfile={openProfile} clearError={() => setAlert('')} key={feastRoute[1]! + (me?.address ?? '')} id={feastRoute[1]!} api={api} me={me} run={run} busy={working} announce={announce} settings={settings} path={screen} account={() => session.snapshot().account} connect={() => void connect()} sound={musicButton} /></Suspense>;
   else if (screen === '/how-it-works') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><LearnRoute sound={musicButton} announce={announce} still={settings.still || settings.reducedMotion} /></Suspense>; }
+  else if (screen === '/how-it-works/why') { music = screenMusic.launcher; content = <Suspense fallback={<Opening bare />}><WhyRoute sound={musicButton} /></Suspense>; }
   else if (!me) { music = screenMusic.launcher; content = <Launcher connect={() => void connect()} busy={working} notice={alert || (online ? '' : copy['err.offline'])} sound={musicButton} />; }
   else if (setupRoute) { music = screenMusic.setup; content = <Suspense fallback={<Opening />}><SetupRoute announce={announce} key={screen} burrowId={setupRoute[1]!} api={api} me={me} onProfile={openProfile} run={run} busy={working} /></Suspense>; }
   else if (screen === '/burrows/new') { music = screenMusic.burrow; content = <Suspense fallback={<Opening bare />}><CreateBurrowRoute me={me} api={api} session={session} run={run} busy={working} onProfile={openProfile} /></Suspense>; }
@@ -168,7 +172,7 @@ export function App() {
     <header className="app-header" inert={layered}><div className="screen-mark"><Link href="/" className="brand wordmark">{copy['app.name']}</Link><BetaChip /></div><nav className="actions" aria-label={copy['app.navigation']}>
       {me ? <ProfileButton address={me.address} variant={me.variant} onClick={openProfile} />
         : musicButton}
-    </nav><div id="feast-header" /></header>
+    </nav></header>
     {!online && !launching ? <p className="offline-band">{copy['err.offline']}</p> : null}
     <main id="content" tabIndex={-1} inert={layered}>{beneath ? content : null}</main>
     {layered ? <div className="screen-layer">{layer}</div> : null}

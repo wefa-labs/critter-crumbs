@@ -39,7 +39,6 @@
 .start-feast .deadline-box:focus-within > span { visibility:hidden; }
 
 .start-feast .place-actions { flex-direction:column; align-items:stretch; }
-.start-feast a.quiet { display:inline-flex; align-items:center; }
 
 /* forced colours paint over a transparent text and a card's background: the picker shows its own text, and a
    chosen card a heavier edge */

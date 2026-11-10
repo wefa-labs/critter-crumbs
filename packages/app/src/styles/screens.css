@@ -50,7 +50,6 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .launch-sheet { position:relative; z-index:1; flex:none; display:flex; flex-direction:column; align-items:center; gap:14px; padding:22px 20px max(20px, env(safe-area-inset-bottom)); background:var(--cc-bg); border-top:var(--cc-border-strong); border-radius:22px 22px 0 0; box-shadow:0 -6px 16px color-mix(in srgb, var(--cc-burrow) 12%, transparent); }
 .launch-sheet > * { max-width:380px; }
 .launch-sheet .pill, .screen-sheet .pill { min-height:52px; padding:0 24px; }
-.launch-sheet a.quiet { display:inline-flex; align-items:center; }
 /* desktop: the painting is the whole screen, the sheet a card, and the critters gather either side of it.
    1280 x 800 in the design, its critters half as large again as the phone's. */
 @media (min-width:900px) {
@@ -120,7 +119,6 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 /* a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx) */
 .screen-layer { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:var(--cc-bg); }
 .screen-layer > .core-game { flex:1; height:auto; min-height:0; }
-#root:has(> .screen-layer) > .notice { position:fixed; top:64px; left:16px; right:16px; z-index:5000; }
 /* who has done something, at a glance: the count, the faces in a row with those not yet dimmed, then their names */
 .face-row { display:grid; gap:4px; }
 .face-row-count { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
@@ -138,8 +136,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .name-count { position:absolute; right:14px; top:50%; translate:0 -50%; font-size:var(--cc-text-xs); font-weight:400; color:var(--cc-text-2); font-variant-numeric:tabular-nums; pointer-events:none; }
 .name-count[data-over="true"] { color:var(--cc-error-text); font-weight:700; }
 .meeting-name { font-weight:700; }
-/* its foot: the choice, and under it the quiet way out, as How it works is under Connect on the launcher */
-.first-meeting .place-actions { flex-direction:column; align-items:stretch; gap:8px; }
+/* its foot: the choice, and under it the quiet way out, as How it works is under Connect on the launcher; home with no
+   burrows yet puts How it works under Start a burrow the same way */
+.first-meeting .place-actions, .home-empty .place-actions { flex-direction:column; align-items:stretch; gap:8px; }
 .first-meeting .place-actions > .quiet { align-self:center; font-size:var(--cc-text-sm); }
 
 /* ------------------------------------------------------------------ your critter (profile.tsx): its element over the
@@ -152,7 +151,6 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 /* How it works and Disconnect follow the settings, as the flow page draws them, and stay in view when the settings scroll */
 .your-critter .place-sheet { grid-template-rows:minmax(0, max-content) auto; align-content:start; }
 .your-critter .place-actions { justify-content:space-between; }
-.your-critter .place-actions a.quiet { display:inline-flex; align-items:center; }
 .switch-row { display:grid; grid-template-columns:minmax(0, 1fr) auto; column-gap:14px; align-items:center; min-height:60px; padding:10px 0; cursor:pointer; }
 .switch-row + .switch-row { border-top:1px solid var(--cc-line); }
 .switch-row b { grid-column:1; font-size:var(--cc-text-md); line-height:1.3; }
@@ -214,4 +212,28 @@ dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscro
 .learn-phases { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
 /* the week's thought bubbles are drawn as the reveal screen draws them (game.css .thought-target) */
 .learn-bubble svg { filter:drop-shadow(0 2px 3px color-mix(in srgb, var(--cc-burrow) 18%, transparent)); }
+/* the sheet has a top, a middle and a foot: the line that is not the step's message (the week's deadlines, the way to
+   the page behind Why nobody can peek) stands at the foot of the words, over the actions (the first-steps review, F7) */
+.learn-foot { margin-top:auto; }
 @media (min-width:900px) { .learn .sheet-screen { --room-h:max(100vw * 897 / 1600, 100dvh - 36px); } }
+/* from the design's 1280 px desktop (Design System §6.1, xl), the panel is a size up from the phone's, 28 px over 20 px,
+   and wider, so a line keeps 45 to 60 characters (the first-steps review, F7) */
+@media (min-width:1280px) {
+  .learn .sheet-screen { --panel:clamp(480px, 40vw, 620px); }
+  .learn-content { font-size:var(--cc-text-xl); }
+  .learn-content h1 { font-size:var(--cc-text-2xl); }
+  .learn-explanation, .learn-count, .learn-results { font-size:var(--cc-text-md); }
+  .learn-content .quiet { font-size:inherit; }
+}
+
+/* ------------------------------------------------------------------ the page behind Why nobody can peek (why.tsx): one
+   column about 34 em wide under the header, scrolling over Got it at the foot. Space parts the lines of a list, and more
+   of it the sections; the machinery is quieted to the secondary colour */
+.why-page { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:20px 20px 32px; }
+.why-column { max-width:34em; margin:auto; display:grid; gap:12px; }
+.why-column h1 { margin:0; }
+.why-column h2 { margin-top:16px; }
+.why-leads { margin:0; padding:0; list-style:none; display:grid; gap:12px; }
+.why-machinery { display:grid; gap:12px; color:var(--cc-text-2); }
+.why-foot { padding:12px 20px max(16px, env(safe-area-inset-bottom)); border-top:1px solid var(--cc-line); }
+.why-foot .pill { display:flex; max-width:34em; margin:auto; }
