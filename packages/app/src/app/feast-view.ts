@@ -21,17 +21,18 @@ export const scatterFailure={closed:'closed',rejected:'rejected',failed:'failed'
 export type ScatterFailure = keyof typeof scatterFailure;
 /** Errors from a confirmation that are the app's own notices, not a state of the scatter screen. */
 const appNotices = ['err.saveUnverified', 'err.notParticipant', 'err.sessionExpired', 'scatter.submit.help'];
-/** A scatter not signed: declined, the account app locked or on another account, or a signature too old for the store. */
-const unsignedIds = ['scatter.sign.rejected', 'scatter.sign.locked', 'scatter.sign.otherAccount', 'scatter.sign.expired'];
+/** What leaves the screen rejected, a scatter not signed: declined, the account app locked or on another account, or signed too long ago. */
+const rejections = ['scatter.sign.rejected', 'scatter.sign.locked', 'scatter.sign.otherAccount', 'scatter.sign.expired'] as const;
+export type Rejection = typeof rejections[number];
 /**
- * The state a failed confirmation leaves the scatter screen in (flow 39–41): scattering closed, the scatter not
- * signed (declined, locked, another account, or signed too long ago), or a save that could not be made. A scatter saved but not yet confirmed, a reconnect (401) and the app's
+ * The state a failed confirmation leaves the scatter screen in (flow 39–41): scattering closed, the scatter
+ * not signed (a rejection), or a save that could not be made. A scatter saved but not yet confirmed, a reconnect (401) and the app's
  * own notices leave the screen as it was, and their message reaches the app's alert unchanged.
  */
 export function scatterFailureOf(copyId: string | undefined, status: number | undefined): ScatterFailure | undefined {
   if (status === 401 || copyId && appNotices.includes(copyId)) return undefined;
   if (copyId === 'scatter.closed') return scatterFailure.closed;
-  if (copyId && unsignedIds.includes(copyId)) return scatterFailure.rejected;
+  if (rejections.some(id => id === copyId)) return scatterFailure.rejected;
   return scatterFailure.failed;
 }
 

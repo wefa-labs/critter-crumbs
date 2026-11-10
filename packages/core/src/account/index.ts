@@ -13,7 +13,7 @@ export interface Account {
   disconnect(): Promise<void>;
 }
 /** The account app cannot sign for the connected account just now: it is locked, or on another account. Both pass once it is back. */
-export class AccountUnavailable extends Error { constructor(readonly reason: 'locked' | 'otherAccount') { super(`Account ${reason}`); } }
+export class AccountUnavailableError extends Error { constructor(readonly reason: 'locked' | 'otherAccount') { super(`Account ${reason}`); } }
 export interface AccountOption { id: string; name: string; icon?: string }
 export interface AccountProvider { discover(): Promise<AccountOption[]>; connect(option: AccountOption): Promise<Account> }
 export interface SignInChallenge { nonce: string; issuedAt: number; expiresAt: number }

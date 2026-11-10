@@ -847,7 +847,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `scatter.sign.rejected` | Not confirmed. Your crumbs are still here — try again when you're ready. |
 | `scatter.sign.locked` | Your account app is locked. Your crumbs are still here — unlock it, then try again. |
 | `scatter.sign.otherAccount` | Your account app is on another account. Your crumbs are still here — switch back, then try again. |
-| `scatter.sign.expired` | That confirmation is too old to save. Your crumbs are still here — try again to confirm afresh. |
+| `scatter.sign.expired` | That confirmation is too old to save. Your crumbs are still here — try again. |
 | `scatter.saving` | Saving… |
 | `scatter.done.title` | Scattered. |
 | `scatter.done.body` | You can change this until {scatteringDeadline}. |

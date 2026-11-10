@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { AccountUnavailable, createInjectedAccountProvider, createLocalAccount } from '@critter-crumbs/core';
+import { AccountUnavailableError, createInjectedAccountProvider, createLocalAccount } from '@critter-crumbs/core';
 import { copy } from '@critter-crumbs/shared';
 import { hexToString, verifyMessage, verifyTypedData } from 'viem';
 
@@ -40,9 +40,9 @@ function setup({ chain = '0x1', switchFails, signFails, announce = true }: { cha
   return { provider: accountProvider, local, methods, added, report, emit: (name: string) => listeners.get(name)?.(undefined as never) };
 }
 const typed = { domain: { name: 'Fixture', version: '1', chainId: 84532 }, types: { Example: [{ name: 'value', type: 'uint256' }] }, primaryType: 'Example', message: { value: 42n } } as const;
-/** Why the account would not sign: its AccountUnavailable reason, or the error itself. */
+/** Why the account would not sign: its AccountUnavailableError reason, or the error itself. */
 async function refusal(signing: Promise<unknown>) {
-  try { await signing; } catch (error) { return error instanceof AccountUnavailable ? error.reason : error; }
+  try { await signing; } catch (error) { return error instanceof AccountUnavailableError ? error.reason : error; }
   throw new Error('signed');
 }
 async function connected(options?: Parameters<typeof setup>[0]) {

@@ -1,7 +1,7 @@
 import { createWalletClient, custom, getAddress, type EIP1193Provider, type WalletClient } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { copy } from '@critter-crumbs/shared';
-import { AccountUnavailable, type AccountProvider } from './index.js';
+import { AccountUnavailableError, type AccountProvider } from './index.js';
 interface Announcement { info: { uuid: string; name: string; icon?: string }; provider: EIP1193Provider }
 type BaseChainId = 8453 | 84532;
 const chains = { 8453: base, 84532: baseSepolia } as const;
@@ -64,9 +64,9 @@ export function createInjectedAccountProvider({ events = window, chainId }: { ev
       async function signing<T>(sign: () => Promise<T>) {
         if (disconnected) throw new Error('Disconnected account');
         if (!ours(current)) current = (await client.getAddresses().catch(() => [current]))[0];
-        if (!current) throw new AccountUnavailable('locked');
-        if (!ours(current)) throw new AccountUnavailable('otherAccount');
-        try { return await sign(); } catch (error) { throw rpcCodes(error).includes(4100) ? new AccountUnavailable('locked') : error; }
+        if (!current) throw new AccountUnavailableError('locked');
+        if (!ours(current)) throw new AccountUnavailableError('otherAccount');
+        try { return await sign(); } catch (error) { throw rpcCodes(error).includes(4100) ? new AccountUnavailableError('locked') : error; }
       }
       return { address, kind: 'injected',
         signMessage: message => signing(() => client.signMessage({ account: address, message })),
