@@ -44,9 +44,10 @@ export const FOLDED_DOCK_HEIGHT = 74;
 export const RESULTS_FLOOR = 196;
 /**
  * A phone shorter than the design's gives the results card room for its heading, the summary and two rows over its
- * pinned actions and the bar (RESULTS_LEAST) while it can leave the huddle a strip of floor (RESULTS_FLOOR_LEAST),
- * the critters standing smaller on it. A card shorter than RESULTS_PINNED_LEAST, the least that shows one row under
- * pinned heading and actions, scrolls them with its list instead: a phone on its side (QA accessibility-08).
+ * pinned actions and the bar (RESULTS_LEAST: the 419 px those parts measure at 375 px, and a little for rounding) while
+ * it can leave the huddle a strip of floor (RESULTS_FLOOR_LEAST), the critters standing smaller on it. A card shorter
+ * than RESULTS_PINNED_LEAST, the least that shows one row under pinned heading and actions, scrolls them with its list
+ * instead: a phone on its side (QA accessibility-08).
  */
 const RESULTS_LEAST = 424, RESULTS_FLOOR_LEAST = 48, RESULTS_PINNED_LEAST = 361;
 export const DESKTOP_MIN_WIDTH = 900;
@@ -146,7 +147,8 @@ export function layoutGame(input: LayoutInput) {
     // the size a row reaches: up to 1.3 times the base on a phone with room to spare, never wider than the scene
     const fit = (row: typeof huddled) => Math.min(base * (desktop ? 1 : 1.3), base * room / span(row, base));
     // on the phone, never taller than the floor above the card: a front row's box reaches 16/15 of its size above the
-    // card's edge, a back row's 1.45 times (QA accessibility-08); a tall phone's 196 px is never the limit
+    // card's edge, a back row's 1.45 times, with a pixel spare for the box's rounded height (QA accessibility-08); a
+    // tall phone's 196 px is never the limit
     const tallest = (rows: 1 | 2) => desktop ? Infinity : (dock.y - 1) / (rows === 1 ? 16 / 15 : 1.45);
     // one row when everyone fits at full size, or at the most a short floor allows, so nobody stands behind anybody;
     // else the scatter page's two
