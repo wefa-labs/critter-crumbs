@@ -216,6 +216,15 @@ dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscro
    the page behind Why nobody can peek) stands at the foot of the words, over the actions (the first-steps review, F7) */
 .learn-foot { margin-top:auto; }
 @media (min-width:900px) { .learn .sheet-screen { --room-h:max(100vw * 897 / 1600, 100dvh - 36px); } }
+/* from the design's 1280 px desktop (Design System §6.1, xl), the panel is a size up from the phone's, 28 px over 20 px,
+   and wider, so a line keeps 45 to 60 characters (the first-steps review, F7) */
+@media (min-width:1280px) {
+  .learn .sheet-screen { --panel:clamp(480px, 40vw, 620px); }
+  .learn-content { font-size:var(--cc-text-xl); }
+  .learn-content h1 { font-size:var(--cc-text-2xl); }
+  .learn-explanation, .learn-count, .learn-results { font-size:var(--cc-text-md); }
+  .learn-content .quiet { font-size:inherit; }
+}
 
 /* ------------------------------------------------------------------ the page behind Why nobody can peek (why.tsx): one
    column about 34 em wide under the header, scrolling over Got it at the foot. Space parts the lines of a list, and more
