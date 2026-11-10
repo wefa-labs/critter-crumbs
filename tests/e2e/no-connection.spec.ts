@@ -43,17 +43,21 @@ test('when the browser refuses the clipboard, the page’s address shows under t
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto(`/feasts/${feasts[0].id}`);
   await page.getByRole('button', { name: 'Connect to join', exact: true }).click();
-  const sheet = page.getByRole('dialog', { name: 'Choose how to connect' }), address = sheet.getByText(page.url(), { exact: true });
+  const sheet = page.getByRole('dialog', { name: 'Choose how to connect' }), pageAddress = sheet.getByText(page.url(), { exact: true });
   const copyLink = sheet.getByRole('button', { name: 'Copy link', exact: true });
   await expect(copyLink).toBeVisible();
-  await expect(address).toHaveCount(0);
+  await expect(pageAddress).toHaveCount(0);
   await copyLink.click();
   await expect(sheet.getByRole('alert')).toHaveText("Couldn't copy. Try again, or select the text and copy it yourself.");
-  await expect(address).toBeInViewport({ ratio: 1 });
+  await expect(pageAddress).toBeInViewport({ ratio: 1 });
   const notice = (await sheet.locator('.sheet-notice').boundingBox())!;
-  expect((await address.boundingBox())!.y).toBeGreaterThanOrEqual(notice.y + notice.height);
-  await address.click();
+  expect((await pageAddress.boundingBox())!.y).toBeGreaterThanOrEqual(notice.y + notice.height);
+  await pageAddress.click();
   expect(await page.evaluate(() => getSelection()?.toString())).toBe(page.url());
+  // Cancel takes the sheet's words with it, so nothing behind it asks for text that is no longer there
+  await sheet.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText(/Couldn't copy/)).toHaveCount(0);
 });
 
 /* Looking for what the browser offers can fail too, as when the code that asks it does not arrive. That is not "nothing
