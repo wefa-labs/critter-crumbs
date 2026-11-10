@@ -63,3 +63,7 @@ _Avoid_: vote, submission (in code); any use in copy
 **Simple view**:
 The 2D rendering of critters used before 3D loads, when WebGL is unavailable, or by choice.
 _Avoid_: fallback mode, degraded mode, low-fi
+
+**Account app**:
+The app a member connects with and signs in, such as a browser extension or a phone wallet; it asks before each signature, and it can be locked or moved to another account.
+_Avoid_: wallet (in UI)

@@ -47,13 +47,14 @@ export async function apiHarness(options: Partial<Omit<ApiDependencies, 'db'>> &
     }
     return id;
   }
-  async function createFeast(options: { kind?: 'people' | 'options'; open?: boolean; aggregatePublic?: boolean } = {}) {
+  /** `scattering` is how long scattering stays open, in milliseconds after gathering closes: a second unless a test needs longer. */
+  async function createFeast(options: { kind?: 'people' | 'options'; open?: boolean; aggregatePublic?: boolean; scattering?: number } = {}) {
     const owner = await connect(), members = [await connect(2), await connect(3)];
     const burrow = await api({ method: 'POST', path: '/api/burrows', headers: owner.headers, body: { name: 'Oak' } });
     const burrowId = String(burrow.body.id);
     for (const member of members) await api({ method: 'POST', path: `/api/burrows/${burrowId}/members`, headers: owner.headers, body: { address: member.account.address } });
     const created = await api({ method: 'POST', path: `/api/burrows/${burrowId}/feasts`, headers: owner.headers, body: {
-      title: 'Fixture', kind: options.kind ?? 'people', crumbsPerCritter: 100, gatheringEndsAt: now+1000, scatteringEndsAt: now+2000,
+      title: 'Fixture', kind: options.kind ?? 'people', crumbsPerCritter: 100, gatheringEndsAt: now+1000, scatteringEndsAt: now+1000+(options.scattering ?? 1000),
       aggregatePublic: options.aggregatePublic ?? false, individualOpen: false, options: [{ name: 'Garden', statement: 'Plant trees.' }, { name: 'Library', statement: 'Buy books.' }],
     } });
     if (created.status !== 201) throw new Error(`Draft creation failed: ${JSON.stringify(created.body)}`);
