@@ -74,7 +74,8 @@ test('+ with nothing left to give keeps a whole ring in focus, and still looks d
 for (const viewport of [{ width: 375, height: 812 }, { width: 375, height: 548 }]) {
   test(`with a statement open at ${viewport.width}×${viewport.height}, Tab never lands on anything hidden under it`, async ({ page }) => {
     await openFixture(page, 'reading', viewport);
-    await expect(page.locator('.phone-statement')).toBeFocused();
+    /* a phone statement opens with focus in its words, so the keys scroll them straight away (QA accessibility-06) */
+    await expect(page.locator('.phone-statement .statement-scroll')).toBeFocused();
     const stops: string[] = [];
     for (let i = 0; i < 30; i++) {
       await page.keyboard.press('Tab');
