@@ -22,10 +22,10 @@ const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const TOASTS: Record<string, string> = { scattered: 'Your scatter is in.', rejected: "Not confirmed. Your crumbs are still here — try again when you're ready.", failed: "Couldn't save your scatter. Check your connection and try again — nothing was lost." };
 const CLOSES = 'Scattering closes in 2 days · Wed 7 Oct, 18:00 (PDT)';
 
-async function open(page: Page, state: string, viewport: { width: number; height: number }) {
+async function open(page: Page, state: string, viewport: { width: number; height: number }, count = 8) {
   await page.setViewportSize(viewport);
-  await page.goto(`/dev/screens?capture&state=${state}&count=8&scene=window`);
-  await expect(page.locator('.circle-spot')).toHaveCount(8);
+  await page.goto(`/dev/screens?capture&state=${state}&count=${count}&scene=window`);
+  await expect(page.locator('.circle-spot')).toHaveCount(count);
   await page.waitForTimeout(300);
 }
 const box = async (page: Page, selector: string) => (await page.locator(selector).first().boundingBox())!;
@@ -99,10 +99,7 @@ test('waiting for the feast: the sheet counts who has scattered while the feast 
    nine names, a burrow of ten, the phone's sheet still holds it all without scrolling */
 test('no scatter readable: the sheet names whose and carries the fingerprint, and still fits', async ({ page }) => {
   for (const viewport of [PHONE, DESKTOP]) {
-    await page.setViewportSize(viewport);
-    await page.goto('/dev/screens?capture&state=unreadable&count=10&scene=window');
-    await expect(page.locator('.circle-spot')).toHaveCount(10);
-    await page.waitForTimeout(300);
+    await open(page, 'unreadable', viewport, 10);
     const sheet = page.locator(viewport === PHONE ? '.game-sheet' : '.side-sheet');
     await expect(sheet.getByText("scattered, but their crumbs couldn't be read, so there's nothing to share out.")).toBeVisible();
     if (viewport === PHONE) expect(await sheet.evaluate(node => node.scrollHeight <= node.clientHeight)).toBe(true);

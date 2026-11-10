@@ -127,17 +127,18 @@ export function ResultsList({ feast, opened, record, givers }: { feast: PublicFe
       {opened.missingUids.map(uid => <p className="results-note receipt-evidence" key={uid}>{formatCopy('err.uidMissing', { uid })}</p>)}
       {record ?? <p className="results-sum">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>}
       {givers ? <button type="button" className="quiet left" onClick={givers}>{copy['results.givers.title']}</button> : null}
-      {member ? <ResultFingerprint hash={result.resultHash} /> : null}
+      <ResultFingerprint feast={feast} hash={result.resultHash} />
     </div>
   );
 }
 
 /**
- * The result's fingerprint, folded under its name with what it is for. Members compare theirs: the same fingerprint means
- * the same result, so a browser that read the scatters differently stands out.
+ * A member's result fingerprint, folded under its name with what it is for (the first-steps review, F8). Members compare
+ * theirs: the same fingerprint means the same result, so a browser that read the scatters differently stands out. A
+ * visitor has none to compare: their result is read from the burrow's record, and its hash is that record's UID.
  */
-function ResultFingerprint({ hash }: { hash: string }) {
-  return <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><p className="results-sum">{copy['results.verification.help']}</p><code className="receipt-evidence">{hash}</code></details>;
+function ResultFingerprint({ feast, hash }: { feast: PublicFeast; hash: string }) {
+  return isMemberFeast(feast) ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><p className="results-sum">{copy['results.verification.help']}</p><code className="receipt-evidence">{hash}</code></details> : null;
 }
 
 /** In who gave what the arrows across scroll the table: they are kept from the circle, which would turn under it (QA accessibility-06). */
@@ -256,7 +257,7 @@ export function EmptySheet({ feast, opened, empty, heading }: { feast: PublicFea
       <p className="sheet-help">{summaryOf(feast, opened.result)}</p>
       {unreadable ? <SheetNotice trouble>{empty.line}</SheetNotice> : <p>{empty.line}</p>}
       {opened.missingUids.map(uid => <SheetNotice trouble key={uid}><span className="receipt-evidence">{formatCopy('err.uidMissing', { uid })}</span></SheetNotice>)}
-      {unreadable ? <ResultFingerprint hash={opened.result.resultHash} /> : null}
+      {unreadable ? <ResultFingerprint feast={feast} hash={opened.result.resultHash} /> : null}
       <Grow />
       <p className="sheet-help">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>
     </>
