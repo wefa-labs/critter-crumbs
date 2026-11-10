@@ -12,6 +12,8 @@ function lose(page: Page, module: string, times = Infinity) {
   void page.route(url => url.pathname === module, route => ++asked.count <= times ? route.abort('failed') : route.continue());
   return asked;
 }
+/* a screen that arrives on a second request, or after a whole reload, comes later than one opened in the usual way */
+const later = { timeout: 20000 };
 async function seed(page: Page, phase: 'gathering' | 'scattering') {
   const response = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase } }); expect(response.ok()).toBe(true);
   return (await response.json()).feasts[0] as { id: string; title: string };
@@ -31,8 +33,9 @@ test('a feast link whose screen does not arrive says so with Reload, asks twice 
   await page.waitForTimeout(1500);
   expect(asked.count).toBe(2); expect(documents).toBe(1);
   await page.unrouteAll({ behavior: 'wait' });
-  await reload.click();
-  await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible();
+  // a whole page load, as page.goto waits for one
+  await Promise.all([page.waitForEvent('load'), reload.click()]);
+  await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible(later);
   expect(documents).toBe(2);
 });
 
@@ -40,7 +43,7 @@ test('a screen whose first request is lost arrives on the second, with no notice
   const feast = await seed(page, 'gathering');
   const asked = lose(page, '/src/app/feast.tsx', 1);
   await page.goto(`/feasts/${feast.id}`);
-  await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: feast.title, exact: true })).toBeVisible(later);
   expect(asked.count).toBe(2);
   await expect(page.getByRole('button', { name: 'Reload', exact: true })).toHaveCount(0);
 });
@@ -59,9 +62,9 @@ test('Start reading with the scatter screen lost says so with Reload, and Reload
   await expect(page.getByRole('heading', { level: 1, name: "Can't open this right now", exact: true })).toBeVisible();
   await expect(page.locator('#content').getByText(NOTICE, { exact: true })).toBeVisible();
   await page.unrouteAll({ behavior: 'wait' });
-  await page.getByRole('button', { name: 'Reload', exact: true }).click();
+  await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'Reload', exact: true }).click()]);
   expect(new URL(page.url()).pathname).toBe(`/feasts/${feast.id}/read`);
-  await expect(page.locator('.phone-statement')).toBeVisible();
+  await expect(page.locator('.phone-statement')).toBeVisible(later);
 });
 
 /* A screen drawn over another: your critter's profile. The screen beneath stays as it was and may hold work not yet
