@@ -119,6 +119,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 /* a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx) */
 .screen-layer { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:var(--cc-bg); }
 .screen-layer > .core-game { flex:1; height:auto; min-height:0; }
+/* a screen over another whose code did not arrive: the notice laid out as a page, Reload then Back (lazy-screen.tsx) */
+.screen-layer:has(> h1) { display:block; padding:var(--cc-space-6); }
+.screen-layer > button + button { margin-left:var(--cc-space-3); }
 /* who has done something, at a glance: the count, the faces in a row with those not yet dimmed, then their names */
 .face-row { display:grid; gap:4px; }
 .face-row-count { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }

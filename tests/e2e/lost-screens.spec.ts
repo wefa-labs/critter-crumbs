@@ -63,3 +63,17 @@ test('Start reading with the scatter screen lost says so with Reload, and Reload
   expect(new URL(page.url()).pathname).toBe(`/feasts/${feast.id}/read`);
   await expect(page.locator('.phone-statement')).toBeVisible();
 });
+
+/* A screen drawn over another: your critter's profile. The screen beneath stays as it was and may hold work not yet
+   saved, so the notice over it offers Back as well as Reload. */
+test('your critter’s profile whose screen is lost offers Back to the screen beneath as well as Reload', async ({ page }) => {
+  await page.goto('/'); await connectLocal(page, 2);
+  await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
+  lose(page, '/src/app/profile.tsx');
+  await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: "Can't open this right now", exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Reload', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Back', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Your burrows', exact: true })).toBeVisible();
+  await expect(page.locator('.screen-layer')).toHaveCount(0);
+});

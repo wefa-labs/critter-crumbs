@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
 import { generateCritter } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
 import { CrumbGlyph } from '../game/mound.js';
