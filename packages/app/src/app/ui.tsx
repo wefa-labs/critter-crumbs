@@ -32,13 +32,9 @@ export function Page({ title, children, context, screen, primary = true }: { tit
 export function Opening({ bare = false }: { bare?: boolean }) {
   return <div className={bare ? 'core-game opening' : 'opening'}><Loader crumb={<CrumbGlyph />} /><p className="sr-only">{copy['app.loading']}</p></div>;
 }
-/**
- * A route whose data has not arrived: the bobbing crumbs, or the outage notice with a retry. Error copy never becomes a
- * page title. A screen whose code did not arrive says so in the same place, with its own line and Reload, and a screen
- * drawn over another adds the way back to it (lazy-screen.tsx).
- */
-export function PendingPage({ error, retry, bare = false, line = 'err.storeUnreachable', action = 'action.retry', children }: { error: unknown; retry: () => void; bare?: boolean; line?: CopyId; action?: CopyId; children?: ReactNode }) {
-  return error ? <Page title={copy['app.unavailable']}><p>{copy[line]}</p><button onClick={retry}>{copy[action]}</button>{children}</Page> : <Opening bare={bare} />;
+/** A route whose data has not arrived: the bobbing crumbs, or the outage notice with a retry. Error copy never becomes a page title. */
+export function PendingPage({ error, retry, bare = false }: { error: unknown; retry: () => void; bare?: boolean }) {
+  return error ? <Page title={copy['app.unavailable']}><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></Page> : <Opening bare={bare} />;
 }
 export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0, delighted = false }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number; delighted?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
