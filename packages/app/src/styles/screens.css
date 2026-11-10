@@ -190,6 +190,8 @@ html[data-still="true"] .switch-row input, html[data-still="true"] .switch-row i
 .connect-option .game-icon { color:var(--cc-text-2); }
 .connect-glyph { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--cc-text); color:var(--cc-bg); font-weight:800; object-fit:cover; }
 .connect-sheet .quiet { justify-self:center; }
+/* the page's address, once the browser refuses the clipboard, at the profile address's size: one press selects it all */
+.connect-sheet .address { font-size:var(--cc-text-sm); color:var(--cc-text-2); user-select:all; }
 /* a long list of apps scrolls inside the sheet and never pushes its title off the screen */
 dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
 
