@@ -598,6 +598,7 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `app.environment.help` | Still in development. Rehearsal only. |
 | `app.environment.chip` | Beta (the chip beside the burrow line in every header, D32) |
 | `app.tagline` | Everyone gets a handful of crumbs to share. |
+| `app.unavailable` | Can't open this right now (the title over the store being out of reach, `err.storeUnreachable`, and over a screen that did not arrive, `err.screenLoad`) |
 | `action.connect` | Connect |
 | `action.disconnect` | Disconnect |
 | `action.back` | Back |
