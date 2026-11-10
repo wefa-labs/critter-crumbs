@@ -13,7 +13,8 @@ async function resign(signed: SignedOffchainAttestation, account: Account) {
   signed.signature = { r: signature.r, s: signature.s, v: Number(signature.v) as 27 | 28 };
 }
 type Mutation = (signed: SignedOffchainAttestation, feast: Feast) => void;
-const invalidCases: [string, Mutation][] = [
+/* rules-04: a time out of the store's window has its own refusal, which the scatter screen answers by signing again */
+const invalidCases: [string, Mutation, string?][] = [
   ['wrong domain version', signed => { signed.domain.version = '1.0.0'; }],
   ['wrong chain', signed => { signed.domain.chainId = 8453; }],
   ['wrong domain name', signed => { signed.domain.name = 'Different attestation'; }],
@@ -21,8 +22,8 @@ const invalidCases: [string, Mutation][] = [
   ['wrong schema', signed => { signed.message.schema = `0x${'ff'.repeat(32)}`; }],
   ['wrong feast', (signed, feast) => { signed.message.data = encodeBallot({ feastId: '00000000-0000-4000-8000-000000000002', shutterIdentity: feast.registration!.identity, ciphertext: '0x11' }); }],
   ['wrong Shutter identity', (signed, feast) => { signed.message.data = encodeBallot({ feastId: feast.id, shutterIdentity: `0x${'ff'.repeat(32)}`, ciphertext: '0x11' }); }],
-  ['stale time', signed => { signed.message.time = String(BigInt(signed.message.time) - 301n); }],
-  ['future time', signed => { signed.message.time = String(BigInt(signed.message.time) + 301n); }],
+  ['stale time', signed => { signed.message.time = String(BigInt(signed.message.time) - 301n); }, 'scatter.sign.expired'],
+  ['future time', signed => { signed.message.time = String(BigInt(signed.message.time) + 301n); }, 'scatter.sign.expired'],
   ['nonzero recipient', signed => { signed.message.recipient = '0x0000000000000000000000000000000000000001'; }],
   ['expiring attestation', signed => { signed.message.expirationTime = '1'; }],
   ['revocable attestation', signed => { signed.message.revocable = true; }],
@@ -32,13 +33,13 @@ const invalidCases: [string, Mutation][] = [
   ['wrong typed fields', signed => { signed.types.Attest[0]!.type = 'uint64'; }],
   ['malformed schema data', signed => { signed.message.data = '0x11'; }],
 ];
-test.each(invalidCases)('API ballot verification rejects %s even with a valid signature', async (_, change) => {
+test.each(invalidCases)('API ballot verification rejects %s even with a valid signature', async (_, change, refusal = 'err.generic') => {
   const { api, createFeast, close, clock, advance } = await apiHarness({ eas: testEas }); disposals.push(close);
   const { path, owner } = await createFeast({ open: true }); advance(1000);
   const feast = (await api({ method: 'GET', path, headers: owner.headers })).body as unknown as Feast;
   const signed = await encryptedScatter(feast, owner.account, clock()); change(signed, feast); await resign(signed, owner.account);
   const response = await api({ method: 'POST', path: `${path}/ballots`, headers: owner.headers, body: signed });
-  expect(response.status).toBe(400); expect(response.body.error).toBe('err.generic');
+  expect(response.status).toBe(400); expect(response.body.error).toBe(refusal);
   expect((await api({ method: 'GET', path, headers: owner.headers })).body.ownBallotUids).toEqual([]);
 });
 test('API ballot verification rejects a signature made by a different participant', async () => {

@@ -4,7 +4,7 @@ import { canonicalJSON, parseAllocationPayload, parseAddress } from '@critter-cr
 import type { OpenedFeast } from '../app/feast-session.js';
 import { isResultState, type GameScreenState, type MemberFeast } from '../app/feast-view.js';
 import members from './game-members.js';
-export const screenStates: GameScreenState[] = ['reveal', 'scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'waiting', 'key', 'feast', 'feasted', 'results', 'nobody', 'tie', 'givers', 'recording', 'recorded', 'public'];
+export const screenStates: GameScreenState[] = ['reveal', 'scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'waiting', 'key', 'feast', 'feasted', 'results', 'nobody', 'unreadable', 'tie', 'givers', 'recording', 'recorded', 'public'];
 export const galleryQuery = { state: 'state', count: 'count', scene: 'scene', capture: 'capture' };
 /** The scattering moments, drawn over a fixture world rather than the live session. */
 export const scatteringStates: GameScreenState[] = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed'];
@@ -53,13 +53,14 @@ export function fixtureFeast(count: number, state: GameScreenState = 'scatter'):
   /* past the close: the feast is laid out, played or read, and everyone but the cast's one has scattered */
   const feasting = isResultState(state) || state === 'feast' || state === 'feasted' || state === 'waiting' || state === 'key';
   const people = members.slice(0, count), targets = people.map((p, index) => ({ id: ('0x' + p.address.toLowerCase().slice(2).padStart(64, '0')) as Hex, ownerAddress: parseAddress(p.address), name: p.name, position: index, kind: 'person' as const }));
-  return { id: '00000000-0000-4000-8000-000000000026', burrowId: 'rehearsal', burrowName: 'Rehearsal burrow', title: 'Our shared work', context: '', kind: 'people', status: 'open', phase: feasting ? 'feast' : 'scattering', serverNow: SERVER_NOW, createdBy: (targets[VIEWER] ?? targets[0]!).ownerAddress!, crumbsPerCritter: 100, gatheringEndsAt: SERVER_NOW - 86400000, scatteringEndsAt: CLOSES_AT, aggregatePublic: state === 'recording' || state === 'recorded' || state === 'public', individualOpen: state === 'givers', gatheringExtended: false, openedAt: SERVER_NOW - 5 * 86400000, cancelledAt: null, participantsFrozenAt: SERVER_NOW - 86400000, registration: null, closeRecord: null, resultAttestation: null, aggregate: null, targets, participants: targets.map(t => t.ownerAddress!), portraits: targets.map(t => ({ targetId: t.id, variant: 0 })), statements: targets.map((t, i) => ({ targetId: t.id, authorAddress: t.ownerAddress!, body: people[i]!.statement, updatedAt: SERVER_NOW - 2 * 86400000 })), participation: { written: targets.map(t => t.id), scattered: feasting ? scatterersAt(state, count).map(index => targets[index]!.ownerAddress!) : [] }, ownBallotUids: [], ownReceipts: [] };
+  return { id: '00000000-0000-4000-8000-000000000026', burrowId: 'rehearsal', burrowName: 'Rehearsal burrow', title: 'Our shared work', context: '', kind: 'people', status: 'open', phase: feasting ? 'feast' : 'scattering', serverNow: SERVER_NOW, createdBy: (targets[VIEWER] ?? targets[0]!).ownerAddress!, crumbsPerCritter: 100, gatheringEndsAt: SERVER_NOW - 86400000, scatteringEndsAt: CLOSES_AT, aggregatePublic: state === 'recording' || state === 'recorded' || state === 'public', individualOpen: state === 'givers', gatheringExtended: false, openedAt: SERVER_NOW - 5 * 86400000, cancelledAt: null, participantsFrozenAt: SERVER_NOW - 86400000, registration: null, closeRecord: null, resultAttestation: null, aggregate: null, targets, participants: targets.map(t => t.ownerAddress!), participantNames: targets.map(t => ({ address: t.ownerAddress!, name: t.name })), portraits: targets.map(t => ({ targetId: t.id, variant: 0 })), statements: targets.map((t, i) => ({ targetId: t.id, authorAddress: t.ownerAddress!, body: people[i]!.statement, updatedAt: SERVER_NOW - 2 * 86400000 })), participation: { written: targets.map(t => t.id), scattered: feasting ? scatterersAt(state, count).map(index => targets[index]!.ownerAddress!) : [] }, ownBallotUids: [], ownReceipts: [] };
 }
 
 /**
  * Valid fixture scatters, opened through the same deterministic tally as a live feast. Each giver shares their 100 by
  * what everyone received, varied a little per giver, as the flow page's who-gave-what table does (giversTable); the
- * totals land near the scatter page's. One scatterer splitting evenly makes the tie (flow 46); nobody, no scatters.
+ * totals land near the scatter page's. One scatterer splitting evenly makes the tie (flow 46); nobody, no scatters. For
+ * every scatter unreadable, the same givers' scatters are saved and none of them opens (QA copy-01).
  */
 export function fixtureOpened(feast: MemberFeast, state: GameScreenState): OpenedFeast {
   const ballots: TallyCandidate[] = [], givers: OpenedFeast['givers'] = [], n = feast.targets.length, cast = referenceCast(n);
@@ -69,6 +70,7 @@ export function fixtureOpened(feast: MemberFeast, state: GameScreenState): Opene
     const attester = feast.participants[g]!;
     const amounts = state === 'tie' ? feast.targets.map((_, c) => c === 0 || c === 3 ? 50 : 0) : distribute(feast.targets.map((_, c) => c === g ? 0 : cast.received[c]! * (1 + (((g * 5 + c * 3) % 7) - 3) * 0.08)), 100);
     const seq = String(i + 1), uid = ('0x' + (i + 1).toString(16).padStart(64, '0')) as Hex;
+    if (state === 'unreadable') { ballots.push({ seq, uid, attester, plaintext: null }); return; }
     ballots.push({ seq, uid, attester, plaintext: canonicalJSON(parseAllocationPayload({ v: 1, feast: feast.id, scatterer: attester, participants, allocation: feast.targets.map((t, j) => [t.id, amounts[j]!]), nonce: '0000000000000026' })) });
     givers.push({ seq, uid, attester, amounts });
   });

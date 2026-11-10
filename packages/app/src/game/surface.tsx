@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { copy } from '@critter-crumbs/shared';
 import { Dialog } from '../app/ui.js';
 import { StatementText } from '../app/gathering.js';
@@ -18,36 +18,50 @@ export { Grow, Loader, SheetNotice } from './sheet-parts.js';
 
 /**
  * The signing step: a sheet from the bottom on the phone, a centred card on desktop. Native <dialog>, opened modally
- * and announced; Cancel and Escape both close it.
+ * and announced, with its description (`describedBy`, an element's id) read with its name; Cancel and Escape both close
+ * it.
  */
-export function GameDialog({ title, children, cancel, action, busy = false }: { title: string; children: ReactNode; cancel: () => void; action: ReactNode; busy?: boolean }) {
+export function GameDialog({ title, children, cancel, action, busy = false, describedBy }: { title: string; children: ReactNode; cancel: () => void; action: ReactNode; busy?: boolean; describedBy?: string }) {
   return (
-    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} dismiss="action.cancel" actions={action}>
+    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} dismiss="action.cancel" actions={action} {...(describedBy ? { describedBy } : {})}>
       {children}
     </Dialog>
   );
 }
 
 /**
+ * A statement's words, scrolling inside its bubble or panel. The box is a stop for the keys of its own, named for its
+ * critter, so the words of a statement longer than the box can be reached by keyboard in every engine, Safari's
+ * included (QA accessibility-06). The same box shows each critter's words as the circle turns, so focus stays in it, and
+ * each starts at the top.
+ */
+function StatementScroll({ className, name, body, empty, scroller }: { className: string; name: string; body: string | undefined; empty: string; scroller?: RefObject<HTMLDivElement | null> }) {
+  const inner = useRef<HTMLDivElement>(null), box = scroller ?? inner;
+  useLayoutEffect(() => { if (box.current) box.current.scrollTop = 0; }, [name]);
+  return <div ref={box} className={className} tabIndex={0} role="region" aria-label={name}>{body ? <StatementText body={body} paragraphs /> : <p>{empty}</p>}</div>;
+}
+
+/**
  * A statement opened from the thought bubble on the phone: the bubble panel at the top of the screen, the element
- * chip and a close icon above the text. The dock's ‹ and › step through the circle; there is no position count.
+ * chip and a close icon above the text, which takes focus so the keys scroll it straight away. The dock's ‹ and › step
+ * through the circle; there is no position count.
  */
 export function PhoneStatement({ name, element, body, empty, close }: { name: string; element: CritterElement | null; body: string | undefined; empty: string; close: () => void }) {
-  const host = useRef<HTMLElement>(null), closer = useRef(close);
+  const scroll = useRef<HTMLDivElement>(null), closer = useRef(close);
   closer.current = close;
   useEffect(() => {
-    host.current?.focus();
+    scroll.current?.focus();
     const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') closer.current(); };
     addEventListener('keydown', escape);
     return () => { removeEventListener('keydown', escape); document.querySelector<HTMLElement>('.thought-target')?.focus(); };
   }, []);
   return (
-    <article ref={host} tabIndex={-1} className="phone-statement" aria-label={name}>
+    <article tabIndex={-1} className="phone-statement" aria-label={name}>
       <div className="statement-heading">
         {element ? <ElementChip element={element} /> : <strong>{name}</strong>}
         <button className="icon-button statement-close" type="button" aria-label={copy['action.close']} onClick={close}><GameIcon name="close" /></button>
       </div>
-      <div className="statement-scroll" key={name}>{body ? <StatementText body={body} paragraphs /> : <p>{empty}</p>}</div>
+      <StatementScroll className="statement-scroll" scroller={scroll} name={name} body={body} empty={empty} />
     </article>
   );
 }
@@ -74,14 +88,15 @@ export function PanelStatement({ name, element, own, body, empty }: { name: stri
         {element ? <ElementChip element={element} /> : null}
         {own ? <span className="panel-own">{copy['scatter.own.short']}</span> : null}
       </div>
-      <div className="panel-scroll" key={name}>{body ? <StatementText body={body} paragraphs /> : <p>{empty}</p>}</div>
+      <StatementScroll className="panel-scroll" name={name} body={body} empty={empty} />
     </article>
   );
 }
 
 /**
  * The phone's results: the dock grown into a card with its heading and close icon, the list scrolling under a fade, and
- * its actions pinned at its foot, so a long list never pushes the download below the fold (decision D9).
+ * its actions pinned at its foot, so a long list never pushes the download below the fold (decision D9). On a card too
+ * short to pin them, a phone on its side, the heading and actions scroll with the list (game/layout.ts).
  */
 export function ResultsCard({ title, close, heading, actions, children }: { title: string; close?: () => void; heading?: React.RefObject<HTMLHeadingElement | null>; actions?: ReactNode; children: ReactNode }) {
   return (

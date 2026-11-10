@@ -1,11 +1,34 @@
-import { ApiClientError, phaseAt } from '@critter-crumbs/core';
-import { integer, parseAddress, parseSequence, ValidationError, type Address, type SignedOffchainAttestation } from '@critter-crumbs/shared';
+import { AccountUnavailableError, ApiClientError, phaseAt, type Account } from '@critter-crumbs/core';
+import { BALLOT_TIME_TOLERANCE_SECONDS, integer, parseAddress, parseSequence, ValidationError, type Address, type SignedOffchainAttestation } from '@critter-crumbs/shared';
 import type { AppApi } from './session.js';
-import { isMemberFeast, type MemberFeast } from './feast-view.js';
+import { isMemberFeast, type MemberFeast, type Rejection } from './feast-view.js';
 export interface ScatterReceipt { uid: string; seq: string }
 export interface ScatterState { amounts: number[]; dirty: boolean; status: 'idle' | 'signing' | 'saving' | 'verifying' | 'saved' | 'error'; receipt: ScatterReceipt | null; remote: ScatterReceipt | null }
+/**
+ * A kept signature is resent only while it is under four minutes old: the store takes one signed within ±5 minutes of its
+ * clock, and the minute to spare covers the request and the clock estimate. Older, the retry signs again (rules-04).
+ */
+const stale = (signed: SignedOffchainAttestation, now: number) => now / 1000 - Number(signed.message.time) >= BALLOT_TIME_TOLERANCE_SECONDS - 60;
+const unavailable = { locked: 'scatter.sign.locked', otherAccount: 'scatter.sign.otherAccount' } as const satisfies Record<AccountUnavailableError['reason'], Rejection>;
+/** The error a signature that did not come reaches the screen as (production-build-04): the account app locked or on another account, else not confirmed. */
+const signingFailure = (error: unknown) => error instanceof ApiClientError || error instanceof ValidationError ? error
+  : new ApiClientError(error instanceof AccountUnavailableError ? unavailable[error.reason] : 'scatter.sign.rejected', 400);
 interface Options { onAccepted?: (receipt: ScatterReceipt) => void; api: AppApi; feast: MemberFeast; viewer: Address; sign: (amounts: number[], now: number, feast: MemberFeast) => Promise<SignedOffchainAttestation> }
-/** Keep edits in memory. A lost response is reconciled by UID before any retry. */
+type SignScatter = (account: Account, feast: MemberFeast, amounts: number[], now: number) => Promise<SignedOffchainAttestation>;
+/**
+ * The scatter screen's signer: the account connected now signs, with the signing code fetched on first use. No account, or
+ * another than the session's, asks to connect again (E19); code that cannot be fetched is the connection; what the account
+ * app answers goes to the session as it is, which says what it means (production-build-04).
+ */
+export function accountSigner(account: () => Account | null, viewer: Address, load: () => Promise<{ signScatter: SignScatter }> = () => import('../crypto/index.js')): Options['sign'] {
+  return async (amounts, now, latest) => {
+    const connected = account();
+    if (!connected || connected.address.toLowerCase() !== viewer.toLowerCase()) throw new ApiClientError('err.sessionExpired', 401);
+    const { signScatter } = await load().catch(() => { throw new ApiClientError('err.saveFailed', 0); });
+    return signScatter(connected, latest, amounts, now);
+  };
+}
+/** Keep edits in memory. A lost response is reconciled by UID before any retry; a retry signs again once the kept signature is too old. */
 export function createScatterSession({ api, feast, viewer, sign, onAccepted }: Options) {
   const address = parseAddress(viewer), listeners = new Set<() => void>();
   let state: ScatterState = { amounts: feast.targets.map(() => 0), dirty: false, status: 'idle', receipt: null, remote: null };
@@ -48,9 +71,9 @@ export function createScatterSession({ api, feast, viewer, sign, onAccepted }: O
           if (!latest.participants?.some(participant => parseAddress(participant) === address)) throw new ApiClientError('err.notParticipant', 403);
           if (state.amounts.reduce((sum, n) => sum + n, 0) !== latest.crumbsPerCritter) throw new ValidationError('scatter.submit.help');
           const amounts = [...state.amounts];
-          if (!pending || !same(pending.amounts, amounts)) {
+          if (!pending || !same(pending.amounts, amounts) || stale(pending.signed, now)) {
             publish({ status: 'signing' });
-            pending = { signed: await sign(amounts, now, latest), amounts };
+            pending = { signed: await sign(amounts, now, latest).catch(error => { throw signingFailure(error); }), amounts };
           }
           const submittedUid = pending.signed.uid;
           publish({ status: 'saving' });

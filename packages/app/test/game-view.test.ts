@@ -26,6 +26,8 @@ test('a failed confirmation becomes a screen state only for the designed moments
  /* flow 39–41: closed, declined, and a save that could not be made */
  expect(scatterFailureOf('scatter.closed',400)).toBe('closed');
  expect(scatterFailureOf('scatter.sign.rejected',400)).toBe('rejected');
+ /* production-build-04, rules-04: a locked account app, another account or an old signature is not a lost connection */
+ for(const id of ['scatter.sign.locked','scatter.sign.otherAccount','scatter.sign.expired'])expect(scatterFailureOf(id,400)).toBe('rejected');
  for(const [id,status] of [['err.storeUnreachable',503],['err.generic',500],[undefined,undefined]] as const)expect(scatterFailureOf(id,status)).toBe('failed');
  /* a scatter saved but not yet confirmed is not a failure, and a reconnect or a notice the app owns leaves the screen as it was */
  for(const [id,status] of [['err.saveUnverified',0],['err.notParticipant',403],['scatter.submit.help',undefined],['scatter.sign.rejected',401],['err.sessionExpired',401]] as const)expect(scatterFailureOf(id,status)).toBeUndefined();

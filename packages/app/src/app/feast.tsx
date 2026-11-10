@@ -1,4 +1,4 @@
-import { lazy, Suspense, useDeferredValue, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { Suspense, useDeferredValue, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { copy } from '@critter-crumbs/shared';
 import { phaseAt, ApiClientError } from '@critter-crumbs/core';
 import { useTrustedTime } from './deadlines.js';
@@ -11,15 +11,17 @@ import { Draft, FeastActions } from './feast-actions.js';
 import { EndedFeast, JoinedTooLate, NoFeastHere, NotInBurrow } from './feast-states.js';
 import type { GameSettings } from '../world/index.js';
 import { Reveal } from './read.js';
-const Scatter = lazy(() => import('./scatter.js').then(module => ({ default: module.Scatter })));
+import { lazyScreen } from './lazy-screen.js';
+/* each asked for once more if its request is lost; app.tsx's ScreenBoundary says so with Reload if it still fails */
+const Scatter = lazyScreen(() => import('./scatter.js').then(module => ({ default: module.Scatter })));
 import type { Account } from '@critter-crumbs/core';
 import { GameFrame } from '../game/parts.js';
 import { Toast } from '../game/surface.js';
 import { scatteringDeadline } from './time.js';
 import { Gathering, OptionStatements } from './gathering.js';
 import { Invite } from './invite.js';
-const PublicResults = lazy(() => import('./public-results.js'));
-const Results = lazy(() => import('./results.js'));
+const PublicResults = lazyScreen(() => import('./public-results.js'));
+const Results = lazyScreen(() => import('./results.js'));
 /** Scattering closed with the scatter screen open: the screen stops and the circle falls asleep (flow 41) for a moment before the feast is laid out. */
 const CLOSING_HOLD_MS = 2400;
 /** Start reading or a bubble pressed again while the reading screen is on its way: the first press stands. */

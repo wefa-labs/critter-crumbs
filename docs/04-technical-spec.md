@@ -234,6 +234,7 @@ interface AccountProvider { discover(): Promise<AccountOption[]>; connect(option
 
 - **v0 provider:** EIP-6963 discovery (the `eip6963:announceProvider` handshake is ~30 lines; no library) feeding viem's `createWalletClient({ transport: custom(provider) })`. No wagmi, no connector kits (**T5**).
 - **v1 provider:** an embedded-wallet SDK wrapped to the same interface; `kind: 'embedded'`. The rest of the app never imports a provider directly.
+- **When it cannot sign.** An account whose wallet is locked, or on another account, throws `AccountUnavailableError` with that reason, without asking the wallet, and signs again once the wallet is back on its address; a wallet that answers 4100 (unauthorised) is locked. Only `disconnect()` is final. The v1 provider keeps the same contract (decision of 2026-11-09).
 - **Chains.** Signing in needs no chain. Signing a ballot and posting the result need the EAS chain, Base (chain id 8453; Base Sepolia 84532 in dev and during the testnet period): the account is asked to switch (`wallet_switchEthereumChain`) at those moments, and to add the chain (`wallet_addEthereumChain`) when the wallet does not know it. MetaMask refuses typed data whose domain chainId is not the active chain; a wallet that cannot switch signs as it is (decision of 2026-10-08).
 - **ENS** is resolved server-side against a mainnet RPC (`MAINNET_RPC_URL`, a dependency named in the brief) with a 24-hour cache in Postgres (`profiles.ens_name`, `ens_checked_at`); the client never holds an RPC key. Failure shows addresses (`err.ensUnavailable`).
 - **Sign-in message** (EIP-191), copy in the Design System's voice, never the word wallet:
@@ -313,7 +314,7 @@ The off-chain UID is computed as the SDK does; **V4** — the exact preimage is 
 ```
 bytes32 feastId, bytes32 shutterIdentity, bytes ciphertext, uint32 payloadVersion
 ```
-Attestation fields: `recipient = 0x0`, `expirationTime = 0`, `revocable = false`, `refUID = 0x0`, `time` = client `now()` (server accepts ±5 minutes), `salt` random. The server verifies with viem `verifyTypedData` (attester recovers), checks `feastId` and `shutterIdentity` match the feast, attester ∈ `feast_participants`, phase = scattering at server time, ciphertext ≤ 4 KB, then assigns `seq` and stores the whole signed object as received. The same address may submit any number of times; each is stored (PRD R12, T11).
+Attestation fields: `recipient = 0x0`, `expirationTime = 0`, `revocable = false`, `refUID = 0x0`, `time` = client `now()` (server accepts ±5 minutes, `BALLOT_TIME_TOLERANCE_SECONDS`, and refuses one outside them as `scatter.sign.expired`), `salt` random. The server verifies with viem `verifyTypedData` (attester recovers), checks `feastId` and `shutterIdentity` match the feast, attester ∈ `feast_participants`, phase = scattering at server time, ciphertext ≤ 4 KB, then assigns `seq` and stores the whole signed object as received. The same address may submit any number of times; each is stored (PRD R12, T11).
 
 **Result schema** (on-chain, Base; shaped so a v1 custody contract can read it — PRD §10):
 ```
@@ -370,7 +371,7 @@ All under `/api`, Vercel Functions on the Node runtime, JSON in and out, `server
 | `POST /burrows/:id/leave` | member | R16 |
 | `POST /burrows/:id/removals` | creator | Remove another member; the burrow keeps a visible record of who was removed, by whom and when (decisions of 2026-09-05 and 2026-09-06) |
 | `POST /burrows/:id/feasts` | member | Create draft (validation §3) |
-| `GET /feasts/:id` | phase-aware | Public: title, context, deadlines, targets asleep. Member: plus statements per §4 gates, participation, own ballot UIDs, close record after close, `result_attestation` |
+| `GET /feasts/:id` | phase-aware | Public: title, context, deadlines, targets asleep. Member: plus statements per §4 gates, participation, own ballot UIDs, close record after close, `result_attestation`, and `participantNames`, each participant's name as the burrow's member list has it now (ENS, else the display name; `null` for neither), which names the members of an options feast in its results (QA lifecycle-04) |
 | `POST /feasts/:id/open` | creator | Registers Shutter identity; sets `opened_at` |
 | `POST /feasts/:id/cancel` | creator, gathering | R8 |
 | `POST /feasts/:id/extend` | creator, gathering, once | R13, P6 |
@@ -481,8 +482,8 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | # | State | Sees | Can do | Completes |
 |---|---|---|---|---|
 | E1 | Shutter unreachable at reveal | `feast.waiting.*`, then `err.keyUnreachable` after 20 s; the waiting screen keeps polling `/key` every 60 s | Wait; come back later. The client also tries Shutter directly (**V3**) | Yes, later. Keys are released once and recoverable after keyper downtime (Shutter docs) |
-| E2 | Wallet rejects the signature mid-scatter | `scatter.sign.rejected`; the allocation stays in the DOM | Press *Scatter these* again | Yes |
-| E3 | Network drops after pressing *Scatter these* | Before the POST resolves: `err.saveFailed` — allocation kept. After: the client re-reads the feast; until its UID appears: `err.saveUnverified`; then `err.saveVerified` / the done line | Retry; the same ballot resubmitted gets a new `seq` and the same effect | Yes |
+| E2 | Wallet rejects the signature mid-scatter, is locked, or is on another account | `scatter.sign.rejected`, `scatter.sign.locked` or `scatter.sign.otherAccount`; the allocation stays in the DOM | Unlock it or switch back if need be, then press *Scatter these* again: the same page signs once the wallet is back on the connected account | Yes |
+| E3 | Network drops after pressing *Scatter these* | Before the POST resolves: `err.saveFailed` — allocation kept. After: the client re-reads the feast; until its UID appears: `err.saveUnverified`; then `err.saveVerified` / the done line | Retry; the same ballot resubmitted gets a new `seq` and the same effect. A ballot kept four minutes or more is signed afresh for the retry instead, the same allocation, since the store takes a signed time only within ±5 minutes (§7); one that reaches it too old, after a slow confirmation, is refused as `scatter.sign.expired` and the retry signs afresh | Yes |
 | E4 | Someone not in the burrow opens the link | Arrival (F1) then `burrow.unknown.*` after connecting | Ask a member to add them; a member adds, they reload | Yes |
 | E5 | Nobody scatters | Feast plays without a wave; `results.nobody`; CSV has zeros | Nothing to do; a new feast can be started | Yes, as an empty result |
 | E6 | One person scatters | Normal; `results.one` | — | Yes |
@@ -493,7 +494,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E11 | A UID missing from the published set | The client checks its own UIDs against the close record on every results load: `err.uidMissing` with the UID | Tell the burrow; the ballot exists in the store (signed) and the close record is immutable, so this is a bug or an outage to be reported, not silently absorbed | The feast completes for everyone else; the affected scatterer's ballot is provably theirs and the burrow decides |
 | E12 | Same address submits twice | Both stored; the latest `seq` counts (T11); the done line reflects the latest | Change again until close | Yes |
 | E13 | Shutter registration fails at open | `err.storeUnreachable` variant for open: the feast stays a draft | Retry *Open the feast*; the identity prefix is reused | Yes, once it succeeds |
-| E14 | A ballot fails to decrypt or validate at tally | `results.unreadable` names the scatterer; they count as not having scattered (T7) | The scatterer can show their signed ballot; nothing else | Yes |
+| E14 | A ballot fails to decrypt or validate at tally | `results.unreadable` names the scatterer; they count as not having scattered (T7). When not one ballot can be read, the results are their own state, `unreadable`: the nobody-scattered sheet with `results.unreadable.all` naming them and the result fingerprint under it, never `results.nobody` (QA copy-01). A client that could not read what the others read has a different `resultHash`, so comparing it tells one client’s failure from everyone’s | The scatterer can show their signed ballot; nothing else | Yes |
 | E15 | Submission arrives after scattering closed | `scatter.closed`; the server rejects with the same id | Nothing; the last accepted ballot stands | Yes |
 | E16 | Ballot from a non-participant (joined after freeze) | Server rejects `err.notParticipant` (new string) | Wait for the next feast | Yes |
 | E17 | A member leaves during gathering | Removed from the feast; if a people feast drops below three at scattering open, status `void` and `feast.tooFew` (P11) | Start a new feast | The void case does not; every other case does |
@@ -508,6 +509,7 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | E26 | Two tabs, one scattering in each | Each submission gets its own `seq`; the latest counts; both tabs re-read and show the latest | — | Yes |
 | E27 | Statement over 2,000 characters pasted | Truncated at the cap client-side; `gathering.limit`; the server rejects longer | — | Yes |
 | E28 | Reveal opened before Shutter's timestamp on a fast clock | `feast.keyNotYet`; nothing decrypts | Wait | Yes |
+| E29 | A screen's code does not arrive: a tab opened before a deployment asks for files the deployment no longer has, or a request is lost on a poor connection | A lost module is asked for once more; then, in the screen's place, `app.unavailable` with `err.screenLoad`, never an empty page. Nothing reloads by itself (QA production-build-06) | *Reload*; Back as well over your critter's profile | Yes; statements and scatters already saved are on the store |
 
 New copy IDs introduced here (to be added to the Design System §10): `results.unreadable`, `err.notParticipant`, `err.feastCapacity` (“A feast can include at most 49 critters.”).
 

@@ -1,34 +1,37 @@
 import { afterEach, expect, test } from 'vitest';
-import { createApiClient,createCloseRecord,createMockTimelock } from '@critter-crumbs/core';
+import { AccountUnavailableError,createApiClient,createCloseRecord,createMockTimelock,type Account } from '@critter-crumbs/core';
 import { apiHarness } from './support.js';
 import { testEas, encryptedScatter } from './scatter-support.js';
 import {createReceiptBook} from '../../packages/app/src/app/receipts.js';
 import {openFeastResult} from '../../packages/app/src/app/feast-session.js';
-import { createScatterSession } from '../../packages/app/src/app/scatter-session.js';
+import { accountSigner, createScatterSession } from '../../packages/app/src/app/scatter-session.js';
 import type { MemberFeast } from '../../packages/app/src/app/feast-view.js';
 const disposals: (() => Promise<void>)[] = [];
 afterEach(async () => { for (const dispose of disposals.splice(0)) await dispose(); });
-async function fixture(onAccepted: (receipt:{uid:string;seq:string})=>void=()=>{}) {
+/** `scattering` keeps the feast open longer than the harness's one second, for retries that come minutes later; `signer` replaces the counting signer. */
+async function fixture(onAccepted: (receipt:{uid:string;seq:string})=>void=()=>{}, { scattering, signer }: { scattering?: number; signer?: (owner: Account) => Parameters<typeof createScatterSession>[0]['sign'] } = {}) {
   const server = await apiHarness({ eas: testEas }); disposals.push(server.close);
-  const { path, owner, members } = await server.createFeast({ open: true }); server.advance(1000);
-  let uncertain = false, readsFail = false, rejectSign = false, signed = 0, failVerification = false, dropRead = false;
+  const { path, owner, members } = await server.createFeast({ open: true, ...(scattering ? { scattering } : {}) }); server.advance(1000);
+  let uncertain = false, readsFail = false, rejectSign = false, signed = 0, failVerification = false, dropRead = false, dropPost = false, confirmTakes = 0;
   const requests: unknown[] = [], accepted: {uid:string;seq:string}[]=[];
   const api = createApiClient({ clock: server.clock, fetch: async (input, init) => {
     if (dropRead && !init?.method) { dropRead = false; throw new Error('verification unavailable'); }
     if (readsFail && !init?.method) throw new Error('offline');
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
     if (body) requests.push(body);
+    if (dropPost && init?.method === 'POST') { dropPost = false; throw new Error('connection dropped'); }
     const response = await server.api({ method: init?.method ?? 'GET', path: String(input), headers: owner.headers, body });
     if (failVerification && init?.method === 'POST') { failVerification = false; dropRead = true; }
     if (uncertain && init?.method === 'POST') { uncertain = false; throw new Error('lost response'); }
     return new Response(JSON.stringify(response.body), { status: response.status });
   } });
   const feast = await api.get(path) as unknown as MemberFeast;
-  const session = createScatterSession({ api, feast, viewer: owner.account.address, onAccepted:receipt=>{accepted.push(receipt);onAccepted(receipt);}, sign: async (amounts, now, latest) => {
-    signed++; if (rejectSign) throw new Error('rejected'); return encryptedScatter(latest, owner.account, now, amounts);
-  } });
+  const session = createScatterSession({ api, feast, viewer: owner.account.address, onAccepted:receipt=>{accepted.push(receipt);onAccepted(receipt);}, sign: signer?.(owner.account) ?? (async (amounts, now, latest) => {
+    signed++; if (rejectSign) throw new Error('rejected');
+    const scatter = await encryptedScatter(latest, owner.account, now, amounts); server.advance(confirmTakes); confirmTakes = 0; return scatter;
+  }) });
   const amounts = feast.targets.map(target => target.ownerAddress === members[0]!.account.address ? 100 : 0);
-  return { server, api, path, owner, feast, session, amounts, requests, accepted, signed: () => signed, verificationFails() { failVerification = true; }, uncertain() { uncertain = true; }, offline(value: boolean) { readsFail = value; }, reject(value: boolean) { rejectSign = value; } };
+  return { server, api, path, owner, feast, session, amounts, requests, accepted, signed: () => signed, verificationFails() { failVerification = true; }, uncertain() { uncertain = true; }, dropNextSave() { dropPost = true; }, confirmTakes(ms: number) { confirmTakes = ms; }, offline(value: boolean) { readsFail = value; }, reject(value: boolean) { rejectSign = value; } };
 }
 test('a browser scatter encrypts the complete allocation and confirms its ordered receipt; latest replacement counts', async () => {
   const f = await fixture(); f.session.edit(f.amounts); await f.session.submit();
@@ -49,7 +52,7 @@ test('rejected signing and offline verification preserve counts; incomplete and 
   const f = await fixture(); await expect(f.session.submit()).rejects.toThrow(); expect(f.signed()).toBe(0);
   const self = f.feast.targets.map(target => target.ownerAddress === f.owner.account.address ? 100 : 0);
   expect(() => f.session.edit(self)).toThrow();
-  f.session.edit(f.amounts); f.reject(true); await expect(f.session.submit()).rejects.toThrow();
+  f.session.edit(f.amounts); f.reject(true); await expect(f.session.submit()).rejects.toMatchObject({ status: 400, copyId: 'scatter.sign.rejected' });
   expect(f.session.snapshot().amounts).toEqual(f.amounts);
   f.reject(false); f.offline(true); await expect(f.session.submit()).rejects.toThrow(); expect(f.session.snapshot().amounts).toEqual(f.amounts);
   f.offline(false); await f.session.submit(); expect(f.session.snapshot().status).toBe('saved');
@@ -96,4 +99,46 @@ test('acknowledged UID survives failed verification and restart, exposing a cons
   const feast=await api.get(f.path) as unknown as MemberFeast,acceptedUids=createReceiptBook(storage).read(feast.id,f.owner.account.address);
   const opened=await openFeastResult({api,feast,acceptedUids,timelock:createMockTimelock({clock:f.server.clock}),eas:testEas,yieldToBrowser:async()=>{}});
   expect(opened?.missingUids).toEqual([f.accepted[0]!.uid]);expect(opened?.result.totalScattered).toBe(0);
+});
+
+// rules-04: the store takes a scatter signed at most five minutes either side of its clock (Technical Spec §7).
+test('a retry more than five minutes after a dropped save signs afresh, and the store takes it', async () => {
+  const f = await fixture(undefined, { scattering: 3600000 }); f.session.edit(f.amounts); f.dropNextSave();
+  await expect(f.session.submit()).rejects.toMatchObject({ copyId: 'err.storeUnreachable' });
+  f.server.advance(301000); await f.session.submit();
+  expect(f.session.snapshot()).toMatchObject({ status: 'saved', receipt: { seq: '1' }, amounts: f.amounts, dirty: false }); expect(f.signed()).toBe(2);
+});
+test('a retry soon after a dropped save sends the same signed scatter without asking again', async () => {
+  const f = await fixture(undefined, { scattering: 3600000 }); f.session.edit(f.amounts); f.dropNextSave();
+  await expect(f.session.submit()).rejects.toMatchObject({ copyId: 'err.storeUnreachable' });
+  f.server.advance(60000); await f.session.submit();
+  expect(f.session.snapshot()).toMatchObject({ status: 'saved', receipt: { seq: '1' } }); expect(f.signed()).toBe(1);
+  expect((f.requests as { uid: string }[]).map(request => request.uid)).toEqual([f.session.snapshot().receipt!.uid, f.session.snapshot().receipt!.uid]);
+});
+test('a confirmation that took more than five minutes is refused as expired, not as a lost connection, and the retry signs afresh', async () => {
+  const f = await fixture(undefined, { scattering: 3600000 }); f.session.edit(f.amounts); f.confirmTakes(301000);
+  await expect(f.session.submit()).rejects.toMatchObject({ status: 400, copyId: 'scatter.sign.expired' });
+  await f.session.submit();
+  expect(f.session.snapshot()).toMatchObject({ status: 'saved', receipt: { seq: '1' } }); expect(f.signed()).toBe(2);
+});
+
+test('a scatter the store took, whose answer was lost, is found by its UID when the retry comes minutes later, and not signed or sent again', async () => {
+  const f = await fixture(undefined, { scattering: 3600000 }); f.session.edit(f.amounts); f.verificationFails();
+  await expect(f.session.submit()).rejects.toThrow();
+  f.server.advance(301000); await f.session.submit();
+  expect(f.session.snapshot()).toMatchObject({ status: 'saved', receipt: { seq: '1' } }); expect(f.signed()).toBe(1); expect(f.requests).toHaveLength(1);
+});
+// production-build-04: through the screen's own signer, the session says why the account app did not sign, and the same page saves once it is back.
+test('an account app that is locked or on another account says so, keeps the crumbs, and the scatter saves once it is back', async () => {
+  let away: AccountUnavailableError['reason'] | undefined, lost = false, connected = true;
+  const f = await fixture(undefined, { signer: owner => accountSigner(() => connected ? { ...owner, async signTypedData(typed) { if (away) throw new AccountUnavailableError(away); return owner.signTypedData(typed); } } : null, owner.address,
+    async () => { if (lost) throw new TypeError('Failed to fetch dynamically imported module'); return { signScatter: (account, latest, amounts, now) => encryptedScatter(latest, account, now, amounts) }; }) });
+  f.session.edit(f.amounts);
+  away = 'locked'; await expect(f.session.submit()).rejects.toMatchObject({ status: 400, copyId: 'scatter.sign.locked' });
+  away = 'otherAccount'; await expect(f.session.submit()).rejects.toMatchObject({ status: 400, copyId: 'scatter.sign.otherAccount' });
+  away = undefined; lost = true; await expect(f.session.submit()).rejects.toMatchObject({ status: 0, copyId: 'err.saveFailed' });
+  lost = false; connected = false; await expect(f.session.submit()).rejects.toMatchObject({ status: 401, copyId: 'err.sessionExpired' });
+  expect(f.session.snapshot().amounts).toEqual(f.amounts);
+  connected = true; await f.session.submit();
+  expect(f.session.snapshot()).toMatchObject({ status: 'saved', receipt: { seq: '1' }, amounts: f.amounts });
 });

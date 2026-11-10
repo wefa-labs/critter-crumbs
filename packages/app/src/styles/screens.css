@@ -119,6 +119,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 /* a screen drawn over the one it was opened from, which stays as it was beneath it (app.tsx) */
 .screen-layer { position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; background:var(--cc-bg); }
 .screen-layer > .core-game { flex:1; height:auto; min-height:0; }
+/* a screen over another whose code did not arrive: the notice laid out as a page, Reload then Back (lazy-screen.tsx) */
+.screen-layer:has(> h1) { display:block; padding:var(--cc-space-6); }
+.screen-layer > button + button { margin-left:var(--cc-space-3); }
 /* who has done something, at a glance: the count, the faces in a row with those not yet dimmed, then their names */
 .face-row { display:grid; gap:4px; }
 .face-row-count { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 10px; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
@@ -146,7 +149,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .floor-chip { position:absolute; left:50%; top:12%; translate:-50% 0; z-index:1; }
 .profile-kept { font-size:var(--cc-text-xs); color:var(--cc-text-2); text-align:right; }
 .critter-address { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:48px; padding:0 4px 0 14px; border:1.5px solid var(--cc-line-strong); border-radius:14px; background:var(--cc-bg-raised); }
-.critter-address .address { overflow-wrap:normal; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.critter-address .address { overflow-wrap:normal; }
+/* an address to copy, a size up from .address: your own in its short form, and the page's in the connect sheet */
+.critter-address .address, .connect-sheet .address { font-size:var(--cc-text-sm); color:var(--cc-text-2); }
 .your-critter .quiet { padding-inline:10px; }
 /* How it works and Disconnect follow the settings, as the flow page draws them, and stay in view when the settings scroll */
 .your-critter .place-sheet { grid-template-rows:minmax(0, max-content) auto; align-content:start; }
@@ -176,7 +181,8 @@ html[data-still="true"] .switch-row input, html[data-still="true"] .switch-row i
 /* practice: each critter is a button the size of its drawing; a crumb hops to it from the heap */
 .practice-hit { position:absolute; inset:0; width:100%; min-width:44px; min-height:44px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; touch-action:manipulation; }
 .practice-hit:active { translate:none; }
-.core-game .practice-hit:focus-visible { outline:2px solid var(--cc-text); outline-offset:2px; box-shadow:none; border-radius:50%; }
+/* the app's ring round the practice critter, as round the game's (game.css .circle-hit) */
+.core-game .practice-hit:focus-visible { border-radius:50%; }
 .practice-crumb { position:absolute; left:0; top:0; z-index:3; width:20px; height:20px; margin:-10px 0 0 -10px; line-height:0; pointer-events:none; }
 .practice-crumb svg { width:100%; height:100%; overflow:visible; }
 
@@ -186,6 +192,8 @@ html[data-still="true"] .switch-row input, html[data-still="true"] .switch-row i
 .connect-option .game-icon { color:var(--cc-text-2); }
 .connect-glyph { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--cc-text); color:var(--cc-bg); font-weight:800; object-fit:cover; }
 .connect-sheet .quiet { justify-self:center; }
+/* the page's address, once the browser refuses the clipboard: one press selects it all */
+.connect-sheet .address { user-select:all; }
 /* a long list of apps scrolls inside the sheet and never pushes its title off the screen */
 dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
 

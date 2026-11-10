@@ -1,39 +1,43 @@
-import type { Feast, FeastClock, FeastKind, Phase, ResultView, Statement, Target } from '@critter-crumbs/shared';
+import type { Feast, FeastClock, FeastKind, ParticipantName, Phase, ResultView, Statement, Target } from '@critter-crumbs/shared';
 import type { MusicTrack } from '../audio/index.js';
 import { screenMusic } from './screen-music.js';
 export interface PublicFeast extends FeastClock, Partial<ResultView> { id: string; burrowName: string; title: string; context: string; kind: FeastKind; aggregatePublic: boolean; targets: Target[]; portraits: { targetId: string; variant: number }[]; phase: Phase; serverNow: number }
-export interface MemberFeast extends Feast, ResultView { burrowName: string; portraits: PublicFeast['portraits']; phase: Phase; serverNow: number; statements: Statement[]; participation: { written: string[]; scattered: string[] }; ownBallotUids: string[]; ownReceipts: { uid: string; seq: string }[] }
+export interface MemberFeast extends Feast, ResultView { burrowName: string; portraits: PublicFeast['portraits']; phase: Phase; serverNow: number; participantNames: ParticipantName[]; statements: Statement[]; participation: { written: string[]; scattered: string[] }; ownBallotUids: string[]; ownReceipts: { uid: string; seq: string }[] }
 export const isMemberFeast = (feast: PublicFeast | MemberFeast): feast is MemberFeast => 'participants' in feast;
 export const portraitVariant = (feast: PublicFeast, target: Target) => feast.portraits.find(portrait => portrait.targetId === target.id)?.variant ?? 0;
 
 /** Presentation state only; the scatter session still owns signing, receipts and replacement. */
-export type GameScreenState = 'reveal'|'scatter'|'reading'|'done'|'scattered'|'signing'|'saving'|'rejected'|'failed'|'closed'|'waiting'|'key'|'feast'|'feasted'|'results'|'nobody'|'tie'|'givers'|'recording'|'recorded'|'public';
-export interface GameViewInput { phase: Phase; remaining:number; receipt?:boolean; dirty?:boolean; reveal?:boolean; reading?:boolean; signing?:boolean; saving?:boolean; failure?:'rejected'|'failed'|'closed'; opened?:boolean; playing?:boolean; keyPending?:boolean; resultState?:'nobody'|'tie'|'givers'|'recording'|'recorded'; resultsOpen?:boolean }
+export type GameScreenState = 'reveal'|'scatter'|'reading'|'done'|'scattered'|'signing'|'saving'|'rejected'|'failed'|'closed'|'waiting'|'key'|'feast'|'feasted'|'results'|'nobody'|'unreadable'|'tie'|'givers'|'recording'|'recorded'|'public';
+export interface GameViewInput { phase: Phase; remaining:number; receipt?:boolean; dirty?:boolean; reveal?:boolean; reading?:boolean; signing?:boolean; saving?:boolean; failure?:'rejected'|'failed'|'closed'; opened?:boolean; playing?:boolean; keyPending?:boolean; resultState?:'nobody'|'unreadable'|'tie'|'givers'|'recording'|'recorded'; resultsOpen?:boolean }
 export function gameView(input:GameViewInput) {
  const editable=input.phase==='scattering'&&input.failure!=='closed';
- const state:GameScreenState=!editable ? input.failure==='closed'?'closed':input.opened ? input.playing ? 'feast' : input.resultsOpen===false&&input.resultState!=='nobody' ? 'feasted' : input.resultState??'results' : input.keyPending?'key':'waiting' : input.saving?'saving':input.signing?'signing':input.failure??(input.reveal?'reveal':input.reading?'reading':input.receipt&&!input.dirty?'scattered':input.remaining===0?'done':'scatter');
- return {state,editable,reading:state==='reading',results:['results','nobody','tie','givers','recording','recorded','public'].includes(state),remaining:input.remaining};
+ const state:GameScreenState=!editable ? input.failure==='closed'?'closed':input.opened ? input.playing ? 'feast' : input.resultsOpen===false&&input.resultState!=='nobody'&&input.resultState!=='unreadable' ? 'feasted' : input.resultState??'results' : input.keyPending?'key':'waiting' : input.saving?'saving':input.signing?'signing':input.failure??(input.reveal?'reveal':input.reading?'reading':input.receipt&&!input.dirty?'scattered':input.remaining===0?'done':'scatter');
+ return {state,editable,reading:state==='reading',results:isResultState(state),remaining:input.remaining};
 }
 
-export const isResultState=(state:GameScreenState)=>['results','nobody','tie','givers','recording','recorded','public'].includes(state);
+export const isResultState=(state:GameScreenState)=>['results','nobody','unreadable','tie','givers','recording','recorded','public'].includes(state);
 
 export const scatterFailure={closed:'closed',rejected:'rejected',failed:'failed'} as const;
 export type ScatterFailure = keyof typeof scatterFailure;
 /** Errors from a confirmation that are the app's own notices, not a state of the scatter screen. */
 const appNotices = ['err.saveUnverified', 'err.notParticipant', 'err.sessionExpired', 'scatter.submit.help'];
+/** What leaves the screen rejected, a scatter not signed: declined, the account app locked or on another account, or signed too long ago. */
+const rejections = ['scatter.sign.rejected', 'scatter.sign.locked', 'scatter.sign.otherAccount', 'scatter.sign.expired'] as const;
+export type Rejection = typeof rejections[number];
 /**
- * The state a failed confirmation leaves the scatter screen in (flow 39–41): scattering closed, the signature
- * declined, or a save that could not be made. A scatter saved but not yet confirmed, a reconnect (401) and the app's
+ * The state a failed confirmation leaves the scatter screen in (flow 39–41): scattering closed, the scatter
+ * not signed (a rejection), or a save that could not be made. A scatter saved but not yet confirmed, a reconnect (401) and the app's
  * own notices leave the screen as it was, and their message reaches the app's alert unchanged.
  */
 export function scatterFailureOf(copyId: string | undefined, status: number | undefined): ScatterFailure | undefined {
   if (status === 401 || copyId && appNotices.includes(copyId)) return undefined;
   if (copyId === 'scatter.closed') return scatterFailure.closed;
-  if (copyId === 'scatter.sign.rejected') return scatterFailure.rejected;
+  if (rejections.some(id => id === copyId)) return scatterFailure.rejected;
   return scatterFailure.failed;
 }
 
-export const resultStates={nobody:'nobody',givers:'givers'} as const;
+/** The results' own states: no crumbs counted because nobody scattered, or because no scatter saved could be read at the feast (QA copy-01); who gave what. */
+export const resultStates={nobody:'nobody',unreadable:'unreadable',givers:'givers'} as const;
 
 /**
  * The music under a feast's pages outside the game: the launcher's for someone who is not in the burrow, the town square
@@ -49,7 +53,7 @@ export function feastPageMusic(feast: PublicFeast | MemberFeast | null, phase: P
 }
 
 /** Each state by name, for the screens that pick one. */
-export const gameStates = { reveal: 'reveal', scatter: 'scatter', reading: 'reading', done: 'done', scattered: 'scattered', signing: 'signing', saving: 'saving', rejected: 'rejected', failed: 'failed', closed: 'closed', waiting: 'waiting', key: 'key', feast: 'feast', feasted: 'feasted', results: 'results', nobody: 'nobody', tie: 'tie', givers: 'givers', recording: 'recording', recorded: 'recorded', public: 'public' } as const satisfies Record<GameScreenState, GameScreenState>;
+export const gameStates = { reveal: 'reveal', scatter: 'scatter', reading: 'reading', done: 'done', scattered: 'scattered', signing: 'signing', saving: 'saving', rejected: 'rejected', failed: 'failed', closed: 'closed', waiting: 'waiting', key: 'key', feast: 'feast', feasted: 'feasted', results: 'results', nobody: 'nobody', unreadable: 'unreadable', tie: 'tie', givers: 'givers', recording: 'recording', recorded: 'recorded', public: 'public' } as const satisfies Record<GameScreenState, GameScreenState>;
 /** After the feast: the results open, who gave what, or the results folded back into the bar. */
 export const resultsViews = { results: 'results', givers: 'givers', closed: 'closed' } as const;
 export type ResultsView = keyof typeof resultsViews;

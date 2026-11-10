@@ -430,7 +430,7 @@ A horizontally scrolling list of statement cards, one per critter in the same or
 
 ### 6.5 Results
 
-The settled critter grid (fed states applied, static) above a real `<table>`: Critter · Crumbs · Share, sorted by crumbs descending, ties sharing their line (`results.tie`). Below: the participation line, the did-not-scatter line, the CSV button(s), and — for public feasts — the on-chain record (PRD F9). The giver matrix, when individual scatters are open, is a second table in its own `overflow-x: auto` container with sticky first column.
+The settled critter grid (fed states applied, static) above a real `<table>`: Critter · Crumbs · Share, sorted by crumbs descending, ties sharing their line (`results.tie`). Below: the participation line, the did-not-scatter line, the CSV button(s), and — for public feasts — the on-chain record (PRD F9). The giver matrix, when individual scatters are open, is a second table in its own `overflow-x: auto` container with sticky first column. The container is a stop in the Tab order, a region named `results.givers.title`, and the arrows scroll it sideways rather than turning the circle; a statement's scrolling box in its bubble or panel is a named stop too, and takes focus as a phone statement opens, so every engine, Safari's included, can scroll both from the keyboard (QA accessibility-06).
 
 ## 7. Component inventory
 
@@ -524,6 +524,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Launcher (the app opened on its own, not connected) | The painted burrow as a title screen: the wordmark, the tagline and the beta line on a plate (D32), four critters dozing around a heap of crumbs, Connect, How it works, and the Music toggle. No header, no Settings. Trouble connecting is said in the sheet, above Connect | `app.name`, `app.tagline`, `app.environment.*`, `action.connect`, `launch.learn` |
 | Arrive by a link, not connected | Header with the burrow line, the beta chip and the feast title; the feast’s critters asleep in a ring on the window plate the game stands its circle on, raised as the game raises it so they stand on the floor (the November UI audit, screen 2), with `arrive.asleep` under them; a sheet with the context, both deadlines, one explainer, the one connect button and, under it, How it works, whose steps return here | `arrive.*`, `launch.learn` |
 | Choosing how to connect | A sheet from the bottom on the phone, a card on desktop: one row for each app the browser offers, by its own name, then Cancel. Once one is chosen the sheet waits on it | `connect.*` |
+| Nothing to connect with (a phone's own browser, a chat app's, a computer with no app added) | The same sheet: one cloud notice that says so and what to do, open this page in the app you connect with, on the phone or on a computer; Copy link under it, which puts the page's address on the clipboard and says so in the sheet; then Cancel. If the browser refuses the clipboard, the sheet says so and the page's address shows under the notice, where one press selects all of it to copy by hand; Cancel takes both away with the sheet (`docs/decisions.md`, 2026-11-09). How it works stays under Connect on the screen behind. If looking for a way to connect fails, the sheet closes and the screen behind says something went wrong (QA production-build-07) | `connect.empty`, `connect.link.*`, `err.copy`, `err.generic` |
 | First steps (How it works) | Five short screens that can be skipped, open from the launcher, the invite screen, your critter's profile and home with no burrows: the same handful, ten practice crumbs to give, the week (three phases and two deadlines, every statement open in a thought bubble beside each head), where they go stays private, and a worked feast result. Skip and Got it return to the screen the steps were opened from, else the launcher (D30). The private step and the result carry Why nobody can peek at the foot of their words, and the week its deadlines line, so the sheet has a top, a middle and a foot; the page comes back to the same step. From 1,280 px the desktop panel is wider and a size up, 28 px over 20 px (§6.2, D36). The room scale and sheet action positions stay consistent; only the content scrolls on a short display | `learn.*`, `phase.*`, `why.title` |
 | Why nobody can peek (the page behind the link) | One column at `/how-it-works/why`, about 34 em wide, under the wordmark, the beta chip and the Music toggle, scrolling over Got it pinned at its foot: the closed seed pod of the private step, the title, What you are promised (five lines, each led by its promise in bold), One thing we will not pretend, The words (burrow, critters, scatter, feast), What runs where in the secondary colour (the one place Shutter, EAS, Gnosis Chain and Base are named), and The source, the one section that links out, to the code and the technical spec on GitHub. Got it goes back where the page was opened from, through the browser’s history, or to the launcher when it was opened by its address. It opens only from its links (D36) | `why.*`, `learn.done` |
 | Meet your critter (first connect) | A whole screen (D33): the wordmark and the beta chip in the header; the critter large on the painted floor; in the sheet the title with the element chip, the line, the name field with its 16-character counter when there is no ENS name (the ENS name otherwise), and Re-roll and Keep this one pinned at the foot, with Disconnect as a quiet link under them. No Close: Keep is the way past it, and saves the name and the lock in one update; Disconnect signs out as the profile does and leaves the member where a signed-out visitor would be, on the launcher or, from a feast's link, its invite. Rerolls keep the draft name; the fourth locks on the server and the screen stays until Keep. The page the member connected on, a feast from its link, comes after | `critter.*`, `name.*`, `action.disconnect` |
@@ -545,7 +546,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Gathering, options feast (creator) | Each option a card with its field, its counter and `gathering.saved`, or Save until it is saved; one help line above the cards and `gathering.hidden` once under them; the options' critters asleep on the floor (screen 30) | `gathering.options.title`, `setup.type.options.help` |
 | Gathering, member view of others | No statements: how many are written, with faces and who has not yet. A member of an options feast, who writes nothing, gets no notes card (QA lifecycle-10) | `gathering.hidden`, `gathering.participation`, `gathering.notYet` |
 | Scattering opens (first visit) | The reveal moment (Game Design), then `reveal.*` and the read pass | `reveal.*` |
-| Reading a statement on the phone | A thought bubble across the top of the floor, as tall as its text up to 378 px, past which the text scrolls inside it; a short statement leaves more of the floor in view, and the trail of puffs rises to the bubble's foot (audit decision D8) | `read.*` |
+| Reading a statement on the phone | A thought bubble across the top of the floor, as tall as its text up to 378 px, past which the text scrolls inside it; a short statement leaves more of the floor in view, and the trail of puffs rises to the bubble's foot (audit decision D8). On a window too short for 378 px the bubble ends 12 px above the dock, so the end of a long statement can always be scrolled into view, and the trail is drawn only where it rises to the bubble (QA accessibility-08) | `read.*` |
 | Read pass, critter without statement | Card with portrait and `read.noStatement` | `read.noStatement` |
 | Scatter pass, nobody has scattered | Participation "0 of 8 have scattered" | `scatter.participation` |
 | Scatter pass, own critter | Cell asleep with `scatter.own.*` instead of controls | `scatter.own.*` |
@@ -553,13 +554,15 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Scattering closed, feast not yet computed | Waiting screen with critters asleep in `dusk`; the sheet counts who has scattered (“7 of 8 have scattered”) while the feast is laid out and while the key is not out. Both lead to Why nobody can peek: under the line while the feast is laid out, on a sheet of 290 px on the phone, and under the reason while the key is not out, on 330 px with the count and Try again (D36) | `feast.waiting.*`, `feast.keyNotYet`, `scatter.participation`, `why.title` |
 | The feast | Sequence, then results | `feast.*` |
 | Results, the summary and the fingerprint | Under who scattered, Why nobody can peek, over the ranked critters; at the end of the list, for a member, the result’s fingerprint, a disclosure that says what to do with it. Coming back to the results from the page, or by the browser’s Back, opens them settled; the feast plays when the results are opened afresh, and Replay Feast plays it again (D36) | `results.summary`, `why.title`, `results.verification.*` |
-| Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9) | `feast.replay`, `results.export.*` |
+| Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9). A phone shorter than the design's keeps the card tall enough for two rows (424 px) while 48 px of floor is left above it, the huddle standing smaller on that floor; on a phone on its side, where pinned heading and actions would leave no row to read, they scroll with the list (QA accessibility-08) | `feast.replay`, `results.export.*` |
 | Results, nobody scattered | Grid unchanged, table empty, `results.nobody` | `results.nobody` |
+| Results, no scatter could be read | Scatters were saved but not one could be opened at the feast: the nobody-scattered sheet, 80 px taller on the phone, with `results.unreadable.all` naming whose crumbs could not be read as a cloud notice in place of `results.nobody`, and said aloud as the feast settles (QA copy-01). Under the line, the result’s fingerprint as the results show it, folded, so members can compare theirs and tell one browser failing to open the scatters from everyone’s failing. A scatter of your own missing from the published set shows `err.uidMissing` on either sheet | `results.unreadable.all`, `results.verification.*`, `err.uidMissing` |
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
 | Results, tie | Tied rows share a line under the table | `results.tie` |
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
 | Simple view (fallback or chosen) | Portraits in stages; one notice line, a leaf with Try 3D again over the top of the game's floor (`ScreenNotices`). Its switch is on your critter's profile only while some critter has a 3D mesh (D34) | `fallback.*` |
 | Offline | The ink band under the header (flow page, screen 52); controls stay usable; submit shows why it waits | `err.offline` |
+| A screen that did not arrive (a tab opened before a deployment, or a request lost on a poor connection) | In the screen's place, under the header, the outage notice's title with its own line and Reload; over your critter's profile, Back as well, to the screen beneath. A lost request is asked for once more before it shows; nothing reloads by itself, and never a blank page (Technical Spec §15 E29, QA production-build-06) | `app.unavailable`, `err.screenLoad`, `action.reload`, `action.back` |
 | The device's clock is off, or ENS names could not be looked up | Cloud notices at the head of the screen's sheet, the clock first (flow page, screen 53), each said once: the clock line for the rest of the session, as the clock is checked once a session; the names line while the profile carries the warning | `err.clockSkew`, `err.ensUnavailable` |
 | A link to no burrow (the store has no such burrow, or the link was cut short in copying) | Your critter asleep at the entrance, as on an empty home; the heading, the check-the-link line and Back; no Try again, since trying again cannot help | `burrow.missing.*` |
 | Not in the burrow | The burrow's name in the header; you at its entrance; the ask-a-member line; your short address with Copy your address, the one thing to do next; Back. From a feast's link, the same frame with the burrow's name as the title and your critter on the floor (screen 22) | `burrow.unknown.*`, `profile.address.copy` |
@@ -596,10 +599,12 @@ IDs are stable; `{}` marks interpolation. Plural forms use `Intl.PluralRules`; t
 | `app.environment.help` | Still in development. Rehearsal only. |
 | `app.environment.chip` | Beta (the chip beside the burrow line in every header, D32) |
 | `app.tagline` | Everyone gets a handful of crumbs to share. |
+| `app.unavailable` | Can't open this right now (the title over the store being out of reach, `err.storeUnreachable`, and over a screen that did not arrive, `err.screenLoad`) |
 | `action.connect` | Connect |
 | `action.disconnect` | Disconnect |
 | `action.back` | Back |
 | `action.cancel` | Cancel |
+| `action.reload` | Reload (loads the page again, when a screen's code did not arrive) |
 | `action.settings` | Settings |
 | `phase.draft` / `phase.gathering` / `phase.scattering` / `phase.feast` | Draft / Gathering / Scattering / Feast |
 | `deadline.gathering` | Gathering closes {relative} |
@@ -683,6 +688,9 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 
 | ID | Text |
 |---|---|
+| `connect.empty` | No connection is available in this browser yet. Copy this page's link and open it in the app you connect with, on your phone or on a computer. (the connect sheet when the browser offers nothing) |
+| `connect.link.copy` | Copy link (the page's own address; if the browser refuses the clipboard, the address shows under the notice, with `err.copy`) |
+| `connect.link.copied` | Link copied. |
 | `connect.injected` | This browser (the connect choice offered when the browser has a provider that does not announce itself, as some phone apps' built-in browsers do) |
 | `connect.waiting` | Confirm in {name} |
 | `connect.sign.body` | You'll be asked to sign. It costs nothing and nothing goes on-chain. |
@@ -831,6 +839,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `scatter.remove` | Take a crumb back from {name} |
 | `scatter.count.label` | Crumbs for {name} |
 | `scatter.count.announce` | {n} for {name}. {remaining} to go. |
+| `game.critter.crumbs` | {name}, {n} crumbs (one: {name}, 1 crumb). A name tag's name, the whole name with the count it shows, and what turning the circle says of the critter now in focus (§12.6) |
 | `scatter.own.label` | Your critter |
 | `element.earth` / `.water` / `.fire` / `.air` | Earth / Water / Fire / Air (a version 2 critter's element chip) |
 | `scatter.own.body` | Asleep, eating what the others give it. |
@@ -844,7 +853,12 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `scatter.submit.help` | Scatter all {n} first. |
 | `scatter.sign.title` | Confirm your scatter |
 | `scatter.sign.body` | You'll be asked to sign. It costs nothing and nothing goes on-chain. |
+| `scatter.sign.summary` | Your crumbs: {amounts}. (The confirmation's first line, and with `scatter.sign.body` its description, read as it opens: what is being scattered, in the burrow's order, leaving out critters given nothing) |
+| `scatter.sign.amount` | {n} to {name} (one part of `scatter.sign.summary`, joined as "24 to Moss, 20 to Fern and 56 to Clover") |
 | `scatter.sign.rejected` | Not confirmed. Your crumbs are still here — try again when you're ready. |
+| `scatter.sign.locked` | Your account app is locked. Your crumbs are still here — unlock it, then try again. |
+| `scatter.sign.otherAccount` | Your account app is on another account. Your crumbs are still here — switch back, then try again. |
+| `scatter.sign.expired` | That confirmation is too old to save. Your crumbs are still here — try again. |
 | `scatter.saving` | Saving… |
 | `scatter.done.title` | Scattered. |
 | `scatter.done.body` | You can change this until {scatteringDeadline}. |
@@ -886,7 +900,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `results.attest.help` | Anyone in the burrow can do this. It costs a little gas. |
 | `results.attest.done` | Recorded on-chain by {name}. |
 | `results.attest.view` | View the record |
-| `results.verification` | Result fingerprint (a disclosure at the end of a member’s results) |
+| `results.verification` | Result fingerprint (a disclosure at the end of a member’s results, and on the sheet when no scatter could be read) |
 | `results.verification.help` | Compare it with another member’s. The same fingerprint means the same result. (the first line inside it, over the hash) |
 
 **Settings**
@@ -923,8 +937,10 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `err.storeUnreachable` | Can't reach the burrow right now. Try again in a moment. |
 | `err.keyUnreachable` | Can't fetch the key right now. Nothing is lost — try again in a few minutes. |
 | `err.generic` | Something went wrong. Nothing you did was lost. |
+| `err.screenLoad` | This screen didn't load. Reload to try again — nothing you saved is lost. (under `app.unavailable`, when a screen's code did not arrive) |
 | `err.notParticipant` | This feast started before you joined the burrow. You'll be in the next one. |
 | `results.unreadable` | {names} scattered, but their crumbs couldn't be read, so they count as not having scattered. |
+| `results.unreadable.all` | {names} scattered, but their crumbs couldn't be read, so there's nothing to share out. (when not one scatter saved could be read) |
 
 The Technical Spec's edge-state table references these IDs and may add `err.*` strings here; it must not invent inline copy.
 
@@ -996,21 +1012,25 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | `CrumbStepper` (setup) | Enter, Space on `−` / `+`; digits and ↑/↓ in the field | The buttons move to the next ten; the field takes any whole number from 10 to 1,000 and steps by one |
 | `StatementLine` (`<details>`) | Enter, Space on the summary | Expand / collapse in place |
 | Read pass list | ←/→, Home/End; Tab reaches links inside the card | Snap position follows; focus does not move on snap |
+| A statement's box (bubble or panel) | ↑/↓, Page Up/Down, Space, Home/End | Scroll its words; ←/→ still step through the circle. Opening a statement on the phone puts focus in its box |
+| Who gave what | ←/→ with its box focused | Scroll the table sideways; the circle stays where it is |
 | Dialogs | Esc | Closes; focus returns to the opener (native `<dialog>`) |
 | Deadline items | Enter, Space | Toggles the absolute time (`aria-expanded`) |
 | Feast | Enter on **Skip to results** | Ends the sequence; results heading focused |
 
 ### 12.5 Focus
 
-- `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too.
-- Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
+- `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too. A box that scrolls inside a card or panel that would clip the ring (who gave what, the desktop statement panel) draws it inside itself, `outline-offset: -3px` (QA accessibility-06).
+- Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; a statement opened on the phone → its words, the box that scrolls, so the keys scroll it; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
 - Nothing steals focus while typing or pouring.
+- A critter's ring is the same ring, round its stage, so it reads over the painting's light and dark alike; the first steps' practice critter takes it too. An `aria-disabled` control (`+` with nothing left to give, `−` with nothing given) stays a tab stop with its ring whole: in focus its face is dimmed by a veil of the dock's colour, not by opacity, which would fade the ring with it. While a statement is open over the circle on the phone, the circle's critters are not tab stops, so nothing hidden under the statement takes focus (WCAG 2.4.11): a press on one would only close the statement, as Close and Escape do, and a tap still does.
 
 ### 12.6 Screen readers over a canvas
 
 - The `<canvas>` is `aria-hidden="true"` and `inert`. Nothing in it is focusable; no HTML-in-canvas (the API is not shipped in any browser — checked against current guidance, and not needed here).
 - Each `CritterCell` exposes, in DOM order: name, state in words ("asleep", "your critter", "fed 4 of 10" on results), the collapsed statement, then the controls. The count is an `<output for="…">` bound to the field.
 - Two announcers only (`#announce` polite, `#alert` assertive), both `aria-atomic="true"`; nothing else is live.
+- On the circle, a name tag is named by what it shows, the whole name and its count (`game.critter.crumbs`), and your own tag by its "You"; the count on every tag is reachable without turning to each critter. The confirmation is described by what it scatters (`scatter.sign.summary`) and `scatter.sign.body`, so both are read with its name as it opens.
 
 | Event | Region | Text | Timing |
 |---|---|---|---|
@@ -1021,6 +1041,8 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Statements revealed (screen opens) | polite | `reveal.announce` | After focus lands |
 | Feast settled | polite | `feast.announce` | After the sequence, or immediately with reduced motion |
 | Phase closed while on screen | polite | `scatter.closed` | Once |
+| Circle turned (‹ ›, ←/→, a swipe, a name tag, a press on a critter that does not give) | polite | `game.critter.crumbs` of the critter now in focus; your own sleeping critter `scatter.own.label`; where no tags show, its name | On the turn; the feast's own turns say nothing |
+| Your own sleeping critter pressed | polite | `scatter.own.body` | Each press; the stir and its z's are drawn only |
 | Simple view engaged mid-session | polite | `fallback.midSession` | Once |
 | Re-roll | polite | `critter.reroll.announce` | Each re-roll |
 | Crumbs per critter stepped at setup | polite | `setup.crumbs.announce` | Each press of − or + that moves it |
@@ -1151,7 +1173,7 @@ The shared copy table adds screen/burrow document titles, burrow card counts and
 | `profile.address.copied` | Address copied. |
 | `notification.label` | Update |
 | `notification.dismiss` | Dismiss notification |
-| `err.copy` | Couldn't copy. Try again, or select the text and copy it yourself. |
+| `err.copy` | Couldn't copy. Try again, or select the text and copy it yourself. (on the connect sheet the text is the page's address, shown under the notice once the clipboard is refused) |
 | `burrow.remove` | Remove |
 
 The removal row's accessible label still names the member and burrow context.

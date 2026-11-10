@@ -28,7 +28,7 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
    if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.game-scene .portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
    const inputs=page.locator('.focus-count input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }
-  const inputs=first.locator('.focus-count input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:kind==='people'?'Fern':feast.targets[1].name,exact:true}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
+  const inputs=first.locator('.focus-count input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:new RegExp(`^${(kind==='people'?'Fern':feast.targets[1].name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}, \\d+ crumbs?$`)}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
   const {body:updated}=await readJson<{ownReceipts:unknown[];registration:{identity:string}}>(first,`/api/feasts/${feast.id}`);expect(updated.ownReceipts).toHaveLength(2);
   await first.screenshot({path:testInfo.outputPath('scatter-375.png'),fullPage:true});
   await first.request.post('/api/dev/time',{data:{now:feast.scatteringEndsAt}});
@@ -39,6 +39,8 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
   await first.getByRole('button',{name:'Got it',exact:true}).click();await expect(first.getByRole('heading',{name:'Results',exact:true})).toBeFocused();await expect(first.getByRole('button',{name:'Skip to results',exact:true})).toHaveCount(0);
   const hash=await first.locator('[data-result-hash]').getAttribute('data-result-hash');expect(hash).toMatch(/^0x[0-9a-f]{64}$/);await expect(second.locator('[data-result-hash]')).toHaveAttribute('data-result-hash',hash!);
   await expect(first.locator('.results-list').getByText('2 of 8 scattered · 200 crumbs in all',{exact:true})).toBeVisible();
+  // who did not scatter is named as the burrow knows them, in an options feast too, where nobody is a critter (QA lifecycle-04)
+  const unscattered=first.locator('.results-sum').filter({hasText:"didn't scatter."});await expect(unscattered).toContainText('Pebble');await expect(unscattered).not.toContainText('0x');
   const downloadPromise=first.waitForEvent('download');await first.getByRole('button',{name:'Download CSV',exact:true}).click();const download=await downloadPromise;expect(download.suggestedFilename()).toMatch(/^feast-.+-results\.csv$/);const path=await download.path();const csv=await readFile(path!,'utf8');expect(csv).toContain('critter,address,crumbs,share\r\n');expect(csv.trim().split('\r\n')).toHaveLength(feast.targets.length+1);
   await first.screenshot({path:testInfo.outputPath('results-375.png'),fullPage:true});expect(errors).toEqual([]);
  }finally{for(const context of contexts)await context.close();}
