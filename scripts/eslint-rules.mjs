@@ -18,8 +18,6 @@ const structuralAttributes = new Set([
   'width', 'height', 'size', 'pattern', 'phase', 'viewBox', 'fill', 'stroke', 'd', 'tabIndex',
   'patternUnits', 'x', 'y', 'transform', 'cx', 'cy', 'r', 'rx', 'ry', 'opacity', 'strokeWidth', 'strokeLinejoin', 'strokeDasharray', 'preserveAspectRatio',
 ]);
-/** An attribute name that is structure, not wording: written in JSX, or set on an element a component does not render. */
-const structuralAttribute = (name) => structuralAttributes.has(name) || name?.startsWith('data-') || ['aria-hidden', 'aria-live', 'aria-atomic', 'aria-expanded', 'aria-controls', 'aria-describedby', 'aria-labelledby'].includes(name);
 const staticString = (node) => {
   if (typeof node?.value === 'string') return node.value;
   if (node?.type === 'TemplateLiteral' && node.expressions.length === 0) return node.quasis[0].value.cooked;
@@ -133,7 +131,6 @@ export default {
             if (callee === 'includes' && programStates.has(value) && parent.callee.object === current) return true;
             if (callee === 'play' && argument === 0 && ['connect', 'reroll', 'ui.tap', 'crumb.add', 'crumb.remove', 'pour.hold', 'pour.reverse', 'pile.wall', 'pile.empty', 'statement.open', 'scatter.confirm', 'statements.reveal', 'scatter.closed', 'feast.open', 'feast.feed', 'feast.settle', 'error'].includes(value)) return true;
             if (callee === 'scrollIntoView' && argument === 0) return true;
-            if (callee === 'setAttribute' && argument === 0 && structuralAttribute(value)) return true;
             if (['createPortrait', 'paintCritter'].includes(callee) && argument === 2 && node.parent.type === 'Property' && node.parent.key.name === 'size' && value === 'stage') return true;
             if (['formatCopy', 'formatDevCopy'].includes(callee) && argument === 0 && copyIds.has(value)) return true;
             if (['addEventListener', 'removeEventListener', 'PopStateEvent', 'getElementById', 'closest', 'querySelector', 'querySelectorAll', 'matchMedia', 'setProperty'].includes(callee) && argument === 0) return true;
@@ -148,7 +145,7 @@ export default {
           if (parent.type === 'CallExpression' && parent.callee.name === 'copy') return true;
           if (parent.type === 'JSXAttribute') {
             const name = parent.name.name;
-            return structuralAttribute(name);
+            return structuralAttributes.has(name) || name?.startsWith('data-') || ['aria-hidden', 'aria-live', 'aria-atomic', 'aria-expanded', 'aria-controls', 'aria-describedby', 'aria-labelledby'].includes(name);
           }
           current = parent;
         }

@@ -148,7 +148,7 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
         middle,
         statement: statementSurfaces({ feast, runtime, focus, close: () => setReading(false) }),
         toast: message ? <Toast>{copy[message]}</Toast> : newer ? <Toast>{formatCopy('scatter.latest', { seq: state.remote!.seq })}</Toast> : null,
-        dialog: signing ? <SignDialog summary={scatterSummary(feast.targets.map(targetLabel), state.amounts)} busy={busy} cancel={() => { focusAccepted.current = false; setSigning(false); }} confirm={confirm} /> : null,
+        dialog: signing ? <SignDialog summary={scatterSummary(feast.targets, state.amounts)} busy={busy} cancel={() => { focusAccepted.current = false; setSigning(false); }} confirm={confirm} /> : null,
       }} />
     <SavedFocus focusAccepted={focusAccepted} receipt={state.receipt?.uid} signing={signing || busy} done={done} onSaved={() => { clearError(); setSaved(true); audio.play('scatter.confirm'); announce((session.snapshot().dirty ? copy['scatter.savedWithChanges'] : copy['scatter.done.title']) + ' ' + formatCopy('scatter.done.body', { scatteringDeadline: absoluteDeadline(feast.scatteringEndsAt) })); }} />
   </section></WorldProvider>;

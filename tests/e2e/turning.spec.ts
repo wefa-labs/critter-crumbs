@@ -3,8 +3,9 @@ import { connectLocal } from './session.js';
 
 /*
  * QA accessibility-03 on the live scatter screen. Turning the circle, by ‹ and ›, the arrow keys or a name tag, says
- * through the polite announcer who now stands in focus, as the tag reads ("Fern, 1 crumb"; your own, "Your critter"),
- * and the confirmation is read with what it scatters (Design System §12.6).
+ * through the polite announcer who now stands in focus, as the tag reads ("Fern, 1 crumb"; your own, "Your critter");
+ * pressing your own critter says why nothing else happens; and the confirmation is read with what it scatters (Design
+ * System §12.6).
  */
 const focused = (page: Page) => page.locator('.focus-name').innerText();
 
@@ -37,6 +38,9 @@ test('turning the circle says who stands in focus now, and the confirmation is r
   // your own critter (Moss, for the first rehearsal critter) is said as yours
   for (let i = 0; i < names.length && await focused(page) !== 'Moss'; i++) await next.press('Enter');
   await expect(said).toHaveText('Your critter');
+  // pressing it only stirs it, and says so
+  await page.getByRole('button', { name: 'You', exact: true }).press('Enter');
+  await expect(said).toHaveText('Asleep, eating what the others give it.');
 
   // the confirmation: the rest to the third, read with the dialog in the burrow's order
   await page.getByRole('button', { name: `${third}, 0 crumbs`, exact: true }).click();

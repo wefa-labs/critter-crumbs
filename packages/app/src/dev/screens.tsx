@@ -75,7 +75,7 @@ function ScatterMoment({ state, scene, feast, runtime }: { state: GameScreenStat
             middle,
             statement: statementSurfaces({ feast, runtime, focus, close: () => setReading(false) }),
             toast: message ? <Toast>{copy[message]}</Toast> : null,
-            dialog: view === 'signing' ? <SignDialog summary={scatterSummary(feast.targets.map(t => t.name), runtime.critters.map(critter => critter.get(Count)!.given))} busy={false} cancel={() => setMode(gameStates.done)} confirm={() => setMode(gameStates.scattered)} /> : null,
+            dialog: view === 'signing' ? <SignDialog summary={scatterSummary(feast.targets, runtime.critters.map(critter => critter.get(Count)!.given))} busy={false} cancel={() => setMode(gameStates.done)} confirm={() => setMode(gameStates.scattered)} /> : null,
           }} />
       </section>
     </>

@@ -132,10 +132,11 @@ describe('Short phone windows', () => {
     /* the design's phone keeps its 378 px bubble */
     expect(layoutGame({ viewport: { width: 375, height: 812 }, critters: critters(8), focus: 0, reading: true, statementHeight: 900, issued: 100, surface, scene }).statement.height).toBe(378);
   });
-  /* The card's anatomy at 375 px, measured on the fixtures: the dock's padding and bar 78, the heading 48, the pinned
-     actions 56; inside the list the summary and Why nobody can peek take 99, a row 52 with 6 between, the fade 28. Two
-     rows in view need 78 + 48 + 56 + 99 + 52 + 6 + 52 + 28 = 419; one row with the heading and actions scrolling along
-     with the list, 78 + 48 + 80 + 52 = 258 on a phone on its side, where the summary is one line. */
+  /* The card's anatomy, measured on the fixtures: the dock's padding and bar 78, the heading 48, the pinned actions 56;
+     inside the list the summary (two lines: who scattered, who did not) and Why nobody can peek take 99, a row 52 with
+     6 between, the fade 28. Two rows in view need 78 + 48 + 56 + 99 + 52 + 6 + 52 + 28 = 419. With the heading and
+     actions scrolling along with the list, the heading, the summary, the link and the first 16 px of a row need
+     78 + 48 + 99 + 16 = 241: a phone on its side 375 px tall shows that much, one 390 px tall a whole row. */
   it('gives the results room for two rows on a short phone, the huddle standing smaller on the floor left above them', () => {
     const { surface, scene } = composeGame('results', 'phone');
     const at = (viewport: { width: number; height: number }, n = 8) => layoutGame({ viewport, critters: critters(n), focus: 0, issued: 100, surface, scene });
@@ -148,9 +149,9 @@ describe('Short phone windows', () => {
       expect(layout.dock.y + layout.dock.height, label).toBe(scene);
       /* every critter of the huddle stands wholly inside the scene, on the card's top edge */
       for (const slot of layout.slots) { expect(slot.stage.y, label).toBeGreaterThanOrEqual(0); expect(slot.foot.y, label).toBeGreaterThanOrEqual(layout.dock.y); }
-      /* where two rows cannot fit under pinned heading and actions, they scroll with the list and one row still shows */
-      expect(layout.foldResults, label).toBe(layout.dock.height < 361);
-      if (layout.foldResults) expect(layout.dock.height, label).toBeGreaterThanOrEqual(258);
+      /* where no row would show under pinned heading and actions, they scroll with the list, a row starting in view */
+      expect(layout.resultsUnpinned, label).toBe(layout.dock.height < 361);
+      if (layout.resultsUnpinned) expect(layout.dock.height, label).toBeGreaterThanOrEqual(241);
     }
   });
   it('draws the trail of puffs only where it rises from the head to the bubble, never tucked under it', () => {

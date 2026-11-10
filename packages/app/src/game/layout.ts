@@ -61,6 +61,8 @@ export const sidePanelWidth = (width: number) => Math.min(480, Math.max(400, wid
 const STATEMENT = { inset: 12, height: 378 };
 const bubbleHeight = (measured: number | undefined, room: number) => Math.min(room, measured !== undefined && measured > 0 ? Math.min(STATEMENT.height, Math.ceil(measured)) : STATEMENT.height);
 
+/** A portrait's stage: 1.25 times as tall as it is wide, the feet 140 of its 150 units down (Design System §6.3). */
+const STAGE = { tall: 1.25, feet: 140 / 150 };
 /** How far apart two rectangles are, in px; 0 when they touch or overlap. */
 export const rectGap = (a: Rect, b: Rect) => Math.hypot(Math.max(0, a.x - (b.x + b.width), b.x - (a.x + a.width)), Math.max(0, a.y - (b.y + b.height), b.y - (a.y + a.height)));
 export const overlapArea = (a: Rect, b: Rect) => Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
@@ -146,21 +148,23 @@ export function layoutGame(input: LayoutInput) {
     const span = (row: typeof huddled, size: number) => row.slice(1).reduce((sum, _, i) => sum + step(row, i + 1, size), 0) + (drawn(row[0]!, size) + drawn(row.at(-1)!, size)) / 2;
     // the size a row reaches: up to 1.3 times the base on a phone with room to spare, never wider than the scene
     const fit = (row: typeof huddled) => Math.min(base * (desktop ? 1 : 1.3), base * room / span(row, base));
-    // on the phone, never taller than the floor above the card: a front row's box reaches 16/15 of its size above the
-    // card's edge, a back row's 1.45 times, with a pixel spare for the box's rounded height (QA accessibility-08); a
-    // tall phone's 196 px is never the limit
-    const tallest = (rows: 1 | 2) => desktop ? Infinity : (dock.y - 1) / (rows === 1 ? 16 / 15 : 1.45);
+    // a phone's front row stands a tenth of its size into the card's top; a back row half a size behind it, nine tenths
+    // as large
+    const SINK = 0.1, BEHIND = 0.5, BACK = 0.9, above = STAGE.tall * STAGE.feet;
+    // on the phone, never taller than the floor above the card, a pixel spare for a stage's rounded height (QA
+    // accessibility-08); a tall phone's 196 px is never the limit
+    const tallest = (rows: 1 | 2) => desktop ? Infinity : (dock.y - 1) / (rows === 1 ? above - SINK : BEHIND + BACK * above - SINK);
     // one row when everyone fits at full size, or at the most a short floor allows, so nobody stands behind anybody;
     // else the scatter page's two
     const single = fit(huddled) >= Math.min(base, tallest(1)), front = single ? m : m <= 5 ? m : Math.ceil(m / 2) + 1, back = m - front, row = huddled.slice(0, front), size = Math.min(fit(row), tallest(single ? 1 : 2));
     let x = W / 2 - span(row, size) / 2 + drawn(row[0]!, size) / 2;
     const frontX = row.map((entry, i) => (x += i ? step(row, i, size) : 0));
-    const underFeet = Math.round(size * 1.25) * 10 / 150, frontY = desktop ? dock.y - underFeet : dock.y + size * 0.1;
+    const underFeet = Math.round(size * STAGE.tall) * (1 - STAGE.feet), frontY = desktop ? dock.y - underFeet : dock.y + size * SINK;
     row.forEach((entry, rank) => places.set(entry.index, { x: frontX[rank]!, y: frontY, size, depth: 3200 + rank }));
     huddled.slice(front).forEach((entry, i) => {
       const gap = Math.max(0, Math.min(front - 2, Math.floor((front - 1 - back) / 2) + i));
       // half a critter behind the front row, far enough back that a face shows over its heads
-      places.set(entry.index, { x: (frontX[gap]! + frontX[gap + 1]!) / 2, y: frontY - size * 0.5, size: size * 0.9, depth: 3100 + front + i });
+      places.set(entry.index, { x: (frontX[gap]! + frontX[gap + 1]!) / 2, y: frontY - size * BEHIND, size: size * BACK, depth: 3100 + front + i });
     });
   }
   const slots = input.critters.map((critter, index) => {
@@ -180,8 +184,8 @@ export function layoutGame(input: LayoutInput) {
       const angle = (90 - slot * 360 / n) * Math.PI / 180, sin = Math.sin(angle);
       x = geo.cx + geo.rx * Math.cos(angle); y = geo.cy + geo.ry * sin; size = geo.back + (geo.front - geo.back) * (sin + 1) / 2; depth = Math.max(1, Math.round(y));
     }
-    const width = Math.round(size), height = Math.round(size * 1.25), ext = critter.extent;
-    const stage: Rect = { x: x - width / 2, y: y - height * 140 / 150, width, height };
+    const width = Math.round(size), height = Math.round(size * STAGE.tall), ext = critter.extent;
+    const stage: Rect = { x: x - width / 2, y: y - height * STAGE.feet, width, height };
     const figure: Rect = { x: stage.x + ext.left * width, y: stage.y + ext.top * height, width: (ext.right - ext.left) * width, height: y + 3 - (stage.y + ext.top * height) };
     /* while scattering, the pile at the feet takes a share of the critter's box: its drawing width × 1.1, in percent
        (pileSvg). At the feast, what each critter received heaps beside it at a sixth of a glyph a crumb and 1.9 px a
@@ -351,6 +355,6 @@ export function layoutGame(input: LayoutInput) {
     else if (!fitted) it.tag = { ...it.tag, y: Math.max(2, it.tag.y) };
   }
   /* a results card too short to pin its heading and actions scrolls them with its list */
-  const foldResults = !desktop && input.surface.kind === 'results' && dockH < RESULTS_PINNED_LEAST;
-  return { desktop, crowded, scene: { x: 0, y: HEADER_HEIGHT, width: W, height: H }, dock, statement, heap: showHeap ? heap : null, bubble: bestBubble, bubbles, trail, slots, ppu, unit: geo.u, foldResults };
+  const resultsUnpinned = !desktop && input.surface.kind === 'results' && dockH < RESULTS_PINNED_LEAST;
+  return { desktop, crowded, scene: { x: 0, y: HEADER_HEIGHT, width: W, height: H }, dock, statement, heap: showHeap ? heap : null, bubble: bestBubble, bubbles, trail, slots, ppu, unit: geo.u, resultsUnpinned };
 }

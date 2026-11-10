@@ -1008,7 +1008,7 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 - `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too.
 - Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
 - Nothing steals focus while typing or pouring.
-- A critter's ring is the same ring, round its stage, so it reads over the painting's light and dark alike. An `aria-disabled` control (`+` with nothing left to give, `−` with nothing given) stays a tab stop with its ring whole: in focus its face is dimmed by a veil of the dock's colour, not by opacity, which would fade the ring with it. While a statement is open over the circle on the phone, the critters under it are not tab stops; a tap on one still closes it (WCAG 2.4.11).
+- A critter's ring is the same ring, round its stage, so it reads over the painting's light and dark alike; the first steps' practice critter takes it too. An `aria-disabled` control (`+` with nothing left to give, `−` with nothing given) stays a tab stop with its ring whole: in focus its face is dimmed by a veil of the dock's colour, not by opacity, which would fade the ring with it. While a statement is open over the circle on the phone, the circle's critters are not tab stops, so nothing hidden under the statement takes focus (WCAG 2.4.11): a press on one would only close the statement, as Close and Escape do, and a tap still does.
 
 ### 12.6 Screen readers over a canvas
 
@@ -1026,7 +1026,8 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Statements revealed (screen opens) | polite | `reveal.announce` | After focus lands |
 | Feast settled | polite | `feast.announce` | After the sequence, or immediately with reduced motion |
 | Phase closed while on screen | polite | `scatter.closed` | Once |
-| Circle turned (‹ ›, ←/→, a name tag) | polite | `game.critter.crumbs` of the critter now in focus; your own sleeping critter `scatter.own.label`; where no tags show, its name | On the turn; the feast's own turns say nothing |
+| Circle turned (‹ ›, ←/→, a swipe, a name tag, a press on a critter that does not give) | polite | `game.critter.crumbs` of the critter now in focus; your own sleeping critter `scatter.own.label`; where no tags show, its name | On the turn; the feast's own turns say nothing |
+| Your own sleeping critter pressed | polite | `scatter.own.body` | Each press; the stir and its z's are drawn only |
 | Simple view engaged mid-session | polite | `fallback.midSession` | Once |
 | Re-roll | polite | `critter.reroll.announce` | Each re-roll |
 | Crumbs per critter stepped at setup | polite | `setup.crumbs.announce` | Each press of − or + that moves it |

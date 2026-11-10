@@ -1,4 +1,5 @@
-import { expect, test, type Page } from 'playwright/test';
+import { expect, test } from 'playwright/test';
+import { openFixture } from './open-fixture.js';
 
 /*
  * QA accessibility-08: phone windows shorter than the design's 812 px. An iPhone SE in Safari is about 375 × 548; a
@@ -9,16 +10,10 @@ import { expect, test, type Page } from 'playwright/test';
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US', contextOptions: { reducedMotion: 'reduce' } });
 
-async function open(page: Page, state: string, viewport: { width: number; height: number }) {
-  await page.setViewportSize(viewport);
-  await page.goto(`/dev/screens?capture&state=${state}&count=8&scene=window`);
-  await expect(page.locator('.circle-spot')).toHaveCount(8);
-  await page.waitForTimeout(300);
-}
 
 for (const viewport of [{ width: 375, height: 600 }, { width: 375, height: 548 }, { width: 375, height: 500 }, { width: 812, height: 375 }]) {
   test(`reading at ${viewport.width}×${viewport.height}: the last line of a long statement scrolls into view above the dock`, async ({ page }) => {
-    await open(page, 'reading', viewport);
+    await openFixture(page, 'reading', viewport);
     const end = await page.evaluate(() => {
       const scroll = document.querySelector<HTMLElement>('.statement-scroll')!, dock = document.querySelector('.game-dock')!.getBoundingClientRect();
       scroll.scrollTop = scroll.scrollHeight;
@@ -32,10 +27,10 @@ for (const viewport of [{ width: 375, height: 600 }, { width: 375, height: 548 }
 
 for (const [viewport, least] of [[{ width: 390, height: 664 }, 2], [{ width: 375, height: 548 }, 2], [{ width: 375, height: 500 }, 1], [{ width: 812, height: 375 }, 0]] as const) {
   test(`results at ${viewport.width}×${viewport.height}: ${least ? `${least} or more rows` : 'the start of a row'} in view, every row a scroll away`, async ({ page }) => {
-    await open(page, 'results', viewport);
+    await openFixture(page, 'results', viewport);
     const list = await page.evaluate(() => {
-      const scroll = document.querySelector('.results-card .results-scroll')!, folded = !!scroll.closest('[data-fold]');
-      const box = (folded ? scroll.closest('.results-card')! : scroll) as HTMLElement, fade = folded ? 0 : 28, edge = box.getBoundingClientRect();
+      const scroll = document.querySelector('.results-card .results-scroll')!, unpinned = !!scroll.closest('[data-unpinned]');
+      const box = (unpinned ? scroll.closest('.results-card')! : scroll) as HTMLElement, fade = unpinned ? 0 : 28, edge = box.getBoundingClientRect();
       const rows = [...box.querySelectorAll('.results-row')].map(row => row.getBoundingClientRect());
       return { rows: rows.length, whole: rows.filter(row => row.top >= edge.top - 0.5 && row.bottom <= edge.bottom - fade + 0.5).length, firstStarts: rows[0]!.top < edge.bottom - fade - 16, scrollable: box.scrollHeight - box.clientHeight };
     });
