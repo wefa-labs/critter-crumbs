@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode, type RefObject } from 'react';
-import { generateCritter, ApiClientError } from '@critter-crumbs/core';
+import { generateCritter } from '@critter-crumbs/core';
 import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
 import { CrumbGlyph } from '../game/mound.js';
 import { Loader } from '../game/sheet-parts.js';
@@ -9,7 +9,6 @@ import { critterVersion } from '../portraits/version.js';
 import { portraitMetrics } from '../portraits/metrics.js';
 import { faceCrop } from '../game/styles.js';
 import { useModalAnnouncements } from './announcements.js';
-import type { AppApi } from './session.js';
 
 export const displayName = (profile: Pick<Profile, 'ensName' | 'displayName' | 'address'>) => profile.ensName || profile.displayName || shortAddress(profile.address);
 export const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -33,9 +32,13 @@ export function Page({ title, children, context, screen, primary = true }: { tit
 export function Opening({ bare = false }: { bare?: boolean }) {
   return <div className={bare ? 'core-game opening' : 'opening'}><Loader crumb={<CrumbGlyph />} /><p className="sr-only">{copy['app.loading']}</p></div>;
 }
-/** A route whose data has not arrived: the bobbing crumbs, or the outage notice with a retry. Error copy never becomes a page title. */
-export function PendingPage({ error, retry, bare = false }: { error: unknown; retry: () => void; bare?: boolean }) {
-  return error ? <Page title={copy['app.unavailable']}><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></Page> : <Opening bare={bare} />;
+/**
+ * A route whose data has not arrived: the bobbing crumbs, or the outage notice with a retry. Error copy never becomes a
+ * page title. A screen whose code did not arrive says so in the same place, with its own line and Reload, and a screen
+ * drawn over another adds the way back to it (lazy-screen.tsx).
+ */
+export function PendingPage({ error, retry, bare = false, line = 'err.storeUnreachable', action = 'action.retry', children }: { error: unknown; retry: () => void; bare?: boolean; line?: CopyId; action?: CopyId; children?: ReactNode }) {
+  return error ? <Page title={copy['app.unavailable']}><p>{copy[line]}</p><button onClick={retry}>{copy[action]}</button>{children}</Page> : <Opening bare={bare} />;
 }
 export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0, delighted = false }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number; delighted?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
@@ -90,18 +93,4 @@ export function Dialog({ title, children, onClose, busy = false, actions, dismis
 export function Field({ label, children, help }: { label: CopyId; children: ReactNode; help?: CopyId }) {
   return <label className="field"><span>{copy[label]}</span>{children}{help ? <small>{copy[help]}</small> : null}</label>;
 }
-export function useResource<T>(api: AppApi, path: string, canReplace?: (previous: T, next: T) => boolean) {
-  const [value, setValue] = useState<{ data: T | null; error: unknown }>({ data: null, error: null });
-  const accept = useRef(canReplace); accept.current = canReplace;
-  const [version, setVersion] = useState(0);
-  useEffect(() => {
-    let active = true, request = 0;
-    const read = async () => { const current = ++request; api.invalidate(); try { const data = await api.get(path); if (active && current === request) setValue(previous => previous.data && accept.current?.(previous.data, data as unknown as T) === false ? { ...previous, error: new ApiClientError('err.sessionExpired', 401) } : { data: data as unknown as T, error: null }); } catch (error) { if (active && current === request) setValue(previous => ({ ...previous, error })); } };
-    void read();
-    const poll = window.setInterval(() => { if (!document.hidden) void read(); }, 30000);
-    const onVisible = () => { if (!document.hidden) void read(); };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => { active = false; clearInterval(poll); document.removeEventListener('visibilitychange', onVisible); };
-  }, [api, path, version]);
-  return { ...value, refresh: () => setVersion(value => value + 1) };
-}
+export { useResource } from './resource.js';

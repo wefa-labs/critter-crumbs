@@ -3,6 +3,9 @@ import { copy, formatCopy } from '@critter-crumbs/shared';
 import { GameIcon } from '../game/icons.js';
 import { CrumbGlyph } from '../game/mound.js';
 import { Loader, SheetNotice } from '../game/sheet-parts.js';
+import { useNotification } from './announcements.js';
+import type { RunAction } from './burrows.js';
+import { copyText } from './clipboard.js';
 import { optionInitial, optionPicture } from './connect-option.js';
 import { Dialog } from './ui.js';
 
@@ -14,11 +17,14 @@ function OptionGlyph({ option }: { option: AccountOption }) {
 /**
  * Choosing how to connect (flow page, SCREENS.connect, signing and ['connect-empty']): a sheet from the bottom on the
  * phone, a centred card on desktop. The choices are the apps the browser offers, by their own names; once one is
- * chosen the sheet waits on it, since the app asks for the connection and then for a signature.
+ * chosen the sheet waits on it, since the app asks for the connection and then for a signature. A browser with none,
+ * as a phone's own or a chat app's is when a feast link is tapped there, gets the way forward instead: what to do, and
+ * the page's link to take to the app the member connects with (QA production-build-07).
  */
-export function ConnectSheet({ options, discovering, reason, waiting, busy, choose, cancel }: {
-  options: AccountOption[]; discovering: boolean; reason: string; waiting: AccountOption | null; busy: boolean; choose: (option: AccountOption) => void; cancel: () => void;
+export function ConnectSheet({ options, discovering, reason, waiting, busy, choose, cancel, run }: {
+  options: AccountOption[]; discovering: boolean; reason: string; waiting: AccountOption | null; busy: boolean; choose: (option: AccountOption) => void; cancel: () => void; run: RunAction;
 }) {
+  const notify = useNotification();
   return (
     <Dialog title={copy['connect.title']} className="connect-sheet" onClose={cancel} busy={busy} dismiss="action.cancel">
       <div className="stack" aria-busy={discovering || !!waiting}>
@@ -31,7 +37,10 @@ export function ConnectSheet({ options, discovering, reason, waiting, busy, choo
           <button key={option.id} type="button" className="connect-option" disabled={busy} onClick={() => choose(option)}>
             <OptionGlyph option={option} /><span>{option.name}</span><GameIcon name="right" />
           </button>
-        )) : <SheetNotice trouble>{copy['connect.empty']}</SheetNotice>}
+        )) : <>
+          <SheetNotice trouble>{copy['connect.empty']}</SheetNotice>
+          <button type="button" disabled={busy} onClick={event => { const origin = event.currentTarget; void run(async () => { await copyText(location.href); notify(copy['connect.link.copied'], origin); }); }}>{copy['connect.link.copy']}</button>
+        </>}
       </div>
     </Dialog>
   );
