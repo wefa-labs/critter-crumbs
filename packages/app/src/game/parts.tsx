@@ -55,7 +55,9 @@ export function HeaderWhen({ children }: { children: ReactNode }) {
   return host ? createPortal(children, host) : null;
 }
 
-function CritterSpot({ entity, runtime, onFocus, editable, announce, onOutside, gathered }: { entity: Entity; runtime: StageRuntime; onFocus: () => void; editable: boolean; onOutside?: () => void; gathered: boolean; announce: (text: string) => void }) {
+/** A critter on the floor. `covered`: a statement is open over the circle on the phone, so it leaves the tab order
+ *  (WCAG 2.4.11); a tap on it still closes the statement. */
+function CritterSpot({ entity, runtime, onFocus, editable, announce, onOutside, gathered, covered }: { entity: Entity; runtime: StageRuntime; onFocus: () => void; editable: boolean; onOutside?: () => void; gathered: boolean; covered: boolean; announce: (text: string) => void }) {
   const own = entity.has(IsOwn) && entity.has(Asleep), name = entity.get(Name)!.display, input = useScatterInput(entity, runtime, name, announce);
   const act = (start: () => void) => {
     if (onOutside) { onOutside(); return; }
@@ -65,7 +67,7 @@ function CritterSpot({ entity, runtime, onFocus, editable, announce, onOutside, 
     else onFocus();
   };
   return (
-    <button className="circle-hit" type="button" aria-label={own ? copy['scatter.own.short'] : editable ? formatCopy('scatter.add', { name }) : name}
+    <button className="circle-hit" type="button" tabIndex={covered ? -1 : undefined} aria-label={own ? copy['scatter.own.short'] : editable ? formatCopy('scatter.add', { name }) : name}
       onPointerDown={event => { if (!event.isPrimary || event.button !== 0) return; event.preventDefault(); event.currentTarget.focus(); event.currentTarget.setPointerCapture(event.pointerId); act(() => input.start(1)); }}
       onPointerMove={input.move} onPointerUp={input.stop} onPointerLeave={input.stop} onPointerCancel={input.stop} onLostPointerCapture={input.stop} onBlur={input.stop}
       onClick={event => { if (event.detail !== 0) return; act(() => input.tap(1)); }}>
@@ -74,6 +76,9 @@ function CritterSpot({ entity, runtime, onFocus, editable, announce, onOutside, 
     </button>
   );
 }
+/** A name tag's name: what it shows, the critter's whole name and the crumbs on it (WCAG 2.5.3); on desktop the tag in
+ *  focus shows the name alone, the dock its count. */
+const tagName = (critter: { name: string; count: number }) => formatCopy('game.critter.crumbs', { name: critter.name, n: critter.count });
 function CritterPile({ entity, amount, glyphs }: { entity: Entity; amount?: number; glyphs?: number }) { const count = useTrait(entity, Count)!; return <CrumbMound count={amount ?? count.given} {...(glyphs === undefined ? {} : { glyphs })} />; }
 function TagCount({ entity, amount }: { entity: Entity; amount?: number }) { const count = useTrait(entity, Count)!, value = amount ?? count.given; return <b className="tag-count" data-zero={value <= 0}>{value}</b>; }
 
@@ -141,7 +146,13 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
     away: fedAny && entity.get(Received)!.crumbs <= 0,
   }));
   const layout = layoutGame({ viewport, critters, focus, reading, ...(statementHeight === undefined ? {} : { statementHeight }), issued: issued ?? pile.issued, remaining: remaining ?? pile.remaining, surface, scene: treatment, measure: measureText });
-  const turn = (direction: number) => turnTo((focus + direction + critters.length) % critters.length);
+  /* a turn says who now stands in focus, as the critter's tag reads (Design System §12.6). The feast's own turns, and
+     a statement opened from its bubble, which takes the focus and is named, say nothing more */
+  const turnAndSay = (index: number) => {
+    const critter = critters[index]!;
+    turnTo(index); announce(critter.own ? copy['scatter.own.label'] : treatment.tags ? tagName(critter) : critter.name);
+  };
+  const turn = (direction: number) => turnAndSay((focus + direction + critters.length) % critters.length);
   /* the phone's open statement is as tall as its text, up to the layout's bubble (D8): measured as each statement opens,
      before the frame is drawn, and again if its text changes height (a font arriving) */
   const phoneStatement = reading && !layout.desktop && !!surfaces.statement?.phone;
@@ -192,7 +203,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
         <ScreenNotices game className="game-notices" />
         {layout.slots.map(slot => (
           <div key={slot.index} className="circle-spot" data-spot={slot.index} data-slot={slot.slot} data-face={slot.face} data-away={slot.away} style={{ ...rectStyle(slot.stage), zIndex: slot.depth }}>
-            <CritterSpot entity={runtime.critters[slot.index]!} runtime={runtime} onFocus={() => turnTo(slot.index)} gathered={gathered} editable={editable && !reading && !gathered} announce={announce} {...(reading && onClose ? { onOutside: onClose } : {})} />
+            <CritterSpot entity={runtime.critters[slot.index]!} runtime={runtime} onFocus={() => turnAndSay(slot.index)} gathered={gathered} covered={phoneStatement} editable={editable && !reading && !gathered} announce={announce} {...(reading && onClose ? { onOutside: onClose } : {})} />
           </div>
         ))}
         {treatment.piles ? layout.slots.map(slot => (
@@ -201,7 +212,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
           </div>
         )) : null}
         {layout.slots.filter(slot => !slot.tag.hidden).map(slot => (
-          <button key={slot.index} type="button" className="critter-tag-target" aria-label={targetLabel(feast.targets[slot.index]!)} onClick={() => turnTo(slot.index)} style={{ ...rectStyle(hitRect(slot.tag)), zIndex: 2000 + slot.depth }}>
+          <button key={slot.index} type="button" className="critter-tag-target" aria-label={critters[slot.index]!.own ? slot.name : tagName(critters[slot.index]!)} onClick={() => turnAndSay(slot.index)} style={{ ...rectStyle(hitRect(slot.tag)), zIndex: 2000 + slot.depth }}>
             <span className="critter-tag" data-tag={slot.index} data-focus={slot.slot === 0} data-own={critters[slot.index]!.own} style={{ minWidth: slot.tag.width, height: slot.tag.height }}>
               {slot.tag.short ? shortName(slot.name) : slot.name}
               {!(desktop && slot.slot === 0) && !critters[slot.index]!.own ? <TagCount entity={runtime.critters[slot.index]!} {...(counts ? { amount: counts[slot.index]! } : {})} /> : null}
@@ -216,7 +227,7 @@ export function GameScene({ runtime, feast, focus, turnTo, state, surfaces, read
         {phoneStatement ? <div ref={statementHost} className="statement-host" style={rectStyle(layout.statement)}>{surfaces.statement!.phone}</div> : null}
         {surfaces.toast ?? null}
         {showsDock ? (
-          <div ref={dockHost} className="dock-position" data-surface={surface.kind} style={rectStyle(layout.dock)}>
+          <div ref={dockHost} className="dock-position" data-surface={surface.kind} data-fold={layout.foldResults || undefined} style={rectStyle(layout.dock)}>
             {surface.kind === 'sheet'
               ? <section className="game-sheet">{surfaces.sheet}</section>
               : <Dock crumbs={surface.kind === 'dock' && treatment.heap === 'remaining'} focusRow={surface.kind === 'dock' ? surfaces.focusRow : undefined} middle={surfaces.middle} turn={turn} results={surface.kind === 'results' && !desktop ? surfaces.results?.card : undefined} />}

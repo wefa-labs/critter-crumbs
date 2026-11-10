@@ -28,7 +28,7 @@ for(const kind of ['people','options'] as const)for(const simple of [true,false]
    if(simple)await expect(page.locator('canvas')).toHaveCount(0);else { await expect(page.locator('.game-scene .portrait-v2').first()).toBeVisible(); await expect(page.locator('canvas')).toHaveCount(0); }
    const inputs=page.locator('.focus-count input');await inputs.nth(0).fill('100');await inputs.nth(0).press('Enter');await submit(page);
   }
-  const inputs=first.locator('.focus-count input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:kind==='people'?'Fern':feast.targets[1].name,exact:true}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
+  const inputs=first.locator('.focus-count input');await inputs.nth(0).fill('60');await inputs.nth(0).press('Enter');await first.getByRole('button',{name:new RegExp(`^${(kind==='people'?'Fern':feast.targets[1].name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}, \\d+ crumbs?$`)}).click();await inputs.nth(0).fill('40');await inputs.nth(0).press('Enter');await submit(first);
   const {body:updated}=await readJson<{ownReceipts:unknown[];registration:{identity:string}}>(first,`/api/feasts/${feast.id}`);expect(updated.ownReceipts).toHaveLength(2);
   await first.screenshot({path:testInfo.outputPath('scatter-375.png'),fullPage:true});
   await first.request.post('/api/dev/time',{data:{now:feast.scatteringEndsAt}});

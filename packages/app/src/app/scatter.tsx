@@ -17,7 +17,7 @@ import { gameView, readingAt, scatterFailure, scatterFailureOf, portraitVariant,
 import type { AppApi, Me } from './session.js';
 import { GameScene } from '../game/parts.js';
 import { FocusRow, ScatterMiddle } from '../game/dock.js';
-import { SignDialog, statementSurfaces } from '../game/sheets.js';
+import { scatterSummary, SignDialog, statementSurfaces } from '../game/sheets.js';
 import { Toast } from '../game/surface.js';
 import { stateControls, stateToast } from '../game/composition.js';
 import { useDesktop } from '../game/device.js';
@@ -148,7 +148,7 @@ export function Scatter({ feast, me, api, run, busy, announce, settings, account
         middle,
         statement: statementSurfaces({ feast, runtime, focus, close: () => setReading(false) }),
         toast: message ? <Toast>{copy[message]}</Toast> : newer ? <Toast>{formatCopy('scatter.latest', { seq: state.remote!.seq })}</Toast> : null,
-        dialog: signing ? <SignDialog busy={busy} cancel={() => { focusAccepted.current = false; setSigning(false); }} confirm={confirm} /> : null,
+        dialog: signing ? <SignDialog summary={scatterSummary(feast.targets.map(targetLabel), state.amounts)} busy={busy} cancel={() => { focusAccepted.current = false; setSigning(false); }} confirm={confirm} /> : null,
       }} />
     <SavedFocus focusAccepted={focusAccepted} receipt={state.receipt?.uid} signing={signing || busy} done={done} onSaved={() => { clearError(); setSaved(true); audio.play('scatter.confirm'); announce((session.snapshot().dirty ? copy['scatter.savedWithChanges'] : copy['scatter.done.title']) + ' ' + formatCopy('scatter.done.body', { scatteringDeadline: absoluteDeadline(feast.scatteringEndsAt) })); }} />
   </section></WorldProvider>;

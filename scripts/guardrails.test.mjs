@@ -65,8 +65,12 @@ test('copy guard permits protocol syntax and real copy IDs, not wording hidden i
     'const view = <p>{formatDevCopy("preview.name", { n: 1 })}</p>;',
     // the page behind Why nobody can peek keeps its lines in their own module, copy-why.ts
     'const PROMISES = [["why.promise.read.lead", "why.promise.read.body"]] as const; const view = <h2>{whyCopy["why.promises.title"]}</h2>;',
+    // an attribute set on an element a component does not render is named as the same attribute is in JSX
+    'node.closest("dialog")?.setAttribute("aria-describedby", id);',
   ]) assert.equal(await has(code, 'packages/app/src/probe.tsx', 'copy-ids'), false, code);
   for (const code of [
+    'node.setAttribute("aria-label", "Hello");',
+    'node.setAttribute("title", id);',
     'const view = <button onClick={() => alert("Hello")}>{copy["action.connect"]}</button>;',
     'const view = <p>{formatCopy("home.title", { name: "Hello" })}</p>;',
     'const view = <Field label="Hello" />;',
