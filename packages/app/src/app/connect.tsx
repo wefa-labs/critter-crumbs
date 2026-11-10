@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { AccountOption } from '@critter-crumbs/core';
 import { copy, formatCopy } from '@critter-crumbs/shared';
 import { GameIcon } from '../game/icons.js';
@@ -19,12 +20,14 @@ function OptionGlyph({ option }: { option: AccountOption }) {
  * phone, a centred card on desktop. The choices are the apps the browser offers, by their own names; once one is
  * chosen the sheet waits on it, since the app asks for the connection and then for a signature. A browser with none,
  * as a phone's own or a chat app's is when a feast link is tapped there, gets the way forward instead: what to do, and
- * the page's link to take to the app the member connects with (QA production-build-07).
+ * the page's link to take to the app the member connects with (QA production-build-07). Where the browser refuses the
+ * clipboard, as some apps' own browsers do, the link itself shows under the notice once Copy link fails, and one press
+ * selects all of it to copy by hand (docs/decisions.md, 2026-11-09).
  */
 export function ConnectSheet({ options, discovering, reason, waiting, busy, choose, cancel, run }: {
   options: AccountOption[]; discovering: boolean; reason: string; waiting: AccountOption | null; busy: boolean; choose: (option: AccountOption) => void; cancel: () => void; run: RunAction;
 }) {
-  const notify = useNotification();
+  const notify = useNotification(), [refusedLink, setRefusedLink] = useState('');
   return (
     <Dialog title={copy['connect.title']} className="connect-sheet" onClose={cancel} busy={busy} dismiss="action.cancel">
       <div className="stack" aria-busy={discovering || !!waiting}>
@@ -39,7 +42,8 @@ export function ConnectSheet({ options, discovering, reason, waiting, busy, choo
           </button>
         )) : <>
           <SheetNotice trouble>{copy['connect.empty']}</SheetNotice>
-          <button type="button" disabled={busy} onClick={event => { const origin = event.currentTarget; void run(async () => { await copyText(location.href); notify(copy['connect.link.copied'], origin); }); }}>{copy['connect.link.copy']}</button>
+          {refusedLink ? <p className="address">{refusedLink}</p> : null}
+          <button type="button" disabled={busy} onClick={event => { const origin = event.currentTarget, link = location.href; void run(async () => { await copyText(link).catch((error: unknown) => { setRefusedLink(link); throw error; }); notify(copy['connect.link.copied'], origin); }); }}>{copy['connect.link.copy']}</button>
         </>}
       </div>
     </Dialog>

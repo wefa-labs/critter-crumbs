@@ -32,6 +32,34 @@ for (const viewport of [{ width: 375, height: 812 }, { width: 1280, height: 800 
   }
 });
 
+/* Some browsers refuse the clipboard, as an app's own browser may, and that is where a feast link tapped in a chat often
+   opens. Copy link then says so, and the page's address shows under the notice, where one press selects all of it to
+   copy by hand (docs/decisions.md, 2026-11-09). */
+test('when the browser refuses the clipboard, the page’s address shows under the notice and one press selects it all', async ({ page }) => {
+  await page.addInitScript(() => { navigator.clipboard.writeText = () => Promise.reject(new DOMException('Write permission denied.', 'NotAllowedError')); });
+  await page.route('**/api/dev/config', route => route.fulfill({ json: { enabled: false } }));
+  const seed = await page.request.post('/api/dev/seed', { data: { kind: 'people', phase: 'gathering' } }); expect(seed.ok()).toBe(true);
+  const { feasts } = await seed.json();
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(`/feasts/${feasts[0].id}`);
+  await page.getByRole('button', { name: 'Connect to join', exact: true }).click();
+  const sheet = page.getByRole('dialog', { name: 'Choose how to connect' }), pageAddress = sheet.getByText(page.url(), { exact: true });
+  const copyLink = sheet.getByRole('button', { name: 'Copy link', exact: true });
+  await expect(copyLink).toBeVisible();
+  await expect(pageAddress).toHaveCount(0);
+  await copyLink.click();
+  await expect(sheet.getByRole('alert')).toHaveText("Couldn't copy. Try again, or select the text and copy it yourself.");
+  await expect(pageAddress).toBeInViewport({ ratio: 1 });
+  const notice = (await sheet.locator('.sheet-notice').boundingBox())!;
+  expect((await pageAddress.boundingBox())!.y).toBeGreaterThanOrEqual(notice.y + notice.height);
+  await pageAddress.click();
+  expect(await page.evaluate(() => getSelection()?.toString())).toBe(page.url());
+  // Cancel takes the sheet's words with it, so nothing behind it asks for text that is no longer there
+  await sheet.getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByText(/Couldn't copy/)).toHaveCount(0);
+});
+
 /* Looking for what the browser offers can fail too, as when the code that asks it does not arrive. That is not "nothing
    to connect with": the sheet closes and the screen behind says something went wrong, and the next press looks again. */
 test('when looking for a way to connect fails, the sheet does not say this browser has nothing to connect with', async ({ page }) => {

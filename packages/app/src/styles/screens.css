@@ -149,7 +149,9 @@ html[data-still="true"] .floor-critter .portrait, html[data-still="true"] .floor
 .floor-chip { position:absolute; left:50%; top:12%; translate:-50% 0; z-index:1; }
 .profile-kept { font-size:var(--cc-text-xs); color:var(--cc-text-2); text-align:right; }
 .critter-address { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:48px; padding:0 4px 0 14px; border:1.5px solid var(--cc-line-strong); border-radius:14px; background:var(--cc-bg-raised); }
-.critter-address .address { overflow-wrap:normal; font-size:var(--cc-text-sm); color:var(--cc-text-2); }
+.critter-address .address { overflow-wrap:normal; }
+/* an address to copy, a size up from .address: your own in its short form, and the page's in the connect sheet */
+.critter-address .address, .connect-sheet .address { font-size:var(--cc-text-sm); color:var(--cc-text-2); }
 .your-critter .quiet { padding-inline:10px; }
 /* How it works and Disconnect follow the settings, as the flow page draws them, and stay in view when the settings scroll */
 .your-critter .place-sheet { grid-template-rows:minmax(0, max-content) auto; align-content:start; }
@@ -190,6 +192,8 @@ html[data-still="true"] .switch-row input, html[data-still="true"] .switch-row i
 .connect-option .game-icon { color:var(--cc-text-2); }
 .connect-glyph { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:var(--cc-text); color:var(--cc-bg); font-weight:800; object-fit:cover; }
 .connect-sheet .quiet { justify-self:center; }
+/* the page's address, once the browser refuses the clipboard: one press selects it all */
+.connect-sheet .address { user-select:all; }
 /* a long list of apps scrolls inside the sheet and never pushes its title off the screen */
 dialog.connect-sheet { max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain; }
 

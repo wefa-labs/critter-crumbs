@@ -113,7 +113,8 @@ export function App() {
     catch (error) { providers.current = undefined; closeConnect(); setAlert(message(error)); } finally { setDiscovering(false); }
   }
   /* A connection that is refused or fails closes the sheet, and the screen behind says why (the launcher in its sheet). */
-  function closeConnect() { resumeAfterConnect.current = false; setConnectReason(''); setConnecting(false); }
+  /* the sheet's own trouble leaves with it (opening it cleared the screen's); a failure that closes it says why after */
+  function closeConnect() { resumeAfterConnect.current = false; setConnectReason(''); setConnecting(false); setAlert(''); }
   function connectWith(option: AccountOption) {
     const provider = choices.find(choice => choice.option === option)?.provider;
     if (!provider) return;
