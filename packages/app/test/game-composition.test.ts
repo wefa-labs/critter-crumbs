@@ -90,9 +90,10 @@ describe('core game compositions', () => {
     });
   });
 
-  /* QA copy-01: scatters were saved and not one could be read; the line naming whose takes four lines for a burrow of ten */
-  it('shows no scatter readable over the same awake circle as nobody scattered, on a sheet 40 px taller', () => {
-    expect(composeGame('unreadable', 'phone')).toEqual({ ...composeGame('nobody', 'phone'), surface: { kind: 'sheet', height: 300 } });
+  /* QA copy-01: scatters were saved and not one could be read; the line naming whose takes four lines for a burrow of ten,
+     and the result fingerprint folds under it (docs/decisions.md, 2026-11-09) */
+  it('shows no scatter readable over the same awake circle as nobody scattered, on a sheet 80 px taller', () => {
+    expect(composeGame('unreadable', 'phone')).toEqual({ ...composeGame('nobody', 'phone'), surface: { kind: 'sheet', height: 340 } });
   });
 
   it('grows every result into the results surface with the critters huddled on its edge', () => {

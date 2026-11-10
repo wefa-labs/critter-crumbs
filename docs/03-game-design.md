@@ -202,7 +202,7 @@ Duration: 8 critters ≈ 1.2 + 7 × 0.45 + 0.9 + 0.2 + 0.8 ≈ **6.3 s**; 4 opti
 | Reduced motion / Still critters | No wave: one 320 ms crossfade from asleep-dusk to the settled state, lights to `day`; `feast.settle` only, at −6 dB |
 | Simple view | The same beats with the Design System §7.3 portraits: chew is a 3 % `scale.y` pulse, growth a CSS scale; the hops are identical |
 | Nobody scattered | *Laid out* and *Everyone wakes* play; no wave; the settle hop is skipped; `feast.settle` plays softly; the DOM says `results.nobody` |
-| No scatter could be read | As nobody scattered; the DOM says `results.unreadable.all`, naming whose crumbs could not be read |
+| No scatter could be read | As nobody scattered; the DOM says `results.unreadable.all`, naming whose crumbs could not be read, over the result fingerprint |
 | One scatterer | The full sequence; the table says `results.one` |
 | A tie | Nothing special in the sequence; `results.tie` in the table |
 | Skip | Jumps to *Readable* with a 200 ms crossfade; sound stops in 100 ms |

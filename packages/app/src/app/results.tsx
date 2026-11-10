@@ -127,9 +127,18 @@ export function ResultsList({ feast, opened, record, givers }: { feast: PublicFe
       {opened.missingUids.map(uid => <p className="results-note receipt-evidence" key={uid}>{formatCopy('err.uidMissing', { uid })}</p>)}
       {record ?? <p className="results-sum">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>}
       {givers ? <button type="button" className="quiet left" onClick={givers}>{copy['results.givers.title']}</button> : null}
-      {member ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><p className="results-sum">{copy['results.verification.help']}</p><code className="receipt-evidence">{result.resultHash}</code></details> : null}
+      <ResultFingerprint feast={feast} hash={result.resultHash} />
     </div>
   );
+}
+
+/**
+ * A member's result fingerprint, folded under its name with what it is for (the first-steps review, F8). Members compare
+ * theirs: the same fingerprint means the same result, so a browser that read the scatters differently stands out. A
+ * visitor has none to compare: their result is read from the burrow's record, and its hash is that record's UID.
+ */
+function ResultFingerprint({ feast, hash }: { feast: PublicFeast; hash: string }) {
+  return isMemberFeast(feast) ? <details className="results-fingerprint"><summary>{copy['results.verification']}</summary><p className="results-sum">{copy['results.verification.help']}</p><code className="receipt-evidence">{hash}</code></details> : null;
 }
 
 /** In who gave what the arrows across scroll the table: they are kept from the circle, which would turn under it (QA accessibility-06). */
@@ -235,16 +244,20 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
 
 /**
  * Flow 45: no crumbs were counted, so the critters stay as they were and there is nothing to replay. Either nobody
- * scattered, or not one scatter saved could be read and the sheet names whose (QA copy-01). A scatter of yours missing
- * from the published set says so here as it does in the results (Technical Spec E11).
+ * scattered, or not one scatter saved could be read and the sheet names whose (QA copy-01), with the result's fingerprint
+ * as the results show it, so members can tell one browser failing to open the scatters from everyone's failing
+ * (docs/decisions.md, 2026-11-09). A scatter of yours missing from the published set says so here as it does in the
+ * results (Technical Spec E11).
  */
 export function EmptySheet({ feast, opened, empty, heading }: { feast: PublicFeast; opened: OpenedFeast; empty: NonNullable<ReturnType<typeof emptyResult>>; heading: React.RefObject<HTMLHeadingElement | null> }) {
+  const unreadable = empty.state === resultStates.unreadable;
   return (
     <>
       <h2 ref={heading} tabIndex={-1}>{copy['results.title']}</h2>
       <p className="sheet-help">{summaryOf(feast, opened.result)}</p>
-      {empty.state === resultStates.unreadable ? <SheetNotice trouble>{empty.line}</SheetNotice> : <p>{empty.line}</p>}
+      {unreadable ? <SheetNotice trouble>{empty.line}</SheetNotice> : <p>{empty.line}</p>}
       {opened.missingUids.map(uid => <SheetNotice trouble key={uid}><span className="receipt-evidence">{formatCopy('err.uidMissing', { uid })}</span></SheetNotice>)}
+      {unreadable ? <ResultFingerprint feast={feast} hash={opened.result.resultHash} /> : null}
       <Grow />
       <p className="sheet-help">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>
     </>
