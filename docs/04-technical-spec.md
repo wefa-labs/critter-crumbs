@@ -313,7 +313,7 @@ The off-chain UID is computed as the SDK does; **V4** — the exact preimage is 
 ```
 bytes32 feastId, bytes32 shutterIdentity, bytes ciphertext, uint32 payloadVersion
 ```
-Attestation fields: `recipient = 0x0`, `expirationTime = 0`, `revocable = false`, `refUID = 0x0`, `time` = client `now()` (server accepts ±5 minutes), `salt` random. The server verifies with viem `verifyTypedData` (attester recovers), checks `feastId` and `shutterIdentity` match the feast, attester ∈ `feast_participants`, phase = scattering at server time, ciphertext ≤ 4 KB, then assigns `seq` and stores the whole signed object as received. The same address may submit any number of times; each is stored (PRD R12, T11).
+Attestation fields: `recipient = 0x0`, `expirationTime = 0`, `revocable = false`, `refUID = 0x0`, `time` = client `now()` (server accepts ±5 minutes, `BALLOT_TIME_TOLERANCE_SECONDS`, and refuses one outside them as `scatter.sign.expired`), `salt` random. The server verifies with viem `verifyTypedData` (attester recovers), checks `feastId` and `shutterIdentity` match the feast, attester ∈ `feast_participants`, phase = scattering at server time, ciphertext ≤ 4 KB, then assigns `seq` and stores the whole signed object as received. The same address may submit any number of times; each is stored (PRD R12, T11).
 
 **Result schema** (on-chain, Base; shaped so a v1 custody contract can read it — PRD §10):
 ```
@@ -481,8 +481,8 @@ For each: what the person sees (Design System copy IDs), what they can do, wheth
 | # | State | Sees | Can do | Completes |
 |---|---|---|---|---|
 | E1 | Shutter unreachable at reveal | `feast.waiting.*`, then `err.keyUnreachable` after 20 s; the waiting screen keeps polling `/key` every 60 s | Wait; come back later. The client also tries Shutter directly (**V3**) | Yes, later. Keys are released once and recoverable after keyper downtime (Shutter docs) |
-| E2 | Wallet rejects the signature mid-scatter | `scatter.sign.rejected`; the allocation stays in the DOM | Press *Scatter these* again | Yes |
-| E3 | Network drops after pressing *Scatter these* | Before the POST resolves: `err.saveFailed` — allocation kept. After: the client re-reads the feast; until its UID appears: `err.saveUnverified`; then `err.saveVerified` / the done line | Retry; the same ballot resubmitted gets a new `seq` and the same effect | Yes |
+| E2 | Wallet rejects the signature mid-scatter, is locked, or is on another account | `scatter.sign.rejected`, `scatter.sign.locked` or `scatter.sign.otherAccount`; the allocation stays in the DOM | Unlock it or switch back if need be, then press *Scatter these* again: the same page signs once the wallet is back on the connected account | Yes |
+| E3 | Network drops after pressing *Scatter these* | Before the POST resolves: `err.saveFailed` — allocation kept. After: the client re-reads the feast; until its UID appears: `err.saveUnverified`; then `err.saveVerified` / the done line | Retry; the same ballot resubmitted gets a new `seq` and the same effect. A ballot kept four minutes or more is signed afresh for the retry instead, the same allocation, since the store takes a signed time only within ±5 minutes (§7); one that reaches it too old, after a slow confirmation, is refused as `scatter.sign.expired` and the retry signs afresh | Yes |
 | E4 | Someone not in the burrow opens the link | Arrival (F1) then `burrow.unknown.*` after connecting | Ask a member to add them; a member adds, they reload | Yes |
 | E5 | Nobody scatters | Feast plays without a wave; `results.nobody`; CSV has zeros | Nothing to do; a new feast can be started | Yes, as an empty result |
 | E6 | One person scatters | Normal; `results.one` | — | Yes |

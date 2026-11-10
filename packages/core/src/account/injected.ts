@@ -1,7 +1,7 @@
 import { createWalletClient, custom, getAddress, type EIP1193Provider, type WalletClient } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
 import { copy } from '@critter-crumbs/shared';
-import type { AccountProvider } from './index.js';
+import { AccountUnavailable, type AccountProvider } from './index.js';
 interface Announcement { info: { uuid: string; name: string; icon?: string }; provider: EIP1193Provider }
 type BaseChainId = 8453 | 84532;
 const chains = { 8453: base, 84532: baseSepolia } as const;
@@ -53,30 +53,37 @@ export function createInjectedAccountProvider({ events = window, chainId }: { ev
       const entry = found.get(option.id); if (!entry) throw new Error('Unknown account provider');
       const client = createWalletClient({ transport: custom(entry.provider, { retryCount: 0 }) });
       const [selected] = await client.requestAddresses(); if (!selected) throw new Error('No account selected');
-      const address = getAddress(selected);
-      let connected = true;
-      const requireConnected = () => { if (!connected) throw new Error('Disconnected account'); };
-      const changed = (addresses: string[]) => { if (addresses[0]?.toLowerCase() !== address.toLowerCase()) connected = false; };
-      const lost = () => { connected = false; };
+      const address = getAddress(selected), ours = (other?: string) => other?.toLowerCase() === address.toLowerCase();
+      /* The account the wallet last said it is on, none while it is locked. Only our own disconnect is for good: a wallet
+         that locks or moves to another account can sign again once it is back (production-build-04). */
+      let current: string | undefined = address, disconnected = false;
+      const changed = (addresses: string[]) => { current = addresses[0]; };
+      const lost = () => { current = undefined; };
       entry.provider.on?.('accountsChanged', changed); entry.provider.on?.('disconnect', lost);
+      /** Ask the wallet only once it has said it left, since some come back without saying so; 4100, unauthorised, is a locked wallet. */
+      async function signing<T>(sign: () => Promise<T>) {
+        if (disconnected) throw new Error('Disconnected account');
+        if (!ours(current)) current = (await client.getAddresses().catch(() => [current]))[0];
+        if (!current) throw new AccountUnavailable('locked');
+        if (!ours(current)) throw new AccountUnavailable('otherAccount');
+        try { return await sign(); } catch (error) { throw rpcCodes(error).includes(4100) ? new AccountUnavailable('locked') : error; }
+      }
       return { address, kind: 'injected',
-        async signMessage(message) { requireConnected(); return client.signMessage({ account: address, message }); },
+        signMessage: message => signing(() => client.signMessage({ account: address, message })),
         /* MetaMask refuses typed data whose domain chainId is not the active chain, so a ballot moves the wallet to its chain first */
-        async signTypedData(typed) {
-          requireConnected();
+        signTypedData: typed => signing(async () => {
           const target = typed.domain?.chainId === undefined ? undefined : Number(typed.domain.chainId);
           if (target !== undefined) {
             if (target !== 8453 && target !== 84532) throw new TypeError('Unsupported signing chain');
             await useChain(client, target);
           }
           return client.signTypedData({ ...typed, account: address });
-        },
-        async sendTransaction(tx) {
-          requireConnected();
+        }),
+        sendTransaction: tx => signing(async () => {
           await useChain(client, chainId);
           return client.sendTransaction({ ...tx, account: address, chain: chains[chainId] });
-        },
-        async disconnect() { connected = false; entry.provider.removeListener?.('accountsChanged', changed); entry.provider.removeListener?.('disconnect', lost); },
+        }),
+        async disconnect() { disconnected = true; entry.provider.removeListener?.('accountsChanged', changed); entry.provider.removeListener?.('disconnect', lost); },
       };
     },
   };

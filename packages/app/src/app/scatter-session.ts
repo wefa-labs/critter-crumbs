@@ -1,11 +1,17 @@
-import { ApiClientError, phaseAt } from '@critter-crumbs/core';
-import { integer, parseAddress, parseSequence, ValidationError, type Address, type SignedOffchainAttestation } from '@critter-crumbs/shared';
+import { AccountUnavailable, ApiClientError, phaseAt } from '@critter-crumbs/core';
+import { BALLOT_TIME_TOLERANCE_SECONDS, integer, parseAddress, parseSequence, ValidationError, type Address, type SignedOffchainAttestation } from '@critter-crumbs/shared';
 import type { AppApi } from './session.js';
 import { isMemberFeast, type MemberFeast } from './feast-view.js';
 export interface ScatterReceipt { uid: string; seq: string }
 export interface ScatterState { amounts: number[]; dirty: boolean; status: 'idle' | 'signing' | 'saving' | 'verifying' | 'saved' | 'error'; receipt: ScatterReceipt | null; remote: ScatterReceipt | null }
+/** A kept signature is sent again only while the store would still take it, with a minute to spare (rules-04). */
+const REUSE_SECONDS = BALLOT_TIME_TOLERANCE_SECONDS - 60;
+const unavailable = { locked: 'scatter.sign.locked', otherAccount: 'scatter.sign.otherAccount' } as const;
+/** A signature that did not come says why (production-build-04): the account app locked or on another account, else not confirmed. */
+const unsigned = (error: unknown) => error instanceof ApiClientError || error instanceof ValidationError ? error
+  : new ApiClientError(error instanceof AccountUnavailable ? unavailable[error.reason] : 'scatter.sign.rejected', 400);
 interface Options { onAccepted?: (receipt: ScatterReceipt) => void; api: AppApi; feast: MemberFeast; viewer: Address; sign: (amounts: number[], now: number, feast: MemberFeast) => Promise<SignedOffchainAttestation> }
-/** Keep edits in memory. A lost response is reconciled by UID before any retry. */
+/** Keep edits in memory. A lost response is reconciled by UID before any retry; a retry signs again once the kept signature is too old. */
 export function createScatterSession({ api, feast, viewer, sign, onAccepted }: Options) {
   const address = parseAddress(viewer), listeners = new Set<() => void>();
   let state: ScatterState = { amounts: feast.targets.map(() => 0), dirty: false, status: 'idle', receipt: null, remote: null };
@@ -48,9 +54,9 @@ export function createScatterSession({ api, feast, viewer, sign, onAccepted }: O
           if (!latest.participants?.some(participant => parseAddress(participant) === address)) throw new ApiClientError('err.notParticipant', 403);
           if (state.amounts.reduce((sum, n) => sum + n, 0) !== latest.crumbsPerCritter) throw new ValidationError('scatter.submit.help');
           const amounts = [...state.amounts];
-          if (!pending || !same(pending.amounts, amounts)) {
+          if (!pending || !same(pending.amounts, amounts) || now / 1000 - Number(pending.signed.message.time) > REUSE_SECONDS) {
             publish({ status: 'signing' });
-            pending = { signed: await sign(amounts, now, latest), amounts };
+            pending = { signed: await sign(amounts, now, latest).catch(error => { throw unsigned(error); }), amounts };
           }
           const submittedUid = pending.signed.uid;
           publish({ status: 'saving' });

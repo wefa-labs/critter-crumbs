@@ -21,8 +21,6 @@ const invalidCases: [string, Mutation][] = [
   ['wrong schema', signed => { signed.message.schema = `0x${'ff'.repeat(32)}`; }],
   ['wrong feast', (signed, feast) => { signed.message.data = encodeBallot({ feastId: '00000000-0000-4000-8000-000000000002', shutterIdentity: feast.registration!.identity, ciphertext: '0x11' }); }],
   ['wrong Shutter identity', (signed, feast) => { signed.message.data = encodeBallot({ feastId: feast.id, shutterIdentity: `0x${'ff'.repeat(32)}`, ciphertext: '0x11' }); }],
-  ['stale time', signed => { signed.message.time = String(BigInt(signed.message.time) - 301n); }],
-  ['future time', signed => { signed.message.time = String(BigInt(signed.message.time) + 301n); }],
   ['nonzero recipient', signed => { signed.message.recipient = '0x0000000000000000000000000000000000000001'; }],
   ['expiring attestation', signed => { signed.message.expirationTime = '1'; }],
   ['revocable attestation', signed => { signed.message.revocable = true; }],
@@ -39,6 +37,16 @@ test.each(invalidCases)('API ballot verification rejects %s even with a valid si
   const signed = await encryptedScatter(feast, owner.account, clock()); change(signed, feast); await resign(signed, owner.account);
   const response = await api({ method: 'POST', path: `${path}/ballots`, headers: owner.headers, body: signed });
   expect(response.status).toBe(400); expect(response.body.error).toBe('err.generic');
+  expect((await api({ method: 'GET', path, headers: owner.headers })).body.ownBallotUids).toEqual([]);
+});
+// rules-04: its own refusal, which the scatter screen answers by signing again, where err.generic read as a lost connection
+test.each([-301n, 301n])('API ballot verification refuses a scatter signed %s seconds from its clock as expired', async offset => {
+  const { api, createFeast, close, clock, advance } = await apiHarness({ eas: testEas }); disposals.push(close);
+  const { path, owner } = await createFeast({ open: true }); advance(1000);
+  const feast = (await api({ method: 'GET', path, headers: owner.headers })).body as unknown as Feast;
+  const signed = await encryptedScatter(feast, owner.account, clock()); signed.message.time = String(BigInt(signed.message.time) + offset); await resign(signed, owner.account);
+  const response = await api({ method: 'POST', path: `${path}/ballots`, headers: owner.headers, body: signed });
+  expect(response.status).toBe(400); expect(response.body.error).toBe('scatter.sign.expired');
   expect((await api({ method: 'GET', path, headers: owner.headers })).body.ownBallotUids).toEqual([]);
 });
 test('API ballot verification rejects a signature made by a different participant', async () => {
