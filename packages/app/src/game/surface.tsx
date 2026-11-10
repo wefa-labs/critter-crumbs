@@ -35,7 +35,7 @@ export function GameDialog({ title, children, cancel, action, busy = false }: { 
  * each starts at the top.
  */
 function StatementScroll({ className, name, body, empty, scroller }: { className: string; name: string; body: string | undefined; empty: string; scroller?: RefObject<HTMLDivElement | null> }) {
-  const own = useRef<HTMLDivElement>(null), box = scroller ?? own;
+  const inner = useRef<HTMLDivElement>(null), box = scroller ?? inner;
   useLayoutEffect(() => { if (box.current) box.current.scrollTop = 0; }, [name]);
   return <div ref={box} className={className} tabIndex={0} role="region" aria-label={name}>{body ? <StatementText body={body} paragraphs /> : <p>{empty}</p>}</div>;
 }

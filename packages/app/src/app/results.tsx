@@ -84,12 +84,16 @@ function summaryOf(feast: PublicFeast, result: Pick<TallyResult, 'counted' | 'to
   return feast.kind === 'people' ? formatCopy('results.summary', { scatterers, total: feast.targets.length, totalCrumbs: result.totalScattered }) : formatCopy('results.public.summary', { scatterers, totalCrumbs: result.totalScattered });
 }
 /**
- * Which results have no crumbs counted (flow 45): nobody scattered, or not one scatter saved could be read at the feast
- * (Technical Spec E14, QA copy-01). Null when some were counted.
+ * The results when no crumbs were counted (flow 45), or null when some were: nobody scattered, or not one scatter saved
+ * could be read at the feast, and the line names whose (Technical Spec E14, QA copy-01). The line is the sheet's, and what
+ * is said as the feast settles.
  */
-export const emptyResult = (result: Pick<TallyResult, 'totalScattered' | 'rejected'>) => result.totalScattered ? null : result.rejected.length ? resultStates.unreadable : resultStates.nobody;
-/** Why nothing is shared out, said as the feast settles and written on its sheet: nobody scattered, or whose crumbs could not be read. */
-const emptyLine = (feast: PublicFeast, result: Pick<TallyResult, 'rejected'>) => result.rejected.length ? formatCopy('results.unreadable.all', { names: joinNames(result.rejected.map(entry => memberName(feast, entry.attester))) }) : copy['results.nobody'];
+export function emptyResult(feast: PublicFeast, result: Pick<TallyResult, 'totalScattered' | 'rejected'>) {
+  if (result.totalScattered) return null;
+  return result.rejected.length
+    ? { state: resultStates.unreadable, line: formatCopy('results.unreadable.all', { names: joinNames(result.rejected.map(entry => memberName(feast, entry.attester))) }) }
+    : { state: resultStates.nobody, line: copy['results.nobody'] };
+}
 const fedFor = (share: [number, number], n: number) => Math.min(1, share[0] / share[1] * n / GROWTH.fairShareCap) ** GROWTH.exponent;
 
 /** Replay Feast and Download; on the phone Download is short so both fit one row, keeping "Download CSV" as its name. */
@@ -128,8 +132,8 @@ export function ResultsList({ feast, opened, record, givers }: { feast: PublicFe
   );
 }
 
-/** In who gave what the arrows scroll the table sideways, rather than turn the circle under it (QA accessibility-06). */
-const sideways = (event: KeyboardEvent) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') event.stopPropagation(); };
+/** In who gave what the arrows across scroll the table: they are kept from the circle, which would turn under it (QA accessibility-06). */
+const keepArrowsFromCircle = (event: KeyboardEvent) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') event.stopPropagation(); };
 
 /**
  * Flow 47: who gave what, the table scrolling sideways with each giver held at the left (Design System §6.5). The box
@@ -139,7 +143,7 @@ export function GiverTable({ feast, opened, viewer }: { feast: MemberFeast; open
   return (
     <div className="results-list">
       <p className="results-sum" aria-hidden="true">{copy['results.givers.caption']}</p>
-      <div className="giver-scroll" tabIndex={0} role="region" aria-label={copy['results.givers.title']} onKeyDown={sideways}>
+      <div className="giver-scroll" tabIndex={0} role="region" aria-label={copy['results.givers.title']} onKeyDown={keepArrowsFromCircle}>
         <table className="giver-matrix">
           <caption className="sr-only">{copy['results.givers.caption']}</caption>
           <thead><tr><th scope="col">{copy['results.col.giver']}</th>{feast.targets.map(target => <th scope="col" key={target.id} aria-label={targetLabel(target)}><CritterFace address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={26} /></th>)}</tr></thead>
@@ -169,7 +173,7 @@ export const feastHeapGlyphs = (fraction: number) => Math.max(0, Math.round(frac
  * Closed, the circle shows everyone grown with their totals and Results in the bar opens them again.
  */
 export function FeastResults({ feast, opened, settings, announce, record, viewer, initialPlaying = true, initialView = resultsViews.results }: { feast: PublicFeast; opened: OpenedFeast; settings: GameSettings; announce: (text: string) => void; record?: ReactNode; viewer?: string; initialPlaying?: boolean; initialView?: ResultsView }) {
-  const { result } = opened, audio = useAudio(), surface = useRef<HTMLElement>(null), source = useRef<HTMLDivElement>(null), heading = useRef<HTMLHeadingElement>(null);
+  const { result } = opened, empty = emptyResult(feast, result), audio = useAudio(), surface = useRef<HTMLElement>(null), source = useRef<HTMLDivElement>(null), heading = useRef<HTMLHeadingElement>(null);
   const [playing, setPlaying] = useState(initialPlaying), [beat, setBeat] = useState(''), [focus, setFocus] = useState(0), [view, setView] = useState<ResultsView>(initialView), [reading, setReading] = useState(false), [presentation, setPresentation] = useState({ counts: result.totals.map(() => 0), remaining: 0 });
   const [hops] = useState(() => createHops(document, () => source.current, id => surface.current?.querySelector<HTMLElement>(`[data-critter-id="${id}"]`) ?? null, () => runtime.world));
   const [runtime] = useState(() => createStageRuntime({ issued: isMemberFeast(feast) ? feast.crumbsPerCritter : feast.aggregate?.crumbsIssued ?? 100, asleep: true, settings, critters: feast.targets.map(target => ({ id: target.id, address: target.ownerAddress ?? target.id, ownerAddress: target.ownerAddress, name: targetLabel(target), variant: portraitVariant(feast, target) })), outputs: { sound: audio.cue, hop: cue => hops.add(cue) } }));
@@ -181,7 +185,7 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
       if (state.index >= 0 && state.index !== previousFocus) { previousFocus = state.index; setFocus(state.index); }
       const step = Math.floor(now / CIRCLE_FEEL.presentationMs); if (step !== lastPresentation) { lastPresentation = step; setPresentation({ counts: shown.counts, remaining: feastHeapGlyphs(shown.heapFraction) }); }
       if (!shown.settled) settled = false;
-      if (shown.settled && !settled) { settled = true; setPlaying(false); const maximum = Math.max(0, ...result.totals.map(row => row.crumbs)); const top = result.totals.filter(row => row.crumbs === maximum).map(row => targetLabel(feast.targets.find(t => t.id === row.targetId)!)); announce(maximum ? formatCopy('feast.announce', { topName: joinNames(top) }) : emptyLine(feast, result)); }
+      if (shown.settled && !settled) { settled = true; setPlaying(false); const maximum = Math.max(0, ...result.totals.map(row => row.crumbs)); const top = result.totals.filter(row => row.crumbs === maximum).map(row => targetLabel(feast.targets.find(t => t.id === row.targetId)!)); announce(empty ? empty.line : formatCopy('feast.announce', { topName: joinNames(top) })); }
     });
     return () => { audio.stop(); frame(); stop(); hops.clear(); queueMicrotask(() => runtime.destroy()); };
   }, [runtime]);
@@ -189,8 +193,8 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
   useEffect(() => { if (!playing && view !== 'closed') heading.current?.focus(); }, [playing, view]);
   /* once the feast has played, or been skipped, this place in the history remembers it (Results, feastedHere) */
   useEffect(() => { if (!playing) history.replaceState({ ...history.state, feasted: true }, ''); }, [playing]);
-  const member = isMemberFeast(feast) ? feast : null, empty = emptyResult(result);
-  const state = gameView({ phase: feast.phase, remaining: 0, opened: true, playing, resultsOpen: view !== 'closed', ...(empty ? { resultState: empty } : view === 'givers' ? { resultState: resultStates.givers } : {}) }).state;
+  const member = isMemberFeast(feast) ? feast : null;
+  const state = gameView({ phase: feast.phase, remaining: 0, opened: true, playing, resultsOpen: view !== 'closed', ...(empty ? { resultState: empty.state } : view === 'givers' ? { resultState: resultStates.givers } : {}) }).state;
   const replay = () => { audio.stop(); hops.clear(); setPlaying(true); setFocus(0); setView(resultsViews.results); runtime.actions.replayFeast(); runtime.animateFor(FEAST.maxMs); };
   const skip = () => { hops.clear(); runtime.actions.skipFeast(); runtime.animateFor(FEAST.skipMs); };
   const download = () => downloadCsv(document, feast.title, aggregateCsv(feast.targets, result));
@@ -214,7 +218,7 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
         <GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={state} editable={false} announce={announce} heapHost={source}
           reading={reading && state === 'feasted'} {...(member ? { onRead: () => { setReading(true); audio.play('statement.open'); } } : {})} onClose={() => setReading(false)} counts={presentation.counts} remaining={presentation.remaining} issued={FEAST.glyphs}
           surfaces={playing ? { sheet: <FeastSheet skip={skip} /> }
-            : empty ? { sheet: <EmptySheet feast={feast} opened={opened} heading={heading} /> }
+            : empty ? { sheet: <EmptySheet feast={feast} opened={opened} empty={empty} heading={heading} /> }
             : {
               focusRow: <FeastFocus key={focus} entity={runtime.critters[focus]!} runtime={runtime} feast={feast} focus={focus} />,
               middle: <ResultsPill open={view !== 'closed'} toggle={toggle} />,
@@ -234,13 +238,12 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
  * scattered, or not one scatter saved could be read and the sheet names whose (QA copy-01). A scatter of yours missing
  * from the published set says so here as it does in the results (Technical Spec E11).
  */
-export function EmptySheet({ feast, opened, heading }: { feast: PublicFeast; opened: OpenedFeast; heading: React.RefObject<HTMLHeadingElement | null> }) {
-  const { result } = opened, line = emptyLine(feast, result);
+export function EmptySheet({ feast, opened, empty, heading }: { feast: PublicFeast; opened: OpenedFeast; empty: NonNullable<ReturnType<typeof emptyResult>>; heading: React.RefObject<HTMLHeadingElement | null> }) {
   return (
     <>
       <h2 ref={heading} tabIndex={-1}>{copy['results.title']}</h2>
-      <p className="sheet-help">{summaryOf(feast, result)}</p>
-      {result.rejected.length ? <SheetNotice trouble>{line}</SheetNotice> : <p>{line}</p>}
+      <p className="sheet-help">{summaryOf(feast, opened.result)}</p>
+      {empty.state === resultStates.unreadable ? <SheetNotice trouble>{empty.line}</SheetNotice> : <p>{empty.line}</p>}
       {opened.missingUids.map(uid => <SheetNotice trouble key={uid}><span className="receipt-evidence">{formatCopy('err.uidMissing', { uid })}</span></SheetNotice>)}
       <Grow />
       <p className="sheet-help">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>
