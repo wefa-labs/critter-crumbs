@@ -26,6 +26,17 @@ test('every scatter unreadable at the feast is its own state, naming whose crumb
   expect(markup).not.toContain(copy['results.nobody'].replaceAll("'", '&#x27;'));
 });
 
+/* Afolabi's call of 9 November (docs/decisions.md): the sheet for no scatter readable shows the result's fingerprint as
+   the results do, folded under its name with what it is for. Members compare theirs: the same fingerprint means every
+   browser read the same, so one browser that could not open the scatters stands out from a feast nobody could read. */
+test('the sheet for no scatter readable carries the result fingerprint, as the results do', () => {
+  const feast = fixtureFeast(4, 'unreadable'), opened = fixtureOpened(feast, 'unreadable'), markup = sheet(feast, opened);
+  expect(opened.result.resultHash).toMatch(/^0x[0-9a-f]{64}$/);
+  expect(markup).toContain(`<summary>${copy['results.verification']}</summary>`);
+  expect(markup).toContain(copy['results.verification.help']);
+  expect(markup).toContain(opened.result.resultHash);
+});
+
 test('nobody scattering keeps its own sheet, and a scatter of yours missing from the published set says so on it', () => {
   const feast = fixtureFeast(4, 'nobody'), opened = fixtureOpened(feast, 'nobody'), missing = `0x${'ab'.repeat(32)}`;
   expect(emptyResult(feast, opened.result)).toEqual({ state: 'nobody', line: copy['results.nobody'] });

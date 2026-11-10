@@ -7,14 +7,16 @@ import { expect, test, type Page } from 'playwright/test';
  * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). Three
  * numbers are the app's own: the waiting sheet is 40 px taller than the flow page's 250, for its line to Why nobody can
  * peek, and the key's 80 px taller, for that line and the count of who has scattered (docs/decisions.md, 2026-11-09); the
- * sheet for no scatter readable, which the flow page does not draw, is 40 px over nobody's 260 for the line naming whose.
+ * sheet for no scatter readable, which the flow page does not draw, is 80 px over nobody's 260 for the line naming whose
+ * and the result fingerprint under it.
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US' });
 const PHONE = { width: 375, height: 812 }, DESKTOP = { width: 1440, height: 900 }, HEADER = 64;
 /* the waiting sheet is the flow page's 250 and the 40 px its line to Why nobody can peek needs (the first-steps review, F8);
    the key's adds the count of who has scattered under its notice as well (docs/decisions.md, 2026-11-09); no scatter
-   readable is nobody's 260 and the 40 px its line naming whose crumbs could not be read needs (QA copy-01) */
-const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260, unreadable: 300 };
+   readable is nobody's 260 and the 80 px its line naming whose crumbs could not be read (QA copy-01) and the result
+   fingerprint under it need (docs/decisions.md, 2026-11-09) */
+const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260, unreadable: 340 };
 const DOCKS = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'feasted'];
 const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const TOASTS: Record<string, string> = { scattered: 'Your scatter is in.', rejected: "Not confirmed. Your crumbs are still here — try again when you're ready.", failed: "Couldn't save your scatter. Check your connection and try again — nothing was lost." };
@@ -89,6 +91,24 @@ test('waiting for the feast: the sheet counts who has scattered while the feast 
     const sheet = page.locator(viewport === PHONE ? '.game-sheet' : '.side-sheet');
     await expect(sheet.getByText('7 of 8 have scattered', { exact: true })).toBeVisible();
     if (viewport === PHONE) expect(await sheet.evaluate(node => node.scrollHeight <= node.clientHeight)).toBe(true);
+  }
+});
+
+/* the sheet for no scatter readable carries the result fingerprint under the line naming whose, as the results show it, so
+   members can tell one browser failing to open the scatters from everyone's failing (docs/decisions.md, 2026-11-09); with
+   nine names, a burrow of ten, the phone's sheet still holds it all without scrolling */
+test('no scatter readable: the sheet names whose and carries the fingerprint, and still fits', async ({ page }) => {
+  for (const viewport of [PHONE, DESKTOP]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/dev/screens?capture&state=unreadable&count=10&scene=window');
+    await expect(page.locator('.circle-spot')).toHaveCount(10);
+    await page.waitForTimeout(300);
+    const sheet = page.locator(viewport === PHONE ? '.game-sheet' : '.side-sheet');
+    await expect(sheet.getByText("scattered, but their crumbs couldn't be read, so there's nothing to share out.")).toBeVisible();
+    if (viewport === PHONE) expect(await sheet.evaluate(node => node.scrollHeight <= node.clientHeight)).toBe(true);
+    await sheet.locator('.results-fingerprint summary').click();
+    await expect(sheet.getByText('Compare it with another member’s. The same fingerprint means the same result.', { exact: true })).toBeVisible();
+    await expect(sheet.locator('.results-fingerprint code')).toHaveText(/^0x[0-9a-f]{64}$/);
   }
 });
 

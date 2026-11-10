@@ -76,8 +76,9 @@ const COMPOSITIONS: Record<GameScreenState, Composition> = {
   /* flow 45 */
   nobody: { surface: { kind: 'sheet', height: 260 }, scene: unfed, music: 'full' },
   /* no scatter saved could be read at the feast: flow 45's circle, and its sheet taller for the line naming whose crumbs
-     could not be read, four lines for a burrow of ten (QA copy-01) */
-  unreadable: { surface: { kind: 'sheet', height: 300 }, scene: unfed, music: 'full' },
+     could not be read, four lines for a burrow of ten (QA copy-01), and the result fingerprint folded under it, so that
+     members can compare theirs (docs/decisions.md, 2026-11-09) */
+  unreadable: { surface: { kind: 'sheet', height: 340 }, scene: unfed, music: 'full' },
   /* scatter page #feast with Results open; flow 46–50 give each variant's contents */
   results: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
   tie: { surface: { kind: 'results' }, scene: gathered, music: 'full' },

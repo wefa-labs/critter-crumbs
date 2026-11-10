@@ -556,7 +556,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Results, the summary and the fingerprint | Under who scattered, Why nobody can peek, over the ranked critters; at the end of the list, for a member, the result’s fingerprint, a disclosure that says what to do with it. Coming back to the results from the page, or by the browser’s Back, opens them settled; the feast plays when the results are opened afresh, and Replay Feast plays it again (D36) | `results.summary`, `why.title`, `results.verification.*` |
 | Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9). A phone shorter than the design's keeps the card tall enough for two rows (424 px) while 48 px of floor is left above it, the huddle standing smaller on that floor; on a phone on its side, where pinned heading and actions would leave no row to read, they scroll with the list (QA accessibility-08) | `feast.replay`, `results.export.*` |
 | Results, nobody scattered | Grid unchanged, table empty, `results.nobody` | `results.nobody` |
-| Results, no scatter could be read | Scatters were saved but not one could be opened at the feast: the nobody-scattered sheet, 40 px taller on the phone, with `results.unreadable.all` naming whose crumbs could not be read as a cloud notice in place of `results.nobody`, and said aloud as the feast settles (QA copy-01). A scatter of your own missing from the published set shows `err.uidMissing` on either sheet | `results.unreadable.all`, `err.uidMissing` |
+| Results, no scatter could be read | Scatters were saved but not one could be opened at the feast: the nobody-scattered sheet, 80 px taller on the phone, with `results.unreadable.all` naming whose crumbs could not be read as a cloud notice in place of `results.nobody`, and said aloud as the feast settles (QA copy-01). Under the line, the result’s fingerprint as the results show it, folded, so members can compare theirs and tell one browser failing to open the scatters from everyone’s failing. A scatter of your own missing from the published set shows `err.uidMissing` on either sheet | `results.unreadable.all`, `results.verification.*`, `err.uidMissing` |
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
 | Results, tie | Tied rows share a line under the table | `results.tie` |
 | Results, public, not yet recorded | The record button, creator sees it first | `results.attest.*` |
@@ -900,7 +900,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `results.attest.help` | Anyone in the burrow can do this. It costs a little gas. |
 | `results.attest.done` | Recorded on-chain by {name}. |
 | `results.attest.view` | View the record |
-| `results.verification` | Result fingerprint (a disclosure at the end of a member’s results) |
+| `results.verification` | Result fingerprint (a disclosure at the end of a member’s results, and on the sheet when no scatter could be read) |
 | `results.verification.help` | Compare it with another member’s. The same fingerprint means the same result. (the first line inside it, over the hash) |
 
 **Settings**
