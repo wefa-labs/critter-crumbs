@@ -276,6 +276,8 @@ export const copy = {
   "scatter.submit.help": "Scatter all {n} first.",
   "scatter.sign.title": "Confirm your scatter",
   "scatter.sign.body": "You'll be asked to sign. It costs nothing and nothing goes on-chain.",
+  "scatter.sign.summary": "Your crumbs: {amounts}.",
+  "scatter.sign.amount": "{n} to {name}",
   "scatter.sign.rejected": "Not confirmed. Your crumbs are still here — try again when you're ready.",
   "scatter.sign.locked": "Your account app is locked. Your crumbs are still here — unlock it, then try again.",
   "scatter.sign.otherAccount": "Your account app is on another account. Your crumbs are still here — switch back, then try again.",
@@ -356,6 +358,7 @@ export const copy = {
   "game.profile": "Your critter and settings",
   "game.share.separator": " · ",
   "game.sleep.symbol": "z",
+  "game.critter.crumbs": "{name}, {n} crumbs",
 } as const;
 
 /**
@@ -451,6 +454,7 @@ const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
   'reveal.announce': { slot: 'n', one: 'Statements are open. {n} statement to read.' },
   'scatter.participation': { slot: 'done', one: '{done} of {total} has scattered' },
   'pile.remaining': { slot: 'n', one: '1 to go' },
+  'game.critter.crumbs': { slot: 'n', one: '{name}, 1 crumb' },
   'err.clockSkew': { slot: 'minutes', one: "Your device clock is off by about 1 minute. Deadlines here use the feast's clock, not yours." },
 };
 const fill = (template: string, params: Record<string, string | number>) => template.replace(/\{([^}]+)\}/g, (_, key: string) => String(params[key]));

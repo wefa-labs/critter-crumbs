@@ -546,7 +546,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Gathering, options feast (creator) | Each option a card with its field, its counter and `gathering.saved`, or Save until it is saved; one help line above the cards and `gathering.hidden` once under them; the options' critters asleep on the floor (screen 30) | `gathering.options.title`, `setup.type.options.help` |
 | Gathering, member view of others | No statements: how many are written, with faces and who has not yet. A member of an options feast, who writes nothing, gets no notes card (QA lifecycle-10) | `gathering.hidden`, `gathering.participation`, `gathering.notYet` |
 | Scattering opens (first visit) | The reveal moment (Game Design), then `reveal.*` and the read pass | `reveal.*` |
-| Reading a statement on the phone | A thought bubble across the top of the floor, as tall as its text up to 378 px, past which the text scrolls inside it; a short statement leaves more of the floor in view, and the trail of puffs rises to the bubble's foot (audit decision D8) | `read.*` |
+| Reading a statement on the phone | A thought bubble across the top of the floor, as tall as its text up to 378 px, past which the text scrolls inside it; a short statement leaves more of the floor in view, and the trail of puffs rises to the bubble's foot (audit decision D8). On a window too short for 378 px the bubble ends 12 px above the dock, so the end of a long statement can always be scrolled into view, and the trail is drawn only where it rises to the bubble (QA accessibility-08) | `read.*` |
 | Read pass, critter without statement | Card with portrait and `read.noStatement` | `read.noStatement` |
 | Scatter pass, nobody has scattered | Participation "0 of 8 have scattered" | `scatter.participation` |
 | Scatter pass, own critter | Cell asleep with `scatter.own.*` instead of controls | `scatter.own.*` |
@@ -554,7 +554,7 @@ At zero, the heap shows three faint crumb outlines (`--cc-crust` at 30 %) and th
 | Scattering closed, feast not yet computed | Waiting screen with critters asleep in `dusk`; the sheet counts who has scattered (“7 of 8 have scattered”) while the feast is laid out and while the key is not out. Both lead to Why nobody can peek: under the line while the feast is laid out, on a sheet of 290 px on the phone, and under the reason while the key is not out, on 330 px with the count and Try again (D36) | `feast.waiting.*`, `feast.keyNotYet`, `scatter.participation`, `why.title` |
 | The feast | Sequence, then results | `feast.*` |
 | Results, the summary and the fingerprint | Under who scattered, Why nobody can peek, over the ranked critters; at the end of the list, for a member, the result’s fingerprint, a disclosure that says what to do with it. Coming back to the results from the page, or by the browser’s Back, opens them settled; the feast plays when the results are opened afresh, and Replay Feast plays it again (D36) | `results.summary`, `why.title`, `results.verification.*` |
-| Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9) | `feast.replay`, `results.export.*` |
+| Results on the phone | The card grown out of the dock, its list scrolling; Replay Feast and Download pinned at its foot under the list (who gave what: its download), never below a long list (audit decision D9). A phone shorter than the design's keeps the card tall enough for two rows (424 px) while 48 px of floor is left above it, the huddle standing smaller on that floor; on a phone on its side, where pinned heading and actions would leave no row to read, they scroll with the list (QA accessibility-08) | `feast.replay`, `results.export.*` |
 | Results, nobody scattered | Grid unchanged, table empty, `results.nobody` | `results.nobody` |
 | Results, no scatter could be read | Scatters were saved but not one could be opened at the feast: the nobody-scattered sheet, 40 px taller on the phone, with `results.unreadable.all` naming whose crumbs could not be read as a cloud notice in place of `results.nobody`, and said aloud as the feast settles (QA copy-01). A scatter of your own missing from the published set shows `err.uidMissing` on either sheet | `results.unreadable.all`, `err.uidMissing` |
 | Results, one scatterer | Normal results plus `results.one` | `results.one` |
@@ -839,6 +839,7 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `scatter.remove` | Take a crumb back from {name} |
 | `scatter.count.label` | Crumbs for {name} |
 | `scatter.count.announce` | {n} for {name}. {remaining} to go. |
+| `game.critter.crumbs` | {name}, {n} crumbs (one: {name}, 1 crumb). A name tag's name, the whole name with the count it shows, and what turning the circle says of the critter now in focus (§12.6) |
 | `scatter.own.label` | Your critter |
 | `element.earth` / `.water` / `.fire` / `.air` | Earth / Water / Fire / Air (a version 2 critter's element chip) |
 | `scatter.own.body` | Asleep, eating what the others give it. |
@@ -852,6 +853,8 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `scatter.submit.help` | Scatter all {n} first. |
 | `scatter.sign.title` | Confirm your scatter |
 | `scatter.sign.body` | You'll be asked to sign. It costs nothing and nothing goes on-chain. |
+| `scatter.sign.summary` | Your crumbs: {amounts}. (The confirmation's first line, and with `scatter.sign.body` its description, read as it opens: what is being scattered, in the burrow's order, leaving out critters given nothing) |
+| `scatter.sign.amount` | {n} to {name} (one part of `scatter.sign.summary`, joined as "24 to Moss, 20 to Fern and 56 to Clover") |
 | `scatter.sign.rejected` | Not confirmed. Your crumbs are still here — try again when you're ready. |
 | `scatter.sign.locked` | Your account app is locked. Your crumbs are still here — unlock it, then try again. |
 | `scatter.sign.otherAccount` | Your account app is on another account. Your crumbs are still here — switch back, then try again. |
@@ -1020,12 +1023,14 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 - `:focus-visible` on everything interactive: `outline: 3px solid var(--cc-focus); outline-offset: 2px`, plus a 2 px Oat inner ring on filled buttons (`box-shadow: 0 0 0 2px var(--cc-oat)` inside the outline) so the ring reads on Burrow too. A box that scrolls inside a card or panel that would clip the ring (who gave what, the desktop statement panel) draws it inside itself, `outline-offset: -3px` (QA accessibility-06).
 - Focus management: route change → `#content`, or the screen drawn over the rest (the first meeting, your critter's profile), whose closing returns focus to the opener; statement reveal → **Start reading**; a statement opened on the phone → its words, the box that scrolls, so the keys scroll it; scatter saved → the done line (`tabindex="-1"`); dialog close → opener; feast settled (or skipped, or reduced motion) → results `<h1>`.
 - Nothing steals focus while typing or pouring.
+- A critter's ring is the same ring, round its stage, so it reads over the painting's light and dark alike; the first steps' practice critter takes it too. An `aria-disabled` control (`+` with nothing left to give, `−` with nothing given) stays a tab stop with its ring whole: in focus its face is dimmed by a veil of the dock's colour, not by opacity, which would fade the ring with it. While a statement is open over the circle on the phone, the circle's critters are not tab stops, so nothing hidden under the statement takes focus (WCAG 2.4.11): a press on one would only close the statement, as Close and Escape do, and a tap still does.
 
 ### 12.6 Screen readers over a canvas
 
 - The `<canvas>` is `aria-hidden="true"` and `inert`. Nothing in it is focusable; no HTML-in-canvas (the API is not shipped in any browser — checked against current guidance, and not needed here).
 - Each `CritterCell` exposes, in DOM order: name, state in words ("asleep", "your critter", "fed 4 of 10" on results), the collapsed statement, then the controls. The count is an `<output for="…">` bound to the field.
 - Two announcers only (`#announce` polite, `#alert` assertive), both `aria-atomic="true"`; nothing else is live.
+- On the circle, a name tag is named by what it shows, the whole name and its count (`game.critter.crumbs`), and your own tag by its "You"; the count on every tag is reachable without turning to each critter. The confirmation is described by what it scatters (`scatter.sign.summary`) and `scatter.sign.body`, so both are read with its name as it opens.
 
 | Event | Region | Text | Timing |
 |---|---|---|---|
@@ -1036,6 +1041,8 @@ Target: **WCAG 2.2 AA** across the whole app, including the feast. The canvas is
 | Statements revealed (screen opens) | polite | `reveal.announce` | After focus lands |
 | Feast settled | polite | `feast.announce` | After the sequence, or immediately with reduced motion |
 | Phase closed while on screen | polite | `scatter.closed` | Once |
+| Circle turned (‹ ›, ←/→, a swipe, a name tag, a press on a critter that does not give) | polite | `game.critter.crumbs` of the critter now in focus; your own sleeping critter `scatter.own.label`; where no tags show, its name | On the turn; the feast's own turns say nothing |
+| Your own sleeping critter pressed | polite | `scatter.own.body` | Each press; the stir and its z's are drawn only |
 | Simple view engaged mid-session | polite | `fallback.midSession` | Once |
 | Re-roll | polite | `critter.reroll.announce` | Each re-roll |
 | Crumbs per critter stepped at setup | polite | `setup.crumbs.announce` | Each press of − or + that moves it |

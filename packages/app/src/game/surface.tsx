@@ -18,11 +18,12 @@ export { Grow, Loader, SheetNotice } from './sheet-parts.js';
 
 /**
  * The signing step: a sheet from the bottom on the phone, a centred card on desktop. Native <dialog>, opened modally
- * and announced; Cancel and Escape both close it.
+ * and announced, with its description (`describedBy`, an element's id) read with its name; Cancel and Escape both close
+ * it.
  */
-export function GameDialog({ title, children, cancel, action, busy = false }: { title: string; children: ReactNode; cancel: () => void; action: ReactNode; busy?: boolean }) {
+export function GameDialog({ title, children, cancel, action, busy = false, describedBy }: { title: string; children: ReactNode; cancel: () => void; action: ReactNode; busy?: boolean; describedBy?: string }) {
   return (
-    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} dismiss="action.cancel" actions={action}>
+    <Dialog title={title} className="game-dialog" onClose={cancel} busy={busy} dismiss="action.cancel" actions={action} {...(describedBy ? { describedBy } : {})}>
       {children}
     </Dialog>
   );
@@ -94,7 +95,8 @@ export function PanelStatement({ name, element, own, body, empty }: { name: stri
 
 /**
  * The phone's results: the dock grown into a card with its heading and close icon, the list scrolling under a fade, and
- * its actions pinned at its foot, so a long list never pushes the download below the fold (decision D9).
+ * its actions pinned at its foot, so a long list never pushes the download below the fold (decision D9). On a card too
+ * short to pin them, a phone on its side, the heading and actions scroll with the list (game/layout.ts).
  */
 export function ResultsCard({ title, close, heading, actions, children }: { title: string; close?: () => void; heading?: React.RefObject<HTMLHeadingElement | null>; actions?: ReactNode; children: ReactNode }) {
   return (

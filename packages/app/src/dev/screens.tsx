@@ -1,14 +1,15 @@
+import '../styles/gallery.css';
 import { AudioProvider } from '../audio/context.js';
 import { createAudio } from '../audio/index.js';
 import { useScenes } from '../game/scenes.js';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { WorldProvider, useTrait } from 'koota/react';
 import { copy, devCopy, FEAST, type DevCopyId } from '@critter-crumbs/shared';
-import { Feast, Pile, type GameSettings } from '../world/index.js';
+import { Count, Feast, Pile, type GameSettings } from '../world/index.js';
 import { createStageRuntime, type StageRuntime } from '../sim/stage-runtime.js';
 import { GameFrame, GameScene } from '../game/parts.js';
 import { ScatterMiddle } from '../game/dock.js';
-import { FeastSheet, SignDialog, statementSurfaces } from '../game/sheets.js';
+import { FeastSheet, scatterSummary, SignDialog, statementSurfaces } from '../game/sheets.js';
 import { Toast } from '../game/surface.js';
 import { stateControls, stateToast } from '../game/composition.js';
 import { Reveal } from '../app/read.js';
@@ -74,7 +75,7 @@ function ScatterMoment({ state, scene, feast, runtime }: { state: GameScreenStat
             middle,
             statement: statementSurfaces({ feast, runtime, focus, close: () => setReading(false) }),
             toast: message ? <Toast>{copy[message]}</Toast> : null,
-            dialog: view === 'signing' ? <SignDialog busy={false} cancel={() => setMode(gameStates.done)} confirm={() => setMode(gameStates.scattered)} /> : null,
+            dialog: view === 'signing' ? <SignDialog summary={scatterSummary(feast.targets, runtime.critters.map(critter => critter.get(Count)!.given))} busy={false} cancel={() => setMode(gameStates.done)} confirm={() => setMode(gameStates.scattered)} /> : null,
           }} />
       </section>
     </>

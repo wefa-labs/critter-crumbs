@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
-import { copy, formatCopy, type CopyId } from '@critter-crumbs/shared';
+import { useEffect, useId, useRef } from 'react';
+import { copy, formatCopy, type CopyId, type Target } from '@critter-crumbs/shared';
 import { IsOwn } from '../world/index.js';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { Link, targetLabel } from '../app/ui.js';
+import { joinNames } from '../app/time.js';
 import type { MemberFeast } from '../app/feast-view.js';
 import { critterElement, type GameSurfaces } from './parts.js';
 import { GameDialog, Grow, Loader, PanelStatement, PhoneStatement, SheetNotice } from './surface.js';
@@ -63,12 +64,22 @@ export function FeastSheet({ skip }: { skip: () => void }) {
   );
 }
 
-/** Flow 36: confirming a scatter, which costs nothing; Cancel beside Scatter These. */
-export function SignDialog({ cancel, confirm, busy }: { cancel: () => void; confirm: () => void; busy: boolean }) {
+/** What a scatter gives, the targets and their amounts in the burrow's order, leaving out the critters given nothing:
+ *  "Your crumbs: 24 to Moss, 20 to Fern and 56 to Clover." */
+export const scatterSummary = (targets: readonly Target[], amounts: readonly number[]) =>
+  formatCopy('scatter.sign.summary', { amounts: joinNames(targets.flatMap((target, index) => amounts[index] ? [formatCopy('scatter.sign.amount', { n: amounts[index], name: targetLabel(target) })] : [])) });
+
+/**
+ * Flow 36: confirming a scatter, which costs nothing; Cancel beside Scatter These. It says what is being scattered,
+ * and the dialog is described by its words, so a screen reader reads them with its name as it opens (QA
+ * accessibility-03).
+ */
+export function SignDialog({ summary, cancel, confirm, busy }: { summary: string; cancel: () => void; confirm: () => void; busy: boolean }) {
+  const words = useId();
   return (
-    <GameDialog title={copy['scatter.sign.title']} cancel={cancel} busy={busy}
+    <GameDialog title={copy['scatter.sign.title']} cancel={cancel} busy={busy} describedBy={words}
       action={<button type="button" className="pill" disabled={busy} onClick={confirm}>{busy ? copy['scatter.saving'] : copy['scatter.submit']}</button>}>
-      <p>{copy['scatter.sign.body']}</p>
+      <div id={words} className="stack"><p>{summary}</p><p>{copy['scatter.sign.body']}</p></div>
     </GameDialog>
   );
 }

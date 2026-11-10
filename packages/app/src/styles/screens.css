@@ -179,7 +179,8 @@ html[data-still="true"] .switch-row input, html[data-still="true"] .switch-row i
 /* practice: each critter is a button the size of its drawing; a crumb hops to it from the heap */
 .practice-hit { position:absolute; inset:0; width:100%; min-width:44px; min-height:44px; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; touch-action:manipulation; }
 .practice-hit:active { translate:none; }
-.core-game .practice-hit:focus-visible { outline:2px solid var(--cc-text); outline-offset:2px; box-shadow:none; border-radius:50%; }
+/* the app's ring round the practice critter, as round the game's (game.css .circle-hit) */
+.core-game .practice-hit:focus-visible { border-radius:50%; }
 .practice-crumb { position:absolute; left:0; top:0; z-index:3; width:20px; height:20px; margin:-10px 0 0 -10px; line-height:0; pointer-events:none; }
 .practice-crumb svg { width:100%; height:100%; overflow:visible; }
 

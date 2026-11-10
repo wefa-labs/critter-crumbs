@@ -76,10 +76,10 @@ export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
  * Without it the heading's Close is the way out, since a phone has no Escape key. (Settings and the profile, which
  * had no Cancel, are now one screen, profile.tsx.)
  */
-export function Dialog({ title, children, onClose, busy = false, actions, dismiss, className = '' }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; dismiss?: 'action.cancel' | 'action.back' | 'action.close'; className?: string }) {
+export function Dialog({ title, children, onClose, busy = false, actions, dismiss, className = '', describedBy }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; dismiss?: 'action.cancel' | 'action.back' | 'action.close'; className?: string; describedBy?: string }) {
   const ref = useRef<HTMLDialogElement>(null), id = useId();
   useModalDialog(ref);
-  return <dialog ref={ref} className={`app-dialog ${className}`} aria-labelledby={id} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
+  return <dialog ref={ref} className={`app-dialog ${className}`} aria-labelledby={id} aria-describedby={describedBy} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
     <div className="dialog-heading"><h2 id={id}>{title}</h2>{dismiss ? null : <button type="button" className="secondary dialog-close" disabled={busy} onClick={onClose}>{copy['action.close']}</button>}</div>
     <div className="dialog-body">{children}</div>
     <div className="dialog-feedback" />

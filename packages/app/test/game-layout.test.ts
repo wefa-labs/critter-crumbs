@@ -116,6 +116,53 @@ describe('October surfaces', () => {
   });
 });
 
+/* QA accessibility-08: phone windows shorter than the design's 812, from an iPhone SE in Safari (548) and a phone inside
+   a wallet's browser (500) to a phone on its side */
+describe('Short phone windows', () => {
+  const SHORT = [{ width: 390, height: 664 }, { width: 375, height: 600 }, { width: 375, height: 548 }, { width: 375, height: 500 }, { width: 320, height: 480 }, { width: 667, height: 375 }, { width: 812, height: 375 }, { width: 844, height: 390 }];
+  it('keeps a long statement’s bubble clear of the dock, so its last line can be scrolled into view', () => {
+    const { surface, scene } = composeGame('reading', 'phone');
+    for (const viewport of SHORT) {
+      const layout = layoutGame({ viewport, critters: critters(8), focus: 0, reading: true, statementHeight: 900, issued: 100, surface, scene });
+      const label = JSON.stringify(viewport);
+      expect(layout.statement.y + layout.statement.height, label).toBeLessThanOrEqual(layout.dock.y - 12);
+      /* still a place to read: the heading and three lines of text at the least */
+      expect(layout.statement.height, label).toBeGreaterThanOrEqual(150);
+    }
+    /* the design's phone keeps its 378 px bubble */
+    expect(layoutGame({ viewport: { width: 375, height: 812 }, critters: critters(8), focus: 0, reading: true, statementHeight: 900, issued: 100, surface, scene }).statement.height).toBe(378);
+  });
+  /* The card's anatomy, measured on the fixtures: the dock's padding and bar 78, the heading 48, the pinned actions 56;
+     inside the list the summary (two lines: who scattered, who did not) and Why nobody can peek take 99, a row 52 with
+     6 between, the fade 28. Two rows in view need 78 + 48 + 56 + 99 + 52 + 6 + 52 + 28 = 419. With the heading and
+     actions scrolling along with the list, the heading, the summary, the link and the first 16 px of a row need
+     78 + 48 + 99 + 16 = 241: a phone on its side 375 px tall shows that much, one 390 px tall a whole row. */
+  it('gives the results room for two rows on a short phone, the huddle standing smaller on the floor left above them', () => {
+    const { surface, scene } = composeGame('results', 'phone');
+    const at = (viewport: { width: number; height: number }, n = 8) => layoutGame({ viewport, critters: critters(n), focus: 0, issued: 100, surface, scene });
+    /* the design's phones keep 196 px of floor above the card */
+    for (const viewport of [{ width: 375, height: 812 }, { width: 430, height: 932 }]) expect(at(viewport).dock.y).toBe(196);
+    for (const viewport of SHORT) for (const n of [4, 8, 10]) {
+      const layout = at(viewport, n), label = JSON.stringify({ viewport, n }), scene = viewport.height - 64;
+      if (scene - 48 >= 420) expect(layout.dock.height, label).toBeGreaterThanOrEqual(420);
+      else expect(layout.dock.y, label).toBe(48);
+      expect(layout.dock.y + layout.dock.height, label).toBe(scene);
+      /* every critter of the huddle stands wholly inside the scene, on the card's top edge */
+      for (const slot of layout.slots) { expect(slot.stage.y, label).toBeGreaterThanOrEqual(0); expect(slot.foot.y, label).toBeGreaterThanOrEqual(layout.dock.y); }
+      /* where no row would show under pinned heading and actions, they scroll with the list, a row starting in view */
+      expect(layout.resultsUnpinned, label).toBe(layout.dock.height < 361);
+      if (layout.resultsUnpinned) expect(layout.dock.height, label).toBeGreaterThanOrEqual(241);
+    }
+  });
+  it('draws the trail of puffs only where it rises from the head to the bubble, never tucked under it', () => {
+    const { surface, scene } = composeGame('reading', 'phone');
+    for (const viewport of SHORT) {
+      const layout = layoutGame({ viewport, critters: critters(8), focus: 0, reading: true, statementHeight: 900, issued: 100, surface, scene });
+      for (const puff of layout.trail) expect(puff.y, JSON.stringify(viewport)).toBeGreaterThanOrEqual(layout.statement.y + layout.statement.height);
+    }
+  });
+});
+
 it('shows the whole focused name on desktop, and chooses a short form only when needed',()=>{
  const group=critters(4);group[0]!.name='Alexandra Winterbourne';
  const layout=layoutGame({viewport:{width:1440,height:900},critters:group,focus:0,issued:100,...scattering('desktop')});expect(layout.slots[0]!.name).toBe('Alexandra Winterbourne');expect(layout.slots[0]!.tag.short).toBe(false);
