@@ -31,7 +31,8 @@ test('Start reading takes the reveal to the first statement with nothing between
   await expect(start).toBeEnabled();
   const screen = await watchGameScreen(page);
   await start.click();
-  await expect(page.locator('.phone-statement')).toBeFocused();
+  /* focus is in the statement's words, so the keys scroll them straight away (QA accessibility-06) */
+  await expect(page.locator('.phone-statement .statement-scroll')).toBeFocused();
   expect(new URL(page.url()).pathname).toBe(`/feasts/${feast.id}/read`);
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Statements are open', exact: true })).toBeVisible();

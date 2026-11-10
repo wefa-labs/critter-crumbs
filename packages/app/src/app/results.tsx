@@ -1,13 +1,13 @@
 import { Renderer } from './renderer.js';
 import { memberName, targetOwnedBy } from './names.js';
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { WorldProvider, useTrait } from 'koota/react';
 import type { Entity } from 'koota';
 import type { StageRuntime } from '../sim/stage-runtime.js';
 import { GameScene, HeaderWhen } from '../game/parts.js';
 import { FedLine, FocusRow, ResultsPill } from '../game/dock.js';
 import { FeastSheet, WaitingSheet, statementSurfaces } from '../game/sheets.js';
-import { Grow, ResultsCard, ResultsPanel } from '../game/surface.js';
+import { Grow, ResultsCard, ResultsPanel, SheetNotice } from '../game/surface.js';
 import { Received } from '../world/index.js';
 import { ApiClientError, type Account } from '@critter-crumbs/core';
 import { copy, formatCopy, CIRCLE_FEEL, FEAST, GROWTH, type CopyId, type TallyResult } from '@critter-crumbs/shared';
@@ -83,6 +83,13 @@ function summaryOf(feast: PublicFeast, result: Pick<TallyResult, 'counted' | 'to
   const scatterers = feast.aggregate?.scatterers ?? 0;
   return feast.kind === 'people' ? formatCopy('results.summary', { scatterers, total: feast.targets.length, totalCrumbs: result.totalScattered }) : formatCopy('results.public.summary', { scatterers, totalCrumbs: result.totalScattered });
 }
+/**
+ * Which results have no crumbs counted (flow 45): nobody scattered, or not one scatter saved could be read at the feast
+ * (Technical Spec E14, QA copy-01). Null when some were counted.
+ */
+export const emptyResult = (result: Pick<TallyResult, 'totalScattered' | 'rejected'>) => result.totalScattered ? null : result.rejected.length ? resultStates.unreadable : resultStates.nobody;
+/** Why nothing is shared out, said as the feast settles and written on its sheet: nobody scattered, or whose crumbs could not be read. */
+const emptyLine = (feast: PublicFeast, result: Pick<TallyResult, 'rejected'>) => result.rejected.length ? formatCopy('results.unreadable.all', { names: joinNames(result.rejected.map(entry => memberName(feast, entry.attester))) }) : copy['results.nobody'];
 const fedFor = (share: [number, number], n: number) => Math.min(1, share[0] / share[1] * n / GROWTH.fairShareCap) ** GROWTH.exponent;
 
 /** Replay Feast and Download; on the phone Download is short so both fit one row, keeping "Download CSV" as its name. */
@@ -96,7 +103,7 @@ export function ResultActions({ replay, download, short }: { replay: () => void;
  * received crumbs largest first, the lines about the list, the privacy line, and for a member the result's fingerprint
  * with what it is for.
  */
-function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; opened: OpenedFeast; record?: ReactNode; givers?: () => void }) {
+export function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; opened: OpenedFeast; record?: ReactNode; givers?: () => void }) {
   const { result } = opened, member = isMemberFeast(feast);
   const rows = [...result.totals].filter(row => row.crumbs > 0).sort((a, b) => b.crumbs - a.crumbs || feast.targets.findIndex(t => t.id === a.targetId) - feast.targets.findIndex(t => t.id === b.targetId));
   const one = member && result.counted.length === 1, ties = result.ties.filter(group => result.totalScattered > 0 && group.length > 1);
@@ -121,13 +128,18 @@ function ResultsList({ feast, opened, record, givers }: { feast: PublicFeast; op
   );
 }
 
-/** Flow 47: who gave what, the table scrolling sideways with each giver held at the left (Design System §6.5). */
-function GiverTable({ feast, opened, viewer }: { feast: MemberFeast; opened: OpenedFeast; viewer?: string }) {
+/** In who gave what the arrows scroll the table sideways, rather than turn the circle under it (QA accessibility-06). */
+const sideways = (event: KeyboardEvent) => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') event.stopPropagation(); };
 
+/**
+ * Flow 47: who gave what, the table scrolling sideways with each giver held at the left (Design System §6.5). The box
+ * is a stop for the keys, named, so its far columns can be reached by keyboard in every engine (QA accessibility-06).
+ */
+export function GiverTable({ feast, opened, viewer }: { feast: MemberFeast; opened: OpenedFeast; viewer?: string }) {
   return (
     <div className="results-list">
       <p className="results-sum" aria-hidden="true">{copy['results.givers.caption']}</p>
-      <div className="giver-scroll">
+      <div className="giver-scroll" tabIndex={0} role="region" aria-label={copy['results.givers.title']} onKeyDown={sideways}>
         <table className="giver-matrix">
           <caption className="sr-only">{copy['results.givers.caption']}</caption>
           <thead><tr><th scope="col">{copy['results.col.giver']}</th>{feast.targets.map(target => <th scope="col" key={target.id} aria-label={targetLabel(target)}><CritterFace address={target.ownerAddress ?? target.id} variant={portraitVariant(feast, target)} name={targetLabel(target)} size={26} /></th>)}</tr></thead>
@@ -169,7 +181,7 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
       if (state.index >= 0 && state.index !== previousFocus) { previousFocus = state.index; setFocus(state.index); }
       const step = Math.floor(now / CIRCLE_FEEL.presentationMs); if (step !== lastPresentation) { lastPresentation = step; setPresentation({ counts: shown.counts, remaining: feastHeapGlyphs(shown.heapFraction) }); }
       if (!shown.settled) settled = false;
-      if (shown.settled && !settled) { settled = true; setPlaying(false); const maximum = Math.max(0, ...result.totals.map(row => row.crumbs)); const top = result.totals.filter(row => row.crumbs === maximum).map(row => targetLabel(feast.targets.find(t => t.id === row.targetId)!)); announce(maximum ? formatCopy('feast.announce', { topName: joinNames(top) }) : copy['results.nobody']); }
+      if (shown.settled && !settled) { settled = true; setPlaying(false); const maximum = Math.max(0, ...result.totals.map(row => row.crumbs)); const top = result.totals.filter(row => row.crumbs === maximum).map(row => targetLabel(feast.targets.find(t => t.id === row.targetId)!)); announce(maximum ? formatCopy('feast.announce', { topName: joinNames(top) }) : emptyLine(feast, result)); }
     });
     return () => { audio.stop(); frame(); stop(); hops.clear(); queueMicrotask(() => runtime.destroy()); };
   }, [runtime]);
@@ -177,8 +189,8 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
   useEffect(() => { if (!playing && view !== 'closed') heading.current?.focus(); }, [playing, view]);
   /* once the feast has played, or been skipped, this place in the history remembers it (Results, feastedHere) */
   useEffect(() => { if (!playing) history.replaceState({ ...history.state, feasted: true }, ''); }, [playing]);
-  const member = isMemberFeast(feast) ? feast : null, nobody = !result.totalScattered;
-  const state = gameView({ phase: feast.phase, remaining: 0, opened: true, playing, resultsOpen: view !== 'closed', ...(nobody ? { resultState: resultStates.nobody } : view === 'givers' ? { resultState: resultStates.givers } : {}) }).state;
+  const member = isMemberFeast(feast) ? feast : null, empty = emptyResult(result);
+  const state = gameView({ phase: feast.phase, remaining: 0, opened: true, playing, resultsOpen: view !== 'closed', ...(empty ? { resultState: empty } : view === 'givers' ? { resultState: resultStates.givers } : {}) }).state;
   const replay = () => { audio.stop(); hops.clear(); setPlaying(true); setFocus(0); setView(resultsViews.results); runtime.actions.replayFeast(); runtime.animateFor(FEAST.maxMs); };
   const skip = () => { hops.clear(); runtime.actions.skipFeast(); runtime.animateFor(FEAST.skipMs); };
   const download = () => downloadCsv(document, feast.title, aggregateCsv(feast.targets, result));
@@ -202,7 +214,7 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
         <GameScene runtime={runtime} feast={feast} focus={focus} turnTo={setFocus} state={state} editable={false} announce={announce} heapHost={source}
           reading={reading && state === 'feasted'} {...(member ? { onRead: () => { setReading(true); audio.play('statement.open'); } } : {})} onClose={() => setReading(false)} counts={presentation.counts} remaining={presentation.remaining} issued={FEAST.glyphs}
           surfaces={playing ? { sheet: <FeastSheet skip={skip} /> }
-            : nobody ? { sheet: <NobodySheet summary={summaryOf(feast, result)} privacy={copy[feast.aggregatePublic ? 'results.public' : 'results.private']} heading={heading} /> }
+            : empty ? { sheet: <EmptySheet feast={feast} opened={opened} heading={heading} /> }
             : {
               focusRow: <FeastFocus key={focus} entity={runtime.critters[focus]!} runtime={runtime} feast={feast} focus={focus} />,
               middle: <ResultsPill open={view !== 'closed'} toggle={toggle} />,
@@ -217,15 +229,21 @@ export function FeastResults({ feast, opened, settings, announce, record, viewer
   );
 }
 
-/** Flow 45: nobody scattered; the critters stay as they were and there is nothing to replay. */
-function NobodySheet({ summary, privacy, heading }: { summary: string; privacy: string; heading: React.RefObject<HTMLHeadingElement | null> }) {
+/**
+ * Flow 45: no crumbs were counted, so the critters stay as they were and there is nothing to replay. Either nobody
+ * scattered, or not one scatter saved could be read and the sheet names whose (QA copy-01). A scatter of yours missing
+ * from the published set says so here as it does in the results (Technical Spec E11).
+ */
+export function EmptySheet({ feast, opened, heading }: { feast: PublicFeast; opened: OpenedFeast; heading: React.RefObject<HTMLHeadingElement | null> }) {
+  const { result } = opened, line = emptyLine(feast, result);
   return (
     <>
       <h2 ref={heading} tabIndex={-1}>{copy['results.title']}</h2>
-      <p className="sheet-help">{summary}</p>
-      <p>{copy['results.nobody']}</p>
+      <p className="sheet-help">{summaryOf(feast, result)}</p>
+      {result.rejected.length ? <SheetNotice trouble>{line}</SheetNotice> : <p>{line}</p>}
+      {opened.missingUids.map(uid => <SheetNotice trouble key={uid}><span className="receipt-evidence">{formatCopy('err.uidMissing', { uid })}</span></SheetNotice>)}
       <Grow />
-      <p className="sheet-help">{privacy}</p>
+      <p className="sheet-help">{copy[feast.aggregatePublic ? 'results.public' : 'results.private']}</p>
     </>
   );
 }

@@ -50,7 +50,7 @@ describe('October surfaces', () => {
     for (const slot of layout.slots) expect(slot.foot.y).toBeLessThanOrEqual(layout.dock.y);
   });
   it('gives a sheet state the whole desktop floor, its content living in the side panel', () => {
-    for (const state of ['reveal', 'waiting', 'key', 'feast', 'nobody'] as const) expect(at(state, { width: 1280, height: 800 }).dock.height).toBe(0);
+    for (const state of ['reveal', 'waiting', 'key', 'feast', 'nobody', 'unreadable'] as const) expect(at(state, { width: 1280, height: 800 }).dock.height).toBe(0);
     expect(at('scatter', { width: 1280, height: 800 }).dock.height).toBe(130);
     expect(at('results', { width: 1440, height: 900 }).dock.height).toBe(74);
   });

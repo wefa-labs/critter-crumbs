@@ -1,12 +1,22 @@
 import { personTargetId } from '@critter-crumbs/core';
 import { getAddress } from 'viem';
-import type { Address, FeastPortrait, Target } from '@critter-crumbs/shared';
+import type { Address, FeastPortrait, ParticipantName, Target } from '@critter-crumbs/shared';
 import type { Row } from './database.js';
 import { identityFromRow, timestamp } from './store.js';
 export function peopleTargets(members: Row[]): Target[] {
   return members.filter(member => member.left_at === null).map((member, position) => {
     const address = getAddress(String(member.address));
     return { id: personTargetId(address), ownerAddress: address, name: String(member.ens_name ?? member.display_name ?? address), position, kind: 'person' };
+  });
+}
+/**
+ * Each participant named as the burrow's member list names them now: their ENS name, else the name they typed (PRD F2).
+ * A participant who has left since the freeze keeps their row, and so their name.
+ */
+export function participantNames(members: Row[], participants: Address[]): ParticipantName[] {
+  return participants.map(address => {
+    const member = members.find(row => sameAddress(String(row.address), address)), name = member?.ens_name || member?.display_name;
+    return { address, name: name ? String(name) : null };
   });
 }
 export function currentPortrait(target: Target, members: Row[], source: 'profile' | 'creation' | 'freeze', capturedAt: number | null): FeastPortrait {

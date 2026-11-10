@@ -4,15 +4,17 @@ import { expect, test, type Page } from 'playwright/test';
  * Each core state's composition, checked against numbers read off the review pages, never off the app:
  * the flow page's SCREENS (docs/explorations/app-screens/index.html: sheetH, .toast, .modal, .d-desktop .sheet) and
  * the scatter page, pass eleven (docs/explorations/scatter-layouts/index.html: DOCK_BASE 130, RESULTS_FLOOR 196, the
- * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). Two
+ * 74 px folded dock and results bar, the 400–480 px side panel, the statement bubble at 12 px, at most 378 px tall). Three
  * numbers are the app's own: the waiting sheet is 40 px taller than the flow page's 250, for its line to Why nobody can
- * peek, and the key's 80 px taller, for that line and the count of who has scattered (docs/decisions.md, 2026-11-09).
+ * peek, and the key's 80 px taller, for that line and the count of who has scattered (docs/decisions.md, 2026-11-09); the
+ * sheet for no scatter readable, which the flow page does not draw, is 40 px over nobody's 260 for the line naming whose.
  */
 test.use({ timezoneId: 'America/Los_Angeles', locale: 'en-US' });
 const PHONE = { width: 375, height: 812 }, DESKTOP = { width: 1440, height: 900 }, HEADER = 64;
 /* the waiting sheet is the flow page's 250 and the 40 px its line to Why nobody can peek needs (the first-steps review, F8);
-   the key's adds the count of who has scattered under its notice as well (docs/decisions.md, 2026-11-09) */
-const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260 };
+   the key's adds the count of who has scattered under its notice as well (docs/decisions.md, 2026-11-09); no scatter
+   readable is nobody's 260 and the 40 px its line naming whose crumbs could not be read needs (QA copy-01) */
+const SHEETS: Record<string, number> = { reveal: 230, waiting: 290, key: 330, feast: 144, nobody: 260, unreadable: 300 };
 const DOCKS = ['scatter', 'reading', 'done', 'scattered', 'signing', 'saving', 'rejected', 'failed', 'closed', 'feasted'];
 const RESULTS = ['results', 'tie', 'givers', 'recording', 'recorded', 'public'];
 const TOASTS: Record<string, string> = { scattered: 'Your scatter is in.', rejected: "Not confirmed. Your crumbs are still here — try again when you're ready.", failed: "Couldn't save your scatter. Check your connection and try again — nothing was lost." };
