@@ -59,7 +59,7 @@ The app has no analytics or telemetry. The [product requirements](docs/01-prd.md
 
 ## Who builds it
 
-Critter Crumbs is developed by **WEFA LLC**. Write to [afo@wefa.world](mailto:afo@wefa.world) with questions or for permissions, and use [GitHub issues](https://github.com/wefa-labs/critter-crumbs/issues) for bugs and proposals.
+Critter Crumbs is developed by **WEFA LLC**. Write to [contact@wefa.world](mailto:contact@wefa.world) with questions or for permissions, and use [GitHub issues](https://github.com/wefa-labs/critter-crumbs/issues) for bugs and proposals.
 
 The four specifications are written for coding agents, with a person reviewing their work. [AGENTS.md](AGENTS.md) holds the rules every agent follows (`CLAUDE.md` links to it), and `.agents/skills/` holds their shared workflows.
 
@@ -75,7 +75,7 @@ Developed by **WEFA LLC**. The core, functional frontend and server software are
 
 [LICENSE](LICENSE) explains the split; [LICENSE-WEFA](LICENSE-WEFA) identifies the reserved material, including copies embedded in builds and prototypes. Audio playback and other functional code remain MIT when they refer to reserved assets. The Grandstander font retains its [SIL Open Font License](packages/app/public/fonts/Grandstander-OFL.txt).
 
-The complete branded build includes reserved modules and assets. Reusing those portions requires separate written permission from WEFA or replacements for the generator, art, audio and branding. Contact [afo@wefa.world](mailto:afo@wefa.world) for permissions. Package-local licence files describe each workspace's scope.
+The complete branded build includes reserved modules and assets. Reusing those portions requires separate written permission from WEFA or replacements for the generator, art, audio and branding. Contact [contact@wefa.world](mailto:contact@wefa.world) for permissions. Package-local licence files describe each workspace's scope.
 
 ## Review the implementation
 
