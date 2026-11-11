@@ -1,5 +1,7 @@
 # Foundation
 
+> **Historical, September 2026.** This describes the workspace before the core and app workstreams landed. The packages now hold the feast logic, the API and the app, as the [README](../../README.md) describes.
+
 This Bun workspace prepares the tooling for the core and app workstreams. It contains no feast logic, route handlers, or UI. All three packages expose only `.` through built ESM JavaScript and declarations; their public entries are empty. Add exports deliberately in later phases.
 
 ```text

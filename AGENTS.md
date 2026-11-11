@@ -4,7 +4,7 @@ Read this before touching anything. The four documents in `docs/` are the spec; 
 
 ## What this is
 
-A private way for a group (a **burrow**) to decide how something is shared out. Everyone gets the same handful of **crumbs** and **scatters** them to **critters** (people or budget options). Every scatter stays encrypted until the **feast**, then it all opens at once. First real use: a council of 6–10 people in October 2026, real money, rehearsal in September. Docs: `docs/01-prd.md` (what and why), `02-design-system.md` (look, components, copy), `03-game-design.md` (feel, sound, the Koota simulation), `04-technical-spec.md` (how). Decisions not in the docs go in `docs/decisions.md`, append-only.
+A private way for a group (a **burrow**) to decide how something is shared out. Everyone gets the same handful of **crumbs** and **scatters** them to **critters** (people or budget options). Every scatter stays encrypted until the **feast**, then it all opens at once. First real use: a council of 6–10 people, real money, after a rehearsal; planned for October 2026 with the rehearsal in September, neither has happened yet, and production is a testnet beta (`docs/decisions.md`, 2026-11-10). Docs: `docs/01-prd.md` (what and why), `02-design-system.md` (look, components, copy), `03-game-design.md` (feel, sound, the Koota simulation), `04-technical-spec.md` (how). Decisions not in the docs go in `docs/decisions.md`, append-only.
 
 ## Vocabulary — use these words, in code comments and in every UI string
 

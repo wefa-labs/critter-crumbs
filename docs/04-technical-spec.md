@@ -3,6 +3,8 @@
 **Document 4 of 4** · Status: draft for review · 2026-09-02
 Upstream: `01-prd.md` (rules §5, lifecycle §6, privacy §8, edge list, P1–P12), `02-design-system.md` (stage contract §6.3, portraits §5.7, fallback §11, copy IDs §10), `03-game-design.md` (Koota simulation §7, budget §6, sound §5.7). Companion: `AGENTS.md`, `docs/decisions.md`.
 
+> **Status, 10 November 2026.** Kept up to date as the app changes, but its plans are dated: production runs on testnet until Shutter's mainnet access arrives (§13), and the September rehearsal and October feasts it builds toward have not happened yet. The [README](../README.md#current-status) says where things stand.
+
 **How to read this document.** Written for two coding agents working in parallel, with a human reviewing.
 
 - Normative: "must", "never", every table of names and shapes. Code uses the names here.
@@ -457,6 +459,8 @@ critter-crumbs/
 | `SESSION_SECRET`, `MOCK_SECRET` | random | random; mock unused |
 | `DEV_ENDPOINTS_ENABLED` | `1` | unset |
 | `APP_ORIGIN` | `http://localhost:5173` | `https://crittercrumbs.app` |
+
+**Until mainnet (decision of 2026-10-08).** Production runs on testnet until Shutter's mainnet access arrives (#17, #18): `SHUTTER_MODE=chiado` with no API key, EAS on Base Sepolia, and `APP_ORIGIN` `https://www.crittercrumbs.app`. The right-hand column above is the mainnet target; `docs/build/deployment.md` holds the live values. Until then the rehearsal runs on the testnet production and records no public result (`docs/decisions.md`, 2026-10-10).
 
 **T8** — the rehearsal runs on the production configuration: mainnet Shutter, Base mainnet, `crittercrumbs.app`. The point of the rehearsal is the real path; Base gas is cents and the registration limit of five per day is ample. The rehearsal's fake feast also posts its public result on Base (**T13**), so the recording path is exercised before it matters.
 

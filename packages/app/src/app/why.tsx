@@ -64,7 +64,7 @@ export function Why({ sound }: { sound: ReactNode }) {
           <h2>{whyCopy['why.words.title']}</h2>
           <Leads lines={WORDS} />
           <h2>{whyCopy['why.runs.title']}</h2>
-          <div className="why-machinery"><p>{whyCopy['why.runs.connect']}</p><Leads lines={RUNS} /></div>
+          <div className="why-machinery"><p>{whyCopy['why.runs.connect']}</p><Leads lines={RUNS} /><p>{whyCopy['why.runs.beta']}</p></div>
           <h2>{whyCopy['why.source.title']}</h2>
           <p>{whyCopy['why.source.body']}</p>
           <p><a className="quiet" href="https://github.com/wefa-labs/critter-crumbs" rel="noopener">{whyCopy['why.source.code']}</a></p>

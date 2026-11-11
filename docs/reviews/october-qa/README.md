@@ -2,7 +2,7 @@
 
 Run from 9 to 11 October 2026 against `main` at `111bf4d`, the day the sound set landed, and from the second evening against `main` plus the fixes the pass led to. One agent tested each area on its own local stack, in Chromium and in WebKit, the engine behind Safari, and two more then re-ran every finding rated blocker or major. Every finding has its reproduction on its area's page.
 
-**All 8 areas are done, with 127 findings:** 4 blockers, 29 major, 56 minor and 38 notes, as the finders rated them. **After the verifiers, 1 blocker and 23 major stand.**
+**All 8 areas are done, with 127 findings:** 4 blockers, 29 major, 56 minor and 38 notes, as the finders rated them. **After the verifiers, 1 blocker and 23 major stand.** These counts date from 11 October; the State column below records what has been fixed since.
 
 | Area | Findings | Page |
 |---|---|---|
