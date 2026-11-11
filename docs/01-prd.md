@@ -3,6 +3,8 @@
 **Document 1 of 4** · Status: revised after review, 2026-09-01
 Downstream: `02-design-system.md` · `03-game-design.md` · `04-technical-spec.md`
 
+> **Status, 10 November 2026.** Written in September 2026 for the first release, and kept up to date as decisions change it. Its dates are not: the September rehearsal and the October 2026 feasts below have not happened yet. Production is a testnet beta, and a solo smoke feast ran on it on 29 October. The [README](../README.md#current-status) says where things stand.
+
 **How to read this document.** It is written for coding agents, with a human reviewing.
 
 - "Must" and "never" are binding.
@@ -35,7 +37,7 @@ Two use cases, one mechanic:
 
 Both render identically. Every target is a critter, whether or not a person is behind it. A budget line called "Knowledge Commons" has a critter that grows when fed, exactly like a person's.
 
-It is a 3D app: critters are procedurally generated 3D characters, and feeding them is the interface. Playful and game-like — but it is a tool adults use to move real money. Charming, not childish. It should feel good to use twice a year, not demand attention.
+Feeding the critters is the interface. They are procedurally generated characters, specified here in 3D; since 2 November 2026 every build draws them as painted Garden Spirits by default, with the 3D critters at `?critters=1` (ADR 0006). Playful and game-like — but it is a tool adults use to move real money. Charming, not childish. It should feel good to use twice a year, not demand attention.
 
 **Precedent.** The allocation mechanic comes from Coordinape. Three deliberate differences:
 
@@ -50,11 +52,11 @@ Borrow the mechanic, not the interface.
 | Fact | Value |
 |---|---|
 | First real users | A council of roughly 6–10 people |
-| First real use | October 2026: one contribution allocation (people feast), then one budget split across four options (options feast). Rehearsal in September. |
+| First real use | One contribution allocation (people feast), then one budget split across four options (options feast), after a rehearsal. Planned for October 2026, with the rehearsal in September; neither has happened yet (see the status note above). |
 | Wallets | Every member already has one; v0 is fully web3-native |
 | Geography | Four continents — see deadline display rules (§6) |
 | Cadence | A few times a year; the app must explain itself on every return, not rely on habit |
-| Burrows | A member can belong to any number of burrows (v0). The October council is one of them. |
+| Burrows | A member can belong to any number of burrows (v0). The council is one of them. |
 
 Design for this group, not for scale.
 
@@ -64,7 +66,7 @@ Design for this group, not for scale.
 | Creator | The member who created a given feast | Set it up; cancel during draft or gathering; extend the gathering deadline once |
 | Payment operator | Whoever moves the money afterwards | None in-app; consumes the CSV (F9) |
 
-There is no owner or admin role (R9).
+There is no owner or admin role (R9), with one exception: the member who created a burrow can remove another member from it, and the burrow sees that a removal happened (Q8, resolved 2026-09-05).
 
 ## 3. Vocabulary
 
@@ -117,7 +119,7 @@ All binding. ⚖ marks rules the tally must enforce. Ballots are encrypted in fl
 | R6 | A people feast needs at least three critters. An options feast has no minimum. **P8** — checked at feast creation and again when scattering opens; if leaving (R16) has taken a people feast below three by then, the feast ends without scattering (P11). |
 | R7 | The participant set freezes when scattering opens. Members who join the burrow during gathering are in. Nobody joins a feast in progress. |
 | R8 | The creator can cancel during draft or gathering, never once scattering has started. |
-| R9 | Any member of a burrow can create a feast in it. There is no owner role. |
+| R9 | Any member of a burrow can create a feast in it. There is no owner role; only the burrow's creator can remove another member (Q8). |
 | R10 | Statements are plain text, capped at 2,000 characters with a live counter, line breaks preserved, URLs auto-linked. No markdown in v0 (richer formatting is a v1 question). |
 | R11 | Statements are hidden during gathering; each author sees and edits their own throughout. When scattering opens, every statement is revealed at once, and all statements lock. |
 | R12 ⚖ | A scatter is private the moment it is made and final when scattering closes; until then it can be replaced. A submission is always a complete allocation — partial updates do not exist. The submission that counts per scatterer is their latest (see tally definition below). |
@@ -168,7 +170,7 @@ Any connected user can create a burrow: name it, add critters by address or ENS.
 
 **Proposal P2 — who the link admits.** The join link admits only addresses already added to the burrow. An unknown address sees the burrow's name and a line saying it doesn't know them, and to ask a member to add them (this is the "not in the burrow" edge state). If instead anyone holding the link may join, say so and the Technical Spec adjusts.
 
-Any member can leave a burrow (R16). Whether one member can remove another is **Q8**.
+Any member can leave a burrow (R16). Only the burrow's creator can remove another member, and the remaining members see that a removal happened (**Q8**, resolved 2026-09-05).
 
 ### F4 — Setting up a feast
 
@@ -300,7 +302,7 @@ The acceptance envelope for October: **one burrow runs one people feast, then on
 | Deterministic client-side tally | R14, §5 |
 | On-chain result attestation | Public feasts only; any member may post (F9) |
 | Results and CSV export | F9 |
-| 3D critters with a fully usable 2D fallback | §9 |
+| 3D critters with a fully usable 2D fallback | §9. Since 2 November 2026 the painted portraits are the default and the 3D critters are at `?critters=1` (ADR 0006) |
 | Responsive, phone-first | §9 |
 | Sound per the Design System and Game Design docs | Two toggles, defaults per §9 |
 | A rehearsal feast, in September | Below |
@@ -326,7 +328,7 @@ The acceptance envelope for October: **one burrow runs one people feast, then on
 | Individual scatters are decryptable after the feast | §8 honest limit |
 | Statements are plain text | Links yes, formatting no |
 | Leaving a feast in progress | A member in a frozen participant set stays in that feast's results (R16) |
-| No removal of one member by another | Q8 |
+| Only the burrow's creator can remove another member | Q8 |
 | External dependencies | Shutter keyper liveness at reveal, an ENS RPC endpoint, the ballot store. Failure behaviour is enumerated in the Technical Spec's edge states. |
 
 ### The rehearsal feast — in scope, not optional testing
@@ -392,7 +394,7 @@ Preconditions: the rehearsal feast has completed, in September (§10). Measureme
 
 | # | Question | Blocks |
 |---|---|---|
-| Q8 | Can one member remove another from a burrow, or only leave themselves? | Burrow member list UI |
+| Q8 | Can one member remove another from a burrow, or only leave themselves? | Resolved 2026-09-05: only the burrow's creator can remove another member, and the remaining members see that a removal happened (`docs/decisions.md`) |
 | Q9 | The exact copyright holder for the `LICENSE` file | Resolved 2026-09-02: WEFA LLC; repo at `wefa-labs/critter-crumbs` |
 
 ## 13. What the other documents own

@@ -1,6 +1,6 @@
 # Issue tracker
 
-Use GitHub issues on `wefa-labs/critter-crumbs`. Labels `ready-for-agent`, `blocked`, and `needs-human` exist. As checked on 2026-09-04, GitHub authentication works but Issues is disabled. A person must enable Issues; agents must not change repository settings. Until then, keep drafts in `.scratch/phase-1/issues/` and use the committed [human setup request](../foundation/needs-human-setup.md) to reconstruct them in another checkout.
+Use GitHub issues on `wefa-labs/critter-crumbs`. Labels `ready-for-agent`, `blocked`, and `needs-human` exist. Issues is enabled (checked 2026-11-10; it was disabled on 2026-09-04). Agents must not change repository settings. If GitHub cannot be reached, keep drafts in `.scratch/<feature>/issues/`.
 
 Read an issue and its discussion with:
 

@@ -1,5 +1,7 @@
 # Build flow for v0
 
+> **Historical, September 2026.** These are the prompts the first build ran from, and their commands and dates are from then. [deployment.md](deployment.md), [rehearsal.md](rehearsal.md) and the [README](../../README.md) are current.
+
 Four phases, three models, one rehearsal deadline. Each phase is a prompt in this directory, written to be pasted whole into the agent that runs it. `AGENTS.md` comes first for every agent; the four documents in `docs/` remain the spec and nothing here overrides them.
 
 | File | Phase | Runner |
