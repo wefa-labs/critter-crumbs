@@ -6,6 +6,7 @@ for (const command of [
   [process.execPath, ['node_modules/typescript/bin/tsc', '-b']],
   [process.execPath, ['node_modules/vitest/vitest.mjs', 'run', ...args]],
   [process.execPath, ['--import', './scripts/no-network.mjs', '--test', ...tooling]],
+  ['bash', ['.claude/hooks/test-guardrail.sh']],
 ]) {
   const result = spawnSync(command[0], command[1], { stdio: 'inherit', env: { ...process.env, CC_API_DATABASE: 'pglite' } });
   if (result.error) throw result.error;
