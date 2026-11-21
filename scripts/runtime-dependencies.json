@@ -23,14 +23,14 @@
   },
   {
     "name": "three",
-    "version": "0.186.1",
+    "version": "0.187.0",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "8b378ebe60e2fe500158cb0ac71cb5e8b7d92953c2abcc63a0eb90499653b5bc",
-    "gzipArchiveBytes": 4648523,
-    "integrity": "sha512-blFeqb49wRCSGUGj7gtpfnSGHy2lwDk94RhUmS1c/hTby70kvChbWpkJ4Pm1390LqzzvTmzgXKHPEafJwCb8jA=="
+    "gzipArchiveBytes": 4795351,
+    "integrity": "sha512-Qiu7R+Cmh8CstZsY1uJOSWnVlfo7ZtNLV7mF8Jltk3LB3AtDu9cRZlcnRKkAk8Y4z6KKw35z7Y7Urd7jWY8etA=="
   },
   {
     "name": "@react-three/fiber",
@@ -93,13 +93,13 @@
   },
   {
     "name": "@neondatabase/serverless",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "manifestLicense": "MIT",
     "license": "MIT",
     "notice": "LICENSE",
     "sourceNotice": null,
     "noticeSha256": "52d77cad9a5d509fed860399f75f0798b24d27c49be5616f8ff15a42bd98c249",
-    "gzipArchiveBytes": 135513,
-    "integrity": "sha512-tnaqgixUengZQNd9ZrS3ytQfamJzLKY8QxgqWQTNHHtB+KrFQWk77JTbbpg4RD+J3qE4eO2lVytvGDX5Kj6FdQ=="
+    "gzipArchiveBytes": 135310,
+    "integrity": "sha512-PI2JjuyEFE7oZDTkV/s6WP4KEceCwnjQHClfunhysuIATtvcVTBLdA4UgHTnJo7C0mkK+OZ6U7SV1NDnYa0HgA=="
   }
 ]
