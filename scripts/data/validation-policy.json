@@ -1,0 +1,287 @@
+{
+  "version": 1,
+  "about": "Proof by tier for scripts/select-checks.mjs (the agent kit's check selector, copied byte for byte). Routine changes get the targeted suite of the package they touch; sensitive changes add the full check; critical changes need the full check and the production build. The tier paths here mirror .agents/merge-policy.json, and scripts/select-checks.test.mjs fails when the two disagree on any tracked file.",
+  "intentOrder": [
+    "diagnose",
+    "qa",
+    "review",
+    "checkpoint",
+    "readiness",
+    "push",
+    "ship",
+    "merge",
+    "release"
+  ],
+  "riskOrder": [
+    "routine",
+    "sensitive",
+    "critical"
+  ],
+  "riskRules": [
+    {
+      "risk": "sensitive",
+      "prefixes": [
+        "packages/shared/",
+        "packages/api/",
+        "api/"
+      ],
+      "exact": [
+        ".agents/policy.json",
+        ".agents/merge-policy.json"
+      ]
+    }
+  ],
+  "surfaceRules": [
+    {
+      "surface": "shared",
+      "prefixes": [
+        "packages/shared/"
+      ]
+    },
+    {
+      "surface": "core",
+      "prefixes": [
+        "packages/core/"
+      ]
+    },
+    {
+      "surface": "app",
+      "prefixes": [
+        "packages/app/"
+      ]
+    },
+    {
+      "surface": "api",
+      "prefixes": [
+        "packages/api/",
+        "api/",
+        "db/",
+        "tests/api/"
+      ]
+    },
+    {
+      "surface": "tooling",
+      "prefixes": [
+        "scripts/",
+        ".claude/hooks/",
+        ".codex/",
+        "tests/deployment/"
+      ]
+    },
+    {
+      "surface": "all",
+      "exact": [
+        "package.json",
+        "bun.lock",
+        "tsconfig.json",
+        "tsconfig.base.json",
+        "tsconfig.server.json",
+        "tsconfig.tools.json",
+        "vitest.config.ts"
+      ]
+    }
+  ],
+  "conditionalRules": [
+    {
+      "check": "full-check",
+      "prefixes": [
+        "packages/shared/",
+        "packages/api/",
+        "api/"
+      ],
+      "exact": [
+        ".agents/policy.json",
+        ".agents/merge-policy.json"
+      ],
+      "runInQa": true
+    }
+  ],
+  "criticalOverrides": [
+    {
+      "id": "critical-paths",
+      "risk": "critical",
+      "prefixes": [
+        "packages/core/src/account/",
+        "packages/core/src/timelock/",
+        "packages/core/src/tally/",
+        "packages/core/src/eas/",
+        "packages/core/src/generator/",
+        "db/",
+        ".claude/hooks/",
+        ".github/workflows/"
+      ],
+      "exact": [
+        "packages/api/src/keys.ts",
+        "packages/api/src/timelock.ts",
+        "packages/api/src/session.ts",
+        "packages/api/src/ballots.ts",
+        "packages/api/src/ballot-verifier.ts",
+        "packages/api/src/burrow-transactions.ts",
+        "packages/api/src/burrows.ts",
+        "packages/api/src/close-record.ts",
+        "packages/api/src/feasts.ts",
+        "packages/api/src/freeze.ts",
+        "packages/api/src/registration-journal.ts",
+        "packages/api/src/results.ts",
+        "packages/api/src/targets.ts",
+        "packages/api/src/store.ts",
+        "packages/api/src/database.ts",
+        "packages/api/src/clock.ts",
+        "scripts/deploy.mjs",
+        "scripts/register-schemas.ts",
+        "scripts/migrate.ts",
+        "scripts/check-dependencies.mjs",
+        "scripts/install-bun.mjs",
+        "vercel.json",
+        ".codex/hooks.json"
+      ],
+      "globs": [
+        "scripts/*-dependencies.json"
+      ],
+      "checks": [
+        "full-check",
+        "vercel-build"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "id": "lint",
+      "command": "bun run lint",
+      "risk": "a custom rule (time as input, no HTML, import direction, copy IDs) is broken",
+      "expectedSignal": "eslint reports no problems",
+      "freshness": "exact-inputs",
+      "budgetSeconds": 60,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "shared-test",
+      "command": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project shared",
+      "risk": "the shared contract (types, copy, validators) regresses",
+      "expectedSignal": "the shared project passes",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 60,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "core-test",
+      "command": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project core",
+      "risk": "tally, phases, generator, timelock or attestations regress",
+      "expectedSignal": "the core project passes",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 90,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "app-test",
+      "command": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project app",
+      "risk": "screens, the Koota world or the game layout regress",
+      "expectedSignal": "the app project passes",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 120,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "api-test",
+      "command": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project api",
+      "risk": "the API, its writes or the data layer regress",
+      "expectedSignal": "the api project passes on PGlite",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 180,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "tooling-test",
+      "command": "node --import ./scripts/no-network.mjs --test scripts/*.test.mjs && bash .claude/hooks/test-guardrail.sh",
+      "risk": "a guardrail, lint probe, build policy or dependency check regresses",
+      "expectedSignal": "the tooling tests and the guardrail cases pass",
+      "freshness": "exact-inputs",
+      "budgetSeconds": 90,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "full-check",
+      "command": "bun run check",
+      "risk": "a change outside its own package breaks the gate CI runs",
+      "expectedSignal": "bun run check exits 0",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 600,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "vercel-build",
+      "command": "bun run vercel-build",
+      "risk": "the production bundle no longer builds or breaks its chunk budgets",
+      "expectedSignal": "the build finishes within the shell and 3D budgets",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 300,
+      "stopRule": "stop-dependent-checks"
+    }
+  ],
+  "layout": {
+    "surfaces": [
+      {
+        "id": "shared",
+        "root": "packages/shared/",
+        "checks": [
+          "shared-test"
+        ],
+        "ownerProof": "shared-test",
+        "focusedCommand": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project shared {paths}"
+      },
+      {
+        "id": "core",
+        "root": "packages/core/",
+        "checks": [
+          "core-test"
+        ],
+        "ownerProof": "core-test",
+        "focusedCommand": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project core {paths}"
+      },
+      {
+        "id": "app",
+        "root": "packages/app/",
+        "checks": [
+          "app-test"
+        ],
+        "ownerProof": "app-test",
+        "focusedCommand": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project app {paths}"
+      },
+      {
+        "id": "api",
+        "root": "packages/api/",
+        "checks": [
+          "api-test"
+        ],
+        "focusable": false,
+        "ownerProof": "api-test"
+      },
+      {
+        "id": "tooling",
+        "root": "scripts/",
+        "source": null,
+        "manifest": null,
+        "checks": [
+          "tooling-test"
+        ],
+        "focusable": false,
+        "ownerProof": "tooling-test"
+      }
+    ],
+    "lockfiles": [
+      "bun.lock"
+    ],
+    "hygiene": {
+      "lint": {
+        "check": "lint",
+        "extensions": [
+          ".js",
+          ".mjs",
+          ".ts",
+          ".tsx"
+        ],
+        "scopedCommand": "node node_modules/eslint/bin/eslint.js --max-warnings 0 {paths}"
+      }
+    }
+  }
+}
