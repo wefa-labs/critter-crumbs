@@ -1,7 +1,9 @@
 // `bun run lint`: ESLint over the repository, held to a shrink-only baseline.
 //
 // The four custom rules and the rest had no findings when the baseline was taken, so for them
-// any finding fails. The React hooks and jsx-a11y rules joined with findings already in the
+// any finding fails. Counts are per rule and file, as the kit's baseline keeps them: within a
+// file, fixing one held finding leaves room for one new finding of the same rule. A message with
+// no rule (a parse error or an unused disable directive) counts as "parse-error". The React hooks and jsx-a11y rules joined with findings already in the
 // tree (docs/decisions.md, 2026-11-21); scripts/data/lint-baseline.json holds their count per
 // rule and file, and a count may fall but never rise. When counts fall, `--shrink` lowers the
 // baseline to match. scripts/lint-baseline.mjs is the agent kit's baseline module, copied as is.

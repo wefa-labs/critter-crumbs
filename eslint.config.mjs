@@ -36,8 +36,10 @@ export default [
     rules: { "critter-crumbs/imports": "error" },
   },
   {
-    // Type-aware: a promise nobody awaits, returns or marks with `void` loses its failure.
-    files: ["packages/*/src/**/*.{ts,tsx}", "api/**/*.ts"],
+    // Type-aware: a promise nobody awaits, returns or marks with `void` loses its failure. The
+    // route files under api/ are one-line re-exports whose tsconfig reads built declarations, so
+    // they are left out: type information there depends on whether dist has been built.
+    files: ["packages/*/src/**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },

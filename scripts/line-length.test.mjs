@@ -16,7 +16,7 @@ const EXCEPTIONS = {
   "packages/shared/src/copy.ts":
     "a prompt whose literal type carries its {slots}; split, it would lose them",
   "packages/app/src/crypto/timelock.ts":
-    "a known-answer ciphertext, typed as Hex, that has no place to break",
+    "a known-answer ciphertext in a critical crypto file, kept as one literal rather than rebuilt from pieces",
 };
 
 const files = execFileSync(
