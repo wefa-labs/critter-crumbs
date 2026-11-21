@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "commands": [
+    { "id": "bun-test", "prefix": ["bun", "test"], "action": "block", "message": "Use `bun run test`: the suites run under Vitest and node --test, not Bun's own runner." },
+    { "id": "git-push-force", "pattern": "^git push( .*)? (--force(-with-lease)?(=\\S*)?|-f)( |$)", "action": "block", "message": "Force pushes are blocked here, --force-with-lease included (.claude/hooks/block-dangerous-git.sh). Push a new commit instead." },
+    { "id": "git-push-mirror", "pattern": "^git push( .*)? --mirror( |$)", "action": "block", "message": "A mirror push overwrites every remote ref. Push your branch by name." },
+    { "id": "git-push-delete", "pattern": "^git push( .*)? (--delete|-d)( |$)", "action": "block", "message": "Deleting a remote branch is the person's call; merged branches are deleted by GitHub." },
+    { "id": "git-push-forced-refspec", "pattern": "^git push( .*)? \\+\\S*:", "action": "block", "message": "A +refspec is a force push. Push a new commit instead." },
+    { "id": "git-reset-hard", "pattern": "^git reset( .*)? --hard( |$)", "action": "block", "message": "reset --hard discards work. Use git reset --soft, or restore your own files by name." },
+    { "id": "git-clean-force", "pattern": "^git clean( .*)? -[a-zA-Z]*f", "action": "block", "message": "A forced clean deletes untracked work. Remove your own files by name; git clean -n previews." },
+    { "id": "git-branch-force-delete", "pattern": "^git branch( .*)? -D( |$)", "action": "block", "message": "Forced branch deletion loses unmerged commits. Use git branch -d." },
+    { "id": "git-discard-all", "pattern": "^git (checkout|restore)( .*)? \\.( |$)", "action": "block", "message": "This discards every change in the tree. Restore your own files by name." },
+    { "id": "git-history-rewrite", "pattern": "^git (filter-branch|reflog expire|gc( .*)? --prune=now)", "action": "block", "message": "History rewrites and reflog pruning are blocked here." },
+    { "id": "production-deploy", "pattern": "(^bun run deploy|scripts/deploy\\.(mjs|js))( .*)? --production( .*)? --execute|(^bun run deploy|scripts/deploy\\.(mjs|js))( .*)? --execute( .*)? --production", "action": "ask", "message": "A production deploy is afo's to run (docs/decisions.md, 2026-11-21). Print the plan without --execute instead." },
+    { "id": "eas-schema-registration", "pattern": "(^bun run register-schemas|register-schemas\\.(ts|js))( .*)? --execute", "action": "ask", "message": "EAS schema registration is afo's to run. register-schemas --check is read-only." }
+  ],
+  "paths": [
+    { "id": "generator-frozen", "glob": "packages/core/src/generator/**", "action": "notice", "message": "The generator is frozen per version: changing its output needs a version bump and a docs/decisions.md entry." }
+  ],
+  "proof": { "commands": ["^bun run (check|test|lint|typecheck|build|vercel-build|e2e|check:[a-z-]+)\\b"] }
+}

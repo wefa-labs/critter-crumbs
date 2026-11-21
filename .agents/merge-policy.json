@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "mergeMethod": "merge",
+  "autoMerge": true,
+  "deleteBranchOnMerge": true,
+  "requiredChecks": [
+    "check"
+  ],
+  "adminBypass": "always",
+  "release": {
+    "about": "main is the integration branch and nothing deploys from it: production is a manual deploy (docs/build/deployment.md). Agents merge every tier into main on proof alone (decided 15 November 2026, applied here 21 November). Each pull request names its tier and its proof in its Verification section; no Merge Gate check reads it. CI's check job (bun run check, then bun run vercel-build) runs on every pull request and is the required check, so no change of any tier merges without the full gate and the production build passing.",
+    "approvalAt": [
+      "bun run deploy --production --execute",
+      "EAS schema registration (bun run register-schemas --execute)"
+    ]
+  },
+  "tiers": {
+    "critical": {
+      "about": "Keys, the timelock, the tally, attestations, the generator, sessions and every server write, the data, deploy, the dependency allowlists, the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
+      "paths": [
+        "packages/core/src/account/**",
+        "packages/core/src/timelock/**",
+        "packages/core/src/tally/**",
+        "packages/core/src/eas/**",
+        "packages/core/src/generator/**",
+        "packages/api/src/keys.ts",
+        "packages/api/src/timelock.ts",
+        "packages/api/src/session.ts",
+        "packages/api/src/ballots.ts",
+        "packages/api/src/ballot-verifier.ts",
+        "packages/api/src/burrow-transactions.ts",
+        "packages/api/src/burrows.ts",
+        "packages/api/src/close-record.ts",
+        "packages/api/src/feasts.ts",
+        "packages/api/src/freeze.ts",
+        "packages/api/src/registration-journal.ts",
+        "packages/api/src/results.ts",
+        "packages/api/src/targets.ts",
+        "packages/api/src/store.ts",
+        "packages/api/src/database.ts",
+        "packages/api/src/clock.ts",
+        "db/**",
+        "scripts/deploy.mjs",
+        "scripts/register-schemas.ts",
+        "scripts/migrate.ts",
+        "scripts/check-dependencies.mjs",
+        "scripts/install-bun.mjs",
+        "scripts/*-dependencies.json",
+        "vercel.json",
+        ".claude/hooks/**",
+        ".codex/hooks.json",
+        ".github/workflows/**"
+      ],
+      "requireCodeOwnerReview": false,
+      "autoMerge": true
+    },
+    "sensitive": {
+      "about": "The shared contract (types, copy, constants, validators), the rest of the API and the Vercel routes, and the agent rules. Proof: bun run check green and an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof.",
+      "paths": [
+        "packages/shared/**",
+        "packages/api/**",
+        "api/**",
+        ".agents/policy.json",
+        ".agents/merge-policy.json"
+      ],
+      "requireCodeOwnerReview": false,
+      "autoMerge": true
+    },
+    "routine": {
+      "about": "Everything else. Proof: the targeted check for the changed behavior (the narrowest test or command that exercises it, as node scripts/select-checks.mjs prints) and CI green, recorded in the pull request's Verification section. A change that renders under packages/app/src adds captures at 375 and 1280 wide, or says why they are pending.",
+      "paths": [
+        "**"
+      ],
+      "requireCodeOwnerReview": false,
+      "autoMerge": true
+    }
+  }
+}

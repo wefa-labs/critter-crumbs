@@ -1,0 +1,45 @@
+# Code owners for the critical and sensitive tiers of .agents/merge-policy.json, one line per
+# tier path, kept in step by scripts/merge-policy.test.mjs. No tier requires a code owner's
+# review (GitHub refuses approval of one's own pull request); this file names who answers for them.
+# The last matching line wins, so the narrower critical lines come after the sensitive ones.
+
+# Sensitive
+/packages/shared/                                @Oba-One
+/packages/api/                                   @Oba-One
+/api/                                            @Oba-One
+/.agents/policy.json                             @Oba-One
+/.agents/merge-policy.json                       @Oba-One
+
+# Critical
+/packages/core/src/account/                      @Oba-One
+/packages/core/src/timelock/                     @Oba-One
+/packages/core/src/tally/                        @Oba-One
+/packages/core/src/eas/                          @Oba-One
+/packages/core/src/generator/                    @Oba-One
+/packages/api/src/keys.ts                        @Oba-One
+/packages/api/src/timelock.ts                    @Oba-One
+/packages/api/src/session.ts                     @Oba-One
+/packages/api/src/ballots.ts                     @Oba-One
+/packages/api/src/ballot-verifier.ts             @Oba-One
+/packages/api/src/burrow-transactions.ts         @Oba-One
+/packages/api/src/burrows.ts                     @Oba-One
+/packages/api/src/close-record.ts                @Oba-One
+/packages/api/src/feasts.ts                      @Oba-One
+/packages/api/src/freeze.ts                      @Oba-One
+/packages/api/src/registration-journal.ts        @Oba-One
+/packages/api/src/results.ts                     @Oba-One
+/packages/api/src/targets.ts                     @Oba-One
+/packages/api/src/store.ts                       @Oba-One
+/packages/api/src/database.ts                    @Oba-One
+/packages/api/src/clock.ts                       @Oba-One
+/db/                                             @Oba-One
+/scripts/deploy.mjs                              @Oba-One
+/scripts/register-schemas.ts                     @Oba-One
+/scripts/migrate.ts                              @Oba-One
+/scripts/check-dependencies.mjs                  @Oba-One
+/scripts/install-bun.mjs                         @Oba-One
+/scripts/*-dependencies.json                     @Oba-One
+/vercel.json                                     @Oba-One
+/.claude/hooks/                                  @Oba-One
+/.codex/hooks.json                               @Oba-One
+/.github/workflows/                              @Oba-One
