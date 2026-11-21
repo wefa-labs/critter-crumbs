@@ -1,51 +1,83 @@
-import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const json = (file) => JSON.parse(readFileSync(path.resolve(root, file), 'utf8'));
-const runtime = json('scripts/runtime-dependencies.json');
-const dev = json('scripts/dev-dependencies.json');
-const lock = Bun.JSONC.parse(readFileSync(path.resolve(root, 'bun.lock'), 'utf8'));
-const overrides = json('scripts/dev-overrides.json');
-const manifests = ['package.json', ...['shared', 'core', 'app', 'api'].map((name) => `packages/${name}/package.json`)];
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const json = (file) => JSON.parse(readFileSync(path.resolve(root, file), "utf8"));
+const runtime = json("scripts/runtime-dependencies.json");
+const dev = json("scripts/dev-dependencies.json");
+const lock = Bun.JSONC.parse(readFileSync(path.resolve(root, "bun.lock"), "utf8"));
+const overrides = json("scripts/dev-overrides.json");
+const manifests = [
+  "package.json",
+  ...["shared", "core", "app", "api"].map((name) => `packages/${name}/package.json`),
+];
 const found = new Map();
-const fail = (message) => { throw new Error(message); };
-const permissive = new Set(['MIT', 'Apache-2.0', 'BSD-2-Clause', 'BSD-3-Clause', 'ISC', 'OFL-1.1']);
+const fail = (message) => {
+  throw new Error(message);
+};
+const permissive = new Set(["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "OFL-1.1"]);
 for (const file of manifests) {
   const manifest = json(file);
   for (const [name, version] of Object.entries(manifest.dependencies ?? {})) {
-    if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version)) fail(`${file}: ${name} must use an exact version.`);
-    if (name.startsWith('@critter-crumbs/')) continue;
-    if (found.has(name) && found.get(name) !== version) fail(`${name} has conflicting runtime versions.`);
+    if (!/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(version))
+      fail(`${file}: ${name} must use an exact version.`);
+    if (name.startsWith("@critter-crumbs/")) continue;
+    if (found.has(name) && found.get(name) !== version)
+      fail(`${name} has conflicting runtime versions.`);
     found.set(name, version);
   }
   for (const [name, version] of Object.entries(manifest.devDependencies ?? {})) {
-    if (dev[name] !== version) fail(`${file}: unreviewed development dependency ${name}@${version}.`);
+    if (dev[name] !== version)
+      fail(`${file}: unreviewed development dependency ${name}@${version}.`);
   }
 }
-if (found.size !== runtime.length) fail('Runtime dependencies differ from the reviewed §11 list.');
+if (found.size !== runtime.length) fail("Runtime dependencies differ from the reviewed §11 list.");
 for (const item of runtime) {
   if (found.get(item.name) !== item.version) fail(`Unreviewed version of ${item.name}.`);
   const directory = `node_modules/${item.name}`;
   const installed = json(`${directory}/package.json`);
-  if (installed.version !== item.version || installed.license !== item.manifestLicense) fail(`${item.name}: installed metadata changed.`);
-  if (!permissive.has(item.license) || !permissive.has(installed.license)) fail(`${item.name}: licence requires human review.`);
-  const notice = readFileSync(path.resolve(root, item.notice ? `${directory}/${item.notice}` : item.sourceNotice));
-  if (createHash('sha256').update(notice).digest('hex') !== item.noticeSha256) fail(`${item.name}: own licence changed; verify it again.`);
+  if (installed.version !== item.version || installed.license !== item.manifestLicense)
+    fail(`${item.name}: installed metadata changed.`);
+  if (!permissive.has(item.license) || !permissive.has(installed.license))
+    fail(`${item.name}: licence requires human review.`);
+  const notice = readFileSync(
+    path.resolve(root, item.notice ? `${directory}/${item.notice}` : item.sourceNotice)
+  );
+  if (createHash("sha256").update(notice).digest("hex") !== item.noticeSha256)
+    fail(`${item.name}: own licence changed; verify it again.`);
   const locked = lock.packages[item.name];
-  if (locked?.[0] !== `${item.name}@${item.version}` || locked.at(-1) !== item.integrity) fail(`${item.name}: archive integrity differs from measured evidence.`);
+  if (locked?.[0] !== `${item.name}@${item.version}` || locked.at(-1) !== item.integrity)
+    fail(`${item.name}: archive integrity differs from measured evidence.`);
   if (!(item.gzipArchiveBytes > 0)) fail(`${item.name}: missing gzip measurement.`);
 }
-const rootManifest = json('package.json');
-if (JSON.stringify(rootManifest.overrides) !== JSON.stringify(overrides)) fail('Development overrides differ from the reviewed list.');
-if (JSON.stringify(Object.entries(rootManifest.devDependencies).sort()) !== JSON.stringify(Object.entries(dev).sort())) fail('Development dependencies differ from the reviewed list.');
+const rootManifest = json("package.json");
+if (JSON.stringify(rootManifest.overrides) !== JSON.stringify(overrides))
+  fail("Development overrides differ from the reviewed list.");
+if (
+  JSON.stringify(Object.entries(rootManifest.devDependencies).sort()) !==
+  JSON.stringify(Object.entries(dev).sort())
+)
+  fail("Development dependencies differ from the reviewed list.");
 // A patch changes what an archive installs, so it is reviewed evidence like the archive itself.
 const patched = runtime.filter((item) => item.patch);
-const reviewedPatches = Object.fromEntries(patched.map((item) => [`${item.name}@${item.version}`, item.patch]));
-if (JSON.stringify(Object.entries(rootManifest.patchedDependencies ?? {}).sort()) !== JSON.stringify(Object.entries(reviewedPatches).sort())) fail('Patched dependencies differ from the reviewed list.');
+const reviewedPatches = Object.fromEntries(
+  patched.map((item) => [`${item.name}@${item.version}`, item.patch])
+);
+if (
+  JSON.stringify(Object.entries(rootManifest.patchedDependencies ?? {}).sort()) !==
+  JSON.stringify(Object.entries(reviewedPatches).sort())
+)
+  fail("Patched dependencies differ from the reviewed list.");
 for (const item of patched) {
-  if (createHash('sha256').update(readFileSync(path.resolve(root, item.patch))).digest('hex') !== item.patchSha256) fail(`${item.name}: patch changed; review it again.`);
+  if (
+    createHash("sha256")
+      .update(readFileSync(path.resolve(root, item.patch)))
+      .digest("hex") !== item.patchSha256
+  )
+    fail(`${item.name}: patch changed; review it again.`);
 }
-console.log(`${runtime.length} exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified; ${patched.length} reviewed ${patched.length === 1 ? 'patch' : 'patches'}.`);
+console.log(
+  `${runtime.length} exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified; ${patched.length} reviewed ${patched.length === 1 ? "patch" : "patches"}.`
+);

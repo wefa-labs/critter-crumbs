@@ -1,12 +1,13 @@
 // WEFA reserved generator implementation; see LICENSE in this directory.
 // Existing third-party hash and PRNG terms remain in force.
-import { hex, integer } from '@critter-crumbs/shared';
+import { hex, integer } from "@critter-crumbs/shared";
 
-export const GEN_VERSION = '1';
+export const GEN_VERSION = "1";
 // bryc's cyrb53 and Tommy Ettinger's mulberry32; provenance and independent vectors
 // are recorded in docs/research/generator-v1-vectors.md. Preserve operation order.
 function cyrb53(value: string): number {
-  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  let h1 = 0xdeadbeef,
+    h2 = 0x41c6ce57;
   for (let i = 0; i < value.length; i++) {
     const ch = value.charCodeAt(i);
     h1 = Math.imul(h1 ^ ch, 2654435761);
@@ -34,31 +35,87 @@ export function generate(address: string, variant: number) {
   function choice<const T extends string>(values: readonly (readonly [T, number])[]): T {
     const draw = rng() * values.reduce((sum, entry) => sum + entry[1], 0);
     let threshold = 0;
-    for (const [value, weight] of values) { threshold += weight; if (draw < threshold) return value; }
-    throw new RangeError('Invalid generator weights');
+    for (const [value, weight] of values) {
+      threshold += weight;
+      if (draw < threshold) return value;
+    }
+    throw new RangeError("Invalid generator weights");
   }
   return {
-    bodyShape: choice([['egg', 35], ['bean', 25], ['capsule', 25], ['round', 15]]),
-    bodyHeight: uniform(0.85, 1.25), bodyWidth: uniform(0.75, 1.15), belly: uniform(0, 0.30),
-    headShape: choice([['round', 45], ['egg', 30], ['squarish', 25]]),
-    headSize: uniform(0.50, 0.72), headTilt: uniform(-8, 8),
-    earType: choice([['round', 1], ['pointed', 1], ['long', 1], ['floppy', 1], ['tufts', 1], ['none', 1]]),
-    earSize: uniform(0.18, 0.50), earSpread: uniform(35, 75),
-    eyeStyle: choice([['round', 50], ['oval', 30], ['half-lid', 20]]),
-    eyeSize: uniform(0.10, 0.20), eyeSpacing: uniform(0.32, 0.62), eyeHeight: uniform(0.45, 0.62), pupilSize: uniform(0.45, 0.70),
-    snout: choice([['none', 40], ['button', 35], ['muzzle', 25]]), cheeks: rng() < 0.30,
-    armType: choice([['stubs', 50], ['paws', 30], ['none', 20]]), legLength: uniform(0.15, 0.35),
-    tailType: choice([['none', 30], ['puff', 25], ['curl', 25], ['stub', 20]]),
-    markings: choice([['none', 55], ['belly patch', 25], ['spots', 20]]),
-    hue: uniform(0, 360), chroma: uniform(0.06, 0.13), lightness: uniform(0.58, 0.76), accentShift: uniform(15, 45), idlePhase: uniform(0, 1),
+    bodyShape: choice([
+      ["egg", 35],
+      ["bean", 25],
+      ["capsule", 25],
+      ["round", 15],
+    ]),
+    bodyHeight: uniform(0.85, 1.25),
+    bodyWidth: uniform(0.75, 1.15),
+    belly: uniform(0, 0.3),
+    headShape: choice([
+      ["round", 45],
+      ["egg", 30],
+      ["squarish", 25],
+    ]),
+    headSize: uniform(0.5, 0.72),
+    headTilt: uniform(-8, 8),
+    earType: choice([
+      ["round", 1],
+      ["pointed", 1],
+      ["long", 1],
+      ["floppy", 1],
+      ["tufts", 1],
+      ["none", 1],
+    ]),
+    earSize: uniform(0.18, 0.5),
+    earSpread: uniform(35, 75),
+    eyeStyle: choice([
+      ["round", 50],
+      ["oval", 30],
+      ["half-lid", 20],
+    ]),
+    eyeSize: uniform(0.1, 0.2),
+    eyeSpacing: uniform(0.32, 0.62),
+    eyeHeight: uniform(0.45, 0.62),
+    pupilSize: uniform(0.45, 0.7),
+    snout: choice([
+      ["none", 40],
+      ["button", 35],
+      ["muzzle", 25],
+    ]),
+    cheeks: rng() < 0.3,
+    armType: choice([
+      ["stubs", 50],
+      ["paws", 30],
+      ["none", 20],
+    ]),
+    legLength: uniform(0.15, 0.35),
+    tailType: choice([
+      ["none", 30],
+      ["puff", 25],
+      ["curl", 25],
+      ["stub", 20],
+    ]),
+    markings: choice([
+      ["none", 55],
+      ["belly patch", 25],
+      ["spots", 20],
+    ]),
+    hue: uniform(0, 360),
+    chroma: uniform(0.06, 0.13),
+    lightness: uniform(0.58, 0.76),
+    accentShift: uniform(15, 45),
+    idlePhase: uniform(0, 1),
   };
 }
 export type CritterParameters = ReturnType<typeof generate>;
 export function layout(params: CritterParameters) {
-  const yF = { egg: 1.25, bean: 1.10, capsule: 1.15, round: 1.00 }[params.bodyShape];
-  const bh = 0.5 * params.bodyHeight * yF, bw = 0.5 * params.bodyWidth;
-  const leg = params.legLength * params.bodyHeight, bodyC = 0.6 * leg + bh;
-  const hr = 0.5 * params.headSize * params.bodyHeight, headC = bodyC + bh + 0.76 * hr;
+  const yF = { egg: 1.25, bean: 1.1, capsule: 1.15, round: 1.0 }[params.bodyShape];
+  const bh = 0.5 * params.bodyHeight * yF,
+    bw = 0.5 * params.bodyWidth;
+  const leg = params.legLength * params.bodyHeight,
+    bodyC = 0.6 * leg + bh;
+  const hr = 0.5 * params.headSize * params.bodyHeight,
+    headC = bodyC + bh + 0.76 * hr;
   const earLen = params.earSize * 2 * hr * 1.8;
   return { yF, bh, bw, leg, bodyC, hr, headC, earLen };
 }

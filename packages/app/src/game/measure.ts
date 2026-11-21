@@ -4,11 +4,15 @@
  * to its estimate.
  */
 let context: CanvasRenderingContext2D | null | undefined;
-let family = '';
+let family = "";
 export function measureText(text: string, size: number, weight: number): number | undefined {
   if (context === undefined) {
-    context = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d');
-    family = typeof document === 'undefined' ? '' : getComputedStyle(document.documentElement).getPropertyValue('--cc-font-body').trim();
+    context =
+      typeof document === "undefined" ? null : document.createElement("canvas").getContext("2d");
+    family =
+      typeof document === "undefined"
+        ? ""
+        : getComputedStyle(document.documentElement).getPropertyValue("--cc-font-body").trim();
   }
   if (!context || !family) return undefined;
   context.font = `${weight} ${size}px ${family}`;

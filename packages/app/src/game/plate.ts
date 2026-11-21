@@ -3,7 +3,10 @@
  * the top and its floor fills the rest. `aspect` is its width over its height; `wallFoot` is how far down it the wall
  * ends in the middle, at the foot of the wall or of its steps, as a share of its height.
  */
-export interface PlateShape { aspect: number; wallFoot: number }
+export interface PlateShape {
+  aspect: number;
+  wallFoot: number;
+}
 
 /** The strip of floor kept between the foot of the wall and the feet of the circle's back row. */
 export const PLATE_GAP = 8;
@@ -15,8 +18,16 @@ export const PLATE_GAP = 8;
  * for the foot of its wall to come PLATE_GAP above the back row: the top of the wall leaves the screen, and the floor
  * meets the feet. A plate whose wall already ends above the row is left where it is.
  */
-export function plateLift(scene: { width: number; height: number }, plate: PlateShape, backRow: number) {
+export function plateLift(
+  scene: { width: number; height: number },
+  plate: PlateShape,
+  backRow: number
+) {
   const foot = backRow - PLATE_GAP;
   /* raised by `lift`, the plate is drawn `scene.height + lift` tall, or `scene.width / aspect` where that is taller */
-  return Math.max(0, plate.wallFoot * scene.width / plate.aspect - foot, (plate.wallFoot * scene.height - foot) / (1 - plate.wallFoot));
+  return Math.max(
+    0,
+    (plate.wallFoot * scene.width) / plate.aspect - foot,
+    (plate.wallFoot * scene.height - foot) / (1 - plate.wallFoot)
+  );
 }

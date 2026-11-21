@@ -1,28 +1,90 @@
-import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react';
-import { generateCritter } from '@critter-crumbs/core';
-import { copy, formatCopy, type CopyId, type Profile, type Target } from '@critter-crumbs/shared';
-import { CrumbGlyph } from '../game/mound.js';
-import { Loader } from '../game/sheet-parts.js';
-import { disposePortrait } from '../portraits/index.js';
-import { paintCritter } from '../portraits/painter.js';
-import { critterVersion } from '../portraits/version.js';
-import { portraitMetrics } from '../portraits/metrics.js';
-import { faceCrop } from '../game/styles.js';
-import { useModalAnnouncements } from './announcements.js';
+import { useEffect, useId, useRef, type ReactNode, type RefObject } from "react";
+import { generateCritter } from "@critter-crumbs/core";
+import { copy, formatCopy, type CopyId, type Profile, type Target } from "@critter-crumbs/shared";
+import { CrumbGlyph } from "../game/mound.js";
+import { Loader } from "../game/sheet-parts.js";
+import { disposePortrait } from "../portraits/index.js";
+import { paintCritter } from "../portraits/painter.js";
+import { critterVersion } from "../portraits/version.js";
+import { portraitMetrics } from "../portraits/metrics.js";
+import { faceCrop } from "../game/styles.js";
+import { useModalAnnouncements } from "./announcements.js";
 
-export const displayName = (profile: Pick<Profile, 'ensName' | 'displayName' | 'address'>) => profile.ensName || profile.displayName || shortAddress(profile.address);
+export const displayName = (profile: Pick<Profile, "ensName" | "displayName" | "address">) =>
+  profile.ensName || profile.displayName || shortAddress(profile.address);
 export const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`;
 /** A stored name that is only the address falls back to the §5.5 short form; the full address is shown separately. */
-export const memberLabel = (name: string, address: string) => name.toLowerCase() === address.toLowerCase() ? shortAddress(address) : name;
-export const targetLabel = (target: Target) => target.ownerAddress?.toLowerCase() === target.name.toLowerCase() ? shortAddress(target.name) : target.name;
+export const memberLabel = (name: string, address: string) =>
+  name.toLowerCase() === address.toLowerCase() ? shortAddress(address) : name;
+export const targetLabel = (target: Target) =>
+  target.ownerAddress?.toLowerCase() === target.name.toLowerCase()
+    ? shortAddress(target.name)
+    : target.name;
 /** Moves to `path`, recording the screen it was left from, so the first steps can return there (learn-return.ts). */
-export function navigate(path: string) { history.pushState({ from: location.pathname }, '', path); window.dispatchEvent(new PopStateEvent('popstate')); }
-export function Link({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
-  return <a href={href} className={className} onClick={event => { if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) { event.preventDefault(); navigate(href); } }}>{children}</a>;
+export function navigate(path: string) {
+  history.pushState({ from: location.pathname }, "", path);
+  window.dispatchEvent(new PopStateEvent("popstate"));
 }
-export function Page({ title, children, context, screen, primary = true }: { title: string; context?: string; screen?: string; primary?: boolean; children: ReactNode }) {
-  useEffect(() => { document.title = context ? formatCopy('app.contextTitle', { screen: screen ?? title, burrow: context }) : formatCopy('app.pageTitle', { title }); const content = document.getElementById('content'); if (content) { content.scrollTop = 0; content.focus(); } document.querySelector<HTMLElement>('[data-initial-focus="true"]')?.focus(); }, [title, context, screen]);
-  return <>{primary ? <h1>{title}</h1> : <p className="feast-title">{title}</p>}{children}</>;
+export function Link({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <a
+      href={href}
+      className={className}
+      onClick={(event) => {
+        if (
+          event.button === 0 &&
+          !event.metaKey &&
+          !event.ctrlKey &&
+          !event.shiftKey &&
+          !event.altKey
+        ) {
+          event.preventDefault();
+          navigate(href);
+        }
+      }}
+    >
+      {children}
+    </a>
+  );
+}
+export function Page({
+  title,
+  children,
+  context,
+  screen,
+  primary = true,
+}: {
+  title: string;
+  context?: string;
+  screen?: string;
+  primary?: boolean;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    document.title = context
+      ? formatCopy("app.contextTitle", { screen: screen ?? title, burrow: context })
+      : formatCopy("app.pageTitle", { title });
+    const content = document.getElementById("content");
+    if (content) {
+      content.scrollTop = 0;
+      content.focus();
+    }
+    document.querySelector<HTMLElement>('[data-initial-focus="true"]')?.focus();
+  }, [title, context, screen]);
+  return (
+    <>
+      {primary ? <h1>{title}</h1> : <p className="feast-title">{title}</p>}
+      {children}
+    </>
+  );
 }
 /**
  * While the session is read, a screen's code arrives or a route's data is on its way: three bobbing crumbs. `bare`
@@ -30,44 +92,146 @@ export function Page({ title, children, context, screen, primary = true }: { tit
  * page's own header.
  */
 export function Opening({ bare = false }: { bare?: boolean }) {
-  return <div className={bare ? 'core-game opening' : 'opening'}><Loader crumb={<CrumbGlyph />} /><p className="sr-only">{copy['app.loading']}</p></div>;
+  return (
+    <div className={bare ? "core-game opening" : "opening"}>
+      <Loader crumb={<CrumbGlyph />} />
+      <p className="sr-only">{copy["app.loading"]}</p>
+    </div>
+  );
 }
 /** A route whose data has not arrived: the bobbing crumbs, or the outage notice with a retry. Error copy never becomes a page title. */
-export function PendingPage({ error, retry, bare = false }: { error: unknown; retry: () => void; bare?: boolean }) {
-  return error ? <Page title={copy['app.unavailable']}><p>{copy['err.storeUnreachable']}</p><button onClick={retry}>{copy['action.retry']}</button></Page> : <Opening bare={bare} />;
+export function PendingPage({
+  error,
+  retry,
+  bare = false,
+}: {
+  error: unknown;
+  retry: () => void;
+  bare?: boolean;
+}) {
+  return error ? (
+    <Page title={copy["app.unavailable"]}>
+      <p>{copy["err.storeUnreachable"]}</p>
+      <button onClick={retry}>{copy["action.retry"]}</button>
+    </Page>
+  ) : (
+    <Opening bare={bare} />
+  );
 }
-export function PortraitImage({ address, variant, name, size = 40, asleep = false, decorative = true, fed = 0, delighted = false }: { address: string; variant: number; name: string; size?: 40 | 64 | 96 | 'stage'; asleep?: boolean; decorative?: boolean; fed?: number; delighted?: boolean }) {
+export function PortraitImage({
+  address,
+  variant,
+  name,
+  size = 40,
+  asleep = false,
+  decorative = true,
+  fed = 0,
+  delighted = false,
+}: {
+  address: string;
+  variant: number;
+  name: string;
+  size?: 40 | 64 | 96 | "stage";
+  asleep?: boolean;
+  decorative?: boolean;
+  fed?: number;
+  delighted?: boolean;
+}) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const svg = paintCritter(document, generateCritter(address, variant, critterVersion), { name, size, asleep, decorative, fed, delighted });
+    const svg = paintCritter(document, generateCritter(address, variant, critterVersion), {
+      name,
+      size,
+      asleep,
+      decorative,
+      fed,
+      delighted,
+    });
     host.current?.replaceChildren(svg);
-    return () => { disposePortrait(svg); svg.remove(); };
+    return () => {
+      disposePortrait(svg);
+      svg.remove();
+    };
   }, [address, variant, name, size, asleep, decorative, fed, delighted]);
-  return <div className={size === 'stage' ? 'stage' : 'portrait-slot'} ref={host} />;
+  return <div className={size === "stage" ? "stage" : "portrait-slot"} ref={host} />;
 }
 /** A face crop around the head; the review art supplies its own head centre and radius (game/styles.ts). */
 function faceStyle(address: string, variant: number, size: number) {
   const extent = portraitMetrics(generateCritter(address, variant, critterVersion)).extent;
-  return faceCrop(size, extent.headY, extent.headX, extent.headX === undefined ? undefined : extent.headRadius);
+  return faceCrop(
+    size,
+    extent.headY,
+    extent.headX,
+    extent.headX === undefined ? undefined : extent.headRadius
+  );
 }
 /** A critter's element, for its chip (Design System §10, `element.*`); a version 1 critter has none. */
 export function critterElementOf(address: string, variant: number) {
   const drawn = generateCritter(address, variant, critterVersion);
-  return drawn.version === '2' ? drawn.element : null;
+  return drawn.version === "2" ? drawn.element : null;
 }
 /** A critter's face cropped to the head, as the flow page draws the givers' table (face()). */
-export function CritterFace({ address, variant, name, size }: { address: string; variant: number; name: string; size: number }) {
-  return <span className="critter-face" style={faceStyle(address, variant, size)} aria-hidden="true"><PortraitImage address={address} variant={variant} name={name} size="stage" /></span>;
+export function CritterFace({
+  address,
+  variant,
+  name,
+  size,
+}: {
+  address: string;
+  variant: number;
+  name: string;
+  size: number;
+}) {
+  return (
+    <span className="critter-face" style={faceStyle(address, variant, size)} aria-hidden="true">
+      <PortraitImage address={address} variant={variant} name={name} size="stage" />
+    </span>
+  );
 }
 /** The same face and 44 px target open the profile navigation on every screen. */
-export function ProfileButton({ address, variant, onClick }: { address: string; variant: number; onClick: (() => void) | undefined }) {
+export function ProfileButton({
+  address,
+  variant,
+  onClick,
+}: {
+  address: string;
+  variant: number;
+  onClick: (() => void) | undefined;
+}) {
   const face = faceStyle(address, variant, 44);
-  return <button type="button" className="game-profile" style={face} aria-label={copy['game.profile']} onClick={onClick}><PortraitImage address={address} variant={variant} name={copy['scatter.own.short']} size="stage" /></button>;
+  return (
+    <button
+      type="button"
+      className="game-profile"
+      style={face}
+      aria-label={copy["game.profile"]}
+      onClick={onClick}
+    >
+      <PortraitImage
+        address={address}
+        variant={variant}
+        name={copy["scatter.own.short"]}
+        size="stage"
+      />
+    </button>
+  );
 }
 /** A native modal dialog: opened on mount, announced, and focus returned where it was when it closes. */
 export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
   const announceWithin = useModalAnnouncements();
-  useEffect(() => { const dialog = ref.current!; const previous = document.activeElement; dialog.showModal(); announceWithin(dialog.querySelector<HTMLElement>('.dialog-feedback') ?? dialog); dialog.querySelector<HTMLElement>('input, textarea')?.focus(); return () => { announceWithin(null); dialog.close(); if (previous instanceof HTMLElement && previous.isConnected) previous.focus(); else document.getElementById('content')?.focus(); }; }, [announceWithin]);
+  useEffect(() => {
+    const dialog = ref.current!;
+    const previous = document.activeElement;
+    dialog.showModal();
+    announceWithin(dialog.querySelector<HTMLElement>(".dialog-feedback") ?? dialog);
+    dialog.querySelector<HTMLElement>("input, textarea")?.focus();
+    return () => {
+      announceWithin(null);
+      dialog.close();
+      if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
+      else document.getElementById("content")?.focus();
+    };
+  }, [announceWithin]);
 }
 /**
  * One stable frame for dialogs and phone sheets; only its body scrolls as content changes. A dialog has one way out
@@ -76,17 +240,82 @@ export function useModalDialog(ref: RefObject<HTMLDialogElement | null>) {
  * Without it the heading's Close is the way out, since a phone has no Escape key. (Settings and the profile, which
  * had no Cancel, are now one screen, profile.tsx.)
  */
-export function Dialog({ title, children, onClose, busy = false, actions, dismiss, className = '', describedBy }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean; actions?: ReactNode; dismiss?: 'action.cancel' | 'action.back' | 'action.close'; className?: string; describedBy?: string }) {
-  const ref = useRef<HTMLDialogElement>(null), id = useId();
+export function Dialog({
+  title,
+  children,
+  onClose,
+  busy = false,
+  actions,
+  dismiss,
+  className = "",
+  describedBy,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+  busy?: boolean;
+  actions?: ReactNode;
+  dismiss?: "action.cancel" | "action.back" | "action.close";
+  className?: string;
+  describedBy?: string;
+}) {
+  const ref = useRef<HTMLDialogElement>(null),
+    id = useId();
   useModalDialog(ref);
-  return <dialog ref={ref} className={`app-dialog ${className}`} aria-labelledby={id} aria-describedby={describedBy} onCancel={event => { event.preventDefault(); if (!busy) onClose(); }}>
-    <div className="dialog-heading"><h2 id={id}>{title}</h2>{dismiss ? null : <button type="button" className="secondary dialog-close" disabled={busy} onClick={onClose}>{copy['action.close']}</button>}</div>
-    <div className="dialog-body">{children}</div>
-    <div className="dialog-feedback" />
-    {actions || dismiss ? <div className="dialog-actions">{dismiss ? <button type="button" className="dialog-dismiss" disabled={busy} onClick={onClose}>{copy[dismiss]}</button> : null}{actions}</div> : null}
-  </dialog>;
+  return (
+    <dialog
+      ref={ref}
+      className={`app-dialog ${className}`}
+      aria-labelledby={id}
+      aria-describedby={describedBy}
+      onCancel={(event) => {
+        event.preventDefault();
+        if (!busy) onClose();
+      }}
+    >
+      <div className="dialog-heading">
+        <h2 id={id}>{title}</h2>
+        {dismiss ? null : (
+          <button
+            type="button"
+            className="secondary dialog-close"
+            disabled={busy}
+            onClick={onClose}
+          >
+            {copy["action.close"]}
+          </button>
+        )}
+      </div>
+      <div className="dialog-body">{children}</div>
+      <div className="dialog-feedback" />
+      {actions || dismiss ? (
+        <div className="dialog-actions">
+          {dismiss ? (
+            <button type="button" className="dialog-dismiss" disabled={busy} onClick={onClose}>
+              {copy[dismiss]}
+            </button>
+          ) : null}
+          {actions}
+        </div>
+      ) : null}
+    </dialog>
+  );
 }
-export function Field({ label, children, help }: { label: CopyId; children: ReactNode; help?: CopyId }) {
-  return <label className="field"><span>{copy[label]}</span>{children}{help ? <small>{copy[help]}</small> : null}</label>;
+export function Field({
+  label,
+  children,
+  help,
+}: {
+  label: CopyId;
+  children: ReactNode;
+  help?: CopyId;
+}) {
+  return (
+    <label className="field">
+      <span>{copy[label]}</span>
+      {children}
+      {help ? <small>{copy[help]}</small> : null}
+    </label>
+  );
 }
-export { useResource } from './resource.js';
+export { useResource } from "./resource.js";

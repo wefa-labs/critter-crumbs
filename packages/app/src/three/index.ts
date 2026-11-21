@@ -1,1 +1,1 @@
-export { StageScene } from './scene.js';
+export { StageScene } from "./scene.js";

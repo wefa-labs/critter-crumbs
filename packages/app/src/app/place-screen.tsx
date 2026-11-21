@@ -1,12 +1,12 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import { formatCopy } from '@critter-crumbs/shared';
-import { sceneCircle } from './invite-circle.js';
-import { ScreenNotices } from './notices.js';
-import { FloorCritter, PaintedFloor } from './painted-floor.js';
-import { sheetScreenStyle, type Painting } from './painted-scene.js';
-import { ScreenHeader } from './screen-header.js';
-import { joinNames } from './time.js';
-import { CritterFace, ProfileButton } from './ui.js';
+import { useEffect, useRef, type ReactNode } from "react";
+import { formatCopy } from "@critter-crumbs/shared";
+import { sceneCircle } from "./invite-circle.js";
+import { ScreenNotices } from "./notices.js";
+import { FloorCritter, PaintedFloor } from "./painted-floor.js";
+import { sheetScreenStyle, type Painting } from "./painted-scene.js";
+import { ScreenHeader } from "./screen-header.js";
+import { joinNames } from "./time.js";
+import { CritterFace, ProfileButton } from "./ui.js";
 
 /**
  * A connected screen as the flow page draws every one (docs/explorations/app-screens: hdr(), sceneLayer() and the
@@ -26,29 +26,90 @@ import { CritterFace, ProfileButton } from './ui.js';
  *   your critter's profile over the screen it was opened from, to which app.tsx returns the focus. It takes the focus,
  *   Escape goes back where it has a back chevron, and on leaving it the page's title is the beneath one's again.
  */
-export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewer, painting, floor, sheetHeight, actions, over = false, className = '', children }: {
-  title: string; wordmark?: boolean; burrow?: string; href?: string; back?: () => void;
+export function PlaceScreen({
+  title,
+  wordmark = false,
+  burrow,
+  href,
+  back,
+  viewer,
+  painting,
+  floor,
+  sheetHeight,
+  actions,
+  over = false,
+  className = "",
+  children,
+}: {
+  title: string;
+  wordmark?: boolean;
+  burrow?: string;
+  href?: string;
+  back?: () => void;
   viewer?: { address: string; variant: number; open: () => void };
-  painting: Painting; floor: ReactNode; sheetHeight: number; actions?: ReactNode; over?: boolean; className?: string; children: ReactNode;
+  painting: Painting;
+  floor: ReactNode;
+  sheetHeight: number;
+  actions?: ReactNode;
+  over?: boolean;
+  className?: string;
+  children: ReactNode;
 }) {
   const root = useRef<HTMLElement>(null);
   /* runs before the title is set below, so it keeps the title of the screen beneath and gives it back on leaving */
   useEffect(() => {
-    if (!over) { document.getElementById('content')?.focus(); return; }
+    if (!over) {
+      document.getElementById("content")?.focus();
+      return;
+    }
     const beneath = document.title;
     root.current?.focus();
-    return () => { document.title = beneath; };
+    return () => {
+      document.title = beneath;
+    };
   }, [over]);
-  useEffect(() => { document.title = burrow ? formatCopy('app.contextTitle', { screen: title, burrow }) : formatCopy('app.pageTitle', { title }); }, [title, burrow]);
+  useEffect(() => {
+    document.title = burrow
+      ? formatCopy("app.contextTitle", { screen: title, burrow })
+      : formatCopy("app.pageTitle", { title });
+  }, [title, burrow]);
   return (
-    <section ref={root} className={`core-game place-screen ${className}`} aria-label={title} tabIndex={over ? -1 : undefined}
-      onKeyDown={event => { if (over && back && event.key === 'Escape' && !event.defaultPrevented) { event.preventDefault(); back(); } }}>
-      <ScreenHeader {...(wordmark ? {} : { title })} {...(burrow ? { burrow } : {})} {...(href ? { href } : {})} {...(back ? { back } : {})}
-        end={viewer ? <ProfileButton address={viewer.address} variant={viewer.variant} onClick={viewer.open} /> : null} />
+    <section
+      ref={root}
+      className={`core-game place-screen ${className}`}
+      aria-label={title}
+      tabIndex={over ? -1 : undefined}
+      onKeyDown={(event) => {
+        if (over && back && event.key === "Escape" && !event.defaultPrevented) {
+          event.preventDefault();
+          back();
+        }
+      }}
+    >
+      <ScreenHeader
+        {...(wordmark ? {} : { title })}
+        {...(burrow ? { burrow } : {})}
+        {...(href ? { href } : {})}
+        {...(back ? { back } : {})}
+        end={
+          viewer ? (
+            <ProfileButton
+              address={viewer.address}
+              variant={viewer.variant}
+              onClick={viewer.open}
+            />
+          ) : null
+        }
+      />
       <div className="sheet-screen" style={sheetScreenStyle(sheetHeight)}>
-        <PaintedFloor painting={painting} className="screen-floor">{floor}</PaintedFloor>
+        <PaintedFloor painting={painting} className="screen-floor">
+          {floor}
+        </PaintedFloor>
         <div className="screen-sheet place-sheet">
-          <div className="place-words"><ScreenNotices />{children}</div>
+          <div className="place-words">
+            <ScreenNotices />
+            {children}
+          </div>
           {actions ? <div className="place-actions">{actions}</div> : null}
         </div>
       </div>
@@ -57,21 +118,49 @@ export function PlaceScreen({ title, wordmark = false, burrow, href, back, viewe
 }
 
 /** One of the critters in a ring: who it is, which of its drawings, and whether it is awake. */
-export interface RingCritter { key: string; address: string; variant: number; asleep: boolean }
+export interface RingCritter {
+  key: string;
+  address: string;
+  variant: number;
+  asleep: boolean;
+}
 
 /**
  * Critters in a ring around the middle of the floor (flow page, circle(); invite-circle.ts), each awake or asleep: the
  * first at the front, the rest going round it, smaller at the back, each turned toward the middle.
  */
 export function FloorRing({ critters }: { critters: readonly RingCritter[] }) {
-  return <>{sceneCircle(critters.length).map(spot => {
-    const { key, address, variant, asleep } = critters[spot.index]!;
-    return <FloorCritter key={key} critter={{ x: spot.x, y: spot.y, size: spot.size, face: spot.face, address, variant, asleep }} />;
-  })}</>;
+  return (
+    <>
+      {sceneCircle(critters.length).map((spot) => {
+        const { key, address, variant, asleep } = critters[spot.index]!;
+        return (
+          <FloorCritter
+            key={key}
+            critter={{
+              x: spot.x,
+              y: spot.y,
+              size: spot.size,
+              face: spot.face,
+              address,
+              variant,
+              asleep,
+            }}
+          />
+        );
+      })}
+    </>
+  );
 }
 
 /** One face in a row: whose, which of its drawings, its name for the not-yet line, and whether it has done the thing. */
-export interface RowFace { key: string; address: string; variant: number; name: string; done: boolean }
+export interface RowFace {
+  key: string;
+  address: string;
+  variant: number;
+  name: string;
+  done: boolean;
+}
 /** The faces' size in the row, the flow page's 26 to 28 */
 const ROW_FACE = 28;
 
@@ -80,15 +169,38 @@ const ROW_FACE = 28;
  * everyone's face in a row, those who have not yet dimmed, and under them who has not, by name (`notYet`, "Not yet: …").
  * The faces are for the eye; the two lines say it all to a screen reader.
  */
-export function FaceRow({ count, faces, notYet }: { count: string; faces: readonly RowFace[]; notYet: 'gathering.notYet' | 'scatter.notYet' }) {
-  const waiting = faces.filter(face => !face.done);
+export function FaceRow({
+  count,
+  faces,
+  notYet,
+}: {
+  count: string;
+  faces: readonly RowFace[];
+  notYet: "gathering.notYet" | "scatter.notYet";
+}) {
+  const waiting = faces.filter((face) => !face.done);
   return (
     <div className="face-row">
       <div className="face-row-count">
         <span>{count}</span>
-        <span className="face-row-faces">{faces.map(face => <span key={face.key} className="face-row-face" data-done={face.done}><CritterFace address={face.address} variant={face.variant} name={face.name} size={ROW_FACE} /></span>)}</span>
+        <span className="face-row-faces">
+          {faces.map((face) => (
+            <span key={face.key} className="face-row-face" data-done={face.done}>
+              <CritterFace
+                address={face.address}
+                variant={face.variant}
+                name={face.name}
+                size={ROW_FACE}
+              />
+            </span>
+          ))}
+        </span>
       </div>
-      {waiting.length ? <p className="face-row-waiting">{formatCopy(notYet, { names: joinNames(waiting.map(face => face.name)) })}</p> : null}
+      {waiting.length ? (
+        <p className="face-row-waiting">
+          {formatCopy(notYet, { names: joinNames(waiting.map((face) => face.name)) })}
+        </p>
+      ) : null}
     </div>
   );
 }
