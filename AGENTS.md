@@ -1,12 +1,12 @@
-# AGENTS.md — Critter Crumbs
+# AGENTS.md: Critter Crumbs
 
-Read this before touching anything. The four documents in `docs/` are the spec; this file is the part every agent must keep in its head.
+Read this before touching anything. The four documents in `docs/` are the spec; this file is the part every agent must keep in its head. The shared rules every agent follows on afo's machines are in `~/.agents/AGENTS.md`; cloud agents never load them. What must hold for every agent is enforced in the repository and CI (lint, tests, the guardrail hook, the required check); `.agents/policy.json` adds rules that only the machine-wide guards read.
 
 ## What this is
 
 A private way for a group (a **burrow**) to decide how something is shared out. Everyone gets the same handful of **crumbs** and **scatters** them to **critters** (people or budget options). Every scatter stays encrypted until the **feast**, then it all opens at once. First real use: a council of 6–10 people, real money, after a rehearsal; planned for October 2026 with the rehearsal in September, neither has happened yet, and production is a testnet beta (`docs/decisions.md`, 2026-11-10). Docs: `docs/01-prd.md` (what and why), `02-design-system.md` (look, components, copy), `03-game-design.md` (feel, sound, the Koota simulation), `04-technical-spec.md` (how). Decisions not in the docs go in `docs/decisions.md`, append-only.
 
-## Vocabulary — use these words, in code comments and in every UI string
+## Vocabulary: use these words, in code comments and in every UI string
 
 | Term | Meaning |
 |---|---|
@@ -18,7 +18,7 @@ A private way for a group (a **burrow**) to decide how something is shared out. 
 | Crumbs | What you have to give. The same handful for everyone. |
 | Scatter | The act of giving crumbs to a critter. |
 
-**Never in user-facing copy:** seal, round, cache, vote, ballot, wallet. Say "connect", never "connect your wallet". `ballot` is allowed as a code identifier only. All copy lives in `packages/shared/src/copy.ts` with the IDs from `02-design-system.md` §10 (one exception, `copy-why.ts` beside it, holds the lines of the page behind Why nobody can peek, so the shell does not carry them; `docs/decisions.md`, 2026-11-09) — never inline a string in a component.
+**Never in user-facing copy:** seal, round, cache, vote, ballot, wallet. Say "connect", never "connect your wallet". `ballot` is allowed as a code identifier only. All copy lives in `packages/shared/src/copy.ts` with the IDs from `02-design-system.md` §10 (one exception, `copy-why.ts` beside it, holds the lines of the page behind Why nobody can peek, so the shell does not carry them; `docs/decisions.md`, 2026-11-09). Never inline a string in a component.
 
 ## Rules the code must enforce (PRD §5)
 
@@ -32,10 +32,40 @@ Equal crumbs for everyone · you must scatter all of them · you cannot scatter 
 - **No new dependency** without an entry in `docs/decisions.md`. Runtime list is in `04-technical-spec.md` §11.
 - **The tally is pure and deterministic.** Arrays in position order, no floats, no object-key iteration. Its tests are the contract.
 - **DOM owns layout; the canvas only draws critters** into stage rects (`02-design-system.md` §6.3). Text never renders in WebGL.
-- **Portraits first, 3D later.** Every stage renders the 2D portrait, then crossfades to the mesh when the lazy chunk is ready. Simple view is not an error path.
+- **Portraits first; the 3D path stays.** Every stage renders the 2D portrait. Garden Spirits, the default look, have no mesh, so the default stage is portraits only (ADR 0006); version 1 at `?critters=1` crossfades to its mesh when the lazy 3D chunk is ready. Keep that path working: it stays (`docs/decisions.md`, 2026-11-21). Simple view is not an error path.
 - **Every sound cue pairs with a DOM state.** No cue may carry meaning alone.
 - **Copy IDs, not strings.** Errors from the API are copy IDs.
-- **Generator is frozen** at `GEN_VERSION 1` before the rehearsal; changing its output needs a version bump and a decision.
+- **Each generator version is frozen.** `GEN_VERSION` 1 (`packages/core/src/generator/index.ts`) and `GEN_VERSION_2` (`versioned.ts`, which Garden Spirits draw) are both frozen; changing either one's output needs a new version and a decision.
+
+## Rules and their enforcers
+
+A rule with no enforcer but review is a candidate for one: a lint rule, a test, a CI check, or a line in `.agents/policy.json`.
+
+| Rule | Enforcer | Where |
+| --- | --- | --- |
+| Time is an input: clocks only in the named adapters | lint `critter-crumbs/time-as-input` | `scripts/eslint-rules.mjs`, probes in `scripts/guardrails.test.mjs` |
+| No `innerHTML` or HTML strings | lint `critter-crumbs/no-html` | same |
+| Imports run app → core → shared, api → core and shared, by package name only | lint `critter-crumbs/imports` | same |
+| Copy IDs, not strings, in components | lint `critter-crumbs/copy-ids` | same |
+| No `<Canvas>` from `@react-three/fiber` | lint `no-restricted-imports` | `eslint.config.mjs` |
+| No eval-style code in the bundle | build policy | `scripts/build-policy.mjs` |
+| Shell and 3D chunks stay in budget | build budget | `scripts/build-budget.mjs` (`bun run build`) |
+| Every dependency is reviewed: exact version, allowed licence, archive hash | `check:licenses` | `scripts/check-dependencies.mjs` and its two allowlists |
+| The tally is pure and deterministic | tests | `packages/core/test/tally.test.ts` |
+| Each generator version is frozen | vector tests | `packages/core/test/generator.test.ts`, `generator-v2.test.ts` |
+| Generated design tokens match their source | `check:tokens` | `scripts/generate-tokens.mjs` |
+| Bun and Node versions are the pinned ones | `check:toolchain` | `scripts/check-toolchain.mjs` |
+| No force pushes, hard resets, forced cleans or deletions, wholesale discards, history rewrites | git guardrail hook for Claude Code and Codex; repo guard rules where the machine-wide guards run | `.claude/hooks/block-dangerous-git.sh`, `.codex/hooks.json`, `.agents/policy.json`; cases run by `bun run test` |
+| A production deploy and EAS schema registration are afo's to run | credentials only he holds; repo guard rules `production-deploy`, `vercel-production`, `eas-schema-registration` (ask) | `.agents/policy.json` |
+| Every pull request passes the full check and the production build before it merges | CI job `check`, the required check once afo applies the merge settings; admins can still bypass it, so agents never merge with `--admin` (repo guard rule `admin-merge`) | `.github/workflows/check.yml`, `.agents/merge-policy.json`, `.agents/policy.json` |
+| A pull request records its tier and proof | PR template, review | `.github/pull_request_template.md`, `.agents/merge-policy.json` |
+| No em dash in this file | `agents-doctor` (`no-em-dash`) | run locally until the doctor runs in CI |
+| Never in user-facing copy: seal, round, cache, vote, ballot, wallet | review | `docs/02-design-system.md` §10 |
+| Every sound cue pairs with a DOM state | review | `docs/03-game-design.md` |
+
+## Merging and proof
+
+`main` is the integration branch, and nothing deploys from it: production is a manual deploy. Agents merge every tier into `main` on proof alone, with merge commits. The tiers, their paths and their proof are in `.agents/merge-policy.json`: critical (keys, timelock, tally, generator, phases, encryption, sessions, writes, data, deploy, dependencies, everything that defines the required check, and CI), sensitive (`packages/shared`, `packages/api`, `api/`, the agent rules) and routine (everything else). Each pull request names its tier and its proof in its Verification section. afo's approval is needed only for `bun run deploy --production --execute` and an EAS schema registration, and both are his to run.
 
 ## Shared engineering guidance
 
@@ -62,31 +92,45 @@ Do not create an aggregate hierarchy or a second rule registry merely to adopt D
 
 ## Workstreams
 
-- **A (core):** `packages/core`, `packages/api`, `db`, `scripts` — account, timelock, EAS, tally, API, data. Root `api/` contains only Vercel route exports; server implementation belongs in `packages/api/src`.
-- **B (app):** `packages/app/src`, `packages/app/public` — screens, components, Koota world, 3D, audio, portraits.
-- **Shared:** `packages/shared/src` — types, copy, constants (`feel.ts`), validators. Small reviewed changes only.
+- **A (core):** `packages/core`, `packages/api`, `db`, `scripts`: account, timelock, EAS, tally, API, data. Root `api/` contains only Vercel route exports; server implementation belongs in `packages/api/src`.
+- **B (app):** `packages/app/src`, `packages/app/public`: screens, components, Koota world, 3D, audio, portraits.
+- **Shared:** `packages/shared/src`: types, copy, constants (`feel.ts`), validators. Small reviewed changes only.
 
 ## Skills (any agent)
 
-Ten skills from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, licence copied alongside) are vendored in `.agents/skills/` — the cross-agent location Codex reads natively and the `skills` installer treats as canonical. Claude Code reads them through the `.claude/skills` symlink; `CLAUDE.md` is a symlink to this file. For another agent, point it at `.agents/skills/` or run `npx skills@latest add mattpocock/skills` (Node 20+) and pick that agent.
+All skills live in `.agents/skills/`, the folder Codex reads; Claude Code reads it through the `.claude/skills` link, and `CLAUDE.md` is a link to this file. Five come from the shared agent kit (`dev-surfaces/agents/kit/skills`) and read `.agents/adapter.md` for this repository's commands and rules. Eight come from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, licence copied alongside). One skill per job:
 
 | Skill | Use it when | Claude | Codex |
 |---|---|---|---|
+| `review` (kit) | Before every merge: regressions, requirement closure and readiness, ending in a verdict | `/review` | `$review` |
+| `debug` (kit) | A bug, a failing test or build, or a QA finding: root cause first, then fresh proof | `/debug` | `$debug` |
+| `plan` (kit) | Planning, sequencing or closing a body of work, or running it as parallel lanes | `/plan` | `$plan` |
+| `ship` (kit) | Commit, push and open or update a pull request with its proof | `/ship` | `$ship` |
+| `research` (kit) | A question that needs repository or primary-source evidence, such as the verify list in `docs/04-technical-spec.md` §18 | `/research` | `$research` |
 | `tdd` | Building or fixing anything behind a named seam (tally, `phaseAt`, ballot verifier, Koota systems, `Timelock`, `Account`) | `/tdd` | `$tdd` |
 | `codebase-design` | Laying out a module or an interface; deciding where a seam belongs | `/codebase-design` | `$codebase-design` |
-| `code-review` | Before every merge: Standards axis against this file, Spec axis against `docs/` | `/code-review` | `$code-review` |
-| `to-tickets` | Turning `docs/04-technical-spec.md` §16 (or any plan) into tracer-bullet tickets with blocking edges | `/to-tickets` | `$to-tickets` |
-| `implement` | Working a ticket end to end: TDD, type-check, suite, review, commit | `/implement` | `$implement` |
+| `to-tickets` | Turning a plan into tracer-bullet tickets with blocking edges | `/to-tickets` | `$to-tickets` |
+| `implement` | Writing one ticket's code end to end (TDD, type-check, suite); `review` and `ship` take it from there | `/implement` | `$implement` |
 | `domain-modeling` | Any time a term is fuzzy or new; it edits `CONTEXT.md` and proposes ADRs | model-invoked | model-invoked |
 | `wait-what` | A message you do not understand; re-pitched in the glossary's words | `/wait-what` | `$wait-what` |
-| `research` | The verify-list in `docs/04-technical-spec.md` §18 and any other question needing primary sources | model-invoked | model-invoked |
 | `handoff` | Ending a session with work in flight | `/handoff` | `$handoff` |
-| `git-guardrails-claude-code` | Already installed here (Claude Code only), customised: an ordinary push is allowed; force pushes, remote deletions, hard resets, forced cleans, forced branch deletion, wholesale checkout/restore and history rewrites are blocked. Patterns live in `.claude/hooks/block-dangerous-git.sh` and are covered by `.claude/hooks/guardrail-cases.txt`; change them only with `.claude/hooks/test-guardrail.sh` passing. Codex runs in its own sandbox with approvals instead | — | — |
+| `git-guardrails-claude-code` | Changing the git guardrail. It is installed for both tools: `.claude/settings.json` and `.codex/hooks.json` run `.claude/hooks/block-dangerous-git.sh`, and `.claude/hooks/test-guardrail.sh` (run by `bun run test`) proves both block the cases in `guardrail-cases.txt` | n/a | n/a |
 
-**Configuration the skills expect** (in place of `/setup-matt-pocock-skills`, which is not installed): glossary `CONTEXT.md` (glossary only, no implementation detail) · ADRs in `docs/adr/` (one paragraph each, numbered) · specs in `docs/` · tracker: GitHub issues on `wefa-labs/critter-crumbs` with labels `ready-for-agent`, `blocked`, `needs-human`; local fallback `.scratch/<feature>/issues/` (ignored by git) · decisions that are not ADRs go in `docs/decisions.md`.
+**Configuration the skills expect:** glossary `CONTEXT.md` (glossary only, no implementation detail) · ADRs in `docs/adr/` (one paragraph each, numbered) · specs in `docs/` · tracker: Linear, Product team, Critter Crumbs project (`docs/decisions.md`, 2026-11-21); issues already on GitHub stay there, and the local fallback is `.scratch/<feature>/issues/` (ignored by git) · decisions that are not ADRs go in `docs/decisions.md` · this repository's commands and rules for the kit skills: `.agents/adapter.md`.
 
 ## Commands
 
-Use Bun 1.4.2 for package management and scripts; Node 22.22.1 for the function toolchain. `bun install --frozen-lockfile --ignore-scripts` · `bun run check` (lint, typecheck, tests, licences, vulnerability audit and archive integrity) · `bun run build` (compiles workspaces, builds the app, enforces chunk budgets) · `bun run test` · `bun run dev:app` (Vite only) · `bun run dev` (Vite + `vercel dev`, mock by default; human project setup required) · `bun run e2e:install` (explicit Chromium install) · `bun run e2e` (phase 3 lifecycle) · `bun run migrate` and `bun run seed` (phase 2 implementations required). See `docs/foundation/README.md`.
+Use Bun 1.4.2 for package management and scripts; Node 22.22.1 for the function toolchain.
 
-Environment variables and modes: `04-technical-spec.md` §13. `SHUTTER_MODE=mock` is the default locally and must never be set in production.
+| Task | Command |
+| --- | --- |
+| Install | `bun install --frozen-lockfile --ignore-scripts` |
+| Full check (CI runs it on every pull request) | `bun run check`: toolchain, tokens, lint, typecheck, tests, the git guardrail, assets, workspaces, licences, vulnerability audit |
+| Tests only | `bun run test` (Vitest, the tooling tests, the guardrail cases) |
+| Production build | `bun run build`: compiles workspaces, builds the app, enforces chunk budgets; CI runs `bun run vercel-build` |
+| Local stack | `bun run dev:local`: Vite at `http://127.0.0.1:5173`, the API on PGlite at `:3000`, mock encryption and the dev clock (`docs/build/local-core.md`) |
+| Browser suites | `bun run e2e:install` once, then `bun run e2e` (lifecycle, `tests/e2e`) or `bunx playwright test --config playwright.screens.config.ts`, against a running `dev:local` |
+| Proof for a change | `node scripts/select-checks.mjs` prints the checks its changed paths need, by tier |
+| Seed a phase | `bun run seed --phase <phase>` beside a running local stack |
+
+`bun run dev` (Vite with `vercel dev`) needs the human-owned Vercel and Neon setup. The docs index is `docs/README.md`. Environment variables and modes: `04-technical-spec.md` §13. `SHUTTER_MODE=mock` is the default locally and must never be set in production.
