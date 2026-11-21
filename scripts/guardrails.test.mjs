@@ -3,7 +3,14 @@ import { test } from "node:test";
 import path from "node:path";
 import { ESLint } from "eslint";
 
-const eslint = new ESLint();
+// The probes lint files that do not exist, which the TypeScript project cannot load, so type-aware
+// parsing and the one rule that needs it are off here; scripts/lint-rules.test.mjs probes that rule.
+const eslint = new ESLint({
+  overrideConfig: {
+    languageOptions: { parserOptions: { projectService: false } },
+    rules: { "@typescript-eslint/no-floating-promises": "off" },
+  },
+});
 const check = async (code, file) =>
   (await eslint.lintText(code, { filePath: path.resolve(file) }))[0].messages;
 const has = async (code, file, rule) =>
