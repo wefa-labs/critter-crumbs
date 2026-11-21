@@ -129,3 +129,77 @@ allow|git push origin main && echo done -d
 allow|git stash push -m x -- .
 allow|git branch --show-current && git push origin HEAD -o ci.skip
 allow|git fetch origin && git checkout -B feat origin/feat
+# From the fourth review: substitutions, abbreviations, bundled flags, other spellings, wrappers
+block|git -C "$(git rev-parse --show-toplevel)" reset --hard
+block|git -C `pwd` reset --hard
+block|git --git-dir="$(pwd)/.git" push --force origin main
+block|git push origin "$(git branch --show-current)" --force
+block|git reset "$(git merge-base HEAD origin/main)" --hard
+block|git -c http.extraHeader="Authorization: Bearer $(gh auth token)" push --force origin main
+block|git -C "$(pwd)" checkout .
+block|git -C "$(pwd)" clean -fdx
+block|git push 2>&1 -f
+block|git reset --ha
+block|git reset --har
+block|git push --forc origin main
+block|git push --mirr
+block|git push origin --del x
+block|git clean --forc -d
+block|git branch --del --forc x
+block|git switch --discard main
+block|git checkout --forc main
+block|git checkout -qf main
+block|git checkout -fB main origin/main
+block|git switch -qf main
+block|git prune --expire=now
+block|git-filter-repo --path x --invert-paths
+block|git reflog delete HEAD@{1}
+block|git gc --prune=all
+block|git push --prune origin refs/heads/*:refs/heads/*
+block|git checkout -- '*'
+block|git restore '*'
+block|git checkout -- ':(top)'
+block|git restore ':(top)'
+block|git checkout ..
+block|git -c clean.requireForce= clean -dx
+block|git branch -f main HEAD~5
+block|time git push -f
+block|command git push -f
+block|exec git push -f
+block|nohup git push -f
+block|xargs -I{} git push -f origin {}
+block|GIT_DIR=x git reset --hard
+block|! git reset --hard
+block|{ git reset --hard; }
+block|if git reset --hard; then :; fi
+block|echo $(git reset --hard)
+block|env -i git push -f
+block|sudo git push -f
+block|git\ push -f
+block|g'i't push -f
+block|find . -exec git reset --hard \;
+allow|git add -A && git commit -m "fix: reset form state" && git push
+allow|git commit -m "make clean faster" && git push -u origin HEAD
+allow|git commit -m "push notifications" --no-verify
+allow|git pull --rebase origin main
+allow|git fetch origin && git rebase origin/main
+allow|git rebase -i HEAD~3
+allow|gh pr create --title "x" --body "y" && gh pr merge 98 --merge
+allow|gh pr merge 98 --merge --delete-branch
+allow|git push origin main 2>&1 | tail -5
+allow|git commit -m "checkout: handle ./ paths"
+allow|git commit -m "this is broken :/"
+allow|git commit -m "push: drop -d flag"
+allow|git switch -
+allow|git checkout -
+allow|git push --dry-run -u origin feat
+allow|git push --recurse-submodules=on-demand
+allow|git worktree add ../x -b feat
+allow|git commit -F msg.txt
+allow|git log --oneline -n 5 -- push.ts
+allow|cat .git/config && git status
+allow|git diff --name-only origin/main...HEAD
+allow|git commit --amend --no-edit && git push
+allow|git stash push -m "wip" && git pull --rebase && git stash pop
+allow|git push origin HEAD:refs/heads/c++-support
+block|git restore --staged --work .

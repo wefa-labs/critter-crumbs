@@ -31,7 +31,11 @@ run_case() { # tool, hook command, event json, expectation, command
 }
 
 while IFS='|' read -r expect command; do
-  case "$expect" in ''|'#'*) continue ;; esac
+  case "$expect" in
+    ''|'#'*) continue ;;
+    allow|block) ;;
+    *) echo "FAIL case file: expectation '$expect' is neither allow nor block: $command"; fails=$((fails+1)); continue ;;
+  esac
   as_string=$(printf '%s' "$command" | jq -Rs '{tool_name:"Bash", tool_input:{command:.}}')
   as_argv=$(printf '%s' "$command" | jq -Rs '{tool_name:"Bash", tool_input:{command:split(" ")}}')
   run_case claude "$claude_hook" "$as_string" "$expect" "$command"
@@ -60,7 +64,20 @@ for event in '{}' '{"tool_input":null}' '{"tool_input":{}}' '{"tool_input":{"com
   run_case claude "$claude_hook" "$event" allow "empty event: $event"
 done
 
+# A long text (a pull request body, a heredoc) is read in a few seconds, so a tool's hook timeout
+# never decides the outcome, and a destructive command on its last line is still found.
+long=$(jq -n --arg c "$(for i in $(seq 500); do printf 'line %s of a long body about the app and its tests\n' "$i"; done; printf 'git reset --%s' hard)" '{tool_input:{command:$c}}')
+started=$SECONDS
+run_case claude "$claude_hook" "$long" block "a 500-line text ending in a hard reset"
+if [ $((SECONDS - started)) -gt 10 ]; then
+  echo "FAIL the hook took $((SECONDS - started)) s on a 500-line text"; fails=$((fails+1))
+fi
+
 n=$(grep -cE '^(allow|block)\|' "$cases")
+expected_runs=$((3 * n + 2 * ${#unreadable[@]} + 2 * ${#shapes[@]} + 4 + 1))
+if [ $total -ne $expected_runs ]; then
+  echo "FAIL ran $total hook calls, expected $expected_runs: a case was skipped"; fails=$((fails+1))
+fi
 if [ $fails -eq 0 ]; then
   echo "guardrail: $n cases, ${#unreadable[@]} unreadable events and ${#shapes[@]} event shapes pass for Claude Code and Codex ($total runs)"
 else
