@@ -1,18 +1,34 @@
-import { readFileSync } from "node:fs";
+// Checks every dependency against the reviewed allowlists. With --refresh it first rewrites the
+// allowlist entries of bumped versions (scripts/dependency-refresh.mjs), refusing any licence
+// change, then checks the result: `bun scripts/check-dependencies.mjs --refresh`.
+import { execFileSync } from "node:child_process";
+import { readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const json = (file) => JSON.parse(readFileSync(path.resolve(root, file), "utf8"));
-const runtime = json("scripts/runtime-dependencies.json");
-const dev = json("scripts/dev-dependencies.json");
 const lock = Bun.JSONC.parse(readFileSync(path.resolve(root, "bun.lock"), "utf8"));
 const overrides = json("scripts/dev-overrides.json");
 const manifests = [
   "package.json",
   ...["shared", "core", "app", "api"].map((name) => `packages/${name}/package.json`),
 ];
+const noticeSha256 = (item) =>
+  createHash("sha256")
+    .update(
+      readFileSync(
+        path.resolve(
+          root,
+          item.notice ? `node_modules/${item.name}/${item.notice}` : item.sourceNotice
+        )
+      )
+    )
+    .digest("hex");
+if (process.argv.includes("--refresh")) await refresh();
+const runtime = json("scripts/runtime-dependencies.json");
+const dev = json("scripts/dev-dependencies.json");
 const found = new Map();
 const fail = (message) => {
   throw new Error(message);
@@ -42,10 +58,7 @@ for (const item of runtime) {
     fail(`${item.name}: installed metadata changed.`);
   if (!permissive.has(item.license) || !permissive.has(installed.license))
     fail(`${item.name}: licence requires human review.`);
-  const notice = readFileSync(
-    path.resolve(root, item.notice ? `${directory}/${item.notice}` : item.sourceNotice)
-  );
-  if (createHash("sha256").update(notice).digest("hex") !== item.noticeSha256)
+  if (noticeSha256(item) !== item.noticeSha256)
     fail(`${item.name}: own licence changed; verify it again.`);
   const locked = lock.packages[item.name];
   if (locked?.[0] !== `${item.name}@${item.version}` || locked.at(-1) !== item.integrity)
@@ -81,3 +94,54 @@ for (const item of patched) {
 console.log(
   `${runtime.length} exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified; ${patched.length} reviewed ${patched.length === 1 ? "patch" : "patches"}.`
 );
+
+async function refresh() {
+  const { refreshAllowlists, RefreshRefused } = await import("./dependency-refresh.mjs");
+  const runtimeVersions = new Map();
+  for (const file of manifests) {
+    for (const [name, version] of Object.entries(json(file).dependencies ?? {}))
+      if (!name.startsWith("@critter-crumbs/")) runtimeVersions.set(name, version);
+  }
+  const npm = (...args) =>
+    JSON.parse(
+      execFileSync("npm", [...args, "--json"], {
+        cwd: root,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "inherit"],
+      })
+    );
+  try {
+    const result = await refreshAllowlists(
+      {
+        runtime: json("scripts/runtime-dependencies.json"),
+        dev: json("scripts/dev-dependencies.json"),
+        runtimeVersions,
+        devVersions: json("package.json").devDependencies,
+      },
+      {
+        installed: (name) => json(`node_modules/${name}/package.json`),
+        noticeSha256,
+        lockIntegrity: (name) => lock.packages[name]?.at(-1),
+        registryLicense: async (name, version) => npm("view", `${name}@${version}`, "license"),
+        registryArchive: async (name, version) => npm("pack", `${name}@${version}`, "--dry-run")[0],
+      }
+    );
+    writeFileSync(
+      path.resolve(root, "scripts/runtime-dependencies.json"),
+      `${JSON.stringify(result.runtime, null, 2)}\n`
+    );
+    writeFileSync(
+      path.resolve(root, "scripts/dev-dependencies.json"),
+      `${JSON.stringify(result.dev, null, 2)}\n`
+    );
+    for (const change of result.changes)
+      console.log(
+        `refreshed ${change.kind} ${change.name} ${change.from} -> ${change.to} (${change.license}${change.gzipArchiveBytes ? `, ${change.gzipArchiveBytes} gzip archive bytes` : ""})`
+      );
+    if (!result.changes.length) console.log("refresh: no bumped versions");
+  } catch (error) {
+    if (!(error instanceof RefreshRefused)) throw error;
+    console.error(`refresh refused: ${error.message}`);
+    process.exit(1);
+  }
+}
