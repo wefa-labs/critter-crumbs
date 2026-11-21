@@ -44,6 +44,11 @@ test('every gated path matches a tracked file', () => {
   for (const glob of gated) assert.ok(tracked.some((file) => globRegex(glob).test(file)), `${glob} matches no tracked file`);
 });
 
+test('a nested tsconfig outside the gated paths stays routine, so the root tsconfig rule stays at the root', () => {
+  assert.equal(tierOf('docs/explorations/any/tsconfig.json'), 'routine');
+  assert.equal(tierOf('tsconfig.json'), 'critical');
+});
+
 test('the files whose tier matters most land in it', () => {
   const pins = {
     critical: [

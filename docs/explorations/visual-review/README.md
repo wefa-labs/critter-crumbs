@@ -1,6 +1,6 @@
 # Critter Crumbs design review
 
-> On 21 November 2026 the critter-directions and scene-proportions prototypes' code was removed, so the two build commands below no longer run; that code is in history at `51961c4`.
+> On 21 November 2026 the critter-directions and scene-proportions prototypes' code was removed, so the two build commands below no longer run and the page's links to those prototypes open their READMEs; that code is in history at `51961c4`.
 
 Open [the review index](index.html) for the creature comparisons, scene changes, corrected mock screens and music auditions. Afolabi selected painted Garden Spirits, eight species, portraits first, and opt-in migration. [Claude's refinement brief](../claude-code-critter-refinement-2026-10-16.md) defines the next art pass. Versioned storage is prepared locally; new art and adoption remain pending review. The scene proportions, combined onboarding and fourth tutorial step are implemented locally.
 
