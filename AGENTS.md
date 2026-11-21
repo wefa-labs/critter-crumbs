@@ -119,7 +119,7 @@ All skills live in `.agents/skills/`, the folder Codex reads; Claude Code reads 
 | `handoff` | Ending a session with work in flight | `/handoff` | `$handoff` |
 | `git-guardrails-claude-code` | Changing the git guardrail. It is installed for both tools: `.claude/settings.json` and `.codex/hooks.json` run `.claude/hooks/block-dangerous-git.sh`, and `.claude/hooks/test-guardrail.sh` (run by `bun run test`) proves both block the cases in `guardrail-cases.txt` | n/a | n/a |
 
-**Configuration the skills expect:** glossary `CONTEXT.md` (glossary only, no implementation detail) · ADRs in `docs/adr/` (one paragraph each, numbered) · specs in `docs/` · tracker: Linear, Product team, Critter Crumbs project (`docs/decisions.md`, 2026-11-21); issues already on GitHub stay there, and the local fallback is `.scratch/<feature>/issues/` (ignored by git) · decisions that are not ADRs go in `docs/decisions.md` · this repository's commands and rules for the kit skills: `.agents/adapter.md`.
+**Configuration the skills expect:** glossary `CONTEXT.md` (glossary only, no implementation detail) · ADRs in `docs/adr/` (one paragraph each, numbered) · specs in `docs/` · tracker: none an agent writes to without asking. afo tracks Critter Crumbs in a Linear workspace agents here cannot reach, so they file nothing in Linear (`docs/decisions.md`, 2026-11-21); GitHub issues on `wefa-labs/critter-crumbs` hold the older history; the local fallback is `.scratch/<feature>/issues/` (ignored by git) · decisions that are not ADRs go in `docs/decisions.md` · this repository's commands and rules for the kit skills: `.agents/adapter.md`.
 
 ## Commands
 
