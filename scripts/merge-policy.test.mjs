@@ -46,9 +46,18 @@ test('every gated path matches a tracked file', () => {
 
 test('the files whose tier matters most land in it', () => {
   const pins = {
-    critical: ['packages/core/src/tally/index.ts', 'packages/core/src/generator/index.ts', 'packages/core/src/generator/versioned.ts', 'packages/api/src/keys.ts', 'packages/api/src/ballots.ts', 'packages/api/src/session.ts', 'db/migrations/0001_init.sql', 'scripts/deploy.mjs', 'scripts/runtime-dependencies.json', 'scripts/dev-dependencies.json', 'vercel.json', '.github/workflows/check.yml', '.claude/hooks/block-dangerous-git.sh', '.codex/hooks.json'],
-    sensitive: ['packages/shared/src/copy.ts', 'packages/api/src/http.ts', 'api/me.ts', '.agents/merge-policy.json'],
-    routine: ['packages/app/src/main.ts', 'packages/core/src/phase.ts', 'docs/decisions.md', 'AGENTS.md'],
+    critical: [
+      // The domain: keys, timelock, tally, generator, phases, encryption, sessions, writes, data.
+      'packages/core/src/tally/index.ts', 'packages/core/src/generator/index.ts', 'packages/core/src/generator/versioned.ts', 'packages/core/src/phase.ts', 'packages/core/src/publication.ts',
+      'packages/app/src/crypto/timelock.ts', 'packages/api/src/keys.ts', 'packages/api/src/ballots.ts', 'packages/api/src/session.ts', 'packages/api/src/runtime.ts', 'db/migrations/0001_init.sql',
+      // Deploy, dependencies, and everything that defines or runs the required check.
+      'scripts/deploy.mjs', 'scripts/deployment/eas.ts', 'scripts/runtime-dependencies.json', 'scripts/dev-dependencies.json', 'scripts/dev-overrides.json', 'scripts/bun-release.json', 'vercel.json',
+      'package.json', 'packages/app/package.json', 'bun.lock', '.bun-version', 'scripts/test.mjs', 'scripts/eslint-rules.mjs', 'eslint.config.mjs', 'vitest.config.ts', '.github/workflows/check.yml',
+      // The git guardrail, for both tools.
+      '.claude/hooks/block-dangerous-git.sh', '.claude/settings.json', '.codex/hooks.json',
+    ],
+    sensitive: ['packages/shared/src/copy.ts', 'packages/api/src/http.ts', 'api/me.ts', '.agents/merge-policy.json', '.agents/adapter.md', 'AGENTS.md', 'scripts/data/validation-policy.json'],
+    routine: ['packages/app/src/main.ts', 'packages/app/src/game/mound-size.ts', 'docs/decisions.md', 'tests/e2e/lifecycle.spec.ts'],
   };
   for (const [tier, files] of Object.entries(pins)) {
     for (const file of files) {

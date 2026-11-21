@@ -27,7 +27,14 @@
       ],
       "exact": [
         ".agents/policy.json",
-        ".agents/merge-policy.json"
+        ".agents/merge-policy.json",
+        "AGENTS.md",
+        ".agents/adapter.md",
+        ".github/CODEOWNERS",
+        ".github/pull_request_template.md",
+        "scripts/data/validation-policy.json",
+        "scripts/select-checks.mjs",
+        "scripts/merge-tiers.mjs"
       ]
     }
   ],
@@ -64,8 +71,17 @@
       "prefixes": [
         "scripts/",
         ".claude/hooks/",
-        ".codex/",
-        "tests/deployment/"
+        ".codex/"
+      ]
+    },
+    {
+      "surface": "deployment",
+      "prefixes": [
+        "tests/deployment/",
+        "scripts/deploy.mjs",
+        "scripts/register-schemas.ts",
+        "scripts/check-shutter.ts",
+        "scripts/deployment/"
       ]
     },
     {
@@ -91,7 +107,14 @@
       ],
       "exact": [
         ".agents/policy.json",
-        ".agents/merge-policy.json"
+        ".agents/merge-policy.json",
+        "AGENTS.md",
+        ".agents/adapter.md",
+        ".github/CODEOWNERS",
+        ".github/pull_request_template.md",
+        "scripts/data/validation-policy.json",
+        "scripts/select-checks.mjs",
+        "scripts/merge-tiers.mjs"
       ],
       "runInQa": true
     }
@@ -106,7 +129,9 @@
         "packages/core/src/tally/",
         "packages/core/src/eas/",
         "packages/core/src/generator/",
+        "packages/app/src/crypto/",
         "db/",
+        "scripts/deployment/",
         ".claude/hooks/",
         ".github/workflows/"
       ],
@@ -127,16 +152,37 @@
         "packages/api/src/store.ts",
         "packages/api/src/database.ts",
         "packages/api/src/clock.ts",
+        "packages/core/src/phase.ts",
+        "packages/core/src/target-id.ts",
+        "packages/core/src/publication.ts",
+        "packages/api/src/runtime.ts",
         "scripts/deploy.mjs",
         "scripts/register-schemas.ts",
+        "scripts/check-shutter.ts",
         "scripts/migrate.ts",
         "scripts/check-dependencies.mjs",
         "scripts/install-bun.mjs",
         "vercel.json",
+        "package.json",
+        "bun.lock",
+        ".bun-version",
+        ".node-version",
+        "scripts/test.mjs",
+        "scripts/no-network.mjs",
+        "scripts/eslint-rules.mjs",
+        "eslint.config.mjs",
+        "vitest.config.ts",
+        "scripts/build-policy.mjs",
+        "scripts/build-budget.mjs",
+        "scripts/check-toolchain.mjs",
+        "scripts/bun-release.json",
+        "scripts/dev-overrides.json",
+        ".claude/settings.json",
         ".codex/hooks.json"
       ],
       "globs": [
-        "scripts/*-dependencies.json"
+        "scripts/*-dependencies.json",
+        "packages/*/package.json"
       ],
       "checks": [
         "full-check",
@@ -188,6 +234,15 @@
       "expectedSignal": "the api project passes on PGlite",
       "freshness": "exact-inputs-and-toolchain",
       "budgetSeconds": 180,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "deployment-test",
+      "command": "node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project deployment",
+      "risk": "the deploy wrapper, Foundry or Shutter setup checks regress",
+      "expectedSignal": "the deployment project passes",
+      "freshness": "exact-inputs-and-toolchain",
+      "budgetSeconds": 60,
       "stopRule": "stop-dependent-checks"
     },
     {
@@ -255,6 +310,17 @@
         ],
         "focusable": false,
         "ownerProof": "api-test"
+      },
+      {
+        "id": "deployment",
+        "root": "tests/deployment/",
+        "source": null,
+        "manifest": null,
+        "checks": [
+          "deployment-test"
+        ],
+        "focusable": false,
+        "ownerProof": "deployment-test"
       },
       {
         "id": "tooling",

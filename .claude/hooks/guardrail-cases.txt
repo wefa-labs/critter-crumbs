@@ -1,5 +1,7 @@
-# expectation|command — "allow" means exit 0, "block" means exit 2
+# expectation|command: "allow" means exit 0, "block" means exit 2
 allow|git push
+block|git -c user.name=x push --force origin main
+block|git -C . reset --hard
 allow|git push -u origin docs/foundation
 allow|git push origin main
 allow|git push --set-upstream origin feature/x

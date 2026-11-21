@@ -2,6 +2,7 @@
 // (scripts/data/validation-policy.json) in step with .agents/merge-policy.json.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { tierOf } from './merge-tiers.mjs';
 import { loadPolicy, planValidation } from './select-checks.mjs';
@@ -37,6 +38,17 @@ test('a push names the test that proves a routine change', () => {
   const focused = planValidation({ intent: 'push', changedPaths: ['packages/app/src/game/mound-size.ts'], testPaths: { app: ['test/circle-motion.test.ts'] } }, { policy });
   assert.equal(focused.status, 'ready');
   assert.match(focused.checks.find((check) => check.id === 'app-test').command, /run --project app test\/circle-motion\.test\.ts$/);
+});
+
+test('every Vitest project a check runs exists, and every project has a check', () => {
+  const config = readFileSync('vitest.config.ts', 'utf8');
+  const projects = new Set([...config.matchAll(/\['([a-z', ]+)'\]\.map/g)].flatMap((match) => match[1].split(/', '/)).concat([...config.matchAll(/name: '([a-z]+)'/g)].map((match) => match[1])));
+  const named = new Set(policy.checks.flatMap((check) => [...check.command.matchAll(/--project ([a-z]+)/g)].map((match) => match[1])));
+  assert.deepEqual([...named].sort(), [...projects].sort());
+});
+
+test('a deployment test runs the deployment project', () => {
+  assert.deepEqual(ids(plan(['tests/deployment/cli.test.ts'])), ['lint', 'deployment-test']);
 });
 
 test('the selector gives every tracked file its merge tier, raising only package entries and manifests', () => {

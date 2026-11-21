@@ -1,6 +1,6 @@
 # AGENTS.md: Critter Crumbs
 
-Read this before touching anything. The four documents in `docs/` are the spec; this file is the part every agent must keep in its head. The shared rules every agent follows on afo's machines are in `~/.agents/AGENTS.md`; cloud agents never load them, so everything this repository needs is enforced here, in the repository and CI.
+Read this before touching anything. The four documents in `docs/` are the spec; this file is the part every agent must keep in its head. The shared rules every agent follows on afo's machines are in `~/.agents/AGENTS.md`; cloud agents never load them. What must hold for every agent is enforced in the repository and CI (lint, tests, the guardrail hook, the required check); `.agents/policy.json` adds rules that only the machine-wide guards read.
 
 ## What this is
 
@@ -55,9 +55,9 @@ A rule with no enforcer but review is a candidate for one: a lint rule, a test, 
 | Each generator version is frozen | vector tests | `packages/core/test/generator.test.ts`, `generator-v2.test.ts` |
 | Generated design tokens match their source | `check:tokens` | `scripts/generate-tokens.mjs` |
 | Bun and Node versions are the pinned ones | `check:toolchain` | `scripts/check-toolchain.mjs` |
-| No force pushes, hard resets, forced cleans or deletions, wholesale discards, history rewrites | git guardrail hook for Claude Code and Codex, and repo guard rules | `.claude/hooks/block-dangerous-git.sh`, `.codex/hooks.json`, `.agents/policy.json`; cases run by `bun run test` |
-| A production deploy and EAS schema registration are afo's to run | repo guard rules `production-deploy`, `eas-schema-registration` (ask), and credentials only he holds | `.agents/policy.json` |
-| Every pull request passes the full check and the production build | CI job `check` | `.github/workflows/check.yml` |
+| No force pushes, hard resets, forced cleans or deletions, wholesale discards, history rewrites | git guardrail hook for Claude Code and Codex; repo guard rules where the machine-wide guards run | `.claude/hooks/block-dangerous-git.sh`, `.codex/hooks.json`, `.agents/policy.json`; cases run by `bun run test` |
+| A production deploy and EAS schema registration are afo's to run | credentials only he holds; repo guard rules `production-deploy`, `vercel-production`, `eas-schema-registration` (ask) | `.agents/policy.json` |
+| Every pull request passes the full check and the production build before it merges | CI job `check`, the required check once afo applies the merge settings; admins can still bypass it, so agents never merge with `--admin` (repo guard rule `admin-merge`) | `.github/workflows/check.yml`, `.agents/merge-policy.json`, `.agents/policy.json` |
 | A pull request records its tier and proof | PR template, review | `.github/pull_request_template.md`, `.agents/merge-policy.json` |
 | No em dash in this file | `agents-doctor` (`no-em-dash`) | run locally until the doctor runs in CI |
 | Never in user-facing copy: seal, round, cache, vote, ballot, wallet | review | `docs/02-design-system.md` §10 |
@@ -65,7 +65,7 @@ A rule with no enforcer but review is a candidate for one: a lint rule, a test, 
 
 ## Merging and proof
 
-`main` is the integration branch, and nothing deploys from it: production is a manual deploy. Agents merge every tier into `main` on proof alone, with merge commits. The tiers, their paths and their proof are in `.agents/merge-policy.json`: critical (keys, timelock, tally, generator, sessions, writes, data, deploy and CI), sensitive (`packages/shared`, `packages/api`, `api/`) and routine (everything else). Each pull request names its tier and its proof in its Verification section. afo's approval is needed only for `bun run deploy --production --execute` and an EAS schema registration, and both are his to run.
+`main` is the integration branch, and nothing deploys from it: production is a manual deploy. Agents merge every tier into `main` on proof alone, with merge commits. The tiers, their paths and their proof are in `.agents/merge-policy.json`: critical (keys, timelock, tally, generator, phases, encryption, sessions, writes, data, deploy, dependencies, everything that defines the required check, and CI), sensitive (`packages/shared`, `packages/api`, `api/`, the agent rules) and routine (everything else). Each pull request names its tier and its proof in its Verification section. afo's approval is needed only for `bun run deploy --production --execute` and an EAS schema registration, and both are his to run.
 
 ## Shared engineering guidance
 

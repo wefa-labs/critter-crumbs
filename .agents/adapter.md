@@ -30,12 +30,13 @@ Bun 1.4.2 and Node 22.22.1 (`.bun-version`, `.node-version`; `bun run check:tool
 ### Conditional checks
 - A change that renders under `packages/app/src` → labeled captures at 375 and 1280 wide from the local stack (`bun run dev:local`), or a line saying why they are pending.
 - `tests/e2e/**` or a game screen → `bun run e2e` against a running `bun run dev:local`.
+- `tests/deployment/**` or `scripts/deployment/**` → the selector's `deployment-test`.
 - `tests/screens/**` → `node node_modules/playwright/cli.js test --config playwright.screens.config.ts` against a running `bun run dev:local`.
 - `db/migrations/**` → `bun run test` (the api project migrates PGlite from scratch).
 - A dependency → `bun run check:licenses` and `bun run check:audit` (both in `bun run check`), plus a `docs/decisions.md` line.
 
 ### Criticality
-`.agents/merge-policy.json`: critical (keys, timelock, tally, EAS, generator, sessions and server writes, `db/`, deploy and dependency scripts, `vercel.json`, the git guardrail, `.github/workflows/`), sensitive (`packages/shared/`, `packages/api/`, `api/`, the agent policies), routine (the rest). Critical: the full gate and the production build plus an adversarial review by a fresh agent. Sensitive: `bun run check` plus that review.
+`.agents/merge-policy.json`: critical (keys, timelock, tally, EAS, generator, phases, client-side encryption, sessions and server writes, `db/`, deploy, dependencies and their allowlists, everything that defines the required check, the git guardrail, `.github/workflows/`), sensitive (`packages/shared/`, `packages/api/`, `api/`, the agent rules), routine (the rest). Critical: the full gate and the production build plus an adversarial review by a fresh agent. Sensitive: `bun run check` plus that review.
 
 ### CI
 GitHub Actions, workflow `Foundation checks` (`.github/workflows/check.yml`), job `check`: `bun run check`, then `bun run vercel-build`, on every push and pull request. `check` is the one required check. The Playwright suites do not run in CI yet. Actions must be GitHub-owned and pinned by SHA: the wefa-labs organisation allows only listed actions, and one unlisted action fails the whole workflow at startup.

@@ -8,7 +8,7 @@
   ],
   "adminBypass": "always",
   "release": {
-    "about": "main is the integration branch and nothing deploys from it: production is a manual deploy (docs/build/deployment.md). Agents merge every tier into main on proof alone (decided 15 November 2026, applied here 21 November). Each pull request names its tier and its proof in its Verification section; no Merge Gate check reads it. CI's check job (bun run check, then bun run vercel-build) runs on every pull request and is the required check, so no change of any tier merges without the full gate and the production build passing.",
+    "about": "main is the integration branch and nothing deploys from it: production is a manual deploy (docs/build/deployment.md). Agents merge every tier into main on proof alone (decided 15 November 2026, applied here 21 November). Each pull request names its tier and its proof in its Verification section; no Merge Gate check reads it. CI's check job (bun run check, then bun run vercel-build) runs on every pull request and is the required check. adminBypass stays until afo removes the admin bypasses elsewhere; agents never merge past a red or missing check (gh pr merge --admin is refused by .agents/policy.json).",
     "approvalAt": [
       "bun run deploy --production --execute",
       "EAS schema registration (bun run register-schemas --execute)"
@@ -16,7 +16,7 @@
   },
   "tiers": {
     "critical": {
-      "about": "Keys, the timelock, the tally, attestations, the generator, sessions and every server write, the data, deploy, the dependency allowlists, the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
+      "about": "Keys, the timelock, the tally, attestations, the generator, phases, client-side encryption, sessions and every server write, the data, deploy, dependencies and their allowlists, everything that defines the required check (package scripts, the test runner, lint, the toolchain pins), the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
       "paths": [
         "packages/core/src/account/**",
         "packages/core/src/timelock/**",
@@ -39,14 +39,37 @@
         "packages/api/src/store.ts",
         "packages/api/src/database.ts",
         "packages/api/src/clock.ts",
+        "packages/app/src/crypto/**",
+        "packages/core/src/phase.ts",
+        "packages/core/src/target-id.ts",
+        "packages/core/src/publication.ts",
+        "packages/api/src/runtime.ts",
         "db/**",
         "scripts/deploy.mjs",
         "scripts/register-schemas.ts",
+        "scripts/deployment/**",
+        "scripts/check-shutter.ts",
         "scripts/migrate.ts",
         "scripts/check-dependencies.mjs",
         "scripts/install-bun.mjs",
         "scripts/*-dependencies.json",
         "vercel.json",
+        "package.json",
+        "packages/*/package.json",
+        "bun.lock",
+        ".bun-version",
+        ".node-version",
+        "scripts/test.mjs",
+        "scripts/no-network.mjs",
+        "scripts/eslint-rules.mjs",
+        "eslint.config.mjs",
+        "vitest.config.ts",
+        "scripts/build-policy.mjs",
+        "scripts/build-budget.mjs",
+        "scripts/check-toolchain.mjs",
+        "scripts/bun-release.json",
+        "scripts/dev-overrides.json",
+        ".claude/settings.json",
         ".claude/hooks/**",
         ".codex/hooks.json",
         ".github/workflows/**"
@@ -55,13 +78,20 @@
       "autoMerge": true
     },
     "sensitive": {
-      "about": "The shared contract (types, copy, constants, validators), the rest of the API and the Vercel routes, and the agent rules. Proof: bun run check green and an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof.",
+      "about": "The shared contract (types, copy, constants, validators), the rest of the API and the Vercel routes, and the agent rules (AGENTS.md, the policies, the adapter, the selector and its policy, CODEOWNERS, the PR template). Proof: bun run check green and an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof.",
       "paths": [
         "packages/shared/**",
         "packages/api/**",
         "api/**",
         ".agents/policy.json",
-        ".agents/merge-policy.json"
+        ".agents/merge-policy.json",
+        "AGENTS.md",
+        ".agents/adapter.md",
+        ".github/CODEOWNERS",
+        ".github/pull_request_template.md",
+        "scripts/data/validation-policy.json",
+        "scripts/select-checks.mjs",
+        "scripts/merge-tiers.mjs"
       ],
       "requireCodeOwnerReview": false,
       "autoMerge": true
