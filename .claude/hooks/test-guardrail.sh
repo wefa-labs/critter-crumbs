@@ -41,15 +41,30 @@ while IFS='|' read -r expect command; do
   run_case codex-argv "$codex_hook" "$as_argv" "$expect" "$command"
 done < "$cases"
 
-unreadable=('{"tool_input":"git status"}' '{"tool_input":42}' 'not json')
+unreadable=('{"tool_input":"git status"}' '{"tool_input":42}' 'not json' '{"tool_input":{"action":{"command":"git status"}}}')
 for event in "${unreadable[@]}"; do
   run_case claude "$claude_hook" "$event" block "unreadable event: $event"
   run_case codex "$codex_hook" "$event" block "unreadable event: $event"
 done
 
+# Shapes a one-line case cannot spell: a line continuation, and a second command field.
+destructive=$(printf 'git push \\\n --%s origin main' force)
+shapes=(
+  "$(jq -n --arg c "$destructive" '{tool_input:{command:$c}}')"
+  "$(jq -n --arg c "$(printf 'git reset \\\n --%s' hard)" '{tool_input:{command:$c}}')"
+  "$(jq -n --arg c "git push --$(printf force) origin main" '{tool_input:{command:"", cmd:$c}}')"
+)
+for event in "${shapes[@]}"; do
+  run_case claude "$claude_hook" "$event" block "event shape: $event"
+  run_case codex "$codex_hook" "$event" block "event shape: $event"
+done
+for event in '{}' '{"tool_input":null}' '{"tool_input":{}}' '{"tool_input":{"command":""}}'; do
+  run_case claude "$claude_hook" "$event" allow "empty event: $event"
+done
+
 n=$(grep -cE '^(allow|block)\|' "$cases")
 if [ $fails -eq 0 ]; then
-  echo "guardrail: $n cases and ${#unreadable[@]} unreadable events pass for Claude Code and Codex ($total runs)"
+  echo "guardrail: $n cases, ${#unreadable[@]} unreadable events and ${#shapes[@]} event shapes pass for Claude Code and Codex ($total runs)"
 else
   echo "guardrail: $fails of $total runs FAILED"; exit 1
 fi

@@ -64,6 +64,14 @@
         "scripts/eslint-rules.mjs",
         "eslint.config.mjs",
         "vitest.config.ts",
+        "tsconfig*.json",
+        "packages/*/tsconfig.json",
+        "api/tsconfig.json",
+        "packages/app/vite.config.ts",
+        "bunfig.toml",
+        "scripts/generate-tokens.mjs",
+        "scripts/probe-workspaces.mjs",
+        "scripts/development-assets.test.mjs",
         "scripts/build-policy.mjs",
         "scripts/build-budget.mjs",
         "scripts/check-toolchain.mjs",
@@ -91,7 +99,12 @@
         ".github/pull_request_template.md",
         "scripts/data/validation-policy.json",
         "scripts/select-checks.mjs",
-        "scripts/merge-tiers.mjs"
+        "scripts/merge-tiers.mjs",
+        "CLAUDE.md",
+        ".agents/skills/**",
+        "scripts/merge-policy.test.mjs",
+        "scripts/select-checks.test.mjs",
+        "scripts/agent-policy.test.mjs"
       ],
       "requireCodeOwnerReview": false,
       "autoMerge": true

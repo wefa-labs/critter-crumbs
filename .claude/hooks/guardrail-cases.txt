@@ -2,6 +2,31 @@
 allow|git push
 block|git -c user.name=x push --force origin main
 block|git -C . reset --hard
+block|git -C . clean -fdx
+block|git --no-pager clean -fdx
+block|git clean --force
+block|git -C . branch -D x
+block|git branch --delete --force x
+block|git branch -f -d x
+block|git -C . checkout .
+block|git --git-dir=.git checkout .
+block|git checkout -f
+block|git -c a=b restore .
+block|git restore :/
+block|git restore --staged --worktree .
+block|git restore -W .
+block|git push -uf origin main
+block|git push origin +main
+block|git push origin :feature
+block|git -C . filter-branch --all
+block|git -C . reflog expire --all
+allow|git restore --staged .
+allow|git restore -S .
+allow|git checkout ./file.ts
+allow|git push --follow-tags origin main
+allow|git -C . status
+allow|git log -p --follow src/a.ts
+allow|git commit -m "push the fix"
 allow|git push -u origin docs/foundation
 allow|git push origin main
 allow|git push --set-upstream origin feature/x

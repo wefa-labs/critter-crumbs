@@ -42,8 +42,8 @@ test('a push names the test that proves a routine change', () => {
 
 test('every Vitest project a check runs exists, and every project has a check', () => {
   const config = readFileSync('vitest.config.ts', 'utf8');
-  const projects = new Set([...config.matchAll(/\['([a-z', ]+)'\]\.map/g)].flatMap((match) => match[1].split(/', '/)).concat([...config.matchAll(/name: '([a-z]+)'/g)].map((match) => match[1])));
-  const named = new Set(policy.checks.flatMap((check) => [...check.command.matchAll(/--project ([a-z]+)/g)].map((match) => match[1])));
+  const projects = new Set([...config.matchAll(/\['([a-z', ]+)'\]\.map/g)].flatMap((match) => match[1].split(/', '/)).concat([...config.matchAll(/name: '([a-z-]+)'/g)].map((match) => match[1])));
+  const named = new Set(policy.checks.flatMap((check) => [...check.command.matchAll(/--project ([a-z-]+)/g)].map((match) => match[1])));
   assert.deepEqual([...named].sort(), [...projects].sort());
 });
 

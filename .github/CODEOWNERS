@@ -16,6 +16,11 @@
 /scripts/data/validation-policy.json             @Oba-One
 /scripts/select-checks.mjs                       @Oba-One
 /scripts/merge-tiers.mjs                         @Oba-One
+/CLAUDE.md                                       @Oba-One
+/.agents/skills/                                 @Oba-One
+/scripts/merge-policy.test.mjs                   @Oba-One
+/scripts/select-checks.test.mjs                  @Oba-One
+/scripts/agent-policy.test.mjs                   @Oba-One
 
 # Critical
 /packages/core/src/account/                      @Oba-One
@@ -64,6 +69,14 @@
 /scripts/eslint-rules.mjs                        @Oba-One
 /eslint.config.mjs                               @Oba-One
 /vitest.config.ts                                @Oba-One
+/tsconfig*.json                                  @Oba-One
+/packages/*/tsconfig.json                        @Oba-One
+/api/tsconfig.json                               @Oba-One
+/packages/app/vite.config.ts                     @Oba-One
+/bunfig.toml                                     @Oba-One
+/scripts/generate-tokens.mjs                     @Oba-One
+/scripts/probe-workspaces.mjs                    @Oba-One
+/scripts/development-assets.test.mjs             @Oba-One
 /scripts/build-policy.mjs                        @Oba-One
 /scripts/build-budget.mjs                        @Oba-One
 /scripts/check-toolchain.mjs                     @Oba-One

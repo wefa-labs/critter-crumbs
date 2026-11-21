@@ -23,7 +23,8 @@
       "prefixes": [
         "packages/shared/",
         "packages/api/",
-        "api/"
+        "api/",
+        ".agents/skills/"
       ],
       "exact": [
         ".agents/policy.json",
@@ -34,7 +35,11 @@
         ".github/pull_request_template.md",
         "scripts/data/validation-policy.json",
         "scripts/select-checks.mjs",
-        "scripts/merge-tiers.mjs"
+        "scripts/merge-tiers.mjs",
+        "CLAUDE.md",
+        "scripts/merge-policy.test.mjs",
+        "scripts/select-checks.test.mjs",
+        "scripts/agent-policy.test.mjs"
       ]
     }
   ],
@@ -103,7 +108,8 @@
       "prefixes": [
         "packages/shared/",
         "packages/api/",
-        "api/"
+        "api/",
+        ".agents/skills/"
       ],
       "exact": [
         ".agents/policy.json",
@@ -114,7 +120,11 @@
         ".github/pull_request_template.md",
         "scripts/data/validation-policy.json",
         "scripts/select-checks.mjs",
-        "scripts/merge-tiers.mjs"
+        "scripts/merge-tiers.mjs",
+        "CLAUDE.md",
+        "scripts/merge-policy.test.mjs",
+        "scripts/select-checks.test.mjs",
+        "scripts/agent-policy.test.mjs"
       ],
       "runInQa": true
     }
@@ -172,6 +182,12 @@
         "scripts/eslint-rules.mjs",
         "eslint.config.mjs",
         "vitest.config.ts",
+        "api/tsconfig.json",
+        "packages/app/vite.config.ts",
+        "bunfig.toml",
+        "scripts/generate-tokens.mjs",
+        "scripts/probe-workspaces.mjs",
+        "scripts/development-assets.test.mjs",
         "scripts/build-policy.mjs",
         "scripts/build-budget.mjs",
         "scripts/check-toolchain.mjs",
@@ -182,7 +198,9 @@
       ],
       "globs": [
         "scripts/*-dependencies.json",
-        "packages/*/package.json"
+        "packages/*/package.json",
+        "tsconfig*.json",
+        "packages/*/tsconfig.json"
       ],
       "checks": [
         "full-check",
