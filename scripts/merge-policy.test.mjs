@@ -57,7 +57,7 @@ test('the files whose tier matters most land in it', () => {
       '.claude/hooks/block-dangerous-git.sh', '.claude/hooks/test-guardrail.sh', '.claude/hooks/guardrail-cases.txt', '.claude/settings.json', '.codex/hooks.json', 'scripts/guardrails.test.mjs',
     ],
     sensitive: ['packages/shared/src/copy.ts', 'packages/api/src/http.ts', 'api/me.ts', '.agents/merge-policy.json', '.agents/policy.json', '.agents/adapter.md', 'AGENTS.md', 'CLAUDE.md', '.agents/skills/review/SKILL.md', 'scripts/data/validation-policy.json', 'scripts/agent-policy.test.mjs'],
-    routine: ['packages/app/src/main.ts', 'packages/app/src/game/mound-size.ts', 'docs/decisions.md', 'tests/e2e/lifecycle.spec.ts', 'docs/explorations/garden-refinement/tsconfig.json'],
+    routine: ['packages/app/src/main.ts', 'packages/app/src/game/mound-size.ts', 'docs/decisions.md', 'tests/e2e/lifecycle.spec.ts', 'docs/explorations/garden-refinement/README.md'],
   };
   for (const [tier, files] of Object.entries(pins)) {
     for (const file of files) {
