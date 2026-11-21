@@ -2,10 +2,12 @@
 // (scripts/data/validation-policy.json) in step with .agents/merge-policy.json.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import { test } from 'node:test';
 import { tierOf } from './merge-tiers.mjs';
-import { loadPolicy, planValidation } from './select-checks.mjs';
+import { loadPolicy, planValidation, resolveGitInputs } from './select-checks.mjs';
 
 const policy = loadPolicy('scripts/data/validation-policy.json');
 const plan = (paths, intent = 'ship') => planValidation({ intent, changedPaths: paths }, { policy });
@@ -49,6 +51,35 @@ test('every Vitest project a check runs exists, and every project has a check', 
 
 test('a deployment test runs the deployment project', () => {
   assert.deepEqual(ids(plan(['tests/deployment/cli.test.ts'])), ['lint', 'deployment-test']);
+});
+
+test('a critical file moved to a routine path keeps the critical tier, staged and committed', (t) => {
+  // A scratch repository with no global or system git config, so no hook, signing or identity of
+  // the machine applies to it.
+  const env = { ...Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_'))), GIT_CONFIG_GLOBAL: '/dev/null', GIT_CONFIG_NOSYSTEM: '1' };
+  const repo = realpathSync(mkdtempSync(path.join(tmpdir(), 'critter-crumbs-selector-rename-')));
+  t.after(() => rmSync(repo, { recursive: true, force: true }));
+  const git = (...args) => execFileSync('git', ['-c', 'user.name=t', '-c', 'user.email=t@example.invalid', '-c', 'init.defaultBranch=main', ...args], { cwd: repo, env, encoding: 'utf8' }).trim();
+  const critical = 'packages/core/src/tally/index.ts';
+  const routine = 'notes/index.ts';
+  git('init', '--quiet');
+  mkdirSync(path.join(repo, path.dirname(critical)), { recursive: true });
+  writeFileSync(path.join(repo, critical), 'export const tally = () => 0;\n');
+  git('add', critical);
+  git('commit', '--quiet', '-m', 'add the tally');
+  const base = git('rev-parse', 'HEAD');
+  assert.equal(plan([routine]).risk, 'routine', 'the new path alone plans as routine');
+  const moved = (stage) => {
+    const inputs = resolveGitInputs({ base }, { cwd: repo, env });
+    assert.deepEqual(inputs.changedPaths, [routine, critical], `${stage}: both paths changed`);
+    assert.deepEqual(inputs.deletedPaths, [critical], `${stage}: the old path is deleted`);
+    assert.equal(planValidation({ changedPaths: inputs.changedPaths, deletedPaths: inputs.deletedPaths }, { policy }).risk, 'critical', stage);
+  };
+  mkdirSync(path.join(repo, 'notes'));
+  git('mv', critical, routine);
+  moved('staged');
+  git('commit', '--quiet', '-m', 'move the tally');
+  moved('committed');
 });
 
 test('the selector gives every tracked file its merge tier, raising only package entries and manifests', () => {

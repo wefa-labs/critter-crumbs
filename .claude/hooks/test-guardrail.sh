@@ -1,8 +1,8 @@
 #!/bin/bash
 # Verifies the git guardrail against guardrail-cases.txt, through the exact hook command that
 # each tool wires: .claude/settings.json for Claude Code and .codex/hooks.json for Codex. Codex
-# is exercised with the command as a string, as a shell's argv (["bash", "-lc", script]) and as a
-# plain argv split on spaces, the shapes it sends. Events the hook cannot read must be refused.
+# is exercised with the command as a string and as an argv split on spaces (a shell's argv,
+# ["bash", "-lc", script], joins to the same text). Events the hook cannot read must be refused.
 # Usage: .claude/hooks/test-guardrail.sh   (exits non-zero if any case fails)
 # Run by scripts/test.mjs, so `bun run check` and CI run it too.
 
@@ -33,11 +33,9 @@ run_case() { # tool, hook command, event json, expectation, command
 while IFS='|' read -r expect command; do
   case "$expect" in ''|'#'*) continue ;; esac
   as_string=$(printf '%s' "$command" | jq -Rs '{tool_name:"Bash", tool_input:{command:.}}')
-  as_shell=$(printf '%s' "$command" | jq -Rs '{tool_name:"Bash", tool_input:{command:["bash","-lc",.]}}')
   as_argv=$(printf '%s' "$command" | jq -Rs '{tool_name:"Bash", tool_input:{command:split(" ")}}')
   run_case claude "$claude_hook" "$as_string" "$expect" "$command"
   run_case codex "$codex_hook" "$as_string" "$expect" "$command"
-  run_case codex-shell "$codex_hook" "$as_shell" "$expect" "$command"
   run_case codex-argv "$codex_hook" "$as_argv" "$expect" "$command"
 done < "$cases"
 

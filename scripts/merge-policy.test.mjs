@@ -54,9 +54,9 @@ test('the files whose tier matters most land in it', () => {
       'scripts/deploy.mjs', 'scripts/deployment/eas.ts', 'scripts/runtime-dependencies.json', 'scripts/dev-dependencies.json', 'scripts/dev-overrides.json', 'scripts/bun-release.json', 'vercel.json',
       'package.json', 'packages/app/package.json', 'bun.lock', '.bun-version', 'bunfig.toml', 'tsconfig.json', 'packages/core/tsconfig.json', 'packages/app/vite.config.ts', 'scripts/generate-tokens.mjs', 'scripts/test.mjs', 'scripts/eslint-rules.mjs', 'eslint.config.mjs', 'vitest.config.ts', '.github/workflows/check.yml',
       // The git guardrail, for both tools.
-      '.claude/hooks/block-dangerous-git.sh', '.claude/settings.json', '.codex/hooks.json',
+      '.claude/hooks/block-dangerous-git.sh', '.claude/hooks/test-guardrail.sh', '.claude/hooks/guardrail-cases.txt', '.claude/settings.json', '.codex/hooks.json', 'scripts/guardrails.test.mjs',
     ],
-    sensitive: ['packages/shared/src/copy.ts', 'packages/api/src/http.ts', 'api/me.ts', '.agents/merge-policy.json', '.agents/adapter.md', 'AGENTS.md', 'CLAUDE.md', '.agents/skills/review/SKILL.md', 'scripts/data/validation-policy.json', 'scripts/agent-policy.test.mjs'],
+    sensitive: ['packages/shared/src/copy.ts', 'packages/api/src/http.ts', 'api/me.ts', '.agents/merge-policy.json', '.agents/policy.json', '.agents/adapter.md', 'AGENTS.md', 'CLAUDE.md', '.agents/skills/review/SKILL.md', 'scripts/data/validation-policy.json', 'scripts/agent-policy.test.mjs'],
     routine: ['packages/app/src/main.ts', 'packages/app/src/game/mound-size.ts', 'docs/decisions.md', 'tests/e2e/lifecycle.spec.ts', 'docs/explorations/garden-refinement/tsconfig.json'],
   };
   for (const [tier, files] of Object.entries(pins)) {

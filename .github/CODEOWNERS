@@ -67,6 +67,7 @@
 /scripts/test.mjs                                @Oba-One
 /scripts/no-network.mjs                          @Oba-One
 /scripts/eslint-rules.mjs                        @Oba-One
+/scripts/guardrails.test.mjs                     @Oba-One
 /eslint.config.mjs                               @Oba-One
 /vitest.config.ts                                @Oba-One
 /tsconfig*.json                                  @Oba-One

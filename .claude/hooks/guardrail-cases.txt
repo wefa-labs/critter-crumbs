@@ -59,3 +59,73 @@ block|git restore .
 block|git filter-branch --all
 block|git reflog expire --expire=now --all
 block|git gc --prune=now
+# From the third review: chains, operators, quotes, shells, options with values, bundled flags
+block|git push "--force"
+block|git "push" -f
+block|git push origin "+main"
+block|git push --force=origin/main
+block|git -c x=y -C d push -f
+block|git	push	-f
+block|FOO=1 git push -f
+block|xargs git push -f
+block|sh -c 'git push -f'
+block|bash -c "git reset --hard"
+block|bash -c 'git checkout .'
+block|bash -c 'git clean -fd'
+block|git reset --hard;echo
+block|git reset --hard; echo ok
+block|git reset --hard&&echo ok
+block|(cd sub && git reset --hard)
+block|git push -f;echo
+block|git push origin main -f&&echo
+block|git clean -fd)
+block|git checkout .;ls
+block|git reset --hard|cat
+block|git --git-dir .git push -f
+block|git --work-tree . reset --hard
+block|git -C "my dir" push -f
+block|git checkout ./
+block|git checkout -- ./
+block|git restore ./
+block|git restore --staged .; git restore .
+block|git restore --staged . && git restore .
+block|git branch -df x
+block|git branch -fd x
+block|git -c clean.requireForce=false clean -dx
+block|git push -ud origin x
+block|git switch -f main
+block|git switch --discard-changes main
+block|git checkout --force main
+block|eval "git push -f"
+block|git push --force"
+block|git branch -D x;
+block|git checkout HEAD -- .
+block|git restore --source=HEAD~3 -- .
+block|/usr/bin/git push -f
+allow|git log --format=%h%x09%s -n 5
+allow|git log --format='%h %s' --follow -- src/a.ts
+allow|git checkout -- src/a.ts
+allow|git checkout -- path/to/file
+allow|git push origin HEAD
+allow|git push origin feat-f
+allow|git push -u origin HEAD
+allow|git checkout -b feat && git add .
+allow|git checkout -b feat/x && git add . && git commit -m wip
+allow|git checkout main && npx prettier --write .
+allow|git push -u origin feat && gh pr create -d --fill
+allow|git push -u origin HEAD && gh pr create --draft --fill
+allow|git push && rm -rf dist
+allow|git push && tail -f log.txt
+allow|git branch -d old && ls -f
+allow|git clean -n && rm -f x
+allow|git restore src/a.ts && cd .
+allow|git reset HEAD~1 && git status --hard
+allow|git push origin HEAD:refs/heads/x
+allow|git checkout .github/workflows/ci.yml
+allow|git -c core.pager=cat log -p
+allow|git diff --stat . && git push
+allow|git checkout main && ls -la .
+allow|git push origin main && echo done -d
+allow|git stash push -m x -- .
+allow|git branch --show-current && git push origin HEAD -o ci.skip
+allow|git fetch origin && git checkout -B feat origin/feat

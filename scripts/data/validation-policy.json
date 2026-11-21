@@ -180,6 +180,7 @@
         "scripts/test.mjs",
         "scripts/no-network.mjs",
         "scripts/eslint-rules.mjs",
+        "scripts/guardrails.test.mjs",
         "eslint.config.mjs",
         "vitest.config.ts",
         "api/tsconfig.json",

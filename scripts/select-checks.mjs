@@ -1400,14 +1400,18 @@ export function resolveGitInputs(options = {}, { cwd = process.cwd(), env = proc
   const committedRange = git(['diff', '--raw', '--no-abbrev', '--no-renames', range]);
   const stagedPatch = raw(['diff', '--cached', '--binary'], root);
   const unstagedPatch = raw(['diff', '--binary'], root);
-  const committedPaths = lines(git(['diff', '--name-only', range]));
-  const stagedPaths = lines(git(['diff', '--cached', '--name-only']));
-  const unstagedPaths = lines(git(['diff', '--name-only']));
+  // Rename detection lists a moved file under its new path only, so a critical file moved to a
+  // routine path would plan as routine. Without it a move is a deletion plus an addition, and
+  // the path it left is planned too.
+  const names = (...args) => lines(git(['diff', '--name-only', '--no-renames', ...args]));
+  const committedPaths = names(range);
+  const stagedPaths = names('--cached');
+  const unstagedPaths = names();
   const untrackedPaths = lines(git(['ls-files', '--others', '--exclude-standard']));
   const deletedPaths = normalizePaths([
-    ...lines(git(['diff', '--name-only', '--diff-filter=D', range])),
-    ...lines(git(['diff', '--cached', '--name-only', '--diff-filter=D'])),
-    ...lines(git(['diff', '--name-only', '--diff-filter=D'])),
+    ...names('--diff-filter=D', range),
+    ...names('--cached', '--diff-filter=D'),
+    ...names('--diff-filter=D'),
   ]).filter((file) => !existsSync(path.resolve(root, file)));
   return {
     root,
