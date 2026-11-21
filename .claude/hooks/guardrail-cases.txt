@@ -1,5 +1,32 @@
-# expectation|command — "allow" means exit 0, "block" means exit 2
+# expectation|command: "allow" means exit 0, "block" means exit 2
 allow|git push
+block|git -c user.name=x push --force origin main
+block|git -C . reset --hard
+block|git -C . clean -fdx
+block|git --no-pager clean -fdx
+block|git clean --force
+block|git -C . branch -D x
+block|git branch --delete --force x
+block|git branch -f -d x
+block|git -C . checkout .
+block|git --git-dir=.git checkout .
+block|git checkout -f
+block|git -c a=b restore .
+block|git restore :/
+block|git restore --staged --worktree .
+block|git restore -W .
+block|git push -uf origin main
+block|git push origin +main
+block|git push origin :feature
+block|git -C . filter-branch --all
+block|git -C . reflog expire --all
+allow|git restore --staged .
+allow|git restore -S .
+allow|git checkout ./file.ts
+allow|git push --follow-tags origin main
+allow|git -C . status
+allow|git log -p --follow src/a.ts
+allow|git commit -m "push the fix"
 allow|git push -u origin docs/foundation
 allow|git push origin main
 allow|git push --set-upstream origin feature/x
@@ -32,3 +59,147 @@ block|git restore .
 block|git filter-branch --all
 block|git reflog expire --expire=now --all
 block|git gc --prune=now
+# From the third review: chains, operators, quotes, shells, options with values, bundled flags
+block|git push "--force"
+block|git "push" -f
+block|git push origin "+main"
+block|git push --force=origin/main
+block|git -c x=y -C d push -f
+block|git	push	-f
+block|FOO=1 git push -f
+block|xargs git push -f
+block|sh -c 'git push -f'
+block|bash -c "git reset --hard"
+block|bash -c 'git checkout .'
+block|bash -c 'git clean -fd'
+block|git reset --hard;echo
+block|git reset --hard; echo ok
+block|git reset --hard&&echo ok
+block|(cd sub && git reset --hard)
+block|git push -f;echo
+block|git push origin main -f&&echo
+block|git clean -fd)
+block|git checkout .;ls
+block|git reset --hard|cat
+block|git --git-dir .git push -f
+block|git --work-tree . reset --hard
+block|git -C "my dir" push -f
+block|git checkout ./
+block|git checkout -- ./
+block|git restore ./
+block|git restore --staged .; git restore .
+block|git restore --staged . && git restore .
+block|git branch -df x
+block|git branch -fd x
+block|git -c clean.requireForce=false clean -dx
+block|git push -ud origin x
+block|git switch -f main
+block|git switch --discard-changes main
+block|git checkout --force main
+block|eval "git push -f"
+block|git push --force"
+block|git branch -D x;
+block|git checkout HEAD -- .
+block|git restore --source=HEAD~3 -- .
+block|/usr/bin/git push -f
+allow|git log --format=%h%x09%s -n 5
+allow|git log --format='%h %s' --follow -- src/a.ts
+allow|git checkout -- src/a.ts
+allow|git checkout -- path/to/file
+allow|git push origin HEAD
+allow|git push origin feat-f
+allow|git push -u origin HEAD
+allow|git checkout -b feat && git add .
+allow|git checkout -b feat/x && git add . && git commit -m wip
+allow|git checkout main && npx prettier --write .
+allow|git push -u origin feat && gh pr create -d --fill
+allow|git push -u origin HEAD && gh pr create --draft --fill
+allow|git push && rm -rf dist
+allow|git push && tail -f log.txt
+allow|git branch -d old && ls -f
+allow|git clean -n && rm -f x
+allow|git restore src/a.ts && cd .
+allow|git reset HEAD~1 && git status --hard
+allow|git push origin HEAD:refs/heads/x
+allow|git checkout .github/workflows/ci.yml
+allow|git -c core.pager=cat log -p
+allow|git diff --stat . && git push
+allow|git checkout main && ls -la .
+allow|git push origin main && echo done -d
+allow|git stash push -m x -- .
+allow|git branch --show-current && git push origin HEAD -o ci.skip
+allow|git fetch origin && git checkout -B feat origin/feat
+# From the fourth review: substitutions, abbreviations, bundled flags, other spellings, wrappers
+block|git -C "$(git rev-parse --show-toplevel)" reset --hard
+block|git -C `pwd` reset --hard
+block|git --git-dir="$(pwd)/.git" push --force origin main
+block|git push origin "$(git branch --show-current)" --force
+block|git reset "$(git merge-base HEAD origin/main)" --hard
+block|git -c http.extraHeader="Authorization: Bearer $(gh auth token)" push --force origin main
+block|git -C "$(pwd)" checkout .
+block|git -C "$(pwd)" clean -fdx
+block|git push 2>&1 -f
+block|git reset --ha
+block|git reset --har
+block|git push --forc origin main
+block|git push --mirr
+block|git push origin --del x
+block|git clean --forc -d
+block|git branch --del --forc x
+block|git switch --discard main
+block|git checkout --forc main
+block|git checkout -qf main
+block|git checkout -fB main origin/main
+block|git switch -qf main
+block|git prune --expire=now
+block|git-filter-repo --path x --invert-paths
+block|git reflog delete HEAD@{1}
+block|git gc --prune=all
+block|git push --prune origin refs/heads/*:refs/heads/*
+block|git checkout -- '*'
+block|git restore '*'
+block|git checkout -- ':(top)'
+block|git restore ':(top)'
+block|git checkout ..
+block|git -c clean.requireForce= clean -dx
+block|git branch -f main HEAD~5
+block|time git push -f
+block|command git push -f
+block|exec git push -f
+block|nohup git push -f
+block|xargs -I{} git push -f origin {}
+block|GIT_DIR=x git reset --hard
+block|! git reset --hard
+block|{ git reset --hard; }
+block|if git reset --hard; then :; fi
+block|echo $(git reset --hard)
+block|env -i git push -f
+block|sudo git push -f
+block|git\ push -f
+block|g'i't push -f
+block|find . -exec git reset --hard \;
+allow|git add -A && git commit -m "fix: reset form state" && git push
+allow|git commit -m "make clean faster" && git push -u origin HEAD
+allow|git commit -m "push notifications" --no-verify
+allow|git pull --rebase origin main
+allow|git fetch origin && git rebase origin/main
+allow|git rebase -i HEAD~3
+allow|gh pr create --title "x" --body "y" && gh pr merge 98 --merge
+allow|gh pr merge 98 --merge --delete-branch
+allow|git push origin main 2>&1 | tail -5
+allow|git commit -m "checkout: handle ./ paths"
+allow|git commit -m "this is broken :/"
+allow|git commit -m "push: drop -d flag"
+allow|git switch -
+allow|git checkout -
+allow|git push --dry-run -u origin feat
+allow|git push --recurse-submodules=on-demand
+allow|git worktree add ../x -b feat
+allow|git commit -F msg.txt
+allow|git log --oneline -n 5 -- push.ts
+allow|cat .git/config && git status
+allow|git diff --name-only origin/main...HEAD
+allow|git commit --amend --no-edit && git push
+allow|git stash push -m "wip" && git pull --rebase && git stash pop
+allow|git push origin HEAD:refs/heads/c++-support
+block|git restore --staged --work .
