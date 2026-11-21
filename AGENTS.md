@@ -48,6 +48,9 @@ A rule with no enforcer but review is a candidate for one: a lint rule, a test, 
 | Imports run app → core → shared, api → core and shared, by package name only | lint `critter-crumbs/imports` | same |
 | Copy IDs, not strings, in components | lint `critter-crumbs/copy-ids` | same |
 | No `<Canvas>` from `@react-three/fiber` | lint `no-restricted-imports` | `eslint.config.mjs` |
+| Hooks follow the rules of hooks with complete dependencies; app markup is accessible | lint `react-hooks/*` and `jsx-a11y/*`, held to a shrink-only baseline of today's findings | `eslint.config.mjs`, `scripts/data/lint-baseline.json`, probes in `scripts/lint-rules.test.mjs` |
+| No promise is left floating in package or route code | lint `@typescript-eslint/no-floating-promises` (type-aware) | same |
+| Source is formatted, and no line runs past 200 characters | `format:check` (Biome), `scripts/line-length.test.mjs` | `biome.json` |
 | No eval-style code in the bundle | build policy | `scripts/build-policy.mjs` |
 | Shell and 3D chunks stay in budget | build budget | `scripts/build-budget.mjs` (`bun run build`) |
 | Every dependency is reviewed: exact version, allowed licence, archive hash | `check:licenses` | `scripts/check-dependencies.mjs` and its two allowlists |
@@ -125,7 +128,8 @@ Use Bun 1.4.2 for package management and scripts; Node 22.22.1 for the function 
 | Task | Command |
 | --- | --- |
 | Install | `bun install --frozen-lockfile --ignore-scripts` |
-| Full check (CI runs it on every pull request) | `bun run check`: toolchain, tokens, lint, typecheck, tests, the git guardrail, assets, workspaces, licences, vulnerability audit |
+| Full check (CI runs it on every pull request) | `bun run check`: toolchain, tokens, formatting, lint, typecheck, tests, the git guardrail, assets, workspaces, licences, vulnerability audit |
+| Format | `bun run format` (Biome); `bun run lint -- --shrink` lowers the lint baseline after fixing held findings |
 | Tests only | `bun run test` (Vitest, the tooling tests, the guardrail cases) |
 | Production build | `bun run build`: compiles workspaces, builds the app, enforces chunk budgets; CI runs `bun run vercel-build` |
 | Local stack | `bun run dev:local`: Vite at `http://127.0.0.1:5173`, the API on PGlite at `:3000`, mock encryption and the dev clock (`docs/build/local-core.md`) |

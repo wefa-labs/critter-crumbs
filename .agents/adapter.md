@@ -20,7 +20,7 @@ Bun 1.4.2 and Node 22.22.1 (`.bun-version`, `.node-version`; `bun run check:tool
 | Tier | Use | Command |
 |---|---|---|
 | targeted | the smallest proof of one changed behavior | `node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project <shared\|core\|app\|api> <test path>` |
-| style | non-mutating lint | `node node_modules/eslint/bin/eslint.js --max-warnings 0 <paths>` |
+| style | non-mutating format and lint | `bun run format:check && bun run lint` |
 | checkpoint | a coherent cross-package batch or shared-interface change | `bun run test` |
 | push | ready-for-CI gate on the committed tree | `bun run check` |
 | readiness | production-readiness review | `bun run check && bun run vercel-build` |

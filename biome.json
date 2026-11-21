@@ -1,8 +1,20 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
-  "linter": { "enabled": false },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "linter": {
+    "enabled": false
+  },
   "formatter": {
     "enabled": true,
     "formatWithErrors": true,
@@ -19,7 +31,11 @@
       "arrowParentheses": "always"
     }
   },
-  "json": { "formatter": { "enabled": false } },
+  "json": {
+    "formatter": {
+      "enabled": false
+    }
+  },
   "files": {
     "includes": [
       "**",
@@ -35,7 +51,8 @@
       "!.vercel/**",
       "!packages/app/src/styles/tokens.css",
       "!packages/app/src/styles/tokens.ts",
-      "!scripts/select-checks.mjs"
+      "!scripts/select-checks.mjs",
+      "!scripts/lint-baseline.mjs"
     ]
   }
 }

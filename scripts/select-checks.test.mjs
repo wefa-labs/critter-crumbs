@@ -17,21 +17,24 @@ const ids = (result) => result.checks.map((check) => check.id);
 test("a routine change gets the targeted suite of its package, not the full check", () => {
   const result = plan(["packages/app/src/game/mound-size.ts"]);
   assert.equal(result.risk, "routine");
-  assert.deepEqual(ids(result), ["lint", "app-test"]);
-  assert.match(result.checks[1].command, /vitest\.mjs run --project app$/);
+  assert.deepEqual(ids(result), ["format", "lint", "app-test"]);
+  assert.match(
+    result.checks.find((check) => check.id === "app-test").command,
+    /vitest\.mjs run --project app$/
+  );
 });
 
 test("a sensitive change adds the full check", () => {
   const result = plan(["packages/shared/src/copy.ts"]);
   assert.equal(result.risk, "sensitive");
-  assert.deepEqual(ids(result), ["lint", "shared-test", "full-check"]);
+  assert.deepEqual(ids(result), ["format", "lint", "shared-test", "full-check"]);
   assert.equal(result.checks.find((check) => check.id === "full-check").command, "bun run check");
 });
 
 test("a critical change needs the full check and the production build", () => {
   const result = plan(["packages/core/src/tally/index.ts"]);
   assert.equal(result.risk, "critical");
-  assert.deepEqual(ids(result), ["lint", "core-test", "full-check", "vercel-build"]);
+  assert.deepEqual(ids(result), ["format", "lint", "core-test", "full-check", "vercel-build"]);
   for (const id of ["full-check", "vercel-build"])
     assert.equal(result.checks.find((check) => check.id === id).mandatory, true);
   assert.equal(
@@ -60,9 +63,9 @@ test("a push names the test that proves a routine change", () => {
 test("every Vitest project a check runs exists, and every project has a check", () => {
   const config = readFileSync("vitest.config.ts", "utf8");
   const projects = new Set(
-    [...config.matchAll(/\['([a-z', ]+)'\]\.map/g)]
-      .flatMap((match) => match[1].split(/', '/))
-      .concat([...config.matchAll(/name: '([a-z-]+)'/g)].map((match) => match[1]))
+    [...config.matchAll(/\[((?:\s*["'][a-z-]+["'],?)+)\s*\]\.map/g)]
+      .flatMap((match) => [...match[1].matchAll(/["']([a-z-]+)["']/g)].map((name) => name[1]))
+      .concat([...config.matchAll(/name: ["']([a-z-]+)["']/g)].map((match) => match[1]))
   );
   const named = new Set(
     policy.checks.flatMap((check) =>
@@ -73,7 +76,11 @@ test("every Vitest project a check runs exists, and every project has a check", 
 });
 
 test("a deployment test runs the deployment project", () => {
-  assert.deepEqual(ids(plan(["tests/deployment/cli.test.ts"])), ["lint", "deployment-test"]);
+  assert.deepEqual(ids(plan(["tests/deployment/cli.test.ts"])), [
+    "format",
+    "lint",
+    "deployment-test",
+  ]);
 });
 
 test("a critical file moved to a routine path keeps the critical tier, staged and committed", (t) => {

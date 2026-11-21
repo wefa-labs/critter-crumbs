@@ -100,6 +100,10 @@ test("the files whose tier matters most land in it", () => {
       ".claude/settings.json",
       ".codex/hooks.json",
       "scripts/guardrails.test.mjs",
+      "biome.json",
+      "scripts/lint.mjs",
+      "scripts/data/lint-baseline.json",
+      "scripts/lint-rules.test.mjs",
     ],
     sensitive: [
       "packages/shared/src/copy.ts",

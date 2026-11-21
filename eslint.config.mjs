@@ -1,5 +1,7 @@
 import parser from "@typescript-eslint/parser";
 import typescript from "@typescript-eslint/eslint-plugin";
+import jsxA11y from "eslint-plugin-jsx-a11y";
+import reactHooks from "eslint-plugin-react-hooks";
 import critterCrumbs from "./scripts/eslint-rules.mjs";
 
 export default [
@@ -32,6 +34,24 @@ export default [
   {
     files: ["packages/*/src/**/*.{ts,tsx,js,jsx,mjs}", "api/**/*.{ts,js,mjs}"],
     rules: { "critter-crumbs/imports": "error" },
+  },
+  {
+    // Type-aware: a promise nobody awaits, returns or marks with `void` loses its failure.
+    files: ["packages/*/src/**/*.{ts,tsx}", "api/**/*.ts"],
+    languageOptions: {
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
+    rules: { "@typescript-eslint/no-floating-promises": "error" },
+  },
+  {
+    files: ["packages/app/src/**/*.{ts,tsx}"],
+    plugins: { "react-hooks": reactHooks },
+    rules: { "react-hooks/rules-of-hooks": "error", "react-hooks/exhaustive-deps": "error" },
+  },
+  {
+    files: ["packages/app/src/**/*.tsx"],
+    plugins: { "jsx-a11y": jsxA11y },
+    rules: { ...jsxA11y.flatConfigs.recommended.rules },
   },
   {
     files: [

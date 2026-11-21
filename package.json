@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "bun run compile && node scripts/dev.mjs",
     "dev:app": "bun run compile && node scripts/dev.mjs --app-only",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "node scripts/lint.mjs",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "typecheck": "tsc -b && tsc -p tsconfig.tools.json",
