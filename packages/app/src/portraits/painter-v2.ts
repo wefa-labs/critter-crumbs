@@ -73,11 +73,27 @@ const ELEMENT = {
   },
 };
 const paintDefinitions = `<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-    <filter id="loose" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <filter id="loose2" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="29" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>
-    <filter id="fur" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .14  0 0 0 0 .11  0 0 0 0 .15  0 0 0 .16 0" result="g"/><feComposite in="g" in2="SourceGraphic" operator="in" result="gi"/><feBlend in="SourceGraphic" in2="gi" mode="multiply"/></filter>
-    <filter id="poster" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="discrete" tableValues="0 .2 .4 .6 .8 1"/><feFuncG type="discrete" tableValues="0 .2 .4 .6 .8 1"/><feFuncB type="discrete" tableValues="0 .2 .4 .6 .8 1"/></feComponentTransfer></filter>
-    <pattern id="strokes" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)"><path d="M0 3.5 H4.6" stroke="${tokens.burrow}" stroke-width="1.7" stroke-linecap="round" opacity=".28"/></pattern>
+    <filter id="loose" x="-15%" y="-15%" width="130%" height="130%">
+    <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="11" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="loose2" x="-15%" y="-15%" width="130%" height="130%">
+    <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="2" seed="29" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="fur" x="0" y="0" width="100%" height="100%">
+    <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 .14  0 0 0 0 .11  0 0 0 0 .15  0 0 0 .16 0" result="g"/>
+    <feComposite in="g" in2="SourceGraphic" operator="in" result="gi"/>
+    <feBlend in="SourceGraphic" in2="gi" mode="multiply"/>
+    </filter>
+    <filter id="poster" color-interpolation-filters="sRGB"><feComponentTransfer>
+    <feFuncR type="discrete" tableValues="0 .2 .4 .6 .8 1"/>
+    <feFuncG type="discrete" tableValues="0 .2 .4 .6 .8 1"/>
+    <feFuncB type="discrete" tableValues="0 .2 .4 .6 .8 1"/></feComponentTransfer></filter>
+    <pattern id="strokes" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
+    <path d="M0 3.5 H4.6" stroke="${tokens.burrow}" stroke-width="1.7" stroke-linecap="round" opacity=".28"/>
+    </pattern>
     <pattern id="hatch" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)"><path d="M0 0 L0 4" stroke="${tokens.burrow}" stroke-width="1.1" opacity=".5"/></pattern>
 </defs></svg>`;
 let serial = 0;
@@ -413,7 +429,10 @@ export function paintV2(
         s(
           "path",
           {
-            d: `M${tx - Rt * 0.2} ${ty} q${Rt * 1.2} ${-Rt * 0.1} ${Rt * 1.7} ${-Rt * 0.8} q${Rt * 0.15} ${-Rt * 0.45} ${Rt * 0.45} ${-Rt * 0.8} q${-Rt * 0.6} ${Rt * 0.9} ${-Rt * 1.95} ${Rt * 1.75} z`,
+            d:
+              `M${tx - Rt * 0.2} ${ty} q${Rt * 1.2} ${-Rt * 0.1} ${Rt * 1.7} ${-Rt * 0.8} ` +
+              `q${Rt * 0.15} ${-Rt * 0.45} ${Rt * 0.45} ${-Rt * 0.8} q${-Rt * 0.6} ${Rt * 0.9} ` +
+              `${-Rt * 1.95} ${Rt * 1.75} z`,
             fill: tone.light,
             stroke: LINE,
             "stroke-width": lw * 0.65,
@@ -540,7 +559,9 @@ export function paintV2(
         )
           .map(
             ([dx, hh]) =>
-              `M${dx - w * 0.4} 0 C${dx - w * 0.45} ${-L * hh * 0.5} ${dx - w * 0.1} ${-L * hh * 0.7} ${dx} ${-L * hh} C${dx + w * 0.1} ${-L * hh * 0.7} ${dx + w * 0.45} ${-L * hh * 0.5} ${dx + w * 0.4} 0 Z`
+              `M${dx - w * 0.4} 0 C${dx - w * 0.45} ${-L * hh * 0.5} ${dx - w * 0.1} ` +
+              `${-L * hh * 0.7} ${dx} ${-L * hh} C${dx + w * 0.1} ${-L * hh * 0.7} ` +
+              `${dx + w * 0.45} ${-L * hh * 0.5} ${dx + w * 0.4} 0 Z`
           )
           .join(" "),
         cloud: (
@@ -554,7 +575,11 @@ export function paintV2(
               `M${cx - sz} ${cy} a${sz} ${sz} 0 1 0 ${2 * sz} 0 a${sz} ${sz} 0 1 0 ${-2 * sz} 0`
           )
           .join(" "),
-        fern: `M${-w * 0.45} 0 C${-w * 0.7} ${-L * 0.45} ${-w * 0.35} ${-L * 0.85} ${w * 0.15} ${-L * 0.95} C${w * 0.75} ${-L * 1.02} ${w * 0.8} ${-L * 0.62} ${w * 0.3} ${-L * 0.62} C${w * 0.05} ${-L * 0.62} ${w * 0.05} ${-L * 0.78} ${w * 0.25} ${-L * 0.78} C${w * 0.1} ${-L * 0.55} ${w * 0.45} ${-L * 0.3} ${w * 0.45} 0 Z`,
+        fern:
+          `M${-w * 0.45} 0 C${-w * 0.7} ${-L * 0.45} ${-w * 0.35} ${-L * 0.85} ${w * 0.15} ` +
+          `${-L * 0.95} C${w * 0.75} ${-L * 1.02} ${w * 0.8} ${-L * 0.62} ${w * 0.3} ` +
+          `${-L * 0.62} C${w * 0.05} ${-L * 0.62} ${w * 0.05} ${-L * 0.78} ${w * 0.25} ` +
+          `${-L * 0.78} C${w * 0.1} ${-L * 0.55} ${w * 0.45} ${-L * 0.3} ${w * 0.45} 0 Z`,
       };
       const d =
         shapes[params.earType] ??
@@ -644,7 +669,10 @@ export function paintV2(
         s(
           "path",
           {
-            d: `M0 ${top - R * 0.72} C${R * 0.27} ${top - R * 0.35} ${R * 0.24} ${top + R * 0.06} 0 ${top + R * 0.06} C${-R * 0.24} ${top + R * 0.06} ${-R * 0.27} ${top - R * 0.35} 0 ${top - R * 0.72} Z`,
+            d:
+              `M0 ${top - R * 0.72} C${R * 0.27} ${top - R * 0.35} ${R * 0.24} ` +
+              `${top + R * 0.06} 0 ${top + R * 0.06} C${-R * 0.24} ${top + R * 0.06} ` +
+              `${-R * 0.27} ${top - R * 0.35} 0 ${top - R * 0.72} Z`,
             fill: el.base,
             stroke: LINE,
             "stroke-width": lw * 0.6,
@@ -685,7 +713,10 @@ export function paintV2(
         s(
           "path",
           {
-            d: `M${-R * 0.17} ${top + R * 0.05} C${-R * 0.22} ${top - R * 0.3} ${-R * 0.02} ${top - R * 0.45} ${R * 0.05} ${top - R * 0.78} C${R * 0.13} ${top - R * 0.4} ${R * 0.27} ${top - R * 0.25} ${R * 0.19} ${top + R * 0.05} Z`,
+            d:
+              `M${-R * 0.17} ${top + R * 0.05} C${-R * 0.22} ${top - R * 0.3} ${-R * 0.02} ` +
+              `${top - R * 0.45} ${R * 0.05} ${top - R * 0.78} C${R * 0.13} ${top - R * 0.4} ` +
+              `${R * 0.27} ${top - R * 0.25} ${R * 0.19} ${top + R * 0.05} Z`,
             fill: el.base,
             stroke: LINE,
             "stroke-width": lw * 0.6,
@@ -696,7 +727,10 @@ export function paintV2(
         s(
           "path",
           {
-            d: `M${-R * 0.07} ${top + R * 0.02} C${-R * 0.09} ${top - R * 0.2} ${R * 0.02} ${top - R * 0.3} ${R * 0.04} ${top - R * 0.5} C${R * 0.07} ${top - R * 0.25} ${R * 0.12} ${top - R * 0.15} ${R * 0.09} ${top + R * 0.02} Z`,
+            d:
+              `M${-R * 0.07} ${top + R * 0.02} C${-R * 0.09} ${top - R * 0.2} ${R * 0.02} ` +
+              `${top - R * 0.3} ${R * 0.04} ${top - R * 0.5} C${R * 0.07} ${top - R * 0.25} ` +
+              `${R * 0.12} ${top - R * 0.15} ${R * 0.09} ${top + R * 0.02} Z`,
             fill: el.light,
           },
           head

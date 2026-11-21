@@ -54,9 +54,20 @@ export function insertTarget(
   portrait: FeastPortrait
 ): string {
   return `insert into targets (feast_id,target_id,kind,owner_address,name,position,portrait_variant,generator_version,renderer_version,portrait_source,portrait_captured_at)
-    select ${bind(feastId)}::uuid,${bind(Buffer.from(target.id.slice(2), "hex"))}::bytea,${bind(target.kind)},${bind(target.ownerAddress?.toLowerCase() ?? null)},${bind(target.name)},${bind(target.position)}::smallint,
-      ${bind(portrait.variant)}::smallint,${bind(portrait.generatorVersion)},${bind(portrait.rendererVersion)},${bind(portrait.source)},${bind(portrait.capturedAt === null ? null : timestamp(portrait.capturedAt))}::timestamptz from gate
-    on conflict (feast_id,target_id) do update set name=excluded.name,position=excluded.position${portrait.source === "freeze" ? ",portrait_variant=excluded.portrait_variant,generator_version=excluded.generator_version,renderer_version=excluded.renderer_version,portrait_source=excluded.portrait_source,portrait_captured_at=excluded.portrait_captured_at" : ""}`;
+    select ${bind(feastId)}::uuid,${bind(Buffer.from(target.id.slice(2), "hex"))}::bytea,
+    ${bind(target.kind)},${bind(target.ownerAddress?.toLowerCase() ?? null)},${bind(target.name)},
+    ${bind(target.position)}::smallint,
+      ${bind(portrait.variant)}::smallint,${bind(portrait.generatorVersion)},
+      ${bind(portrait.rendererVersion)},${bind(portrait.source)},
+      ${bind(portrait.capturedAt === null ? null : timestamp(portrait.capturedAt))}::timestamptz from gate
+    on conflict (feast_id,target_id) do update set name=excluded.name,
+    position=excluded.position${
+      portrait.source === "freeze"
+        ? ",portrait_variant=excluded.portrait_variant,generator_version=excluded.generator_version" +
+          ",renderer_version=excluded.renderer_version,portrait_source=excluded.portrait_source" +
+          ",portrait_captured_at=excluded.portrait_captured_at"
+        : ""
+    }`;
 }
 export const sameAddress = (a: Address | string, b: Address | string) =>
   a.toLowerCase() === b.toLowerCase();
@@ -68,7 +79,10 @@ export function freezePeopleTargets(
 ): string[] {
   const targets = peopleTargets(members);
   return [
-    `delete from targets where feast_id=${bind(feastId)}::uuid and owner_address not in (select jsonb_array_elements_text(${bind(JSON.stringify(targets.map((target) => target.ownerAddress!.toLowerCase())))}::jsonb)) and exists(select 1 from gate)`,
+    `delete from targets where feast_id=${bind(feastId)}::uuid and owner_address not ` +
+      `in (select ` +
+      `jsonb_array_elements_text(${bind(JSON.stringify(targets.map((target) => target.ownerAddress!.toLowerCase())))}::jsonb)) and exists(select 1 from ` +
+      `gate)`,
     ...targets.map((target) =>
       insertTarget(target, feastId, bind, currentPortrait(target, members, "freeze", now))
     ),

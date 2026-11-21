@@ -22,7 +22,9 @@ export function pendingCloses(
           })),
         now
       );
-      return `update feasts set close_record=${bind(JSON.stringify(record))}::jsonb,closed_at=${bind(timestamp(now))}::timestamptz,published_set_hash=${bind(Buffer.from(record.publishedSetHash.slice(2), "hex"))}::bytea
+      return `update feasts set close_record=${bind(JSON.stringify(record))}::jsonb,
+      closed_at=${bind(timestamp(now))}::timestamptz,
+      published_set_hash=${bind(Buffer.from(record.publishedSetHash.slice(2), "hex"))}::bytea
       where id=${bind(row.id)}::uuid and close_record is null and exists(select 1 from gate)`;
     });
 }

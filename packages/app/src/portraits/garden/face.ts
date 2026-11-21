@@ -100,7 +100,10 @@ export function drawFace(pen: Pen, head: SVGGElement, o: FaceOptions) {
       by = r * 0.3;
     pen.form(
       head,
-      `M${f(-r * 0.15 + turn)} ${f(by)}Q${f(turn)} ${f(by - r * 0.12)} ${f(r * 0.15 + turn)} ${f(by)}Q${f(r * 0.04 + turn)} ${f(by + r * 0.24)} ${f(turn)} ${f(by + r * 0.26)}Q${f(-r * 0.04 + turn)} ${f(by + r * 0.24)} ${f(-r * 0.15 + turn)} ${f(by)}Z`,
+      `M${f(-r * 0.15 + turn)} ${f(by)}Q${f(turn)} ${f(by - r * 0.12)} ` +
+        `${f(r * 0.15 + turn)} ${f(by)}Q${f(r * 0.04 + turn)} ${f(by + r * 0.24)} ` +
+        `${f(turn)} ${f(by + r * 0.26)}Q${f(-r * 0.04 + turn)} ${f(by + r * 0.24)} ` +
+        `${f(-r * 0.15 + turn)} ${f(by)}Z`,
       b,
       { weight: 0.55, size: r * 0.15 }
     );

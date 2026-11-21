@@ -64,7 +64,10 @@ else {
     if (result.some((record) => record.status === "missing")) process.exitCode = 1;
   } catch {
     console.error(
-      "EAS setup failed. Check BASE_RPC_URL, the chain and your Foundry --account/FOUNDRY_ACCOUNT. Run --execute in an interactive terminal with cast installed. Check any submitted transaction before retrying; transport details are suppressed to protect credentials."
+      "EAS setup failed. Check BASE_RPC_URL, the chain and your Foundry " +
+        "--account/FOUNDRY_ACCOUNT. Run --execute in an interactive terminal with cast " +
+        "installed. Check any submitted transaction before retrying; transport details " +
+        "are suppressed to protect credentials."
     );
     process.exitCode = 1;
   }

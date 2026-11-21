@@ -101,7 +101,11 @@ export function createResults(db: Database, clock: () => number, reader?: EasRea
         };
         return {
           sql: [
-            `insert into result_attestations (feast_id,chain_id,tx_hash,uid,attester,posted_at) select ${bind(id)}::uuid,${bind(saved.chainId)}::integer,${bind(txHash)},${bind(Buffer.from(saved.uid.slice(2), "hex"))}::bytea,${bind(actor)},${bind(timestamp(now))}::timestamptz from gate`,
+            `insert into result_attestations ` +
+              `(feast_id,chain_id,tx_hash,uid,attester,posted_at) select ${bind(id)}` +
+              `::uuid,${bind(saved.chainId)}::integer,${bind(txHash)}` +
+              `,${bind(Buffer.from(saved.uid.slice(2), "hex"))}::bytea,${bind(actor)}` +
+              `,${bind(timestamp(now))}::timestamptz from gate`,
             `update feasts set result_record=${bind(JSON.stringify(saved))}::jsonb where id=${bind(id)}::uuid and exists(select 1 from gate)`,
           ],
           result: { resultAttestation: saved },

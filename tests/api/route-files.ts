@@ -58,7 +58,9 @@ export function routeFileCheck() {
     verify() {
       if (unserved.size)
         throw new Error(
-          `Answered, but no route file under api/ serves the path, so Vercel would answer with a 404 of its own: ${[...unserved].join(", ")}. Add the route file: one line, export { default } from '@critter-crumbs/api'.`
+          `Answered, but no route file under api/ serves the path, so Vercel would answer ` +
+            `with a 404 of its own: ${[...unserved].join(", ")}. Add the route file: one ` +
+            `line, export { default } from '@critter-crumbs/api'.`
         );
     },
   };

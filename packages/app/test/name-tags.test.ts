@@ -29,14 +29,12 @@ function* circles(
 ) {
   const { scene, surface } = composeGame("scatter", viewport.width >= 900 ? "desktop" : "phone"),
     allocation = fixtureAllocation("scatter", n);
-  const critters = members
-    .slice(0, n)
-    .map((member, index) => ({
-      name: member.name,
-      own: index === 2,
-      count: allocation[index]!,
-      extent: extentOf(member.address),
-    }));
+  const critters = members.slice(0, n).map((member, index) => ({
+    name: member.name,
+    own: index === 2,
+    count: allocation[index]!,
+    extent: extentOf(member.address),
+  }));
   for (let focus = 0; focus < n; focus++)
     yield { focus, layout: layoutGame({ viewport, critters, focus, issued: 100, scene, surface }) };
 }

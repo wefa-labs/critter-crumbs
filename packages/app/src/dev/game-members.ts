@@ -5,7 +5,19 @@ export default [
     weight: 24,
     received: 142,
     statement:
-      "I planted six fruit trees and kept the shared garden watered through the dry weeks. The two apple trees by the gate are from the cuttings we took in March, and both carried fruit this year for the first time.\n\nI also set up the watering rota after the July heat. Eleven people signed up, and the rota is pinned inside the shed door so anyone can see who has the evening slot. When the hose split in August I patched it twice and then bought a new one from the shared fund, with the receipt in the folder.\n\nThe compost bays were overflowing in spring, so I turned all three, built a fourth from pallets, and wrote a short note on what goes in which bay. Since then the kitchen scraps from the community lunch have gone into the garden instead of the bin.\n\nNext year I would like to try a small nursery bed so we can grow our own cuttings instead of buying them, and to run two afternoons on pruning for anyone who wants to learn.",
+      "I planted six fruit trees and kept the shared garden watered through the dry " +
+      "weeks. The two apple trees by the gate are from the cuttings we took in March, " +
+      "and both carried fruit this year for the first time.\n\nI also set up the " +
+      "watering rota after the July heat. Eleven people signed up, and the rota is " +
+      "pinned inside the shed door so anyone can see who has the evening slot. When " +
+      "the hose split in August I patched it twice and then bought a new one from the " +
+      "shared fund, with the receipt in the folder.\n\nThe compost bays were " +
+      "overflowing in spring, so I turned all three, built a fourth from pallets, and " +
+      "wrote a short note on what goes in which bay. Since then the kitchen scraps " +
+      "from the community lunch have gone into the garden instead of the bin.\n\nNext " +
+      "year I would like to try a small nursery bed so we can grow our own cuttings " +
+      "instead of buying them, and to run two afternoons on pruning for anyone who " +
+      "wants to learn.",
     own: false,
   },
   {
@@ -14,7 +26,9 @@ export default [
     weight: 20,
     received: 118,
     statement:
-      "I repaired the library shelves and organised our book swap. Forty-one books went out and thirty came back, which I count as a win. The children’s shelf is now at a height children can reach.",
+      "I repaired the library shelves and organised our book swap. Forty-one books " +
+      "went out and thirty came back, which I count as a win. The children’s shelf is " +
+      "now at a height children can reach.",
     own: false,
   },
   {

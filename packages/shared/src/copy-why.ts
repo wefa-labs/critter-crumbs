@@ -25,7 +25,11 @@ export const whyCopy = {
     "No analytics and no telemetry: the app makes the network requests it needs to do its job, and nothing else.",
   "why.limit.title": "One thing we will not pretend",
   "why.limit.body":
-    "Before the feast, nobody can read your scatter, because nobody has the key: not us, not the creator. After the feast the key exists, so anyone in the burrow could work out who gave what, and so could we, since we keep every locked scatter. Keeping that private is a rule we enforce, not something the lock does for us.",
+    "Before the feast, nobody can read your scatter, because nobody has the key: not " +
+    "us, not the creator. After the feast the key exists, so anyone in the burrow " +
+    "could work out who gave what, and so could we, since we keep every locked " +
+    "scatter. Keeping that private is a rule we enforce, not something the lock does " +
+    "for us.",
   "why.words.title": "The words",
   "why.words.burrow.lead": "Burrow",
   "why.words.burrow.body": "Your group. It stays together from one feast to the next.",

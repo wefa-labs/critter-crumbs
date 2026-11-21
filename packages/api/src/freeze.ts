@@ -18,7 +18,9 @@ export function pendingFreezes(
       at = bind(timestamp(now)),
       tooFew = feast.kind === "people" && members.length < 3;
     sql.push(
-      `update feasts set participants_frozen_at=${at}::timestamptz,status=${bind(tooFew ? "void" : "open")}::feast_status where id=${id} and participants_frozen_at is null and exists(select 1 from gate)`
+      `update feasts set participants_frozen_at=${at}` +
+        `::timestamptz,status=${bind(tooFew ? "void" : "open")}::feast_status where ` +
+        `id=${id} and participants_frozen_at is null and exists(select 1 from gate)`
     );
     const addresses = bind(JSON.stringify(members.map((member) => member.address)));
     sql.push(

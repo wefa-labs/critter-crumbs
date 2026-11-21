@@ -23,14 +23,12 @@ const names = [
   "Sorrel",
 ];
 const critters = (n: number) =>
-  names
-    .slice(0, n)
-    .map((name) => ({
-      name,
-      own: name === "Juniper",
-      count: 12,
-      extent: { top: 0.28, left: 0.2, right: 0.8, headY: 0.48, headRadius: 0.17 },
-    }));
+  names.slice(0, n).map((name) => ({
+    name,
+    own: name === "Juniper",
+    count: 12,
+    extent: { top: 0.28, left: 0.2, right: 0.8, headY: 0.48, headRadius: 0.17 },
+  }));
 describe("October circle layout", () => {
   it("places the focused critter on the reference desktop floor", () => {
     const layout = layoutGame({
@@ -84,14 +82,12 @@ describe("October circle layout", () => {
     ])
       for (const count of [4, 6, 8, 10])
         for (let focus = 0; focus < count; focus++) {
-          const critters = members
-            .slice(0, count)
-            .map((member, i) => ({
-              name: member.name,
-              own: i === 2,
-              count: i === 2 ? 0 : 12,
-              extent: portraitMetrics(generate2(member.address, 0), 0, false).extent,
-            }));
+          const critters = members.slice(0, count).map((member, i) => ({
+            name: member.name,
+            own: i === 2,
+            count: i === 2 ? 0 : 12,
+            extent: portraitMetrics(generate2(member.address, 0), 0, false).extent,
+          }));
           const layout = layoutGame({
             viewport,
             critters,

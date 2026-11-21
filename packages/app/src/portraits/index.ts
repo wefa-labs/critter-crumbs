@@ -246,8 +246,12 @@ export function createPortrait(
         params.earType === "pointed"
           ? `M${-earWidth} 0 Q${-earWidth * 0.8} ${-earLength * 0.55} 0 ${-earLength} Q${earWidth * 0.8} ${-earLength * 0.55} ${earWidth} 0 Z`
           : params.earType === "tufts"
-            ? `M${-earWidth} 0 L${-earWidth * 0.8} ${-earLength * 0.65} L${-earWidth * 0.15} ${-earLength * 0.5} L0 ${-earLength} L${earWidth * 0.35} ${-earLength * 0.55} L${earWidth} ${-earLength * 0.7} L${earWidth} 0 Z`
-            : `M${-earWidth} 0 C${-earWidth * 1.4} ${-earLength * 0.7} ${-earWidth * 0.7} ${-earLength} 0 ${-earLength} C${earWidth * 0.9} ${-earLength} ${earWidth * 1.3} ${-earLength * 0.6} ${earWidth} 0 Z`;
+            ? `M${-earWidth} 0 L${-earWidth * 0.8} ${-earLength * 0.65} L${-earWidth * 0.15} ` +
+              `${-earLength * 0.5} L0 ${-earLength} L${earWidth * 0.35} ${-earLength * 0.55} ` +
+              `L${earWidth} ${-earLength * 0.7} L${earWidth} 0 Z`
+            : `M${-earWidth} 0 C${-earWidth * 1.4} ${-earLength * 0.7} ${-earWidth * 0.7} ` +
+              `${-earLength} 0 ${-earLength} C${earWidth * 0.9} ${-earLength} ${earWidth * 1.3}` +
+              ` ${-earLength * 0.6} ${earWidth} 0 Z`;
       element("path", { d: path, fill: "var(--body)" }, ear);
       element("path", { d: path, fill: "var(--accent)", transform: "scale(.6 .72)" }, ear);
     }

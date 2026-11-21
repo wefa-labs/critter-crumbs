@@ -62,7 +62,10 @@ export function createBurrows(db: Database, clock: () => number, ens?: EnsResolv
           result: undefined,
           sql: [
             `insert into profiles (address,created_at) select ${member},${at}::timestamptz from gate on conflict (address) do nothing`,
-            `insert into burrow_members (burrow_id,address,added_by) select id,${member},${actorParam} from gate on conflict (burrow_id,address) do update set left_at=null,membership_version=burrow_members.membership_version+case when burrow_members.left_at is null then 0 else 1 end`,
+            `insert into burrow_members (burrow_id,address,added_by) select id,${member}` +
+              `,${actorParam} from gate on conflict (burrow_id,address) do update set ` +
+              `left_at=null,membership_version=burrow_members.membership_version+case when ` +
+              `burrow_members.left_at is null then 0 else 1 end`,
           ],
         };
       });
@@ -106,9 +109,13 @@ export function createBurrows(db: Database, clock: () => number, ens?: EnsResolv
         return {
           result: { removal: removalFromRow(row) },
           sql: [
-            `update burrow_members set left_at=${bind(row.removed_at)}::timestamptz where burrow_id=$1 and address=${bind(address)} and membership_version=${bind(version)}::int and exists(select 1 from gate)`,
+            `update burrow_members set left_at=${bind(row.removed_at)}::timestamptz where ` +
+              `burrow_id=$1 and address=${bind(address)} and ` +
+              `membership_version=${bind(version)}::int and exists(select 1 from gate)`,
             `insert into member_removals (id,burrow_id,sequence,operation_id,actor_address,member_address,membership_version,actor_name,member_name,removed_at)
-            select ${bind(receiptId)}::uuid,id,${bind(row.sequence)}::bigint,${bind(operationId)}::uuid,${bind(actor)},${bind(address)},${bind(version)}::int,${bind(row.actor_name)},${bind(row.member_name)},${bind(row.removed_at)}::timestamptz from gate`,
+            select ${bind(receiptId)}::uuid,id,${bind(row.sequence)}::bigint,
+            ${bind(operationId)}::uuid,${bind(actor)},${bind(address)},${bind(version)}::int,
+            ${bind(row.actor_name)},${bind(row.member_name)},${bind(row.removed_at)}::timestamptz from gate`,
           ],
         };
       });

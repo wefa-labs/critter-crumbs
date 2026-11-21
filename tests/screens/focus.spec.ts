@@ -164,15 +164,13 @@ test("every name tag is named by what it shows, its count included; your own tag
 }) => {
   for (const state of ["scatter", "feasted"]) {
     await openFixture(page, state, { width: 375, height: 812 });
-    const tags = await page
-      .locator(".critter-tag-target")
-      .evaluateAll((nodes) =>
-        nodes.map((node) => ({
-          name: node.getAttribute("aria-label"),
-          shown: node.querySelector(".critter-tag")!.firstChild!.textContent!,
-          count: node.querySelector(".tag-count")?.textContent ?? null,
-        }))
-      );
+    const tags = await page.locator(".critter-tag-target").evaluateAll((nodes) =>
+      nodes.map((node) => ({
+        name: node.getAttribute("aria-label"),
+        shown: node.querySelector(".critter-tag")!.firstChild!.textContent!,
+        count: node.querySelector(".tag-count")?.textContent ?? null,
+      }))
+    );
     expect(tags.length).toBeGreaterThan(4);
     for (const tag of tags) {
       if (tag.count === null) {

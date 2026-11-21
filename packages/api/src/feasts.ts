@@ -180,7 +180,11 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
           : keccak256(concatHex([stringToHex(`critter-crumbs${id}`), bytesToHex(randomBytes(32))]));
         return {
           sql: [
-            `update feasts set shutter_identity_prefix=${bind(Buffer.from(prefix.slice(2), "hex"))}::bytea,shutter_registration_started_at=${bind(timestamp(now))}::timestamptz,shutter_registration_token=${bind(token)}::uuid where id=${bind(id)}::uuid and exists(select 1 from gate)`,
+            `update feasts set ` +
+              `shutter_identity_prefix=${bind(Buffer.from(prefix.slice(2), "hex"))}` +
+              `::bytea,shutter_registration_started_at=${bind(timestamp(now))}` +
+              `::timestamptz,shutter_registration_token=${bind(token)}::uuid where ` +
+              `id=${bind(id)}::uuid and exists(select 1 from gate)`,
           ],
           result: { prefix, deadline: milliseconds(row.scattering_ends_at) },
         };
@@ -209,7 +213,11 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
           return {
             sql: [
               `update feasts set status='open',opened_at=${bind(timestamp(now))}::timestamptz,
-            shutter_identity=${bind(Buffer.from(registration.identity.slice(2), "hex"))}::bytea,shutter_eon=${bind(registration.eon)}::int,shutter_eon_key=${bind(Buffer.from(registration.eonKey.slice(2), "hex"))}::bytea,shutter_tx_hash=${bind(registration.txHash)},shutter_registration_started_at=null,shutter_registration_token=null
+            shutter_identity=${bind(Buffer.from(registration.identity.slice(2), "hex"))}::bytea,
+            shutter_eon=${bind(registration.eon)}::int,
+            shutter_eon_key=${bind(Buffer.from(registration.eonKey.slice(2), "hex"))}::bytea,
+            shutter_tx_hash=${bind(registration.txHash)},shutter_registration_started_at=null,
+            shutter_registration_token=null
             where id=${bind(id)}::uuid and shutter_registration_token=${bind(token)}::uuid and exists(select 1 from gate)`,
             ],
             result: undefined,
@@ -218,7 +226,10 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
       } catch (error) {
         await transactions.write(burrowId, (_, _now, bind) => ({
           sql: [
-            `update feasts set shutter_registration_started_at=null,shutter_registration_token=null where id=${bind(id)}::uuid and shutter_registration_token=${bind(token)}::uuid and exists(select 1 from gate)`,
+            `update feasts set ` +
+              `shutter_registration_started_at=null,shutter_registration_token=null where ` +
+              `id=${bind(id)}::uuid and shutter_registration_token=${bind(token)}::uuid and ` +
+              `exists(select 1 from gate)`,
           ],
           result: undefined,
         }));
@@ -326,7 +337,11 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
         integer(targets.length, 1, MAX_FEAST_TARGETS, "err.feastCapacity");
         const sql = [
           `insert into feasts (id,burrow_id,created_by,kind,title,context,crumbs_per_critter,gathering_ends_at,scattering_ends_at,aggregate_public,individual_open)
-        select ${bind(id)}::uuid,id,${bind(actor)},${bind(setup.kind)}::feast_kind,${bind(setup.title)},${bind(setup.context)},${bind(setup.crumbsPerCritter)}::int,${bind(timestamp(setup.gatheringEndsAt))}::timestamptz,${bind(timestamp(setup.scatteringEndsAt))}::timestamptz,${bind(setup.aggregatePublic)}::boolean,${bind(setup.individualOpen)}::boolean from gate`,
+        select ${bind(id)}::uuid,id,${bind(actor)},${bind(setup.kind)}::feast_kind,
+        ${bind(setup.title)},${bind(setup.context)},${bind(setup.crumbsPerCritter)}::int,
+        ${bind(timestamp(setup.gatheringEndsAt))}::timestamptz,
+        ${bind(timestamp(setup.scatteringEndsAt))}::timestamptz,
+        ${bind(setup.aggregatePublic)}::boolean,${bind(setup.individualOpen)}::boolean from gate`,
         ];
         for (const target of targets) {
           sql.push(
@@ -339,7 +354,10 @@ export function createFeasts(db: Database, clock: () => number, timelock?: Timel
           );
           if (setup.kind === "options")
             sql.push(
-              `insert into statements (feast_id,target_id,author_address,body,updated_at) select ${bind(id)}::uuid,${bind(Buffer.from(target.id.slice(2), "hex"))}::bytea,${bind(actor)},${bind(setup.options[target.position]!.statement)},${bind(timestamp(now))}::timestamptz from gate`
+              `insert into statements (feast_id,target_id,author_address,body,updated_at) ` +
+                `select ${bind(id)}::uuid,${bind(Buffer.from(target.id.slice(2), "hex"))}` +
+                `::bytea,${bind(actor)},${bind(setup.options[target.position]!.statement)}` +
+                `,${bind(timestamp(now))}::timestamptz from gate`
             );
         }
         return { sql, result: undefined };

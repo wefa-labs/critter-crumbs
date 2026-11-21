@@ -191,7 +191,11 @@ function flame(pen: Pen, parent: SVGGElement, x: number, y: number, s: number, c
   const g = pen.g(parent, { transform: `translate(${f(x)} ${f(y)})`, class: cls });
   const E = ELEMENT.fire;
   pen.glow(g, 0, -s * 0.35, s * 1.25, E.glow, 0.5);
-  const d = `M0 ${f(-s * 1.15)}C${f(s * 0.25)} ${f(-s * 0.75)} ${f(s * 0.62)} ${f(-s * 0.48)} ${f(s * 0.5)} ${f(-s * 0.05)}C${f(s * 0.42)} ${f(s * 0.32)} ${f(-s * 0.42)} ${f(s * 0.32)} ${f(-s * 0.5)} ${f(-s * 0.05)}C${f(-s * 0.58)} ${f(-s * 0.42)} ${f(-s * 0.12)} ${f(-s * 0.62)} 0 ${f(-s * 1.15)}Z`;
+  const d =
+    `M0 ${f(-s * 1.15)}C${f(s * 0.25)} ${f(-s * 0.75)} ${f(s * 0.62)} ${f(-s * 0.48)}` +
+    ` ${f(s * 0.5)} ${f(-s * 0.05)}C${f(s * 0.42)} ${f(s * 0.32)} ${f(-s * 0.42)} ` +
+    `${f(s * 0.32)} ${f(-s * 0.5)} ${f(-s * 0.05)}C${f(-s * 0.58)} ${f(-s * 0.42)} ` +
+    `${f(-s * 0.12)} ${f(-s * 0.62)} 0 ${f(-s * 1.15)}Z`;
   pen.form(
     g,
     d,
@@ -241,10 +245,16 @@ function wingAt(pen: Pen, parent: SVGGElement, root: string, side: number, fold:
 const roundEar = (w: number, L: number) =>
   `M${f(-w)} 0C${f(-w * 1.15)} ${f(-L * 0.62)} ${f(-w * 0.45)} ${f(-L * 1.02)} 0 ${f(-L)}C${f(w * 0.5)} ${f(-L * 1.02)} ${f(w * 1.15)} ${f(-L * 0.6)} ${f(w)} 0Z`;
 const pointEar = (w: number, L: number) =>
-  `M${f(-w)} 0C${f(-w * 0.9)} ${f(-L * 0.45)} ${f(-w * 0.25)} ${f(-L * 0.9)} ${f(-w * 0.05)} ${f(-L)}Q0 ${f(-L * 1.04)} ${f(w * 0.08)} ${f(-L * 0.98)}C${f(w * 0.35)} ${f(-L * 0.85)} ${f(w * 0.95)} ${f(-L * 0.42)} ${f(w)} 0Z`;
+  `M${f(-w)} 0C${f(-w * 0.9)} ${f(-L * 0.45)} ${f(-w * 0.25)} ${f(-L * 0.9)} ` +
+  `${f(-w * 0.05)} ${f(-L)}Q0 ${f(-L * 1.04)} ${f(w * 0.08)} ${f(-L * 0.98)}` +
+  `C${f(w * 0.35)} ${f(-L * 0.85)} ${f(w * 0.95)} ${f(-L * 0.42)} ${f(w)} 0Z`;
 /** A small wind-blown wisp, for cloud tails and drifting edges. */
 function wisp(pen: Pen, parent: SVGGElement, x: number, y: number, s: number, tone: Tone) {
-  const d = `M${f(x)} ${f(y)}c${f(s * 0.4)} ${f(-s * 0.55)} ${f(s * 1.2)} ${f(-s * 0.5)} ${f(s * 1.35)} ${f(-s * 0.05)}c${f(-s * 0.45)} ${f(-s * 0.15)} ${f(-s * 0.85)} ${f(s * 0.05)} ${f(-s * 1.0)} ${f(s * 0.32)}c${f(-s * 0.12)} ${f(s * 0.12)} ${f(-s * 0.3)} ${f(s * 0.02)} ${f(-s * 0.35)} ${f(-s * 0.27)}Z`;
+  const d =
+    `M${f(x)} ${f(y)}c${f(s * 0.4)} ${f(-s * 0.55)} ${f(s * 1.2)} ${f(-s * 0.5)} ` +
+    `${f(s * 1.35)} ${f(-s * 0.05)}c${f(-s * 0.45)} ${f(-s * 0.15)} ${f(-s * 0.85)} ` +
+    `${f(s * 0.05)} ${f(-s * 1.0)} ${f(s * 0.32)}c${f(-s * 0.12)} ${f(s * 0.12)} ` +
+    `${f(-s * 0.3)} ${f(s * 0.02)} ${f(-s * 0.35)} ${f(-s * 0.27)}Z`;
   pen.form(parent, d, tone, { weight: 0.5, size: s * 0.6, flat: true });
 }
 
@@ -651,7 +661,12 @@ function turtle(d: GardenDraw): Species {
     draw(pen, g, s) {
       const rand = stream(d.seed);
       pen.form(g, ellipsePath(sx + rx * 0.72, FOOT - 4, 8, 5.5), skin, { weight: 0.7, size: 6 });
-      const dome = `M${f(sx - rx)} ${f(sy + ry * 0.55)}C${f(sx - rx)} ${f(sy - ry * 0.9)} ${f(sx - rx * 0.5)} ${f(sy - ry * 1.05)} ${f(sx)} ${f(sy - ry * 1.05)}C${f(sx + rx * 0.5)} ${f(sy - ry * 1.05)} ${f(sx + rx)} ${f(sy - ry * 0.9)} ${f(sx + rx)} ${f(sy + ry * 0.55)}C${f(sx + rx * 0.6)} ${f(sy + ry * 0.85)} ${f(sx - rx * 0.6)} ${f(sy + ry * 0.85)} ${f(sx - rx)} ${f(sy + ry * 0.55)}Z`;
+      const dome =
+        `M${f(sx - rx)} ${f(sy + ry * 0.55)}C${f(sx - rx)} ${f(sy - ry * 0.9)} ` +
+        `${f(sx - rx * 0.5)} ${f(sy - ry * 1.05)} ${f(sx)} ${f(sy - ry * 1.05)}` +
+        `C${f(sx + rx * 0.5)} ${f(sy - ry * 1.05)} ${f(sx + rx)} ${f(sy - ry * 0.9)} ` +
+        `${f(sx + rx)} ${f(sy + ry * 0.55)}C${f(sx + rx * 0.6)} ${f(sy + ry * 0.85)} ` +
+        `${f(sx - rx * 0.6)} ${f(sy + ry * 0.85)} ${f(sx - rx)} ${f(sy + ry * 0.55)}Z`;
       pen.form(g, dome, toneOf(stoneSet[3]!, "#3E4F63"), { size: rx * 0.7, grain: true });
       const stones = pen.g(g, { "clip-path": pen.clip(dome) });
       const cells: [number, number, number, number][] = [
@@ -755,7 +770,9 @@ function turtle(d: GardenDraw): Species {
           1,
           [R * 0.05, -R * 0.84],
           10,
-          `M${f(-R * 0.18)} 0C${f(-R * 0.2)} ${f(-R * 0.28)} ${f(-R * 0.02)} ${f(-R * 0.44)} ${f(R * 0.2)} ${f(-R * 0.4)}C${f(R * 0.1)} ${f(-R * 0.24)} ${f(R * 0.22)} ${f(-R * 0.1)} ${f(R * 0.18)} 0Z`,
+          `M${f(-R * 0.18)} 0C${f(-R * 0.2)} ${f(-R * 0.28)} ${f(-R * 0.02)} ` +
+            `${f(-R * 0.44)} ${f(R * 0.2)} ${f(-R * 0.4)}C${f(R * 0.1)} ${f(-R * 0.24)} ` +
+            `${f(R * 0.22)} ${f(-R * 0.1)} ${f(R * 0.18)} 0Z`,
           { light: "#EAF6F8", base: mix(ELEMENT.water.light, skin.base, 0.4), shadow: skin.shadow },
           null,
           R * 0.16
@@ -834,7 +851,15 @@ function koi(d: GardenDraw): Species {
       const tg = pen.g(g, { class: "cr-tail" }),
         bx = cx + rx * 0.85,
         by = cy + 1;
-      const fin = `M${f(bx)} ${f(by - 6)}C${f(bx + tail * 0.35)} ${f(by - 11)} ${f(bx + tail * 0.72)} ${f(by - tail * 0.7)} ${f(bx + tail)} ${f(by - tail * 0.6)}C${f(bx + tail * 0.84)} ${f(by - tail * 0.32)} ${f(bx + tail * 0.72)} ${f(by - 4)} ${f(bx + tail * 0.9)} ${f(by + tail * 0.2)}C${f(bx + tail * 1.0)} ${f(by + tail * 0.4)} ${f(bx + tail * 0.6)} ${f(by + tail * 0.46)} ${f(bx + tail * 0.42)} ${f(by + tail * 0.24)}C${f(bx + tail * 0.25)} ${f(by + 9)} ${f(bx + 4)} ${f(by + 7)} ${f(bx)} ${f(by + 6)}Z`;
+      const fin =
+        `M${f(bx)} ${f(by - 6)}C${f(bx + tail * 0.35)} ${f(by - 11)} ` +
+        `${f(bx + tail * 0.72)} ${f(by - tail * 0.7)} ${f(bx + tail)} ` +
+        `${f(by - tail * 0.6)}C${f(bx + tail * 0.84)} ${f(by - tail * 0.32)} ` +
+        `${f(bx + tail * 0.72)} ${f(by - 4)} ${f(bx + tail * 0.9)} ${f(by + tail * 0.2)}` +
+        `C${f(bx + tail * 1.0)} ${f(by + tail * 0.4)} ${f(bx + tail * 0.6)} ` +
+        `${f(by + tail * 0.46)} ${f(bx + tail * 0.42)} ${f(by + tail * 0.24)}` +
+        `C${f(bx + tail * 0.25)} ${f(by + 9)} ${f(bx + 4)} ${f(by + 7)} ${f(bx)} ` +
+        `${f(by + 6)}Z`;
       pen.form(tg, fin, finTone, { weight: 0.5, size: tail * 0.3, attrs: { opacity: 0.9 } });
       for (let k = 0; k < 5; k++)
         pen.patch(
@@ -1191,7 +1216,12 @@ function phoenix(d: GardenDraw): Species {
           fold
         );
         const L = wingL,
-          leaf = `M0 0C${f(L * 0.28)} ${f(-L * 0.4)} ${f(L * 0.62)} ${f(-L * 0.8)} ${f(L * 0.38)} ${f(-L * 1.05)}C${f(L * 0.3)} ${f(-L * 0.9)} ${f(L * 0.12)} ${f(-L * 0.95)} ${f(L * 0.02)} ${f(-L * 0.82)}C${f(-L * 0.12)} ${f(-L * 0.85)} ${f(-L * 0.35)} ${f(-L * 0.7)} ${f(-L * 0.25)} ${f(-L * 0.5)}C${f(-L * 0.42)} ${f(-L * 0.42)} ${f(-L * 0.4)} ${f(-L * 0.18)} ${f(-L * 0.18)} ${f(-L * 0.05)}Z`;
+          leaf =
+            `M0 0C${f(L * 0.28)} ${f(-L * 0.4)} ${f(L * 0.62)} ${f(-L * 0.8)} ${f(L * 0.38)} ` +
+            `${f(-L * 1.05)}C${f(L * 0.3)} ${f(-L * 0.9)} ${f(L * 0.12)} ${f(-L * 0.95)} ` +
+            `${f(L * 0.02)} ${f(-L * 0.82)}C${f(-L * 0.12)} ${f(-L * 0.85)} ${f(-L * 0.35)} ` +
+            `${f(-L * 0.7)} ${f(-L * 0.25)} ${f(-L * 0.5)}C${f(-L * 0.42)} ${f(-L * 0.42)} ` +
+            `${f(-L * 0.4)} ${f(-L * 0.18)} ${f(-L * 0.18)} ${f(-L * 0.05)}Z`;
         pen.el(
           "path",
           { d: leaf, fill: "none", stroke: ELEMENT.fire.light, "stroke-width": 4.5, opacity: 0.6 },
@@ -1341,7 +1371,11 @@ function lemur(d: GardenDraw): Species {
       });
       for (const side of [-1, 1]) {
         const wg = wingAt(pen, g, `translate(${CENTER} ${f(by)})`, side, fold);
-        const wing = `M6 -16C${f(reach * 0.45)} -23 ${f(reach * 0.85)} -25 ${f(reach)} -19C${f(reach * 1.05)} -7 ${f(reach * 0.92)} 2 ${f(reach * 0.78)} 6C${f(reach * 0.62)} 12 ${f(reach * 0.4)} 10 ${f(reach * 0.28)} 17C${f(reach * 0.2)} 18 10 15 6 10Z`;
+        const wing =
+          `M6 -16C${f(reach * 0.45)} -23 ${f(reach * 0.85)} -25 ${f(reach)} ` +
+          `-19C${f(reach * 1.05)} -7 ${f(reach * 0.92)} 2 ${f(reach * 0.78)} ` +
+          `6C${f(reach * 0.62)} 12 ${f(reach * 0.4)} 10 ${f(reach * 0.28)} ` +
+          `17C${f(reach * 0.2)} 18 10 15 6 10Z`;
         pen.form(wg, wing, membrane, {
           size: 14,
           weight: 0.6,
@@ -1390,7 +1424,12 @@ function lemur(d: GardenDraw): Species {
       if (fernEars)
         for (const side of [-1, 1] as const) {
           // ears like unfurling fern fronds: a tall leafy ear that curls over at its tip
-          const shape = `M${f(-R * 0.22)} 0C${f(-R * 0.32)} ${f(-R * 0.45)} ${f(-R * 0.15)} ${f(-R * 0.85)} ${f(R * 0.12)} ${f(-R * 0.95)}C${f(R * 0.4)} ${f(-R * 1.0)} ${f(R * 0.42)} ${f(-R * 0.72)} ${f(R * 0.2)} ${f(-R * 0.7)}C${f(R * 0.08)} ${f(-R * 0.68)} ${f(R * 0.1)} ${f(-R * 0.8)} ${f(R * 0.18)} ${f(-R * 0.8)}C${f(R * 0.12)} ${f(-R * 0.6)} ${f(R * 0.28)} ${f(-R * 0.3)} ${f(R * 0.22)} 0Z`;
+          const shape =
+            `M${f(-R * 0.22)} 0C${f(-R * 0.32)} ${f(-R * 0.45)} ${f(-R * 0.15)} ` +
+            `${f(-R * 0.85)} ${f(R * 0.12)} ${f(-R * 0.95)}C${f(R * 0.4)} ${f(-R * 1.0)} ` +
+            `${f(R * 0.42)} ${f(-R * 0.72)} ${f(R * 0.2)} ${f(-R * 0.7)}C${f(R * 0.08)} ` +
+            `${f(-R * 0.68)} ${f(R * 0.1)} ${f(-R * 0.8)} ${f(R * 0.18)} ${f(-R * 0.8)}` +
+            `C${f(R * 0.12)} ${f(-R * 0.6)} ${f(R * 0.28)} ${f(-R * 0.3)} ${f(R * 0.22)} 0Z`;
           const e = ear(
             pen,
             head,

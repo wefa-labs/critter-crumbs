@@ -37,7 +37,10 @@ test("identity upgrade preserves old choices and labels old feast appearances as
         values: [burrowId, address],
       },
       {
-        text: "insert into feasts (id,burrow_id,created_by,kind,title,crumbs_per_critter,gathering_ends_at,scattering_ends_at,aggregate_public,individual_open,status) values ($1,$2,$3,'people','Earlier feast',100,'2026-09-01','2026-09-02',false,false,'cancelled')",
+        text:
+          "insert into feasts " +
+          "(id,burrow_id,created_by,kind,title,crumbs_per_critter,gathering_ends_at,scattering_ends_at,aggregate_public,individual_open,status) values ($1,$2,$3,'people','Earlier " +
+          "feast',100,'2026-09-01','2026-09-02',false,false,'cancelled')",
         values: [feastId, burrowId, address],
       },
       {

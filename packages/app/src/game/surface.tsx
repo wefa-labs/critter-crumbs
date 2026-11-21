@@ -9,7 +9,11 @@ import { ElementChip, GameIcon, type CritterElement } from "./icons.js";
  * the flow page's .sheet, .toast and dialog, and the scatter page's statement bubble, side panel and results.
  */
 
-/** A passing message at the top of the floor, clear of the circle and the critter in focus. It is not a live region: the screen that shows it also says it through the app's announcers (Design System §12.6). */
+/**
+ * A passing message at the top of the floor, clear of the circle and the critter in focus. It is
+ * not a live region: the screen that shows it also says it through the app's announcers (Design
+ * System §12.6).
+ */
 export function Toast({ children }: { children: ReactNode }) {
   return <div className="game-toast">{children}</div>;
 }

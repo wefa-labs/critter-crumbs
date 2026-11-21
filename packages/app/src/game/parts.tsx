@@ -134,7 +134,7 @@ function CritterSpot({
       runtime.circle.play(entity);
       runtime.animateFor(CIRCLE_FEEL.playMs);
     } else if (own) {
-    /* your own critter only stirs, and the z's are drawn: a screen reader is told why nothing else happened */
+      /* your own critter only stirs, and the z's are drawn: a screen reader is told why nothing else happened */
       runtime.circle.stir(entity);
       runtime.animateFor(CIRCLE_FEEL.sleepGlyphMs);
       announce(copy["scatter.own.body"]);

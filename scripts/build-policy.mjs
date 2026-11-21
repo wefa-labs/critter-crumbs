@@ -59,6 +59,9 @@ export function refuseGameInShell(bundle) {
   );
   if (found.length)
     throw new Error(
-      `Koota is in the app shell (${[...new Set(found)].join(", ")}): a module the first screen uses imports the game's world. Keep what poses or simulates critters apart from what draws them, as portraits/pose.ts is kept from portraits/index.ts.`
+      `Koota is in the app shell (${[...new Set(found)].join(", ")}): a module the ` +
+        `first screen uses imports the game's world. Keep what poses or simulates ` +
+        `critters apart from what draws them, as portraits/pose.ts is kept from ` +
+        `portraits/index.ts.`
     );
 }

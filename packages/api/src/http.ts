@@ -10,7 +10,10 @@ export function responseHeaders(connectOrigins: string[] = []): Record<string, s
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), geolocation=(), microphone=(), accelerometer=()",
     "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
-    "Content-Security-Policy": `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' ${origins.join(" ")}; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`,
+    "Content-Security-Policy":
+      `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' ` +
+      `${origins.join(" ")}; img-src 'self' data:; style-src 'self' 'unsafe-inline'; ` +
+      `font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`,
   };
 }
 export function nodeHandler(api: (request: ApiRequest) => Promise<ApiReply>, clock: () => number) {

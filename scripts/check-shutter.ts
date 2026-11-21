@@ -20,7 +20,9 @@ try {
 } catch (error) {
   if (error instanceof ShutterSetupError) console.error(error.message);
   console.error(
-    "Shutter preflight failed. Check the required settings, mainnet authentication and API/chain key consistency. Transport details are suppressed to protect credentials; see docs/build/deployment.md. No identity was registered."
+    "Shutter preflight failed. Check the required settings, mainnet authentication " +
+      "and API/chain key consistency. Transport details are suppressed to protect " +
+      "credentials; see docs/build/deployment.md. No identity was registered."
   );
   process.exitCode = 1;
 }

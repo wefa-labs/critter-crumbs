@@ -60,7 +60,11 @@ export function createBallots(db: Database, clock: () => number, config?: EasCon
         return {
           sql: [
             `insert into ballots (feast_id,seq,uid,attester,attestation,ciphertext,received_at)
-          select ${bind(id)}::uuid,${bind(seq)}::bigint,${bind(Buffer.from(accepted.uid.slice(2), "hex"))}::bytea,${bind(actor)},${bind(JSON.stringify(accepted.attestation))}::jsonb,${bind(Buffer.from(accepted.ciphertext.slice(2), "hex"))}::bytea,${bind(timestamp(now))}::timestamptz from gate`,
+          select ${bind(id)}::uuid,${bind(seq)}::bigint,
+          ${bind(Buffer.from(accepted.uid.slice(2), "hex"))}::bytea,${bind(actor)},
+          ${bind(JSON.stringify(accepted.attestation))}::jsonb,
+          ${bind(Buffer.from(accepted.ciphertext.slice(2), "hex"))}::bytea,
+          ${bind(timestamp(now))}::timestamptz from gate`,
           ],
           result: { uid: accepted.uid, seq, serverNow: now },
         };
