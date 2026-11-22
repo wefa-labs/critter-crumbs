@@ -461,16 +461,12 @@ export function GameScene({
           swipe.current = null;
         }}
       >
-        {state === "scattered" ? (
-          <div className="scene-backdrop" aria-hidden="true" />
-        ) : (
-          <SceneBackdrop
-            id={treatment.scene === "dusk" ? "dusk" : sceneId}
-            desktop={desktop}
-            size={layout.scene}
-            backRow={circleBackRow(viewport, critters.length)}
-          />
-        )}
+        <SceneBackdrop
+          id={treatment.scene === "dusk" ? "dusk" : sceneId}
+          desktop={desktop}
+          size={layout.scene}
+          backRow={circleBackRow(viewport, critters.length)}
+        />
         <div className="scene-dusk-light" aria-hidden="true" />
         <div className="scene-feast-light" aria-hidden="true" />
         <ScreenNotices game className="game-notices" />
