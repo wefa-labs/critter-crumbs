@@ -17,7 +17,7 @@ const ids = (result) => result.checks.map((check) => check.id);
 test("a routine change gets the targeted suite of its package, not the full check", () => {
   const result = plan(["packages/app/src/game/mound-size.ts"]);
   assert.equal(result.risk, "routine");
-  assert.deepEqual(ids(result), ["format", "lint", "app-test"]);
+  assert.deepEqual(ids(result), ["format", "lint", "app-test", "captures"]);
   assert.match(
     result.checks.find((check) => check.id === "app-test").command,
     /vitest\.mjs run --project app$/
@@ -69,10 +69,25 @@ test("every Vitest project a check runs exists, and every project has a check", 
   );
   const named = new Set(
     policy.checks.flatMap((check) =>
-      [...check.command.matchAll(/--project ([a-z-]+)/g)].map((match) => match[1])
+      [...(check.command ?? "").matchAll(/--project ([a-z-]+)/g)].map((match) => match[1])
     )
   );
   assert.deepEqual([...named].sort(), [...projects].sort());
+});
+
+test("a screen change asks for captures, and a core change or an app test does not", () => {
+  const screen = plan(["packages/app/src/game/layout.ts"]).checks.find(
+    (check) => check.id === "captures"
+  );
+  assert.ok(screen, "captures for a change that renders");
+  assert.equal(screen.manual, true);
+  assert.equal(screen.stopRule, "advisory");
+  for (const file of [
+    "packages/core/src/phase.ts",
+    "packages/app/test/csv.test.ts",
+    "packages/app/src/audio/index.ts",
+  ])
+    assert.ok(!ids(plan([file])).includes("captures"), file);
 });
 
 test("a deployment test runs the deployment project", () => {
