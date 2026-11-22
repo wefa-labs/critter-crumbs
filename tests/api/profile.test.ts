@@ -142,7 +142,6 @@ test("API profile takes a new display name of up to 16 characters and says so wh
   });
   expect(refused.status).toBe(400);
   expect(refused.body.error).toBe("name.limit");
-  // nothing of the refused update was kept: neither the name nor the lock
   expect((await api({ method: "GET", path: "/api/me", headers })).body).toMatchObject({
     displayName: "Hazel Montgomery",
     critterLocked: false,

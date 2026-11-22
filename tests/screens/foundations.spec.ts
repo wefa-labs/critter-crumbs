@@ -8,7 +8,6 @@ for (const size of [
     await page.goto("/dev/screens?capture&state=scatter");
     await expect(page.locator(".circle-spot")).toHaveCount(8);
     await expect(page.locator(".circle-spot .portrait-v2")).toHaveCount(8);
-    // The Window scene is one painted plate made for the device, under the look's wash and grain.
     await expect(page.locator(".scene-plate")).toHaveCSS(
       "background-image",
       size.width < 900 ? /window-plate-phone\.webp/ : /window-plate-desktop\.webp/

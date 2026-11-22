@@ -251,7 +251,6 @@ function CountOutput({
   );
 }
 
-/** Where the screen opens: reading, at the critter whose bubble opened it; scattering, at the first critter not yours. */
 function startingFocus(feast: MemberFeast, me: Me, reading: boolean) {
   if (reading) return readingAt(location.search, feast.targets.length);
   return Math.max(

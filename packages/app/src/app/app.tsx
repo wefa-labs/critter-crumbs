@@ -244,7 +244,6 @@ export function App() {
       setDiscovering(false);
     }
   }
-  /* A connection that is refused or fails closes the sheet, and the screen behind says why (the launcher in its sheet). */
   /* the sheet's own trouble leaves with it (opening it cleared the screen's); a failure that closes it says why after */
   function closeConnect() {
     resumeAfterConnect.current = false;
@@ -291,7 +290,6 @@ export function App() {
     showDarkChoice(document.documentElement, value);
     setDarkChoice(value);
   }
-  /* the screen in view, or the one beneath your critter's profile while that is open */
   const profileOpen = path === "/your-critter",
     screen = profileOpen ? under : path;
   const setupRoute = /^\/burrows\/([^/]+)\/feasts\/new$/.exec(screen);
@@ -299,7 +297,6 @@ export function App() {
   const me = state.me,
     burrow = /^\/burrows\/([^/]+)$/.exec(screen),
     critters = /^\/burrows\/([^/]+)\/critters$/.exec(screen);
-  /* a critter not yet kept, or a member with neither an ENS name nor a display name, meets their critter first */
   if (me && meetingFor !== me.address && (!me.critterLocked || (!me.ensName && !me.displayName)))
     setMeetingFor(me.address);
   const meetingShown = me !== null && meetingFor === me.address;
@@ -325,7 +322,6 @@ export function App() {
     screen !== "/how-it-works" &&
     screen !== "/how-it-works/why" &&
     !me;
-  /* the notices that stand while their cause lasts, at the head of each screen's sheet (notices.tsx) */
   const notices = useMemo(() => appNotices(skew, me?.warning), [skew, me?.warning]);
   /* each screen's music; a feast's pages name their own, and loading leaves playing whatever was */
   let content, music: MusicTrack | undefined;

@@ -193,7 +193,6 @@ describe("October surfaces", () => {
     expect(top.y + top.height / 2).toBeLessThan(12 + 378);
     /* a long statement, or one not yet measured, takes the whole bubble and scrolls inside it */
     for (const height of [900, undefined, 0]) expect(open(height).statement.height).toBe(378);
-    /* a shorter bubble covers fewer tags */
     expect(short.slots.filter((slot) => slot.tag.hidden).length).toBeLessThanOrEqual(
       open(900).slots.filter((slot) => slot.tag.hidden).length
     );
@@ -330,7 +329,6 @@ describe("Short phone windows", () => {
         if (scene - 48 >= 420) expect(layout.dock.height, label).toBeGreaterThanOrEqual(420);
         else expect(layout.dock.y, label).toBe(48);
         expect(layout.dock.y + layout.dock.height, label).toBe(scene);
-        /* every critter of the huddle stands wholly inside the scene, on the card's top edge */
         for (const slot of layout.slots) {
           expect(slot.stage.y, label).toBeGreaterThanOrEqual(0);
           expect(slot.foot.y, label).toBeGreaterThanOrEqual(layout.dock.y);

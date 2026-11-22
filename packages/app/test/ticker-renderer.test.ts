@@ -38,7 +38,6 @@ test("a renderer takes ownership, receives invalidations and releases back witho
   host.destroy();
 });
 
-// The runtime seam owns suspension, animation completion, and renderer teardown.
 import { vi } from "vitest";
 import { createStageRuntime } from "../src/sim/stage-runtime.js";
 import { Bump, Flight, Mesh, type SoundCue } from "../src/world/index.js";

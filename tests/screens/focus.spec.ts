@@ -203,9 +203,7 @@ test("the confirmation says what is being scattered, in the burrow’s order", a
     .map(Number)
     .reduce((total, n) => total + n, 0);
   expect(sum).toBe(100);
-  /* read with the dialog's name as it opens, before Cancel */
   await expect(dialog).toHaveAccessibleDescription(/^Your crumbs: .+\. You'll be asked to sign\./);
-  /* the whole of it shows in the phone's sheet, nothing scrolled out of sight */
   expect(
     await dialog.locator(".dialog-body").evaluate((node) => node.scrollHeight <= node.clientHeight)
   ).toBe(true);

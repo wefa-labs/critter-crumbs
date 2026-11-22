@@ -54,7 +54,6 @@ test("on desktop the folded dock keeps its height once the feast has played", as
     .getByRole("button", { name: "Scatter These", exact: true })
     .click();
   await expect(page.locator(".dock-scattered")).toBeVisible();
-  // The deadline passes with the screen open: dusk, the feast plays, then the results.
   expect(
     (
       await page.request.post("/api/dev/time", { data: { now: feast.scatteringEndsAt - 2500 } })

@@ -98,7 +98,6 @@ test("the files whose tier matters most land in it", () => {
       "eslint.config.mjs",
       "vitest.config.ts",
       ".github/workflows/check.yml",
-      // The git guardrail, for both tools.
       ".claude/hooks/block-dangerous-git.sh",
       ".claude/hooks/test-guardrail.sh",
       ".claude/hooks/guardrail-cases.txt",

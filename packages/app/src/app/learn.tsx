@@ -26,14 +26,12 @@ const WORDS = [
   ["learn.private.title", "learn.private.body"],
   ["learn.results.title", "learn.results.body"],
 ] as const;
-/** The week, on the third step: each phase by its name, then one line. */
 const PHASES = [
   ["phase.gathering", "learn.phases.gathering"],
   ["phase.scattering", "learn.phases.scattering"],
   ["phase.feast", "learn.phases.feast"],
 ] as const;
 
-/** A closed seed pod standing on the floor at a critter's feet (seed-pod.tsx). */
 function SeedPod({ pod }: { pod: Standing }) {
   return (
     <div className="floor-prop" style={standingStyle(pod)}>

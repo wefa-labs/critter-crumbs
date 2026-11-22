@@ -185,7 +185,6 @@ export function circleBackRow(viewport: { width: number; height: number }, count
   );
 }
 
-/** The bottom inset each surface takes from the scene. */
 function surfaceHeight(surface: Surface, desktop: boolean, H: number) {
   if (surface.kind === "dock") return DOCK_HEIGHT;
   if (surface.kind === "results")
@@ -743,7 +742,6 @@ export function layoutGame(input: LayoutInput) {
       };
     else if (!fitted) it.tag = { ...it.tag, y: Math.max(2, it.tag.y) };
   }
-  /* a results card too short to pin its heading and actions scrolls them with its list */
   const resultsUnpinned =
     !desktop && input.surface.kind === "results" && dockH < RESULTS_PINNED_LEAST;
   return {

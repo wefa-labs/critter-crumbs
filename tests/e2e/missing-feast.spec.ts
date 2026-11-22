@@ -23,7 +23,6 @@ for (const [title, id] of [
       "href",
       "/"
     );
-    // someone who has not connected keeps the Music toggle, in the floor's corner as on the launcher
     await expect(page.getByRole("button", { name: "Music", exact: true })).toBeVisible();
     await expect(
       page.getByText("Can't reach the burrow right now. Try again in a moment.")

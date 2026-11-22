@@ -64,7 +64,6 @@ test("your critter is one screen over the page it was opened from, with the sett
   });
   expect(seed.ok()).toBe(true);
   const { burrowId } = await seed.json();
-  // the burrow's critters, whose add field is on their own screen
   await page.goto(`/burrows/${burrowId}/critters`);
   await connectLocal(page, 1);
   const face = page.getByRole("button", { name: "Your critter and settings", exact: true }),
@@ -103,7 +102,6 @@ test("your critter is one screen over the page it was opened from, with the sett
     "href",
     "/how-it-works"
   );
-  // the back chevron, Escape and the browser's Back each return to the screen beneath as it was, with the focus on the face
   await profile.getByRole("button", { name: "Back", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}/critters$`));
   await expect(adding).toHaveValue("fern.eth");
@@ -118,7 +116,6 @@ test("your critter is one screen over the page it was opened from, with the sett
   await page.goBack();
   await expect(profile).toHaveCount(0);
   await expect(adding).toHaveValue("fern.eth");
-  // a visit to the first steps from the profile, which return to it, keeps the way back to the screen beneath
   await face.click();
   await profile.getByRole("link", { name: "How it works", exact: true }).click();
   await page.getByRole("button", { name: "Skip", exact: true }).click();
@@ -126,13 +123,11 @@ test("your critter is one screen over the page it was opened from, with the sett
   await profile.getByRole("button", { name: "Back", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}/critters$`));
 
-  // the critters' back chevron leads to the burrow, and the burrow's home
   const back = page.getByRole("button", { name: "Back", exact: true });
   await back.click();
   await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
   await back.click();
   await expect(page).toHaveURL(/\/$/);
-  // home: a whole burrow card opens its burrow, and Start a burrow makes one
   const card = page.locator(`a[href="/burrows/${burrowId}"]`);
   await card.getByText(/^8 critters/).click();
   await expect(page).toHaveURL(new RegExp(`/burrows/${burrowId}$`));
@@ -176,7 +171,6 @@ test("your critter is one screen over the page it was opened from, with the sett
         document.documentElement.scrollHeight,
       ])
     ).toEqual([viewport.width, viewport.height]);
-    // the foot's actions stay on the screen however short it is
     const disconnect = (await profile
       .getByRole("button", { name: "Disconnect", exact: true })
       .boundingBox())!;

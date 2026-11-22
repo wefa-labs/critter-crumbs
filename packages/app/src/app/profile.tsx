@@ -12,7 +12,6 @@ import { PlaceScreen } from "./place-screen.js";
 import type { Me } from "./session.js";
 import { Link, critterElementOf, displayName } from "./ui.js";
 
-/** Each stored setting's name and the line under it */
 const WORDS = {
   effects: ["sound.effects.label", "sound.effects.help"],
   music: ["sound.music.label", "sound.music.help"],
@@ -112,7 +111,6 @@ export function YourCritter({
   );
 }
 
-/** A setting as a switch (flow page, .switch-row): its name, the line under it and the switch at the right; the whole row takes the press. */
 function Switch({
   label,
   help,

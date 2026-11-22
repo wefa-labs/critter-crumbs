@@ -4,7 +4,6 @@ import { ScreenHeader } from "./screen-header.js";
 import { SeedPodDrawing } from "./seed-pod.js";
 import { navigate } from "./ui.js";
 
-/** A line that leads with its key word, in bold, then says the rest. */
 type Lead = readonly [lead: WhyCopyId, line: WhyCopyId];
 /** What a member is promised: the pitch's five, each the guarantee PRD §8 makes. */
 const PROMISES: readonly Lead[] = [
@@ -14,7 +13,6 @@ const PROMISES: readonly Lead[] = [
   ["why.promise.same.lead", "why.promise.same.body"],
   ["why.promise.measure.lead", "why.promise.measure.body"],
 ];
-/** The game's four words, each by its name (PRD §3). */
 const WORDS: readonly Lead[] = [
   ["why.words.burrow.lead", "why.words.burrow.body"],
   ["why.words.critters.lead", "why.words.critters.body"],

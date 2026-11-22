@@ -1,4 +1,3 @@
-/** Eight-species portrait refinement. Review rendering only; uses the frozen v2 comparison draw. */
 import type { CritterV2 } from "@critter-crumbs/core";
 import { rememberPortrait, UNIT } from "../index.js";
 import { drawFace } from "./face.js";
@@ -110,7 +109,6 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const pick = <T>(list: readonly T[], x: number) =>
   list[Math.min(list.length - 1, Math.floor(x * list.length))]!;
 
-/** The face parameters every species shares, from the same draws. */
 function faceFrom(u: number[], r: number) {
   return {
     r,
@@ -134,7 +132,6 @@ const elTone = (e: Element, k = 0): Tone => {
 const own = (l: number, c: number, h: number, soften = 0.28) =>
   toneOf(mix(oklch(l, c, h), CREAM, soften));
 
-/* ------------------------------------------------------------------ shared parts */
 function oakLeaf(
   pen: Pen,
   parent: SVGGElement,
@@ -248,7 +245,6 @@ const pointEar = (w: number, L: number) =>
   `M${f(-w)} 0C${f(-w * 0.9)} ${f(-L * 0.45)} ${f(-w * 0.25)} ${f(-L * 0.9)} ` +
   `${f(-w * 0.05)} ${f(-L)}Q0 ${f(-L * 1.04)} ${f(w * 0.08)} ${f(-L * 0.98)}` +
   `C${f(w * 0.35)} ${f(-L * 0.85)} ${f(w * 0.95)} ${f(-L * 0.42)} ${f(w)} 0Z`;
-/** A small wind-blown wisp, for cloud tails and drifting edges. */
 function wisp(pen: Pen, parent: SVGGElement, x: number, y: number, s: number, tone: Tone) {
   const d =
     `M${f(x)} ${f(y)}c${f(s * 0.4)} ${f(-s * 0.55)} ${f(s * 1.2)} ${f(-s * 0.5)} ` +
@@ -258,7 +254,6 @@ function wisp(pen: Pen, parent: SVGGElement, x: number, y: number, s: number, to
   pen.form(parent, d, tone, { weight: 0.5, size: s * 0.6, flat: true });
 }
 
-/* ------------------------------------------------------------------ earth, on the ground: the acorn squirrel */
 function squirrel(d: GardenDraw): Species {
   const u = d.u,
     W = 18 + 6 * u[1]!,
@@ -439,7 +434,6 @@ function squirrel(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ earth, in the air: the lichen moth */
 function moth(d: GardenDraw): Species {
   const u = d.u,
     R = (23 + 5 * u[0]!) * (0.5 + d.head / 2),
@@ -617,7 +611,6 @@ function moth(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ water, on the ground: the pond turtle */
 function turtle(d: GardenDraw): Species {
   const u = d.u,
     rx = 34 + 6 * u[1]!,
@@ -806,7 +799,6 @@ function turtle(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ water, in the air: the koi kite */
 function koi(d: GardenDraw): Species {
   const u = d.u,
     hover = 22 + 6 * u[11]!,
@@ -981,7 +973,6 @@ function koi(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ fire, on the ground: the ember fox */
 function fox(d: GardenDraw): Species {
   const u = d.u,
     bx = CENTER + 8,
@@ -1142,7 +1133,6 @@ function fox(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ fire, in the air: the phoenix chick */
 function phoenix(d: GardenDraw): Species {
   const u = d.u,
     hover = 14 + 6 * u[11]!,
@@ -1310,7 +1300,6 @@ function phoenix(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ air, gliding: the flying lemur */
 function lemur(d: GardenDraw): Species {
   const u = d.u,
     hover = 17 + 6 * u[11]!,
@@ -1484,7 +1473,6 @@ function lemur(d: GardenDraw): Species {
   };
 }
 
-/* ------------------------------------------------------------------ air, floating: the cloud lamb */
 function lamb(d: GardenDraw): Species {
   const u = d.u,
     hover = 14 + 6 * u[11]!,

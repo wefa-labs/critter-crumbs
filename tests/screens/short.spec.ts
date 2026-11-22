@@ -72,9 +72,7 @@ for (const [viewport, least] of [
     expect(list.rows).toBe(8);
     expect(list.whole).toBeGreaterThanOrEqual(least);
     expect(list.firstStarts).toBe(true);
-    /* the rows not in view are reached by scrolling the list, or on its side the whole card */
     expect(list.scrollable).toBeGreaterThan(0);
-    /* the huddle stands inside the scene, under the header */
     for (const top of await page
       .locator('.circle-spot:not([data-away="true"])')
       .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().top)))
