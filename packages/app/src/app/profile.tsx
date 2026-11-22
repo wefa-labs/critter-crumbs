@@ -111,7 +111,6 @@ export function YourCritter({
   );
 }
 
-/** A setting as a switch (flow page, .switch-row): its name, the line under it and the switch at the right; the whole row takes the press. */
 function Switch({
   label,
   help,

@@ -101,10 +101,6 @@ export function Home({ me, api, onProfile }: Pick<ScreenProps, "me" | "api" | "o
   );
 }
 
-/**
- * One of your burrows on home (flow page, burrowCard()): three of its critters' faces, its name, how many critters it
- * has with the phase of its feast under way, and when that closes in words, or that nothing is due. The card opens it.
- */
 function BurrowCard({
   burrow,
   api,
@@ -291,11 +287,6 @@ function BurrowPage({ view, now, ...screen }: ScreenProps & { view: BurrowView; 
   );
 }
 
-/**
- * Just you so far (flow page, SCREENS['burrow-fresh']; audit screen 15): straight after making a burrow, you at its
- * entrance; the line, the add field with the focus in it, Copy burrow link, and the empty card, whose Start a feast
- * waits for more critters.
- */
 function FreshBurrow({
   view,
   refresh,
@@ -399,11 +390,6 @@ function Unloaded({
   return <PendingPage error={error} retry={retry} bare />;
 }
 
-/**
- * Not in this burrow (flow page, SCREENS.unknown; audit screen 22; PRD P2): you at the burrow's entrance, the line
- * asking someone in it to add you, your short address with Copy your address, which is the one thing to do next, and
- * Back home.
- */
 function NotInBurrow({
   burrowName,
   me,

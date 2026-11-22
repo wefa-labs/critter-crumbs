@@ -186,11 +186,6 @@ export function CrittersScreen({
   );
 }
 
-/**
- * One critter of the burrow (flow page, memberRow()): its face, its name, marked if it is you, the short address where
- * the name is not already one, and Ready to join for a member added who has not joined; `remove` puts the quiet Remove
- * at the right, whose name says whom it removes.
- */
 function MemberRow({
   member,
   yours,

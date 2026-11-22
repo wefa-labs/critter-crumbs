@@ -113,10 +113,6 @@ function useStatement(
   };
 }
 
-/**
- * Your own statement (flow page, gatheringSheet()): the prompt above the field, the count and "Saved." on one line, the
- * hidden line once as a leaf notice, and the gold Save.
- */
 function OwnStatement({
   target,
   onSaved,
@@ -157,7 +153,6 @@ const keepFocusIn = (form: HTMLFormElement) =>
       form.querySelector<HTMLElement>(".statement-saved")?.focus();
   });
 
-/** An option's statement as a card (flow page, SCREENS['gathering-options']): its name, the field, the count, and Save until it is saved. */
 function OptionStatement({ target, ...writing }: FeastWriting & { target: Target }) {
   const statement = useStatement(target, writing, keepFocusIn),
     heading = useId();

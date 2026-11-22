@@ -13,7 +13,6 @@ const PROMISES: readonly Lead[] = [
   ["why.promise.same.lead", "why.promise.same.body"],
   ["why.promise.measure.lead", "why.promise.measure.body"],
 ];
-/** The game's four words, each by its name (PRD §3). */
 const WORDS: readonly Lead[] = [
   ["why.words.burrow.lead", "why.words.burrow.body"],
   ["why.words.critters.lead", "why.words.critters.body"],

@@ -1,4 +1,3 @@
-/** Eight-species portrait refinement. Review rendering only; uses the frozen v2 comparison draw. */
 import type { CritterV2 } from "@critter-crumbs/core";
 import { rememberPortrait, UNIT } from "../index.js";
 import { drawFace } from "./face.js";
