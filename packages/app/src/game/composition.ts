@@ -93,6 +93,7 @@ const unfed: SceneTreatment = {
   controls: "none",
 };
 
+// ===== Planted banner: CI must reject this =====
 const COMPOSITIONS: Record<GameScreenState, Composition> = {
   reveal: {
     surface: { kind: "sheet", height: 230 },
