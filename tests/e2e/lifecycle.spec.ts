@@ -1,6 +1,8 @@
 import { test, expect, type Page } from "playwright/test";
 import { readFile } from "node:fs/promises";
+import { BASE_URL } from "../stack.js";
 import { connectLocal, readJson } from "./session.js";
+import { watchGameScreen, watchNextLoad } from "./watch.js";
 
 async function submit(page: Page) {
   await page.getByRole("button", { name: "Scatter These", exact: true }).click();
@@ -17,14 +19,16 @@ for (const kind of ["people", "options"] as const)
       request,
     }, testInfo) => {
       test.setTimeout(120000);
-      const seeded = await request.post("http://127.0.0.1:5173/api/dev/seed", {
+      const seeded = await request.post("/api/dev/seed", {
         data: { kind, phase: "gathering" },
       });
       expect(seeded.ok()).toBe(true);
       const { feasts } = await seeded.json(),
         feast = feasts[0];
       const contexts = await Promise.all(
-        [1, 2].map(() => browser.newContext({ viewport: { width: 375, height: 812 } }))
+        [1, 2].map(() =>
+          browser.newContext({ baseURL: BASE_URL, viewport: { width: 375, height: 812 } })
+        )
       );
       try {
         for (const context of contexts)
@@ -41,7 +45,7 @@ for (const kind of ["people", "options"] as const)
           page.on("request", (value) => requests.push(value.url()));
         }
         for (const [i, page] of pages.entries()) {
-          await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}`);
+          await page.goto(`/feasts/${feast.id}`);
           await connectLocal(page, i + 1);
         }
         const text = "A concrete contribution for this rehearsal.\nhttps://example.com/notes";
@@ -57,7 +61,7 @@ for (const kind of ["people", "options"] as const)
           second.getByText("A concrete contribution for this rehearsal.", { exact: false })
         ).toHaveCount(0);
         await first.request.post("/api/dev/time", { data: { now: feast.gatheringEndsAt } });
-        await first.goto(`http://127.0.0.1:5173/feasts/${feast.id}/read`);
+        await first.goto(`/feasts/${feast.id}/read`);
         await expect(first.locator(".phone-statement")).toBeVisible();
         for (
           let i = 0;
@@ -71,8 +75,9 @@ for (const kind of ["people", "options"] as const)
         expect(requests.some((url) => /(?:\/three\/|\/three[-.]|@react-three)/.test(url))).toBe(
           false
         );
+        const screens: Awaited<ReturnType<typeof watchGameScreen>>[] = [];
         for (const [i, page] of pages.entries()) {
-          await page.goto(`http://127.0.0.1:5173/feasts/${feast.id}/scatter`);
+          await page.goto(`/feasts/${feast.id}/scatter`);
           await page
             .getByRole("button", { name: "Your critter and settings", exact: true })
             .click();
@@ -83,6 +88,8 @@ for (const kind of ["people", "options"] as const)
             await expect(page.locator(".game-scene .portrait-v2").first()).toBeVisible();
             await expect(page.locator("canvas")).toHaveCount(0);
           }
+          // From here to the feast, any moment with no game screen, or a screen with no floor, fails.
+          screens.push(await watchGameScreen(page));
           const inputs = page.locator(".focus-count input");
           await inputs.nth(0).fill("100");
           await inputs.nth(0).press("Enter");
@@ -107,17 +114,24 @@ for (const kind of ["people", "options"] as const)
         }>(first, `/api/feasts/${feast.id}`);
         expect(updated.ownReceipts).toHaveLength(2);
         await first.screenshot({ path: testInfo.outputPath("scatter-375.png"), fullPage: true });
+        for (const screen of screens) expect(await screen.lapses()).toEqual([]);
         await first.request.post("/api/dev/time", { data: { now: feast.scatteringEndsAt } });
         await first.request.post("/api/dev/release-key", {
           data: { identity: updated.registration.identity },
         });
+        // from the reload's first screen on its floor through the feast to the results, any lapse fails
         for (const page of pages) {
+          screens.push(await watchNextLoad(page));
           await page.reload();
           await expect(page.locator("[data-result-hash]")).toBeVisible();
           const skip = page.getByRole("button", { name: "Skip to results", exact: true });
           if (await skip.isVisible()) await skip.press("Enter");
           await expect(page.getByRole("heading", { name: "Results", exact: true })).toBeFocused();
           await expect(page.locator("h1")).toHaveCount(1);
+        }
+        for (const screen of screens.slice(-2)) {
+          expect(await screen.states()).toContain("results");
+          expect(await screen.lapses()).toEqual([]);
         }
         // the page behind Why nobody can peek, from the results, comes back to them settled, without playing the feast again
         await first.getByRole("link", { name: "Why nobody can peek", exact: true }).click();

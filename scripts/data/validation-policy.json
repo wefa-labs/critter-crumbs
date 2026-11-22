@@ -233,7 +233,13 @@
         "scripts/bun-release.json",
         "scripts/dev-overrides.json",
         ".claude/settings.json",
-        ".codex/hooks.json"
+        ".codex/hooks.json",
+        "playwright.config.ts",
+        "playwright.screens.config.ts",
+        "tests/stack.ts",
+        "tests/e2e/watch.ts",
+        "scripts/dev.mjs",
+        "scripts/vite-local.mjs"
       ],
       "globs": [
         "scripts/*-dependencies.json",

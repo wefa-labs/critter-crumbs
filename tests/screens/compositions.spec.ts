@@ -18,6 +18,18 @@ const PHONE = { width: 375, height: 812 },
    the key's adds the count of who has scattered under its notice as well (docs/decisions.md, 2026-11-09); no scatter
    readable is nobody's 260 and the 80 px its line naming whose crumbs could not be read (QA copy-01) and the result
    fingerprint under it need (docs/decisions.md, 2026-11-09) */
+/* the fonts Chromium drew a node's own text in; in CI the e2e job pins Roboto, Android's system font, so the phone's fit
+   checks measure a phone's type rather than Ubuntu's wider fallback (.github/workflows/check.yml) */
+async function drawnFonts(page: Page, selector: string) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("DOM.enable");
+  await cdp.send("CSS.enable");
+  const { root } = await cdp.send("DOM.getDocument");
+  const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector });
+  const { fonts } = await cdp.send("CSS.getPlatformFontsForNode", { nodeId });
+  await cdp.detach();
+  return fonts.map((font) => font.familyName);
+}
 const SHEETS: Record<string, number> = {
   reveal: 230,
   waiting: 290,
@@ -141,7 +153,9 @@ test("waiting for the feast: the sheet counts who has scattered while the feast 
       const sheet = page.locator(viewport === PHONE ? ".game-sheet" : ".side-sheet");
       await expect(sheet.getByText("7 of 8 have scattered", { exact: true })).toBeVisible();
       if (viewport === PHONE)
-        expect(await sheet.evaluate((node) => node.scrollHeight <= node.clientHeight)).toBe(true);
+        expect(
+          await sheet.evaluate((node) => node.scrollHeight - node.clientHeight)
+        ).toBeLessThanOrEqual(0);
     }
 });
 
@@ -159,8 +173,16 @@ test("no scatter readable: the sheet names whose and carries the fingerprint, an
         "scattered, but their crumbs couldn't be read, so there's nothing to share out."
       )
     ).toBeVisible();
+    if (viewport === PHONE && process.env.CI) {
+      await sheet
+        .getByText("scattered, but their crumbs couldn't be read, so there's nothing to share out.")
+        .evaluate((node) => node.setAttribute("data-font-probe", ""));
+      expect(await drawnFonts(page, "[data-font-probe]")).toEqual(["Roboto"]);
+    }
     if (viewport === PHONE)
-      expect(await sheet.evaluate((node) => node.scrollHeight <= node.clientHeight)).toBe(true);
+      expect(
+        await sheet.evaluate((node) => node.scrollHeight - node.clientHeight)
+      ).toBeLessThanOrEqual(0);
     await sheet.locator(".results-fingerprint summary").click();
     await expect(
       sheet.getByText(
