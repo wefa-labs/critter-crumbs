@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { GameIcon } from './icons.js';
+import type { ReactNode } from "react";
+import { GameIcon } from "./icons.js";
 
 /**
  * The small pieces a sheet is made of, shared by the core game's surfaces (surface.tsx) and the screens around it. In a
@@ -11,13 +11,35 @@ import { GameIcon } from './icons.js';
 export const Grow = () => <div className="sheet-grow" />;
 
 /** A notice inside a sheet: a leaf beside the line, or a cloud when something is not right yet. Not a live region; `id` lets a control it explains point to it. */
-export function SheetNotice({ trouble = false, id, children }: { trouble?: boolean; id?: string; children: ReactNode }) {
-  return trouble
-    ? <div className="sheet-notice" id={id}><GameIcon name="cloud" /><span>{children}</span></div>
-    : <div className="sheet-notice" id={id}><GameIcon name="leaf" /><span>{children}</span></div>;
+export function SheetNotice({
+  trouble = false,
+  id,
+  children,
+}: {
+  trouble?: boolean;
+  id?: string;
+  children: ReactNode;
+}) {
+  return trouble ? (
+    <div className="sheet-notice" id={id}>
+      <GameIcon name="cloud" />
+      <span>{children}</span>
+    </div>
+  ) : (
+    <div className="sheet-notice" id={id}>
+      <GameIcon name="leaf" />
+      <span>{children}</span>
+    </div>
+  );
 }
 
 /** Three bobbing crumbs while the feast is laid out. */
 export function Loader({ crumb }: { crumb: ReactNode }) {
-  return <div className="sheet-loader" aria-hidden="true">{[0, 1, 2].map(index => <span key={index}>{crumb}</span>)}</div>;
+  return (
+    <div className="sheet-loader" aria-hidden="true">
+      {[0, 1, 2].map((index) => (
+        <span key={index}>{crumb}</span>
+      ))}
+    </div>
+  );
 }

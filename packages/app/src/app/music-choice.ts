@@ -4,7 +4,8 @@
  * switching off music nobody had heard. When no sound was playing as the press began, the press starts the music;
  * otherwise it flips the setting.
  */
-export const musicAfterPress = (soundWasPlaying: boolean, on: boolean) => soundWasPlaying ? !on : true;
+export const musicAfterPress = (soundWasPlaying: boolean, on: boolean) =>
+  soundWasPlaying ? !on : true;
 
 /**
  * Remembers whether sound was playing when the press now being handled began. The press itself unlocks sound, and by
@@ -13,12 +14,15 @@ export const musicAfterPress = (soundWasPlaying: boolean, on: boolean) => soundW
  * Space, and a click that no such event led up to (assistive technology sends those) is a whole press by itself.
  */
 export function createPressWatch(soundPlaying: () => boolean) {
-  let atPress = false, pressing = false;
+  let atPress = false,
+    pressing = false;
   return {
     saw(type: string, key?: string) {
-      const begins = type === 'pointerdown' || type === 'keydown' && (key === 'Enter' || key === ' ');
-      if (begins || type === 'click' && !pressing) atPress = soundPlaying();
-      if (begins) pressing = true; else if (type === 'click') pressing = false;
+      const begins =
+        type === "pointerdown" || (type === "keydown" && (key === "Enter" || key === " "));
+      if (begins || (type === "click" && !pressing)) atPress = soundPlaying();
+      if (begins) pressing = true;
+      else if (type === "click") pressing = false;
     },
     soundAtPress: () => atPress,
   };

@@ -1,18 +1,23 @@
-import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
-import { test } from 'node:test';
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { test } from "node:test";
 
 // The page's Content-Security-Policy (vercel.json, Technical Spec §2) has no 'unsafe-eval', so `eval` and `new Function`
 // throw in the browser. Node's --disallow-code-generation-from-strings applies the same rule to a script.
-const underThePolicy = source => spawnSync(process.execPath, ['--disallow-code-generation-from-strings', '--input-type=module', '--eval', source], { encoding: 'utf8' });
+const underThePolicy = (source) =>
+  spawnSync(
+    process.execPath,
+    ["--disallow-code-generation-from-strings", "--input-type=module", "--eval", source],
+    { encoding: "utf8" }
+  );
 
-test('the flag refuses code made from a string, as the page policy does', () => {
+test("the flag refuses code made from a string, as the page policy does", () => {
   const result = underThePolicy(`new Function('return 1')`);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /EvalError/);
 });
 
-test('a Koota world stores, reads, updates and tracks changes without making code from strings', () => {
+test("a Koota world stores, reads, updates and tracks changes without making code from strings", () => {
   const result = underThePolicy(`
     import assert from 'node:assert/strict';
     import { createWorld, trait } from 'koota';

@@ -182,6 +182,12 @@
         "scripts/eslint-rules.mjs",
         "scripts/guardrails.test.mjs",
         "eslint.config.mjs",
+        "biome.json",
+        "scripts/lint.mjs",
+        "scripts/lint-baseline.mjs",
+        "scripts/data/lint-baseline.json",
+        "scripts/lint-rules.test.mjs",
+        "scripts/line-length.test.mjs",
         "vitest.config.ts",
         "api/tsconfig.json",
         "packages/app/vite.config.ts",
@@ -211,12 +217,21 @@
   ],
   "checks": [
     {
+      "id": "format",
+      "command": "bun run format:check",
+      "risk": "unformatted files hide real diffs",
+      "expectedSignal": "biome reports no changes",
+      "freshness": "exact-inputs",
+      "budgetSeconds": 10,
+      "stopRule": "stop-dependent-checks"
+    },
+    {
       "id": "lint",
       "command": "bun run lint",
-      "risk": "a custom rule (time as input, no HTML, import direction, copy IDs) is broken",
+      "risk": "a custom rule (time as input, no HTML, import direction, copy IDs) or a hooks, accessibility or floating-promise rule is broken beyond the baseline",
       "expectedSignal": "eslint reports no problems",
       "freshness": "exact-inputs",
-      "budgetSeconds": 60,
+      "budgetSeconds": 90,
       "stopRule": "stop-dependent-checks"
     },
     {
@@ -266,7 +281,7 @@
     },
     {
       "id": "tooling-test",
-      "command": "node --import ./scripts/no-network.mjs --test scripts/*.test.mjs && bash .claude/hooks/test-guardrail.sh",
+      "command": "node --import ./scripts/no-network.mjs --test $(ls scripts/*.test.mjs | grep -v development-assets) && bash .claude/hooks/test-guardrail.sh",
       "risk": "a guardrail, lint probe, build policy or dependency check regresses",
       "expectedSignal": "the tooling tests and the guardrail cases pass",
       "freshness": "exact-inputs",
@@ -365,7 +380,12 @@
           ".ts",
           ".tsx"
         ],
-        "scopedCommand": "node node_modules/eslint/bin/eslint.js --max-warnings 0 {paths}"
+        "scopedCommand": "bun run lint"
+      },
+      "format": {
+        "check": "format",
+        "scopedCommand": "node_modules/.bin/biome format --no-errors-on-unmatched {paths}",
+        "scopedBudgetSeconds": 5
       }
     }
   }

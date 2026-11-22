@@ -1,36 +1,33 @@
-import type { CopyId } from '@critter-crumbs/shared';
-import type { GameScreenState } from '../app/feast-view.js';
-import type { MusicTrack } from '../audio/assets.js';
-import { DESKTOP_MIN_WIDTH } from './layout.js';
+import type { CopyId } from "@critter-crumbs/shared";
+import type { GameScreenState } from "../app/feast-view.js";
+import type { MusicTrack } from "../audio/assets.js";
+import { DESKTOP_MIN_WIDTH } from "./layout.js";
 
 /**
  * What each core game state shows, ported from the review pages: the flow page's SCREENS for the moments around
  * the scatter screen, and the scatter page (pass eleven) for the screen itself. Pure; the live screens and the
  * gallery both render it, so a state cannot drift into another state's layout.
  */
-export type Device = 'phone' | 'desktop';
+export type Device = "phone" | "desktop";
 
 /** One surface per state. A sheet is the phone's bottom sheet at its height and the side panel on desktop. */
-export type Surface =
-  | { kind: 'dock' }
-  | { kind: 'sheet'; height: number }
-  | { kind: 'results' };
+export type Surface = { kind: "dock" } | { kind: "sheet"; height: number } | { kind: "results" };
 
 export interface SceneTreatment {
-  scene: 'window' | 'dusk';
-  light: 'day' | 'feast';
+  scene: "window" | "dusk";
+  light: "day" | "feast";
   /** Every critter but your own. */
-  mood: 'awake' | 'asleep' | 'delighted';
+  mood: "awake" | "asleep" | "delighted";
   ownAsleep: boolean;
   /** At the feast everyone grows, so the circle's spots shrink to make room. */
   grown: boolean;
-  bubbles: 'none' | 'focus' | 'all';
+  bubbles: "none" | "focus" | "all";
   tags: boolean;
   piles: boolean;
-  heap: 'none' | 'remaining';
+  heap: "none" | "remaining";
   huddle: boolean;
   /** The focus row's − and +: live, dimmed and stopped once scattering has closed, or not there at all. */
-  controls: 'none' | 'live' | 'disabled';
+  controls: "none" | "live" | "disabled";
 }
 
 export interface Composition {
@@ -42,63 +39,181 @@ export interface Composition {
   toast?: CopyId;
 }
 
-const scattering: SceneTreatment = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: true, grown: false, bubbles: 'focus', tags: true, piles: true, heap: 'remaining', huddle: false, controls: 'live' };
-const sleeping: SceneTreatment = { scene: 'dusk', light: 'day', mood: 'asleep', ownAsleep: true, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'remaining', huddle: false, controls: 'none' };
-const gathered: SceneTreatment = { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: true, controls: 'none' };
+const scattering: SceneTreatment = {
+  scene: "window",
+  light: "day",
+  mood: "awake",
+  ownAsleep: true,
+  grown: false,
+  bubbles: "focus",
+  tags: true,
+  piles: true,
+  heap: "remaining",
+  huddle: false,
+  controls: "live",
+};
+const sleeping: SceneTreatment = {
+  scene: "dusk",
+  light: "day",
+  mood: "asleep",
+  ownAsleep: true,
+  grown: false,
+  bubbles: "none",
+  tags: false,
+  piles: false,
+  heap: "remaining",
+  huddle: false,
+  controls: "none",
+};
+const gathered: SceneTreatment = {
+  scene: "window",
+  light: "feast",
+  mood: "delighted",
+  ownAsleep: false,
+  grown: true,
+  bubbles: "none",
+  tags: false,
+  piles: false,
+  heap: "none",
+  huddle: true,
+  controls: "none",
+};
 /* no crumbs were counted: the critters stay as they were */
-const unfed: SceneTreatment = { scene: 'window', light: 'day', mood: 'awake', ownAsleep: false, grown: false, bubbles: 'none', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' };
+const unfed: SceneTreatment = {
+  scene: "window",
+  light: "day",
+  mood: "awake",
+  ownAsleep: false,
+  grown: false,
+  bubbles: "none",
+  tags: false,
+  piles: false,
+  heap: "none",
+  huddle: false,
+  controls: "none",
+};
 
 const COMPOSITIONS: Record<GameScreenState, Composition> = {
   /* flow 34 */
-  reveal: { surface: { kind: 'sheet', height: 230 }, scene: { scene: 'window', light: 'day', mood: 'delighted', ownAsleep: true, grown: false, bubbles: 'all', tags: false, piles: false, heap: 'none', huddle: false, controls: 'none' }, music: 'feeding' },
+  reveal: {
+    surface: { kind: "sheet", height: 230 },
+    scene: {
+      scene: "window",
+      light: "day",
+      mood: "delighted",
+      ownAsleep: true,
+      grown: false,
+      bubbles: "all",
+      tags: false,
+      piles: false,
+      heap: "none",
+      huddle: false,
+      controls: "none",
+    },
+    music: "feeding",
+  },
   /* scatter page: #scatter, #reading, #done, #scattered */
-  scatter: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding' },
-  reading: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding' },
-  done: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding' },
+  scatter: { surface: { kind: "dock" }, scene: scattering, music: "feeding" },
+  reading: { surface: { kind: "dock" }, scene: scattering, music: "feeding" },
+  done: { surface: { kind: "dock" }, scene: scattering, music: "feeding" },
   /* flow 36–40: the dock moments; confirming is a dialog over the dock */
-  signing: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding' },
-  saving: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding' },
-  scattered: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding', toast: 'err.saveVerified' },
-  rejected: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding', toast: 'scatter.sign.rejected' },
-  failed: { surface: { kind: 'dock' }, scene: scattering, music: 'feeding', toast: 'err.saveFailed' },
+  signing: { surface: { kind: "dock" }, scene: scattering, music: "feeding" },
+  saving: { surface: { kind: "dock" }, scene: scattering, music: "feeding" },
+  scattered: {
+    surface: { kind: "dock" },
+    scene: scattering,
+    music: "feeding",
+    toast: "err.saveVerified",
+  },
+  rejected: {
+    surface: { kind: "dock" },
+    scene: scattering,
+    music: "feeding",
+    toast: "scatter.sign.rejected",
+  },
+  failed: {
+    surface: { kind: "dock" },
+    scene: scattering,
+    music: "feeding",
+    toast: "err.saveFailed",
+  },
   /* flow 41; the dusk sting plays as the music stops */
-  closed: { surface: { kind: 'dock' }, scene: { ...scattering, scene: 'dusk', mood: 'asleep', bubbles: 'none', controls: 'disabled' }, music: null },
+  closed: {
+    surface: { kind: "dock" },
+    scene: { ...scattering, scene: "dusk", mood: "asleep", bubbles: "none", controls: "disabled" },
+    music: null,
+  },
   /* flow 42, 43; both are taller than the flow page's 250 for what the app adds: the waiting sheet by 40 px for its line
      to the page behind Why nobody can peek (the first-steps review, F8), and the key's by 80 for that line and the count
      of who has scattered under its notice, with Try again still at its foot (docs/decisions.md, 2026-11-09) */
-  waiting: { surface: { kind: 'sheet', height: 290 }, scene: sleeping, music: null },
-  key: { surface: { kind: 'sheet', height: 330 }, scene: sleeping, music: null },
+  waiting: { surface: { kind: "sheet", height: 290 }, scene: sleeping, music: null },
+  key: { surface: { kind: "sheet", height: 330 }, scene: sleeping, music: null },
   /* flow 44; the feast heap stays while the crumbs fly from it (Game Design G6), though the flow page's still omits it.
      The feast plays its own cue on the effects bus. */
-  feast: { surface: { kind: 'sheet', height: 144 }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'none', tags: false, piles: true, heap: 'remaining', huddle: false, controls: 'none' }, music: null },
+  feast: {
+    surface: { kind: "sheet", height: 144 },
+    scene: {
+      scene: "window",
+      light: "feast",
+      mood: "delighted",
+      ownAsleep: false,
+      grown: true,
+      bubbles: "none",
+      tags: false,
+      piles: true,
+      heap: "remaining",
+      huddle: false,
+      controls: "none",
+    },
+    music: null,
+  },
   /* scatter page #feast with Results closed: everyone grown, the totals on their tags, Results in the bar */
-  feasted: { surface: { kind: 'dock' }, scene: { scene: 'window', light: 'feast', mood: 'delighted', ownAsleep: false, grown: true, bubbles: 'focus', tags: true, piles: false, heap: 'none', huddle: false, controls: 'none' }, music: 'full' },
+  feasted: {
+    surface: { kind: "dock" },
+    scene: {
+      scene: "window",
+      light: "feast",
+      mood: "delighted",
+      ownAsleep: false,
+      grown: true,
+      bubbles: "focus",
+      tags: true,
+      piles: false,
+      heap: "none",
+      huddle: false,
+      controls: "none",
+    },
+    music: "full",
+  },
   /* flow 45 */
-  nobody: { surface: { kind: 'sheet', height: 260 }, scene: unfed, music: 'full' },
+  nobody: { surface: { kind: "sheet", height: 260 }, scene: unfed, music: "full" },
   /* no scatter saved could be read at the feast: flow 45's circle, and its sheet taller for the line naming whose crumbs
      could not be read, four lines for a burrow of ten (QA copy-01), and the result fingerprint folded under it, so that
      members can compare theirs (docs/decisions.md, 2026-11-09) */
-  unreadable: { surface: { kind: 'sheet', height: 340 }, scene: unfed, music: 'full' },
+  unreadable: { surface: { kind: "sheet", height: 340 }, scene: unfed, music: "full" },
   /* scatter page #feast with Results open; flow 46–50 give each variant's contents */
-  results: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
-  tie: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
-  givers: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
-  recording: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
-  recorded: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
-  public: { surface: { kind: 'results' }, scene: gathered, music: 'full' },
+  results: { surface: { kind: "results" }, scene: gathered, music: "full" },
+  tie: { surface: { kind: "results" }, scene: gathered, music: "full" },
+  givers: { surface: { kind: "results" }, scene: gathered, music: "full" },
+  recording: { surface: { kind: "results" }, scene: gathered, music: "full" },
+  recorded: { surface: { kind: "results" }, scene: gathered, music: "full" },
+  public: { surface: { kind: "results" }, scene: gathered, music: "full" },
 };
 
 /** Desktop from DESKTOP_MIN_WIDTH: the side panel opens beside the circle. */
-export const deviceFor = (width: number): Device => width >= DESKTOP_MIN_WIDTH ? 'desktop' : 'phone';
+export const deviceFor = (width: number): Device =>
+  width >= DESKTOP_MIN_WIDTH ? "desktop" : "phone";
 
 /** The message a state shows at the top of the floor; the screen decides how long it stays. */
 export const stateToast = (state: GameScreenState): CopyId | undefined => COMPOSITIONS[state].toast;
 /** Whether a state's − and + are live, dimmed or absent (the same on every device). */
-export const stateControls = (state: GameScreenState): SceneTreatment['controls'] => COMPOSITIONS[state].scene.controls;
+export const stateControls = (state: GameScreenState): SceneTreatment["controls"] =>
+  COMPOSITIONS[state].scene.controls;
 
 export function composeGame(state: GameScreenState, device: Device): Composition {
   const composition = COMPOSITIONS[state];
   /* desktop keeps the statement open in the side panel, so the focused critter needs no bubble */
-  if (device === 'desktop' && composition.scene.bubbles === 'focus') return { ...composition, scene: { ...composition.scene, bubbles: 'none' } };
+  if (device === "desktop" && composition.scene.bubbles === "focus")
+    return { ...composition, scene: { ...composition.scene, bubbles: "none" } };
   return composition;
 }

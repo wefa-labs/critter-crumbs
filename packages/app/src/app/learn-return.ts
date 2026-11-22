@@ -5,6 +5,12 @@
  * home for a connected member.
  */
 export function returnPath(state: unknown): string {
-  const from = typeof state === 'object' && state !== null && 'from' in state ? state.from : undefined;
-  return typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && from !== '/how-it-works' ? from : '/';
+  const from =
+    typeof state === "object" && state !== null && "from" in state ? state.from : undefined;
+  return typeof from === "string" &&
+    from.startsWith("/") &&
+    !from.startsWith("//") &&
+    from !== "/how-it-works"
+    ? from
+    : "/";
 }

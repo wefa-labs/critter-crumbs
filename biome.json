@@ -1,0 +1,58 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
+  },
+  "linter": {
+    "enabled": false
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "trailingCommas": "es5",
+      "semicolons": "always",
+      "arrowParentheses": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/node_modules/**",
+      "!**/dist/**",
+      "!**/build/**",
+      "!**/coverage/**",
+      "!**/*.min.js",
+      "!docs/**",
+      "!.agents/**",
+      "!.claude/**",
+      "!.scratch/**",
+      "!.vercel/**",
+      "!packages/app/src/styles/tokens.css",
+      "!packages/app/src/styles/tokens.ts",
+      "!scripts/select-checks.mjs",
+      "!scripts/lint-baseline.mjs"
+    ]
+  }
+}

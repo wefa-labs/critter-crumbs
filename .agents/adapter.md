@@ -20,7 +20,7 @@ Bun 1.4.2 and Node 22.22.1 (`.bun-version`, `.node-version`; `bun run check:tool
 | Tier | Use | Command |
 |---|---|---|
 | targeted | the smallest proof of one changed behavior | `node node_modules/typescript/bin/tsc -b && CC_API_DATABASE=pglite node node_modules/vitest/vitest.mjs run --project <shared\|core\|app\|api> <test path>` |
-| style | non-mutating lint | `node node_modules/eslint/bin/eslint.js --max-warnings 0 <paths>` |
+| style | non-mutating format and lint | `bun run format:check && bun run lint` |
 | checkpoint | a coherent cross-package batch or shared-interface change | `bun run test` |
 | push | ready-for-CI gate on the committed tree | `bun run check` |
 | readiness | production-readiness review | `bun run check && bun run vercel-build` |
@@ -56,7 +56,7 @@ none
 shared → core → app; shared → core → api. Enforced by the `critter-crumbs/imports` lint rule.
 
 ### Requirement sources
-The pull request body and the issue it links (a Linear issue in the Product team's Critter Crumbs project, or a GitHub issue as `wefa-labs/critter-crumbs#<n>`); the specs `docs/01-prd.md` to `docs/04-technical-spec.md`; `docs/decisions.md`; `docs/adr/`.
+The pull request body and the issue it links (a GitHub issue as `wefa-labs/critter-crumbs#<n>`, or an issue afo names); the specs `docs/01-prd.md` to `docs/04-technical-spec.md`; `docs/decisions.md`; `docs/adr/`.
 
 ### Invariants
 `AGENTS.md` § Rules the code must enforce and § Engineering rules: the PRD §5 feast rules, time as an input, a dumb store, no `innerHTML`, a pure and deterministic tally, copy IDs, frozen generator versions, sound cues paired with DOM state.
@@ -89,7 +89,7 @@ A string inlined in a component instead of a copy ID; a clock read inside logic;
 `docs/decisions.md` (append-only: a correction is a new entry), `docs/adr/*`, `docs/reviews/**`, `docs/build/phase-*`
 
 ### Tracker
-Linear, Product team, Critter Crumbs project. Read-only during a review unless asked to file.
+None an agent writes to: afo tracks Critter Crumbs in a Linear workspace agents here cannot reach. Report findings in the pull request or to afo.
 
 ## debug
 
@@ -142,7 +142,7 @@ none
 none
 
 ### Tracker
-Linear, Product team, Critter Crumbs project. File only when asked.
+None an agent writes to: afo tracks Critter Crumbs in a Linear workspace agents here cannot reach. Ask afo where a finding goes.
 
 ## plan
 
@@ -165,7 +165,7 @@ Copy: new lines as IDs in `docs/02-design-system.md` §10. Sound: each cue and t
 none
 
 ### Plan location
-The Linear project; working notes in `.scratch/<feature>/` (ignored by git).
+Working notes in `.scratch/<feature>/` (ignored by git); afo keeps the plan of record.
 
 ### Plan files
 none
@@ -209,7 +209,7 @@ none
 main
 
 ### PR issue line
-none required; link the Linear or GitHub issue when there is one.
+none required; link the GitHub issue when there is one.
 
 ### Hooks
 No git hooks. The git guardrail runs as an agent hook (`.claude/settings.json`, `.codex/hooks.json`).
@@ -244,10 +244,10 @@ Dependabot pull requests: refresh the dependency allowlists in one reviewable co
 why something is the way it is → `docs/decisions.md` and `docs/adr/` first; a bug → `debug`; a change review → `review`
 
 ### Durable evidence
-The owning spec section, with its primary source; otherwise the pull request or Linear issue that needs it.
+The owning spec section, with its primary source; otherwise the pull request that needs it.
 
 ### Mapping workflow
 none
 
 ### Tracker
-Linear, Product team, Critter Crumbs project
+None: agents file nothing in Linear, which afo keeps in a workspace they cannot reach.

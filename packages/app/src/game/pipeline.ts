@@ -1,1 +1,1 @@
-export { generateCritter } from '@critter-crumbs/core';
+export { generateCritter } from "@critter-crumbs/core";

@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "note": "Shrink-only (scripts/lint.mjs): findings of the React hooks and jsx-a11y rules that the tree had when they joined on 21 November 2026. Counts may go down, never up; bun run lint -- --shrink lowers them. Raising one needs a reviewed hand edit.",
+  "counts": {
+    "jsx-a11y/no-noninteractive-element-interactions": {
+      "packages/app/src/app/place-screen.tsx": 1,
+      "packages/app/src/app/results.tsx": 1
+    },
+    "jsx-a11y/no-noninteractive-tabindex": {
+      "packages/app/src/app/learn.tsx": 1,
+      "packages/app/src/app/results.tsx": 1,
+      "packages/app/src/app/why.tsx": 1,
+      "packages/app/src/game/surface.tsx": 1
+    },
+    "jsx-a11y/no-redundant-roles": {
+      "packages/app/src/app/burrow-critters.tsx": 3,
+      "packages/app/src/app/burrow-feasts.tsx": 2,
+      "packages/app/src/app/burrows.tsx": 1,
+      "packages/app/src/dev/rendering.tsx": 1
+    },
+    "jsx-a11y/no-static-element-interactions": {
+      "packages/app/src/game/parts.tsx": 1
+    },
+    "jsx-a11y/role-supports-aria-props": {
+      "packages/app/src/dev/rendering.tsx": 2
+    },
+    "react-hooks/exhaustive-deps": {
+      "packages/app/src/app/app.tsx": 1,
+      "packages/app/src/app/feast.tsx": 3,
+      "packages/app/src/app/invite.tsx": 1,
+      "packages/app/src/app/read.tsx": 1,
+      "packages/app/src/app/renderer.tsx": 6,
+      "packages/app/src/app/results.tsx": 6,
+      "packages/app/src/app/scatter.tsx": 5,
+      "packages/app/src/app/ui.tsx": 1,
+      "packages/app/src/dev/rendering.tsx": 2,
+      "packages/app/src/game/parts.tsx": 2,
+      "packages/app/src/game/surface.tsx": 1,
+      "packages/app/src/three/runtime.ts": 2
+    }
+  }
+}

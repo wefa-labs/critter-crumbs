@@ -1,50 +1,58 @@
 /** Design System §10. IDs and interpolation names are the shared contract. */
 export const copy = {
-  'profile.title': 'Your critter',
-  'profile.address.copy': 'Copy address',
-  'profile.address.copied': 'Address copied.',
-  'notification.label': 'Update',
-  'notification.dismiss': 'Dismiss notification',
-  'err.copy': "Couldn't copy. Try again, or select the text and copy it yourself.",
+  "profile.title": "Your critter",
+  "profile.address.copy": "Copy address",
+  "profile.address.copied": "Address copied.",
+  "notification.label": "Update",
+  "notification.dismiss": "Dismiss notification",
+  "err.copy": "Couldn't copy. Try again, or select the text and copy it yourself.",
   "gathering.assistant.title": "Start from your notes",
-  "gathering.assistant.help": "Copy this prompt into your own assistant with the notes you choose. Nothing is sent from Critter Crumbs.",
+  "gathering.assistant.help":
+    "Copy this prompt into your own assistant with the notes you choose. Nothing is sent from Critter Crumbs.",
   "gathering.assistant.label": "Statement prompt",
   "gathering.assistant.copy": "Copy prompt",
   "gathering.assistant.copied": "Prompt copied.",
   "gathering.assistant.select": "Copying is unavailable. Select the prompt and copy it yourself.",
-  "gathering.assistant.prompt": "Help me draft my statement for this feast.\nTitle: {title}\nContext: {context}\nType: {kind}\nGathering ends: {gathering}\nScattering ends: {scattering}\n\nUse only the notes I provide below. Find concrete contributions, work completed, and who benefited. Ask about anything unclear; do not invent achievements. Draft in the first person, in plain text, with at most 2,000 characters. Keep it clear and specific so the burrow can understand what I contributed. I will review and edit it before saving.\n\nMy notes:",
-  'results.local.cta': 'Record the rehearsal result',
-  'results.local.help': 'Local Base Sepolia fixture. This exercises recording without gas or a real transaction. Any burrow member can do it.',
-  'results.local.done': 'Rehearsal result recorded by {name}.',
-  'results.local.view': 'View the rehearsal record',
-  'results.local.transaction': 'Transaction reference',
-  'results.local.uid': 'Record reference',
-  'results.public.pending': 'The burrow is preparing the public result. It appears here after a member records it.',
+  "gathering.assistant.prompt":
+    "Help me draft my statement for this feast.\nTitle: {title}\nContext: {context}\nType: {kind}\nGathering ends: {gathering}\nScattering ends: {scattering}\n\nUse only the notes I provide below. Find concrete contributions, work completed, and who benefited. Ask about anything unclear; do not invent achievements. Draft in the first person, in plain text, with at most 2,000 characters. Keep it clear and specific so the burrow can understand what I contributed. I will review and edit it before saving.\n\nMy notes:",
+  "results.local.cta": "Record the rehearsal result",
+  "results.local.help":
+    "Local Base Sepolia fixture. This exercises recording without gas or a real transaction. Any burrow member can do it.",
+  "results.local.done": "Rehearsal result recorded by {name}.",
+  "results.local.view": "View the rehearsal record",
+  "results.local.transaction": "Transaction reference",
+  "results.local.uid": "Record reference",
+  "results.public.pending":
+    "The burrow is preparing the public result. It appears here after a member records it.",
 
-  'results.csv.critter': 'critter',
-  'results.csv.address': 'address',
-  'results.csv.crumbs': 'crumbs',
-  'results.csv.share': 'share',
-  'results.csv.giver': 'giver',
-  'results.received': '{n} crumbs received',
-  'results.verification': 'Result fingerprint',
-  'results.verification.help': 'Compare it with another member’s. The same fingerprint means the same result.',
-  'err.publicationChanged': 'The published scatters do not match the close record, so the feast did not open on this device. Nothing of yours changed. Try again and tell the burrow if this continues.',
-  'err.sessionExpired': 'Connect again to save. Your changes are still here.',
-  'scatter.savedWithChanges': 'Scattered. Your newer edits still need to be saved.',
-  'app.contextTitle': '{screen} · {burrow} · Critter Crumbs',
-  'read.title': 'Read statements',
-  'scatter.title': 'Scatter crumbs',
-  'home.critterCount': '{n} critters',
-  'home.noDeadline': 'No upcoming deadline',
+  "results.csv.critter": "critter",
+  "results.csv.address": "address",
+  "results.csv.crumbs": "crumbs",
+  "results.csv.share": "share",
+  "results.csv.giver": "giver",
+  "results.received": "{n} crumbs received",
+  "results.verification": "Result fingerprint",
+  "results.verification.help":
+    "Compare it with another member’s. The same fingerprint means the same result.",
+  "err.publicationChanged":
+    "The published scatters do not match the close record, so the feast did not open on this device. Nothing of yours changed. Try again and tell the burrow if this continues.",
+  "err.sessionExpired": "Connect again to save. Your changes are still here.",
+  "scatter.savedWithChanges": "Scattered. Your newer edits still need to be saved.",
+  "app.contextTitle": "{screen} · {burrow} · Critter Crumbs",
+  "read.title": "Read statements",
+  "scatter.title": "Scatter crumbs",
+  "home.critterCount": "{n} critters",
+  "home.noDeadline": "No upcoming deadline",
   "phase.void": "Ended before scattering",
   "setup.option.remove": "Remove option",
   "setup.saved": "Draft saved. Review the details, then open the feast when you're ready.",
-  "setup.saved.help": "These details are fixed in this draft. To change them, cancel it and start a new feast.",
+  "setup.saved.help":
+    "These details are fixed in this draft. To change them, cancel it and start a new feast.",
   "burrow.remove": "Remove",
   "burrow.remove.label": "Remove from burrow: {name}",
   "burrow.remove.title": "Remove {name}?",
-  "burrow.remove.body": "The burrow will see who removed them and when. Feasts already scattering keep their participants and results. They can be added again later.",
+  "burrow.remove.body":
+    "The burrow will see who removed them and when. Feasts already scattering keep their participants and results. They can be added again later.",
   "burrow.remove.done": "{name} was removed from the burrow.",
   "burrow.removals.title": "Membership history",
   "burrow.removals.line": "{actor} removed {name}",
@@ -54,7 +62,8 @@ export const copy = {
   "app.pageTitle": "{title} · Critter Crumbs",
   "app.navigation": "Main navigation",
   "connect.title": "Choose how to connect",
-  "connect.empty": "No connection is available in this browser yet. Copy this page's link and open it in the app you connect with, on your phone or on a computer.",
+  "connect.empty":
+    "No connection is available in this browser yet. Copy this page's link and open it in the app you connect with, on your phone or on a computer.",
   "connect.injected": "This browser",
   "connect.rejected": "Connection wasn't confirmed. Try again when you're ready.",
   "connect.resumed": "Connected. Try that again now — nothing you entered was lost.",
@@ -71,7 +80,8 @@ export const copy = {
   "burrow.join": "Join this burrow",
   "burrow.historical": "Past members",
   "burrow.preAdded": "Ready to join",
-  "session.message": "Critter Crumbs\n\nConnect as {address}\n\nNonce: {nonce}\nIssued: {issued}\nExpires: {expires}",
+  "session.message":
+    "Critter Crumbs\n\nConnect as {address}\n\nNonce: {nonce}\nIssued: {issued}\nExpires: {expires}",
   "app.name": "Critter Crumbs",
   "app.environment.label": "Development status",
   "app.environment.badge": "Beta · Testnet",
@@ -95,7 +105,8 @@ export const copy = {
   "deadline.line": "{deadline} · {date}",
   "skip.content": "Skip to content",
   "arrive.burrow": "{burrowName} · {n} critters",
-  "arrive.explainer": "Everyone here gets the same handful of crumbs to share out. Where they go stays private until the feast.",
+  "arrive.explainer":
+    "Everyone here gets the same handful of crumbs to share out. Where they go stays private until the feast.",
   "arrive.asleep": "The critters are asleep until you connect.",
   "arrive.cta": "Connect to join",
   "launch.learn": "How it works",
@@ -104,23 +115,29 @@ export const copy = {
   "learn.skip": "Skip",
   "learn.done": "Got it",
   "learn.handful.title": "Everyone gets the same handful",
-  "learn.handful.body": "A feast is how a group shares something out. Everyone gets the same crumbs, and gives all of them away.",
+  "learn.handful.body":
+    "A feast is how a group shares something out. Everyone gets the same crumbs, and gives all of them away.",
   "learn.tap.body": "Try it: give these ten crumbs away. They are only practice.",
   "learn.tap.give": "Give a practice crumb",
   "learn.phases.title": "Three phases, two deadlines",
-  "learn.phases.gathering": "Everyone writes what they did. Nobody else in the burrow can read it yet.",
-  "learn.phases.scattering": "Every statement opens at once. Read them, then scatter your crumbs. You can change your mind until the deadline.",
+  "learn.phases.gathering":
+    "Everyone writes what they did. Nobody else in the burrow can read it yet.",
+  "learn.phases.scattering":
+    "Every statement opens at once. Read them, then scatter your crumbs. You can change your mind until the deadline.",
   "learn.phases.feast": "Everything opens, and the numbers are there.",
   "learn.phases.deadlines": "Both deadlines stay on screen, in your time zone.",
   "learn.private.title": "Where they go stays private",
-  "learn.private.body": "Nobody sees where anyone’s crumbs went until the feast, not even us. The key that opens every scatter is released at the deadline, and not before.",
+  "learn.private.body":
+    "Nobody sees where anyone’s crumbs went until the feast, not even us. The key that opens every scatter is released at the deadline, and not before.",
   "learn.results.title": "When the feast opens",
-  "learn.results.body": "Every scatter opens at once, and your own device adds them up. Here, four critters had 100 crumbs each and three of them scattered.",
+  "learn.results.body":
+    "Every scatter opens at once, and your own device adds them up. Here, four critters had 100 crumbs each and three of them scattered.",
   "learn.results.table": "Practice feast results",
   "learn.results.critter": "Critter",
   "learn.results.crumbs": "Crumbs",
   "learn.results.share": "Share",
-  "learn.results.explain": "Shares come from the crumbs actually given, {total} in all, so {name}’s {crumbs} is {share}.",
+  "learn.results.explain":
+    "Shares come from the crumbs actually given, {total} in all, so {name}’s {crumbs} is {share}.",
   "learn.results.absent": "Fern didn’t scatter and still receives a share.",
   "learn.example.moss": "Moss",
   "learn.example.clover": "Clover",
@@ -172,7 +189,8 @@ export const copy = {
   "burrow.missing.title": "There's no burrow at this link",
   "burrow.missing.body": "Check the link with whoever sent it.",
   "feast.cancelled": "Cancelled",
-  "feast.tooFew": "{feastTitle} ended before scattering: a people feast needs at least 3 critters. Start a new one when the burrow is ready.",
+  "feast.tooFew":
+    "{feastTitle} ended before scattering: a people feast needs at least 3 critters. Start a new one when the burrow is ready.",
   "feast.missing.title": "There's no feast at this link",
   "feast.missing.body": "Check the link with whoever sent it.",
   "setup.title": "Start a feast",
@@ -215,23 +233,28 @@ export const copy = {
   "setup.save": "Save draft",
   "setup.open": "Open the feast",
   "setup.open.title": "Open {feastTitle}?",
-  "setup.open.body": "Gathering starts now and closes {gatheringDeadline}. You can extend that once.",
+  "setup.open.body":
+    "Gathering starts now and closes {gatheringDeadline}. You can extend that once.",
   "setup.open.cta": "Open the feast",
-  "setup.open.late": "This draft's gathering deadline has passed, so it can't open. Cancel it and start a new feast with later times.",
+  "setup.open.late":
+    "This draft's gathering deadline has passed, so it can't open. Cancel it and start a new feast with later times.",
   "gathering.yours.title": "Your statement",
-  "gathering.prompt": "What did you do this time? Draw on your notes, commits, calendar — anything that helps. Links are welcome.",
+  "gathering.prompt":
+    "What did you do this time? Draw on your notes, commits, calendar — anything that helps. Links are welcome.",
   "gathering.counter": "{n} / 2,000",
   "gathering.limit": "That's the limit — 2,000 characters.",
   "gathering.save": "Save statement",
   "gathering.saved": "Saved.",
-  "gathering.closed": "Gathering closed before your latest words were saved. Anything you saved earlier still stands.",
+  "gathering.closed":
+    "Gathering closed before your latest words were saved. Anything you saved earlier still stands.",
   "gathering.hidden": "Nobody else in the burrow sees this until scattering opens.",
   "gathering.participation": "{written} of {total} statements written",
   "gathering.notYet": "Not yet: {names}",
   "gathering.options.title": "Option statements",
   "gathering.extend": "Extend gathering (once)",
   "gathering.extend.title": "Extend gathering",
-  "gathering.extend.body": "Pick a new close time before scattering closes ({scatteringDeadline}). This is the only extension.",
+  "gathering.extend.body":
+    "Pick a new close time before scattering closes ({scatteringDeadline}). This is the only extension.",
   "gathering.extend.cta": "Extend",
   "gathering.extended": "Gathering now closes {relative}.",
   "gathering.cancel": "Cancel this feast",
@@ -249,11 +272,12 @@ export const copy = {
   "read.done": "Start scattering",
   "read.noStatement": "{name} didn't write a statement.",
   "read.option.noStatement": "No description for this option.",
-  'scatter.add.symbol': '+',
-  'scatter.remove.symbol': '−',
-  'pile.label': 'Your crumbs',
-  'scatter.latest': 'Your latest saved scatter is #{seq}. The crumbs shown here are your edits on this screen. Saving them will replace that scatter.',
-  'scatter.unsaved': 'Your changes have not been saved yet.',
+  "scatter.add.symbol": "+",
+  "scatter.remove.symbol": "−",
+  "pile.label": "Your crumbs",
+  "scatter.latest":
+    "Your latest saved scatter is #{seq}. The crumbs shown here are your edits on this screen. Saving them will replace that scatter.",
+  "scatter.unsaved": "Your changes have not been saved yet.",
   "scatter.instruction": "Tap to give a crumb. Hold to pour.",
   "scatter.add": "Give a crumb to {name}",
   "scatter.remove": "Take a crumb back from {name}",
@@ -278,10 +302,14 @@ export const copy = {
   "scatter.sign.body": "You'll be asked to sign. It costs nothing and nothing goes on-chain.",
   "scatter.sign.summary": "Your crumbs: {amounts}.",
   "scatter.sign.amount": "{n} to {name}",
-  "scatter.sign.rejected": "Not confirmed. Your crumbs are still here — try again when you're ready.",
-  "scatter.sign.locked": "Your account app is locked. Your crumbs are still here — unlock it, then try again.",
-  "scatter.sign.otherAccount": "Your account app is on another account. Your crumbs are still here — switch back, then try again.",
-  "scatter.sign.expired": "That confirmation is too old to save. Your crumbs are still here — try again.",
+  "scatter.sign.rejected":
+    "Not confirmed. Your crumbs are still here — try again when you're ready.",
+  "scatter.sign.locked":
+    "Your account app is locked. Your crumbs are still here — unlock it, then try again.",
+  "scatter.sign.otherAccount":
+    "Your account app is on another account. Your crumbs are still here — switch back, then try again.",
+  "scatter.sign.expired":
+    "That confirmation is too old to save. Your crumbs are still here — try again.",
   "scatter.saving": "Saving…",
   "scatter.done.title": "Scattered.",
   "scatter.done.body": "You can change this until {scatteringDeadline}.",
@@ -333,24 +361,32 @@ export const copy = {
   "view.dark.label": "Dark mode",
   "view.dark.help": "Easier on the eyes at night.",
   "fallback.initial": "Showing the simple view — 3D isn't available in this browser right now.",
-  "fallback.midSession": "The 3D view stopped, so this is the simple view. Nothing else has changed.",
+  "fallback.midSession":
+    "The 3D view stopped, so this is the simple view. Nothing else has changed.",
   "fallback.retry": "Try 3D again",
   "err.offline": "You're offline. Your crumbs are safe on this screen until you're back.",
   "err.online": "Back online.",
-  "err.saveFailed": "Couldn't save your scatter. Check your connection and try again — nothing was lost.",
+  "err.saveFailed":
+    "Couldn't save your scatter. Check your connection and try again — nothing was lost.",
   "err.saveUnverified": "Saved, but not confirmed yet. Keep this open a moment.",
   "err.saveVerified": "Your scatter is in.",
-  "err.clockSkew": "Your device clock is off by about {minutes} minutes. Deadlines here use the feast's clock, not yours.",
+  "err.clockSkew":
+    "Your device clock is off by about {minutes} minutes. Deadlines here use the feast's clock, not yours.",
   "err.uidMissing": "Your scatter isn't in the published set. Keep this: {uid}. Tell the burrow.",
   "err.ensUnavailable": "Couldn't look up ENS names right now, so addresses are shown instead.",
   "err.storeUnreachable": "Can't reach the burrow right now. Try again in a moment.",
-  "err.rehearsalOnly": "Only the local rehearsal can sign and open feasts in this build. Your crumbs stay as you left them.",
-  "err.keyUnreachable": "Can't fetch the key right now. Nothing is lost — try again in a few minutes.",
+  "err.rehearsalOnly":
+    "Only the local rehearsal can sign and open feasts in this build. Your crumbs stay as you left them.",
+  "err.keyUnreachable":
+    "Can't fetch the key right now. Nothing is lost — try again in a few minutes.",
   "err.generic": "Something went wrong. Nothing you did was lost.",
-  "err.notParticipant": "This feast started before you joined the burrow. You'll be in the next one.",
+  "err.notParticipant":
+    "This feast started before you joined the burrow. You'll be in the next one.",
   "err.feastCapacity": "A feast can include at most 49 critters.",
-  "results.unreadable": "{names} scattered, but their crumbs couldn't be read, so they count as not having scattered.",
-  "results.unreadable.all": "{names} scattered, but their crumbs couldn't be read, so there's nothing to share out.",
+  "results.unreadable":
+    "{names} scattered, but their crumbs couldn't be read, so they count as not having scattered.",
+  "results.unreadable.all":
+    "{names} scattered, but their crumbs couldn't be read, so there's nothing to share out.",
   "scatter.own.short": "You",
   "results.export.short": "Download",
   "feast.sequence": "Everyone wakes, then each critter eats and grows in turn.",
@@ -376,21 +412,22 @@ export const devCopy = {
   "preview.render.loss": "Lose the 3D context",
   "preview.render.restore": "Restore the 3D context",
   "preview.render.expand": "Expand statement",
-  'preview.audio.title': 'Sound workshop',
-  'preview.audio.help': 'Render the sound cues silently to check their duration and peak level, then play any cue or track to hear it in the mix.',
-  'preview.audio.run': 'Check sound cues',
-  'preview.audio.pass': 'Pass',
-  'preview.audio.fail': 'Needs attention',
-  'preview.audio.pending': 'Ready to check',
-  'preview.audio.caption': 'Offline audio measurements',
-  'preview.audio.token': 'Cue',
-  'preview.audio.duration': 'Duration (ms)',
-  'preview.audio.peak': 'Peak (dB)',
-  'preview.audio.limit': 'Peak limit (dB)',
-  'preview.audio.status': 'Status',
-  'preview.audio.cues': 'Cues',
-  'preview.audio.quiet': 'Quiet',
-  'preview.audio.duck': 'Statement open',
+  "preview.audio.title": "Sound workshop",
+  "preview.audio.help":
+    "Render the sound cues silently to check their duration and peak level, then play any cue or track to hear it in the mix.",
+  "preview.audio.run": "Check sound cues",
+  "preview.audio.pass": "Pass",
+  "preview.audio.fail": "Needs attention",
+  "preview.audio.pending": "Ready to check",
+  "preview.audio.caption": "Offline audio measurements",
+  "preview.audio.token": "Cue",
+  "preview.audio.duration": "Duration (ms)",
+  "preview.audio.peak": "Peak (dB)",
+  "preview.audio.limit": "Peak limit (dB)",
+  "preview.audio.status": "Status",
+  "preview.audio.cues": "Cues",
+  "preview.audio.quiet": "Quiet",
+  "preview.audio.duck": "Statement open",
   "preview.trait.title": "World subscription workshop",
   "preview.trait.on": "Still critters on",
   "preview.trait.off": "Still critters off",
@@ -442,25 +479,53 @@ export const devCopy = {
 export type DevCopyId = keyof typeof devCopy;
 
 export type CopyId = keyof typeof copy;
-type Slots<Text extends string> = Text extends `${string}{${infer Slot}}${infer Rest}` ? Slot | Slots<Rest> : never;
-type NumericSlot = 'n' | 'max' | 'remaining' | 'written' | 'total' | 'crumbs' | 'i' | 'done' | 'scatterers' | 'totalCrumbs' | 'minutes';
-export type CopyParams<Id extends CopyId> = { [Slot in Slots<(typeof copy)[Id]>]: Slot extends NumericSlot ? number : string };
-const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
-  'arrive.burrow': { slot: 'n', one: '{burrowName} · {n} critter' },
-  'home.critterCount': { slot: 'n', one: '{n} critter' },
-  'critter.reroll.announce': { slot: 'remaining', one: 'New critter. {remaining} re-roll left.' },
-  'gathering.participation': { slot: 'total', one: '{written} of {total} statement written' },
-  'reveal.body': { slot: 'crumbs', one: 'Read them first, then scatter your {crumbs} crumb.' },
-  'reveal.announce': { slot: 'n', one: 'Statements are open. {n} statement to read.' },
-  'scatter.participation': { slot: 'done', one: '{done} of {total} has scattered' },
-  'pile.remaining': { slot: 'n', one: '1 to go' },
-  'game.critter.crumbs': { slot: 'n', one: '{name}, 1 crumb' },
-  'err.clockSkew': { slot: 'minutes', one: "Your device clock is off by about 1 minute. Deadlines here use the feast's clock, not yours." },
+type Slots<Text extends string> = Text extends `${string}{${infer Slot}}${infer Rest}`
+  ? Slot | Slots<Rest>
+  : never;
+type NumericSlot =
+  | "n"
+  | "max"
+  | "remaining"
+  | "written"
+  | "total"
+  | "crumbs"
+  | "i"
+  | "done"
+  | "scatterers"
+  | "totalCrumbs"
+  | "minutes";
+export type CopyParams<Id extends CopyId> = {
+  [Slot in Slots<(typeof copy)[Id]>]: Slot extends NumericSlot ? number : string;
 };
-const fill = (template: string, params: Record<string, string | number>) => template.replace(/\{([^}]+)\}/g, (_, key: string) => String(params[key]));
-export function formatCopy<Id extends CopyId>(id: Id, ...args: keyof CopyParams<Id> extends never ? [] : [CopyParams<Id>]): string {
+const plurals: Partial<Record<CopyId, { slot: string; one: string }>> = {
+  "arrive.burrow": { slot: "n", one: "{burrowName} · {n} critter" },
+  "home.critterCount": { slot: "n", one: "{n} critter" },
+  "critter.reroll.announce": { slot: "remaining", one: "New critter. {remaining} re-roll left." },
+  "gathering.participation": { slot: "total", one: "{written} of {total} statement written" },
+  "reveal.body": { slot: "crumbs", one: "Read them first, then scatter your {crumbs} crumb." },
+  "reveal.announce": { slot: "n", one: "Statements are open. {n} statement to read." },
+  "scatter.participation": { slot: "done", one: "{done} of {total} has scattered" },
+  "pile.remaining": { slot: "n", one: "1 to go" },
+  "game.critter.crumbs": { slot: "n", one: "{name}, 1 crumb" },
+  "err.clockSkew": {
+    slot: "minutes",
+    one: "Your device clock is off by about 1 minute. Deadlines here use the feast's clock, not yours.",
+  },
+};
+const fill = (template: string, params: Record<string, string | number>) =>
+  template.replace(/\{([^}]+)\}/g, (_, key: string) => String(params[key]));
+export function formatCopy<Id extends CopyId>(
+  id: Id,
+  ...args: keyof CopyParams<Id> extends never ? [] : [CopyParams<Id>]
+): string {
   const params = (args[0] ?? {}) as Record<string, string | number>;
   const plural = plurals[id];
-  return fill(plural && new Intl.PluralRules('en').select(Number(params[plural.slot])) === 'one' ? plural.one : copy[id], params);
+  return fill(
+    plural && new Intl.PluralRules("en").select(Number(params[plural.slot])) === "one"
+      ? plural.one
+      : copy[id],
+    params
+  );
 }
-export const formatDevCopy = (id: DevCopyId, params: Record<string, string | number>) => fill(devCopy[id], params);
+export const formatDevCopy = (id: DevCopyId, params: Record<string, string | number>) =>
+  fill(devCopy[id], params);

@@ -2,7 +2,10 @@
 export function clockOffset(clock = () => Date.now()) {
   let offset: number | null = null;
   return {
-    now: (): number | null => offset === null ? null : clock() + offset,
-    accept(serverNow: number): number { offset = serverNow - clock(); return offset; },
+    now: (): number | null => (offset === null ? null : clock() + offset),
+    accept(serverNow: number): number {
+      offset = serverNow - clock();
+      return offset;
+    },
   };
 }
