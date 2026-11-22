@@ -14,16 +14,14 @@ export async function watchGameScreen(page: Page) {
 
 /**
  * The same record for the page's next load, installed before it starts: it begins with the first game screen the load
- * draws on its floor, so the reveal and the feast that follow a reload are watched from there to the results. The frames
- * before it are left out: the first scene after a load waits for the scene list, read once for the page (sceneReader in
- * packages/app/src/game/scene-manifest.ts), and stands on bare ground until it arrives.
+ * shows, so the reveal and the feast that follow a reload are watched from their first frame to the results.
  */
 export async function watchNextLoad(page: Page) {
   await page.addInitScript(record, true);
   return reader(page);
 }
 
-function record(fromFirstFloor: boolean) {
+function record(fromFirstScreen: boolean) {
   const seen = { states: [] as string[], lapses: [] as string[] };
   Object.assign(window, { seen });
   let was = "";
@@ -31,12 +29,7 @@ function record(fromFirstFloor: boolean) {
     const screen = [...document.querySelectorAll(".game-body")].find((body) =>
       body.checkVisibility({ visibilityProperty: true })
     );
-    if (
-      fromFirstFloor &&
-      seen.states.length === 0 &&
-      !screen?.querySelector(".scene-backdrop")?.childElementCount
-    )
-      return;
+    if (fromFirstScreen && !screen && seen.states.length === 0) return;
     const state = screen?.getAttribute("data-game-state");
     if (state && state !== seen.states.at(-1)) seen.states.push(state);
     const now = !screen
