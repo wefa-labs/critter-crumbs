@@ -51,6 +51,7 @@ A rule with no enforcer but review is a candidate for one: a lint rule, a test, 
 | Hooks follow the rules of hooks with complete dependencies; app markup is accessible | lint `react-hooks/*` and `jsx-a11y/*`, held to a shrink-only baseline of today's findings | `eslint.config.mjs`, `scripts/data/lint-baseline.json`, probes in `scripts/lint-rules.test.mjs` |
 | No promise is left floating in package or route code | lint `@typescript-eslint/no-floating-promises` (type-aware) | same |
 | Source is formatted, and no line runs past 200 characters | `format:check` (Biome), `scripts/line-length.test.mjs` | `biome.json` |
+| No purged comment grows back (banners, commented-out code, labels, notes that restate a name), and no report, capture or recording lands in git | `check:regrowth` judges what a change adds against its merge base, with the comment codemod | `scripts/check-regrowth.mjs`, `scripts/comment-policy.mjs` |
 | No eval-style code in the bundle | build policy | `scripts/build-policy.mjs` |
 | Shell and 3D chunks stay in budget | build budget | `scripts/build-budget.mjs` (`bun run build`) |
 | Every dependency is reviewed: exact version, allowed licence, archive hash | `check:licenses` | `scripts/check-dependencies.mjs` and its two allowlists |

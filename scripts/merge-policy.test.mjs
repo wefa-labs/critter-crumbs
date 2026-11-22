@@ -109,6 +109,8 @@ test("the files whose tier matters most land in it", () => {
       "scripts/lint.mjs",
       "scripts/data/lint-baseline.json",
       "scripts/lint-rules.test.mjs",
+      "scripts/comment-policy.mjs",
+      "scripts/check-regrowth.mjs",
     ],
     sensitive: [
       "packages/shared/src/copy.ts",

@@ -75,6 +75,10 @@
 /scripts/data/lint-baseline.json                 @Oba-One
 /scripts/lint-rules.test.mjs                     @Oba-One
 /scripts/line-length.test.mjs                    @Oba-One
+/scripts/comment-policy.mjs                      @Oba-One
+/scripts/comment-policy.test.mjs                 @Oba-One
+/scripts/check-regrowth.mjs                      @Oba-One
+/scripts/check-regrowth.test.mjs                 @Oba-One
 /vitest.config.ts                                @Oba-One
 /tsconfig*.json                                  @Oba-One
 /packages/*/tsconfig.json                        @Oba-One
