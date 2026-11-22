@@ -73,9 +73,25 @@ export function SceneBackdrop({
   );
 }
 
+/* how long the feast's code waits for the scene list before it draws its scenes without one */
+const SCENE_LIST_WAIT_MS = 3000;
 const manifest = sceneReader(() =>
   fetch("/scenes/manifest.json").then((response) => response.json() as Promise<unknown>)
 );
+
+/* The page's first read of the scene list holds this module, and with it the feast's code, until it settles or 3 s
+   pass, so the first scene after a load has the list at its first render and stands on its floor from its first frame:
+   the opening screen stays up meanwhile. Nothing renders and suspends, so no screen starts its stage early. Only the
+   wait is limited, not the read: a list that comes later still reaches every scene, since each one mounting asks for the
+   same read, and a read that fails settles with no scenes and is asked for again. */
+let waited: ReturnType<typeof setTimeout> | undefined;
+await Promise.race([
+  manifest.read(),
+  new Promise((resolve) => {
+    waited = setTimeout(resolve, SCENE_LIST_WAIT_MS);
+  }),
+]);
+clearTimeout(waited);
 
 export function useScenes() {
   const [scenes, setScenes] = useState<Scene[]>(() => manifest.known() ?? []);

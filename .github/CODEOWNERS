@@ -97,3 +97,9 @@
 /.claude/hooks/                                  @Oba-One
 /.codex/hooks.json                               @Oba-One
 /.github/workflows/                              @Oba-One
+/playwright.config.ts                            @Oba-One
+/playwright.screens.config.ts                    @Oba-One
+/tests/stack.ts                                  @Oba-One
+/tests/e2e/watch.ts                              @Oba-One
+/scripts/dev.mjs                                 @Oba-One
+/scripts/vite-local.mjs                          @Oba-One

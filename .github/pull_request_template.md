@@ -17,7 +17,7 @@ Tier: <routine | sensitive | critical>, from `.agents/merge-policy.json` (`node 
 - Routine: the targeted check that exercises the change, with its command and result.
 - Sensitive: `bun run check` green, and an adversarial review by a fresh agent with its findings addressed.
 - Critical: `bun run check` and `bun run vercel-build` green (CI's `check` job), and an adversarial review by a fresh agent with its findings addressed.
-- A change that renders under `packages/app/src`: labeled captures at 375 and 1280 wide, or why they are pending.
+- A change that renders under `packages/app/src` (the selector lists `captures`): labeled captures at 375 and 1280 wide from the local stack, or why they are pending.
 
 ## Not verified
 

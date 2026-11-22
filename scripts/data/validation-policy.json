@@ -127,6 +127,34 @@
         "scripts/agent-policy.test.mjs"
       ],
       "runInQa": true
+    },
+    {
+      "check": "captures",
+      "prefixes": [
+        "packages/app/src/game/",
+        "packages/app/src/portraits/",
+        "packages/app/src/styles/",
+        "packages/app/src/three/",
+        "packages/app/src/world/",
+        "packages/app/src/sim/",
+        "packages/app/public/scenes/",
+        "packages/app/public/fonts/"
+      ],
+      "globs": [
+        "packages/app/src/app/**/*.tsx"
+      ],
+      "exact": [
+        "packages/app/index.html",
+        "packages/app/src/main.ts",
+        "packages/shared/src/copy.ts",
+        "packages/shared/src/copy-why.ts",
+        "packages/shared/src/feel.ts"
+      ],
+      "excludeSuffixes": [
+        "LICENSE"
+      ],
+      "runInQa": true,
+      "runInEvidence": true
     }
   ],
   "criticalOverrides": [
@@ -205,7 +233,13 @@
         "scripts/bun-release.json",
         "scripts/dev-overrides.json",
         ".claude/settings.json",
-        ".codex/hooks.json"
+        ".codex/hooks.json",
+        "playwright.config.ts",
+        "playwright.screens.config.ts",
+        "tests/stack.ts",
+        "tests/e2e/watch.ts",
+        "scripts/dev.mjs",
+        "scripts/vite-local.mjs"
       ],
       "globs": [
         "scripts/*-dependencies.json",
@@ -309,6 +343,16 @@
       "freshness": "exact-inputs-and-toolchain",
       "budgetSeconds": 300,
       "stopRule": "stop-dependent-checks"
+    },
+    {
+      "id": "captures",
+      "command": null,
+      "manual": true,
+      "risk": "a screen looks wrong on a phone or a desktop though its tests pass",
+      "expectedSignal": "labeled captures at 375 and 1280 wide, from the local stack, in the pull request, or a line saying why they are pending",
+      "freshness": "exact-inputs-and-session",
+      "budgetSeconds": 120,
+      "stopRule": "advisory"
     }
   ],
   "layout": {

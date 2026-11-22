@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 
 const local = process.argv.includes("--local");
 const env = {
@@ -16,7 +17,16 @@ const commands = [
 if (local)
   commands.push(
     ["tsc", ["-p", "tsconfig.server.json", "--watch", "--preserveWatchOutput"]],
-    ["node", ["--env-file-if-exists=.env", "--watch", ".scratch/server/scripts/local-api.js"]]
+    // node --watch also watches the env file it is given and stops when that file is missing, as
+    // it is in a clean checkout, so the flag goes only when there is an env file to read.
+    [
+      "node",
+      [
+        ...(existsSync(".env") ? ["--env-file-if-exists=.env"] : []),
+        "--watch",
+        ".scratch/server/scripts/local-api.js",
+      ],
+    ]
   );
 else if (!process.argv.includes("--app-only"))
   commands.push(["vercel", ["dev", "--listen", "3000"]]);

@@ -4,11 +4,12 @@
   "autoMerge": true,
   "deleteBranchOnMerge": true,
   "requiredChecks": [
-    "check"
+    "check",
+    "e2e"
   ],
   "adminBypass": "always",
   "release": {
-    "about": "main is the integration branch and nothing deploys from it: production is a manual deploy (docs/build/deployment.md). Agents merge every tier into main on proof alone (decided 15 November 2026, applied here 21 November). Each pull request names its tier and its proof in its Verification section; no Merge Gate check reads it. CI's check job (bun run check, then bun run vercel-build) runs on every pull request and is the required check. adminBypass stays until afo removes the admin bypasses elsewhere; agents never merge past a red or missing check (gh pr merge --admin is refused by .agents/policy.json).",
+    "about": "main is the integration branch and nothing deploys from it: production is a manual deploy (docs/build/deployment.md). Agents merge every tier into main on proof alone (decided 15 November 2026, applied here 21 November). Each pull request names its tier and its proof in its Verification section; no Merge Gate check reads it. CI's check job (bun run check, then bun run vercel-build) and e2e job (the lifecycle and screens browser suites against the local stack) run on every pull request and are the required checks. adminBypass stays until afo removes the admin bypasses elsewhere; agents never merge past a red or missing check (gh pr merge --admin is refused by .agents/policy.json).",
     "approvalAt": [
       "bun run deploy --production --execute",
       "EAS schema registration (bun run register-schemas --execute)"
@@ -16,7 +17,7 @@
   },
   "tiers": {
     "critical": {
-      "about": "Keys, the timelock, the tally, attestations, the generator, phases, client-side encryption, sessions and every server write, the data, deploy, dependencies and their allowlists, everything that defines the required check (package scripts, the test runner, lint, the toolchain pins), the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
+      "about": "Keys, the timelock, the tally, attestations, the generator, phases, client-side encryption, sessions and every server write, the data, deploy, dependencies and their allowlists, everything that defines the required checks (package scripts, the test runner, lint, the toolchain pins, the browser suites' configs, the local stack they start and the lapse watcher), the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
       "paths": [
         "packages/core/src/account/**",
         "packages/core/src/timelock/**",
@@ -91,7 +92,13 @@
         ".claude/settings.json",
         ".claude/hooks/**",
         ".codex/hooks.json",
-        ".github/workflows/**"
+        ".github/workflows/**",
+        "playwright.config.ts",
+        "playwright.screens.config.ts",
+        "tests/stack.ts",
+        "tests/e2e/watch.ts",
+        "scripts/dev.mjs",
+        "scripts/vite-local.mjs"
       ],
       "requireCodeOwnerReview": false,
       "autoMerge": true
