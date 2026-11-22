@@ -99,8 +99,10 @@ export function hitRect(rect: Rect, min = 44): Rect {
     height,
   };
 }
+/** A name cut to `limit` characters with an ellipsis, counted and cut by code points so an emoji is never split. */
 export function shortName(name: string, limit = 10) {
-  return name.length > limit ? name.slice(0, limit - 1) + "…" : name;
+  const points = [...name];
+  return points.length > limit ? points.slice(0, limit - 1).join("") + "…" : name;
 }
 const nameWidth = (name: string) =>
   [...name].reduce((width, ch) => width + (/[MW@]/.test(ch) ? 11 : /[ilj1 .]/.test(ch) ? 4 : 8), 0);
