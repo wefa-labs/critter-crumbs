@@ -35,7 +35,7 @@ const feast = fc
       { maxLength: 12 }
     ),
   })
-  .map(({ people, crumbs, ballots }): TallyInput => {
+  .map(({ people, crumbs, ballots }): { input: TallyInput; valid: Set<string> } => {
     const participants = Array.from({ length: people }, (_, i) => address(i));
     const targets = participants.map((owner, position) => ({
       id: hex32(1000 + position),
@@ -43,7 +43,10 @@ const feast = fc
       position,
     }));
     const participantsHash = participantSetHash(participants);
-    return {
+    const valid = new Set(
+      ballots.flatMap((ballot, i) => (ballot.broken === "none" ? [String(i + 1)] : []))
+    );
+    const input: TallyInput = {
       feastId,
       publishedSetHash: hex32(99),
       crumbsIssued: crumbs,
@@ -72,11 +75,12 @@ const feast = fc
         };
       }),
     };
+    return { input, valid };
   });
 
 const orderHolds = (implementation: typeof tally) =>
   fc.property(
-    feast.chain((input) =>
+    feast.chain(({ input }) =>
       fc.tuple(
         fc.constant(input),
         fc.shuffledSubarray(input.ballots, { minLength: input.ballots.length }),
@@ -91,19 +95,41 @@ test("shuffled scatters and critters give the same result hash", () => {
   fc.assert(orderHolds(tally), { numRuns: 300 });
 });
 
-test("a valid scatter always counts all its crumbs, and totals are proportions of what was scattered", () => {
-  fc.assert(
-    fc.property(feast, (input) => {
-      const result = tally(input);
-      const scattered = result.totals.reduce((sum, total) => sum + total.crumbs, 0);
-      return (
-        scattered === result.totalScattered &&
-        scattered === result.counted.length * input.crumbsIssued &&
-        result.didNotScatter.length + result.counted.length === input.participants.length
-      );
-    }),
-    { numRuns: 300 }
-  );
+/** Each participant's latest scatter counts when it is valid; nothing else counts. */
+const latestHolds = (implementation: typeof tally) =>
+  fc.property(feast, ({ input, valid }) => {
+    const latest = new Map<string, string>();
+    for (const ballot of input.ballots) {
+      const seen = latest.get(ballot.attester);
+      if (!seen || Number(ballot.seq) > Number(seen)) latest.set(ballot.attester, ballot.seq);
+    }
+    const expected = [...latest.values()].filter((seq) => valid.has(seq)).sort();
+    const result = implementation(input);
+    const counted = result.counted.map((ballot) => ballot.seq).sort();
+    const scattered = result.totals.reduce((sum, total) => sum + total.crumbs, 0);
+    return (
+      JSON.stringify(counted) === JSON.stringify(expected) &&
+      scattered === result.totalScattered &&
+      scattered === counted.length * input.crumbsIssued &&
+      result.didNotScatter.length + counted.length === input.participants.length
+    );
+  });
+
+test("each participant's latest valid scatter counts, all its crumbs, and nothing else", () => {
+  fc.assert(latestHolds(tally), { numRuns: 300 });
+});
+
+test("the latest-scatter property catches a tally that counts the earliest", () => {
+  // Broken on purpose: sequence numbers run backwards, so the first scatter counts as the latest.
+  const earliest: typeof tally = (input) =>
+    tally({
+      ...input,
+      ballots: input.ballots.map((ballot) => ({
+        ...ballot,
+        seq: String(1000 - Number(ballot.seq)),
+      })),
+    });
+  expect(() => fc.assert(latestHolds(earliest), { numRuns: 300 })).toThrow(/Property failed/);
 });
 
 test("the order property catches a tally that counts scatters in the order they arrive", () => {
@@ -113,5 +139,5 @@ test("the order property catches a tally that counts scatters in the order they 
       ...input,
       ballots: input.ballots.map((ballot, i) => ({ ...ballot, seq: String(i + 1) })),
     });
-  expect(() => fc.assert(orderHolds(byArrival), { numRuns: 300 })).toThrow();
+  expect(() => fc.assert(orderHolds(byArrival), { numRuns: 300 })).toThrow(/Property failed/);
 });

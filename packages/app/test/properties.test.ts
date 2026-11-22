@@ -63,7 +63,7 @@ const pour: Pour = (issued, critters, steps) => {
         if (s.kind === "give") game.actions.giveCrumb(critter);
         else if (s.kind === "take") game.actions.takeCrumb(critter);
         else if (s.kind === "set") game.actions.setCount(critter, s.count);
-        else game.actions.startPour(critter, s.direction);
+        else if (s.kind === "pour") game.actions.startPour(critter, s.direction);
       }
       game.tick((now += 16));
     }
@@ -108,7 +108,7 @@ test("the pile property catches a world that lets a count run past the heap", ()
       if (s.kind === "set") given[s.critter] = Math.max(0, Math.trunc(s.count));
     return { remaining: issued - given.reduce((a, b) => a + b, 0), given };
   };
-  expect(() => fc.assert(pileHolds(unclamped), { numRuns: 200 })).toThrow();
+  expect(() => fc.assert(pileHolds(unclamped), { numRuns: 200 })).toThrow(/Property failed/);
 });
 
 const phases = ["draft", "gathering", "scattering", "feast", "cancelled", "void"] as const;
@@ -167,9 +167,11 @@ test("a scatter can be changed only while scattering is open, and no other phase
 
 test("the view property catches a view that keeps a closed scatter editable", () => {
   // Broken on purpose: it forgets that a closed scattering cannot be edited.
-  const forgetful: typeof gameView = (input) =>
-    gameView({ ...input, failure: input.failure === "closed" ? undefined : input.failure });
-  expect(() => fc.assert(viewHolds(forgetful), { numRuns: 2_000 })).toThrow();
+  const forgetful: typeof gameView = (input) => {
+    const { failure, ...rest } = input;
+    return gameView(failure === "closed" ? rest : input);
+  };
+  expect(() => fc.assert(viewHolds(forgetful), { numRuns: 2_000 })).toThrow(/Property failed/);
 });
 
 // Names drawn from letters and from characters outside the Basic Multilingual Plane (emoji),
@@ -199,7 +201,7 @@ test("the name property catches shortening by UTF-16 units", () => {
   // Broken on purpose: the length and the cut count UTF-16 units, as the app once did.
   const byUnits = (name: string, limit = 10) =>
     name.length > limit ? name.slice(0, limit - 1) + "…" : name;
-  expect(() => fc.assert(namesHold(byUnits), { numRuns: 1_000 })).toThrow();
+  expect(() => fc.assert(namesHold(byUnits), { numRuns: 1_000 })).toThrow(/Property failed/);
 });
 
 test("the layout gives a tag that fits by code points the same width short and full", () => {
