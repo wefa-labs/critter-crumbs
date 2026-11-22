@@ -141,7 +141,9 @@ test("waiting for the feast: the sheet counts who has scattered while the feast 
       const sheet = page.locator(viewport === PHONE ? ".game-sheet" : ".side-sheet");
       await expect(sheet.getByText("7 of 8 have scattered", { exact: true })).toBeVisible();
       if (viewport === PHONE)
-        expect(await sheet.evaluate((node) => node.scrollHeight <= node.clientHeight)).toBe(true);
+        expect(
+          await sheet.evaluate((node) => node.scrollHeight - node.clientHeight)
+        ).toBeLessThanOrEqual(0);
     }
 });
 
@@ -160,7 +162,9 @@ test("no scatter readable: the sheet names whose and carries the fingerprint, an
       )
     ).toBeVisible();
     if (viewport === PHONE)
-      expect(await sheet.evaluate((node) => node.scrollHeight <= node.clientHeight)).toBe(true);
+      expect(
+        await sheet.evaluate((node) => node.scrollHeight - node.clientHeight)
+      ).toBeLessThanOrEqual(0);
     await sheet.locator(".results-fingerprint summary").click();
     await expect(
       sheet.getByText(

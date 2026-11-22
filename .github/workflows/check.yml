@@ -49,6 +49,24 @@ jobs:
       - run: bun install --frozen-lockfile --ignore-scripts
       - name: Install Chromium for Playwright
         run: node node_modules/playwright/cli.js install --with-deps chromium
+      # The app sets type in the system font. Ubuntu's falls back to DejaVu Sans, wider than any phone's, so the screens
+      # suite's fit checks render in Roboto, Android's system font, instead.
+      - name: Render the system font as a phone does
+        run: |
+          sudo apt-get install -y --no-install-recommends fonts-roboto-unhinted
+          mkdir -p ~/.config/fontconfig
+          cat > ~/.config/fontconfig/fonts.conf <<'XML'
+          <?xml version="1.0"?>
+          <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+          <fontconfig>
+            <alias binding="strong"><family>system-ui</family><prefer><family>Roboto</family></prefer></alias>
+            <alias binding="strong"><family>sans-serif</family><prefer><family>Roboto</family></prefer></alias>
+            <alias binding="strong"><family>sans</family><prefer><family>Roboto</family></prefer></alias>
+          </fontconfig>
+          XML
+          fc-cache -f
+          fc-match system-ui
+          fc-match sans-serif
       - name: Lifecycle suite
         run: bun run e2e
       - name: Screens suite
