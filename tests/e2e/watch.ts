@@ -8,31 +8,47 @@ import type { Page } from "playwright/test";
  * to a third of a second, and each new scene drew its first frames on bare ground.
  */
 export async function watchGameScreen(page: Page) {
-  await page.evaluate(() => {
-    const seen = { states: [] as string[], lapses: [] as string[] };
-    Object.assign(window, { seen });
-    let was = "";
-    const note = () => {
-      const screen = [...document.querySelectorAll(".game-body")].find((body) =>
-        body.checkVisibility({ visibilityProperty: true })
-      );
-      const state = screen?.getAttribute("data-game-state");
-      if (state && state !== seen.states.at(-1)) seen.states.push(state);
-      const now = !screen
-        ? `no game screen: ${document.querySelector<HTMLElement>(".game-content")?.innerText.trim() ?? ""}`
-        : screen.querySelector(".scene-backdrop")?.childElementCount
-          ? ""
-          : `no floor under the ${state} screen`;
-      if (now && now !== was) seen.lapses.push(now);
-      was = now;
-    };
-    new MutationObserver(note).observe(document.documentElement, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-    });
-    note();
+  await page.evaluate(record, false);
+  return reader(page);
+}
+
+/**
+ * The same record for the page's next load, installed before it starts: it begins with the first game screen the load
+ * shows, so the reveal and the feast that follow a reload are watched from their first frame.
+ */
+export async function watchNextLoad(page: Page) {
+  await page.addInitScript(record, true);
+  return reader(page);
+}
+
+function record(fromFirstScreen: boolean) {
+  const seen = { states: [] as string[], lapses: [] as string[] };
+  Object.assign(window, { seen });
+  let was = "";
+  const note = () => {
+    const screen = [...document.querySelectorAll(".game-body")].find((body) =>
+      body.checkVisibility({ visibilityProperty: true })
+    );
+    if (fromFirstScreen && !screen && seen.states.length === 0) return;
+    const state = screen?.getAttribute("data-game-state");
+    if (state && state !== seen.states.at(-1)) seen.states.push(state);
+    const now = !screen
+      ? `no game screen: ${document.querySelector<HTMLElement>(".game-content")?.innerText.trim() ?? ""}`
+      : screen.querySelector(".scene-backdrop")?.childElementCount
+        ? ""
+        : `no floor under the ${state} screen`;
+    if (now && now !== was) seen.lapses.push(now);
+    was = now;
+  };
+  new MutationObserver(note).observe(document, {
+    subtree: true,
+    childList: true,
+    attributes: true,
   });
+  note();
+}
+
+function reader(page: Page) {
   const read = (list: "states" | "lapses") => () =>
     page.evaluate(
       (key) => (window as unknown as { seen: Record<string, string[]> }).seen[key]!,

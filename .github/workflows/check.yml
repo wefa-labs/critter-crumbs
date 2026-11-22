@@ -50,7 +50,8 @@ jobs:
       - name: Install Chromium for Playwright
         run: node node_modules/playwright/cli.js install --with-deps chromium
       # The app sets type in the system font. Ubuntu's falls back to DejaVu Sans, wider than any phone's, so the screens
-      # suite's fit checks render in Roboto, Android's system font, instead.
+      # suite's fit checks render in Roboto, Android's system font, instead (compositions.spec.ts asserts Chromium draws
+      # it). Roboto is a little narrower than an iPhone's SF Pro: a local run on macOS measures that.
       - name: Render the system font as a phone does
         run: |
           sudo apt-get install -y --no-install-recommends fonts-roboto-unhinted
@@ -65,11 +66,14 @@ jobs:
           </fontconfig>
           XML
           fc-cache -f
-          fc-match system-ui
-          fc-match sans-serif
+          for family in system-ui sans-serif; do
+            test "$(fc-match -f '%{family[0]}' "$family")" = Roboto
+          done
       - name: Lifecycle suite
+        id: lifecycle
         run: bun run e2e
       - name: Screens suite
+        if: ${{ !cancelled() && steps.lifecycle.outcome != 'skipped' }}
         run: node node_modules/playwright/cli.js test --config playwright.screens.config.ts
       - name: Keep the failing runs' traces
         if: failure()

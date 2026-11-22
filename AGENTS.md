@@ -61,7 +61,7 @@ A rule with no enforcer but review is a candidate for one: a lint rule, a test, 
 | Bun and Node versions are the pinned ones | `check:toolchain` | `scripts/check-toolchain.mjs` |
 | No force pushes, hard resets, forced cleans or deletions, wholesale discards, history rewrites | git guardrail hook for Claude Code and Codex; repo guard rules where the machine-wide guards run | `.claude/hooks/block-dangerous-git.sh`, `.codex/hooks.json`, `.agents/policy.json`; cases run by `bun run test` |
 | A production deploy and EAS schema registration are afo's to run | credentials only he holds; repo guard rules `production-deploy`, `vercel-production`, `eas-schema-registration` (ask) | `.agents/policy.json` |
-| Every pull request passes the full check, the production build and the browser suites before it merges | CI jobs `check` and `e2e`, the required check once afo applies the merge settings; admins can still bypass it, so agents never merge with `--admin` (repo guard rule `admin-merge`) | `.github/workflows/check.yml`, `.agents/merge-policy.json`, `.agents/policy.json` |
+| Every pull request passes the full check, the production build and the browser suites before it merges | CI jobs `check` and `e2e`, the required checks once afo applies the merge settings; admins can still bypass it, so agents never merge with `--admin` (repo guard rule `admin-merge`) | `.github/workflows/check.yml`, `.agents/merge-policy.json`, `.agents/policy.json` |
 | A pull request records its tier and proof | PR template, review | `.github/pull_request_template.md`, `.agents/merge-policy.json` |
 | No em dash in this file | `agents-doctor` (`no-em-dash`) | run locally until the doctor runs in CI |
 | Never in user-facing copy: seal, round, cache, vote, ballot, wallet | review | `docs/02-design-system.md` §10 |
@@ -134,7 +134,7 @@ Use Bun 1.4.2 for package management and scripts; Node 22.22.1 for the function 
 | Tests only | `bun run test` (Vitest, the tooling tests, the guardrail cases) |
 | Production build | `bun run build`: compiles workspaces, builds the app, enforces chunk budgets; CI runs `bun run vercel-build` |
 | Local stack | `bun run dev:local`: Vite at `http://127.0.0.1:5173`, the API on PGlite at `:3000`, mock encryption and the dev clock (`docs/build/local-core.md`) |
-| Browser suites | `bun run e2e:install` once, then `bun run e2e` (lifecycle, `tests/e2e`) or `node node_modules/playwright/cli.js test --config playwright.screens.config.ts`. Playwright starts `dev:local` itself (`tests/stack.ts`), or reuses one already running; CI runs both on every pull request, without retries |
+| Browser suites | `bun run e2e:install` once, then `bun run e2e` (lifecycle, `tests/e2e`) or `node node_modules/playwright/cli.js test --config playwright.screens.config.ts`. Playwright starts `dev:local` itself (`tests/stack.ts`), or reuses one already on 5173, whichever checkout serves it (check with `lsof -nP -iTCP:5173 -sTCP:LISTEN`); CI runs both on every pull request, without retries |
 | Proof for a change | `node scripts/select-checks.mjs` prints the checks its changed paths need, by tier |
 | Seed a phase | `bun run seed --phase <phase>` beside a running local stack |
 

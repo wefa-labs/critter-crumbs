@@ -2,7 +2,7 @@ import { test, expect, type Page } from "playwright/test";
 import { readFile } from "node:fs/promises";
 import { BASE_URL } from "../stack.js";
 import { connectLocal, readJson } from "./session.js";
-import { watchGameScreen } from "./watch.js";
+import { watchGameScreen, watchNextLoad } from "./watch.js";
 
 async function submit(page: Page) {
   await page.getByRole("button", { name: "Scatter These", exact: true }).click();
@@ -119,16 +119,20 @@ for (const kind of ["people", "options"] as const)
         await first.request.post("/api/dev/release-key", {
           data: { identity: updated.registration.identity },
         });
+        // from the reload's first game screen through the feast to the results, any lapse fails
         for (const page of pages) {
+          screens.push(await watchNextLoad(page));
           await page.reload();
           await expect(page.locator("[data-result-hash]")).toBeVisible();
           const skip = page.getByRole("button", { name: "Skip to results", exact: true });
           if (await skip.isVisible()) await skip.press("Enter");
           await expect(page.getByRole("heading", { name: "Results", exact: true })).toBeFocused();
           await expect(page.locator("h1")).toHaveCount(1);
-          screens.push(await watchGameScreen(page));
         }
-        for (const screen of screens.slice(-2)) expect(await screen.lapses()).toEqual([]);
+        for (const screen of screens.slice(-2)) {
+          expect(await screen.states()).toContain("results");
+          expect(await screen.lapses()).toEqual([]);
+        }
         // the page behind Why nobody can peek, from the results, comes back to them settled, without playing the feast again
         await first.getByRole("link", { name: "Why nobody can peek", exact: true }).click();
         await expect(

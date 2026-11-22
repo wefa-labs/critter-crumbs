@@ -17,7 +17,7 @@
   },
   "tiers": {
     "critical": {
-      "about": "Keys, the timelock, the tally, attestations, the generator, phases, client-side encryption, sessions and every server write, the data, deploy, dependencies and their allowlists, everything that defines the required check (package scripts, the test runner, lint, the toolchain pins), the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
+      "about": "Keys, the timelock, the tally, attestations, the generator, phases, client-side encryption, sessions and every server write, the data, deploy, dependencies and their allowlists, everything that defines the required checks (package scripts, the test runner, lint, the toolchain pins, the browser suites' configs, the local stack they start and the lapse watcher), the git guardrail and CI. Proof: bun run check and bun run vercel-build green on the head (CI's check job), plus an adversarial review by a fresh agent with its findings addressed, both recorded in the pull request's Verification section. Agents merge on that proof. Code-owner review is not required: GitHub refuses approval of one's own pull request.",
       "paths": [
         "packages/core/src/account/**",
         "packages/core/src/timelock/**",
@@ -92,7 +92,13 @@
         ".claude/settings.json",
         ".claude/hooks/**",
         ".codex/hooks.json",
-        ".github/workflows/**"
+        ".github/workflows/**",
+        "playwright.config.ts",
+        "playwright.screens.config.ts",
+        "tests/stack.ts",
+        "tests/e2e/watch.ts",
+        "scripts/dev.mjs",
+        "scripts/vite-local.mjs"
       ],
       "requireCodeOwnerReview": false,
       "autoMerge": true

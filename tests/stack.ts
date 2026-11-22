@@ -6,8 +6,9 @@ import type { PlaywrightTestConfig } from "playwright/test";
 /**
  * The local stack the browser suites run against: `bun run dev:local` (Vite on 5173, the API on
  * PGlite at 3000, mock encryption and the dev clock). Playwright starts it and waits until the API
- * answers through Vite's proxy. In CI each run gets a fresh data folder and never reuses a server;
- * locally a stack already running is reused, as before.
+ * answers through Vite's proxy, and stops it with SIGTERM so PGlite closes its files. A stack it
+ * starts gets a fresh data folder, so the suites' clock moves never reach a developer's own data.
+ * In CI a server is never reused; locally a stack already on 5173 is, whichever checkout serves it.
  */
 export const BASE_URL = "http://127.0.0.1:5173";
 
@@ -20,18 +21,17 @@ export const stack: Exclude<NonNullable<PlaywrightTestConfig["webServer"]>, unkn
   timeout: 240_000,
   stdout: "ignore",
   stderr: "pipe",
+  gracefulShutdown: { signal: "SIGTERM", timeout: 10_000 },
   env: {
     LOCAL_DATA_DIR:
-      process.env.LOCAL_DATA_DIR ??
-      (ci ? mkdtempSync(path.join(tmpdir(), "critter-crumbs-e2e-")) : ""),
+      process.env.LOCAL_DATA_DIR ?? mkdtempSync(path.join(tmpdir(), "critter-crumbs-e2e-")),
   },
 };
 
-/** Shared by the browser suites: one worker for the one shared clock, no retries, flakes fail. */
+/** Shared by the browser suites: one worker for the one shared clock, no retries, so a flaky test fails the run. */
 export const suiteDefaults = {
   workers: 1,
   retries: 0,
-  failOnFlakyTests: ci,
   forbidOnly: ci,
-  use: { baseURL: BASE_URL },
+  use: { baseURL: BASE_URL, trace: "retain-on-failure" },
 } satisfies PlaywrightTestConfig;
