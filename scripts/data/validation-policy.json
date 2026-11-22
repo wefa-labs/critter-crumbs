@@ -131,19 +131,30 @@
     {
       "check": "captures",
       "prefixes": [
-        "packages/app/src/app/",
         "packages/app/src/game/",
         "packages/app/src/portraits/",
         "packages/app/src/styles/",
         "packages/app/src/three/",
         "packages/app/src/world/",
+        "packages/app/src/sim/",
         "packages/app/public/scenes/",
         "packages/app/public/fonts/"
       ],
-      "exact": [
-        "packages/app/index.html"
+      "globs": [
+        "packages/app/src/app/**/*.tsx"
       ],
-      "runInQa": true
+      "exact": [
+        "packages/app/index.html",
+        "packages/app/src/main.ts",
+        "packages/shared/src/copy.ts",
+        "packages/shared/src/copy-why.ts",
+        "packages/shared/src/feel.ts"
+      ],
+      "excludeSuffixes": [
+        "LICENSE"
+      ],
+      "runInQa": true,
+      "runInEvidence": true
     }
   ],
   "criticalOverrides": [
