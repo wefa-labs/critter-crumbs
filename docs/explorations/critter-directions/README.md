@@ -1,5 +1,7 @@
 # Critter directions
 
+> On 21 November 2026 this prototype's code (its pages, sources, build script and bundles) was removed so that nothing under `docs/` imports the app's code; the record below stays. The code is in history: `git show 51961c4:docs/explorations/critter-directions/<file>`.
+
 **Review decision, 16 October:** Afolabi selected painted Garden Spirits, eight species, portraits first, with opt-in migration. The drawings still need refinement and integration review. [Claude's refinement brief](../claude-code-critter-refinement-2026-10-16.md) supersedes the earlier open direction and migration proposals below.
 
 16 October 2026 · Exploration for the visual and sound brief (`../claude-code-visual-brief-2026-10-15.md`, part 1). Nothing in the app, its generator or its fixtures changed; the review page draws everything itself.

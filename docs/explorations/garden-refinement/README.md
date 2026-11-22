@@ -1,5 +1,7 @@
 # Painted Garden Spirits: refinement review
 
+> On 21 November 2026 this prototype's code (its pages, sources, build script and bundles) was removed so that nothing under `docs/` imports the app's code; the record below stays. The code is in history: `git show 51961c4:docs/explorations/garden-refinement/<file>`.
+
 Eight species are ready to review in the [interactive gallery](index.html). The app can draw the same refined portraits through an explicit review switch. Saved generator/renderer versions, variants, rerolls and locks are untouched. Normal production builds still draw v1.
 
 This implements Afolabi's 16 October request for Codex to execute the [refinement brief](../claude-code-critter-refinement-2026-10-16.md), integrate a reversible preview and push the work. It supersedes that brief's earlier restriction against app imports. Final art acceptance and personal opt-in migration remain separate decisions.

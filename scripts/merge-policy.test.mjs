@@ -56,6 +56,11 @@ test("every gated path matches a tracked file", () => {
     );
 });
 
+test("a nested tsconfig outside the gated paths stays routine, so the root tsconfig rule stays at the root", () => {
+  assert.equal(tierOf("docs/explorations/any/tsconfig.json"), "routine");
+  assert.equal(tierOf("tsconfig.json"), "critical");
+});
+
 test("the files whose tier matters most land in it", () => {
   const pins = {
     critical: [
@@ -123,7 +128,7 @@ test("the files whose tier matters most land in it", () => {
       "packages/app/src/game/mound-size.ts",
       "docs/decisions.md",
       "tests/e2e/lifecycle.spec.ts",
-      "docs/explorations/garden-refinement/tsconfig.json",
+      "docs/explorations/garden-refinement/README.md",
     ],
   };
   for (const [tier, files] of Object.entries(pins)) {

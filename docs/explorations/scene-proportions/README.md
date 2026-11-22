@@ -1,5 +1,7 @@
 # Scene proportions and first steps
 
+> On 21 November 2026 this prototype's code (its pages, sources, build script and bundles) was removed so that nothing under `docs/` imports the app's code; the record below stays. The code is in history: `git show 51961c4:docs/explorations/scene-proportions/<file>`.
+
 The tutorial now uses the launcher's painting scale and floor anchors, so the room and critters keep a consistent relationship while the content changes. First meeting combines the selected critter, name and Keep action in the existing stable dialog. A fourth tutorial step explains the result with a worked people feast. New creature designs and identity migration remain separate choices.
 
 ## Composition
