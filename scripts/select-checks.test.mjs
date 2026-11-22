@@ -17,7 +17,7 @@ const ids = (result) => result.checks.map((check) => check.id);
 test("a routine change gets the targeted suite of its package, not the full check", () => {
   const result = plan(["packages/app/src/game/mound-size.ts"]);
   assert.equal(result.risk, "routine");
-  assert.deepEqual(ids(result), ["format", "lint", "app-test"]);
+  assert.deepEqual(ids(result), ["format", "lint", "app-test", "captures"]);
   assert.match(
     result.checks.find((check) => check.id === "app-test").command,
     /vitest\.mjs run --project app$/
@@ -27,7 +27,7 @@ test("a routine change gets the targeted suite of its package, not the full chec
 test("a sensitive change adds the full check", () => {
   const result = plan(["packages/shared/src/copy.ts"]);
   assert.equal(result.risk, "sensitive");
-  assert.deepEqual(ids(result), ["format", "lint", "shared-test", "full-check"]);
+  assert.deepEqual(ids(result), ["format", "lint", "shared-test", "full-check", "captures"]);
   assert.equal(result.checks.find((check) => check.id === "full-check").command, "bun run check");
 });
 
@@ -69,10 +69,47 @@ test("every Vitest project a check runs exists, and every project has a check", 
   );
   const named = new Set(
     policy.checks.flatMap((check) =>
-      [...check.command.matchAll(/--project ([a-z-]+)/g)].map((match) => match[1])
+      check.manual
+        ? []
+        : [...check.command.matchAll(/--project ([a-z-]+)/g)].map((match) => match[1])
     )
   );
   assert.deepEqual([...named].sort(), [...projects].sort());
+});
+
+test("a change that renders asks for captures, and nothing else does", () => {
+  const asks = (file, intent = "ship") => ids(plan([file], intent)).includes("captures");
+  for (const file of [
+    "packages/app/src/game/layout.ts",
+    "packages/app/src/app/results.tsx",
+    "packages/app/src/styles/app.css",
+    "packages/app/src/portraits/painter-v2.ts",
+    "packages/app/src/three/runtime.ts",
+    "packages/app/src/world/index.ts",
+    "packages/app/src/sim/stage-runtime.ts",
+    "packages/app/src/main.ts",
+    "packages/app/index.html",
+    "packages/app/public/scenes/dusk.webp",
+    "packages/shared/src/copy.ts",
+    "packages/shared/src/feel.ts",
+  ])
+    assert.ok(asks(file), file);
+  for (const file of [
+    "packages/core/src/phase.ts",
+    "packages/app/test/csv.test.ts",
+    "packages/app/src/audio/index.ts",
+    "packages/app/src/app/csv.ts",
+    "packages/app/src/portraits/LICENSE",
+    "packages/shared/src/validate.ts",
+  ])
+    assert.ok(!asks(file), file);
+  for (const intent of ["qa", "review", "push"])
+    assert.ok(asks("packages/app/src/game/layout.ts", intent), intent);
+  const check = plan(["packages/app/src/game/layout.ts"]).checks.find(
+    (entry) => entry.id === "captures"
+  );
+  assert.equal(check.command, null);
+  assert.equal(check.stopRule, "advisory");
 });
 
 test("a deployment test runs the deployment project", () => {
