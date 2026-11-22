@@ -141,8 +141,6 @@ export function FeastRoute({
     if (refreshFailure) announce(refreshFailure);
   }, [refreshFailure]);
   useMusic(feastPageMusic(resource.data, phase, !!me));
-  /* your critter's face at the right of every header outside the game; the pages before scattering say a refresh the
-     store did not answer (refreshFailure) in their sheet, as the plain page once did under its heading */
   const faceOf = (member: Me) => ({
       address: member.address,
       variant: member.variant,

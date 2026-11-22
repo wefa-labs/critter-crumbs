@@ -35,10 +35,6 @@ interface Room {
   viewport: { width: number; height: number };
   desktop: boolean;
 }
-/**
- * The room the game will stand this feast's circle in on this screen: its scene, the floor's width by the height under
- * the header, and the window around it.
- */
 function useRoom(
   screen: RefObject<HTMLDivElement | null>,
   floor: RefObject<HTMLDivElement | null>

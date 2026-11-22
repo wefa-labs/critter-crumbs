@@ -293,9 +293,7 @@ export function GameScene({
   const composition = composeGame(state, deviceFor(viewport.width));
   const { surface, scene: treatment } = composition,
     gathered = treatment.huddle;
-  /* the moment's mood: delighted when statements open, asleep when scattering closes; the feast sets its own */
   useEffect(() => runtime.setMood(treatment.mood), [runtime, treatment.mood]);
-  /* the moment's music, which steps back while a statement is open */
   const audio = useAudio();
   useMusic(composition.music);
   useEffect(() => {

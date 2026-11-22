@@ -35,7 +35,6 @@ export class ScreenBoundary extends Component<
   }
   render() {
     const { back, children } = this.props;
-    /* the outage notice's title, as PendingPage has it, with this failure's own line and Reload */
     return this.state.failed ? (
       <Page title={copy["app.unavailable"]}>
         <p>{copy["err.screenLoad"]}</p>

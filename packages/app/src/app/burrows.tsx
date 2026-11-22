@@ -457,7 +457,6 @@ function NotInBurrow({
   );
 }
 
-/** A link that leads to no burrow: your critter asleep at the entrance, as on an empty home, the line, and Back home. */
 function NoBurrow({ me, onProfile }: ScreenProps) {
   return (
     <PlaceScreen

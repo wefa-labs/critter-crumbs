@@ -12,7 +12,6 @@ interface CropsDevice {
   image: string;
   kind: "crops";
 }
-/** A painting made for the device. */
 interface PlateDevice extends PlateShape {
   image: string;
   kind: "plate";

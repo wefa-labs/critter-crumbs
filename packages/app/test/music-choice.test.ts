@@ -36,7 +36,6 @@ test("a press remembers the silence it began in, although its own unlocking star
   watch.saw("pointerup");
   watch.saw("click");
   expect(watch.soundAtPress()).toBe(false);
-  // the next press begins with the sound playing
   watch.saw("pointerdown");
   watch.saw("pointerup");
   watch.saw("click");

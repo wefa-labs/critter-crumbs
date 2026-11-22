@@ -231,7 +231,6 @@ function scatteredLine(feast: MemberFeast) {
   });
 }
 
-/** The results' first lines: how many scattered and how many crumbs, as the burrow or a visitor may know it. */
 function summaryOf(feast: PublicFeast, result: Pick<TallyResult, "counted" | "totalScattered">) {
   if (isMemberFeast(feast))
     return formatCopy("results.summary", {
@@ -522,7 +521,6 @@ export function GiverTable({
   );
 }
 
-/** After the feast, with the results closed: the focused critter's name over what it received and its share. */
 function FeastFocus({
   entity,
   runtime,
@@ -724,7 +722,6 @@ export function FeastResults({
     ) : (
       <ResultsList feast={feast} opened={opened} record={record} {...(givers ? { givers } : {})} />
     );
-  /* pinned under the list, at the foot of the phone's card and in the desktop panel's bar */
   const actions = (phone: boolean) =>
     view === "givers" && member ? (
       <button
@@ -737,7 +734,6 @@ export function FeastResults({
     ) : (
       <ResultActions replay={replay} download={download} short={phone} />
     );
-  /* the phone's close icon folds the results back into the bar; from who gave what it returns to the results */
   const close =
     view === "givers"
       ? () => setView(resultsViews.results)

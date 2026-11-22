@@ -475,7 +475,6 @@ export function paintV2(
           },
           body
         );
-    /* one soft glow point: chest, throat or brow */
     const glowAt =
       params.spot === "throat"
         ? [CENTER, bodyY - H * 0.55]
@@ -488,7 +487,6 @@ export function paintV2(
       s("stop", { offset: 1, "stop-color": params.glow, "stop-opacity": 0 }, glow);
       s("circle", { cx: glowAt[0], cy: glowAt[1], r: W * 0.42, fill: `url(#${glow.id})` }, body);
     }
-    /* front paws on the belly, and slightly oversized feet */
     for (const side of [-1, 1])
       shaded(
         body,
@@ -817,7 +815,6 @@ export function paintV2(
         },
         head
       );
-    /* big round dark matte eyes, one small highlight; asleep, two closed lids */
     const eyeR = R * (0.24 + params.eyeSize * 0.8),
       spread = Math.min(1, Math.max(0, (params.eyeSpacing - 0.32) / 0.3));
     const ex = Math.max(eyeR + R * 0.1, R * (0.38 + 0.16 * spread)),

@@ -131,7 +131,6 @@ const appNotices = [
   "err.sessionExpired",
   "scatter.submit.help",
 ];
-/** What leaves the screen rejected, a scatter not signed: declined, the account app locked or on another account, or signed too long ago. */
 const rejections = [
   "scatter.sign.rejected",
   "scatter.sign.locked",
