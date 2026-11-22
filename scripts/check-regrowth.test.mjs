@@ -53,7 +53,7 @@ test("new markdown belongs in docs/ outside the report folders, in guidance fold
 });
 
 test("new media belongs only with the app's own assets", () => {
-  assert.equal(fileProblem("packages/app/public/images/arrival.webp"), null);
+  assert.equal(fileProblem("packages/app/public/scenes/dusk.webp"), null);
   for (const file of [
     "docs/explorations/x/capture.jpg",
     "docs/pitch/deck.pdf",
@@ -62,6 +62,32 @@ test("new media belongs only with the app's own assets", () => {
   ]) {
     assert.ok(fileProblem(file), file);
   }
+});
+
+test("reports are caught in any text format and anywhere in docs/, and templates are not reports", () => {
+  for (const file of [
+    "docs/explorations/audit-2026-11-21.md",
+    "docs/audits/findings.md",
+    "AUDIT.markdown",
+    "AUDIT_NOTES.txt",
+    "docs/reviews/qa-2026-11-21.html",
+    "packages/app/report.html",
+    "packages/app/public/qa/capture.jpg",
+    "docs/pitch/deck.pptx",
+    "capture.tiff",
+  ]) {
+    assert.ok(fileProblem(file), file);
+  }
+  for (const file of [
+    ".github/ISSUE_TEMPLATE/bug_report.md",
+    "packages/core/ARCHITECTURE.md",
+    "docs/build/rehearsal.md",
+    "packages/app/index.html",
+  ]) {
+    assert.equal(fileProblem(file), null, file);
+  }
+  assert.ok(fileProblem("capture.dat", { binary: true }));
+  assert.equal(fileProblem("packages/app/public/audio/m6.mp3", { binary: true }), null);
 });
 
 test("app source excludes tests, declarations and generated files", () => {
@@ -119,14 +145,18 @@ test("a planted banner and a planted AUDIT_NOTES.md fail, naming the line and th
   write("AUDIT_NOTES.md", "findings\n");
   write("docs/reviews/october-qa/README.md", "edited, not added\n");
   write("docs/explorations/capture.png", "not really a png\n");
+  writeFileSync(path.join(root, "capture"), Buffer.from([0xff, 0xd8, 0x00, 0x10, 0x4a, 0x46]));
   const { problems } = judge(root, base);
-  assert.equal(problems.length, 3, problems.join("\n"));
+  assert.equal(problems.length, 4, problems.join("\n"));
   assert.ok(
     problems.some((problem) => problem.startsWith("packages/app/src/old.ts:3: new banner comment"))
   );
   assert.ok(problems.some((problem) => problem.startsWith("AUDIT_NOTES.md: reads as a report")));
   assert.ok(
     problems.some((problem) => problem.startsWith("docs/explorations/capture.png: is new media"))
+  );
+  assert.ok(
+    problems.some((problem) => problem.startsWith("capture: is new media or another binary"))
   );
 });
 

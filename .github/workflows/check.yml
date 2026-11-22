@@ -12,8 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERCEL_TELEMETRY_DISABLED: '1'
-      # The regrowth check judges what a change adds against its merge base with this branch.
-      REGROWTH_BASE_REF: origin/${{ github.base_ref || 'main' }}
+      # The regrowth check judges what a change adds: a pull request against its base branch, a
+      # push against the head it replaced (main included), and a new branch against main.
+      REGROWTH_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || 'origin/main' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

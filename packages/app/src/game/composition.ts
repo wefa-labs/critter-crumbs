@@ -185,7 +185,7 @@ const COMPOSITIONS: Record<GameScreenState, Composition> = {
     music: "full",
   },
   nobody: { surface: { kind: "sheet", height: 260 }, scene: unfed, music: "full" },
-  /* no scatter saved could be read at the feast: flow 45's circle, and its sheet taller for the line naming whose crumbs
+  /* no scatter saved could be read at the feast: nobody's circle (flow 45), and its sheet taller for the line naming whose crumbs
      could not be read, four lines for a burrow of ten (QA copy-01), and the result fingerprint folded under it, so that
      members can compare theirs (docs/decisions.md, 2026-11-09) */
   unreadable: { surface: { kind: "sheet", height: 340 }, scene: unfed, music: "full" },
