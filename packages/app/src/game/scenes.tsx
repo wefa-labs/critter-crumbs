@@ -1,8 +1,8 @@
-import { useEffect, useState, type CSSProperties } from 'react';
-import { defaultScene } from './art.js';
-import { plateLift } from './plate.js';
-import { otherPlateImages, sceneReader, type Scene } from './scene-manifest.js';
-import { sceneFilterStyle, sceneLayerStyle } from './styles.js';
+import { useEffect, useState, type CSSProperties } from "react";
+import { defaultScene } from "./art.js";
+import { plateLift } from "./plate.js";
+import { otherPlateImages, sceneReader, type Scene } from "./scene-manifest.js";
+import { sceneFilterStyle, sceneLayerStyle } from "./styles.js";
 
 /**
  * The floor the circle stands on, under the look's wash and grain. A plate is one painting of the room seen from above,
@@ -12,25 +12,47 @@ import { sceneFilterStyle, sceneLayerStyle } from './styles.js';
  * top and the two corners. Scenes are data: a new one is images plus a manifest entry (scripts/scene-layers.mjs renders a
  * crops scene's layers).
  */
-export function SceneBackdrop({ id = defaultScene, desktop, size, backRow }: { id?: string; desktop: boolean; size: { width: number; height: number }; backRow: number }) {
+export function SceneBackdrop({
+  id = defaultScene,
+  desktop,
+  size,
+  backRow,
+}: {
+  id?: string;
+  desktop: boolean;
+  size: { width: number; height: number };
+  backRow: number;
+}) {
   const scenes = useScenes();
-  const scene = scenes.find(entry => entry.id === id) ?? scenes[0];
+  const scene = scenes.find((entry) => entry.id === id) ?? scenes[0];
   const device = scene && (desktop ? scene.devices.desktop : scene.devices.phone);
-  const floorImage = device?.kind === 'plate' ? device.image : scene?.layers?.floor;
+  const floorImage = device?.kind === "plate" ? device.image : scene?.layers?.floor;
   useEffect(() => {
     if (!floorImage) return;
     let active = true;
-    void painting(floorImage).then(() => {
-      if (active) for (const image of otherPlateImages(scenes, desktop, floorImage)) void painting(image).catch(() => {});
-    }).catch(() => {});
-    return () => { active = false; };
+    void painting(floorImage)
+      .then(() => {
+        if (active)
+          for (const image of otherPlateImages(scenes, desktop, floorImage))
+            void painting(image).catch(() => {});
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, [scenes, desktop, floorImage]);
   if (!scene || !device) return <div className="scene-backdrop" aria-hidden="true" />;
   const filter = sceneFilterStyle(scene.lookFilter);
-  if (device.kind === 'plate') {
+  if (device.kind === "plate") {
     return (
       <div className="scene-backdrop" aria-hidden="true" style={filter}>
-        <div className="scene-plate" style={{ backgroundImage: `url(${device.image})`, top: -plateLift(size, device, backRow) }} />
+        <div
+          className="scene-plate"
+          style={{
+            backgroundImage: `url(${device.image})`,
+            top: -plateLift(size, device, backRow),
+          }}
+        />
         <div className="scene-wash" />
         <div className="scene-grain" />
       </div>
@@ -51,14 +73,20 @@ export function SceneBackdrop({ id = defaultScene, desktop, size, backRow }: { i
   );
 }
 
-const manifest = sceneReader(() => fetch('/scenes/manifest.json').then(response => response.json() as Promise<unknown>));
+const manifest = sceneReader(() =>
+  fetch("/scenes/manifest.json").then((response) => response.json() as Promise<unknown>)
+);
 
 export function useScenes() {
   const [scenes, setScenes] = useState<Scene[]>(() => manifest.known() ?? []);
   useEffect(() => {
     let active = true;
-    void manifest.read().then(read => { if (active) setScenes(read); });
-    return () => { active = false; };
+    void manifest.read().then((read) => {
+      if (active) setScenes(read);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
   return scenes;
 }
@@ -73,7 +101,10 @@ function painting(source: string): Promise<void> {
     image.onload = () => resolve();
     image.onerror = () => reject(new Error());
     image.src = source;
-  }).catch(error => { paintings.delete(source); throw error; });
+  }).catch((error) => {
+    paintings.delete(source);
+    throw error;
+  });
   paintings.set(source, { image, ready });
   return ready;
 }

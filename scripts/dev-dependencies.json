@@ -14,5 +14,8 @@
   "playwright": "1.65.1",
   "vercel": "59.9.1",
   "@electric-sql/pglite": "0.5.16",
-  "@noble/curves": "1.9.7"
+  "@noble/curves": "1.9.7",
+  "@biomejs/biome": "2.4.15",
+  "eslint-plugin-jsx-a11y": "6.10.2",
+  "eslint-plugin-react-hooks": "7.1.1"
 }

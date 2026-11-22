@@ -1,7 +1,7 @@
-import type { ReactNode } from 'react';
-import { copy } from '@critter-crumbs/shared';
-import { GameIcon } from '../game/icons.js';
-import { Link } from './ui.js';
+import type { ReactNode } from "react";
+import { copy } from "@critter-crumbs/shared";
+import { GameIcon } from "../game/icons.js";
+import { Link } from "./ui.js";
 
 /**
  * Where the app stands while it is in development: a chip beside the burrow line in every header, in place of the
@@ -10,9 +10,11 @@ import { Link } from './ui.js';
  */
 export function BetaChip() {
   return (
-    <span className="beta-chip" role="note" aria-label={copy['app.environment.label']}>
-      <span aria-hidden="true">{copy['app.environment.chip']}</span>
-      <span className="sr-only">{copy['app.environment.badge']} {copy['app.environment.help']}</span>
+    <span className="beta-chip" role="note" aria-label={copy["app.environment.label"]}>
+      <span aria-hidden="true">{copy["app.environment.chip"]}</span>
+      <span className="sr-only">
+        {copy["app.environment.badge"]} {copy["app.environment.help"]}
+      </span>
     </span>
   );
 }
@@ -25,23 +27,56 @@ export function BetaChip() {
  * the title or the wordmark where there is none. `children` go between the title and the right: the game's closing
  * line on desktop.
  */
-export function ScreenHeader({ title, burrow, href = '/', back, end, children }: {
+export function ScreenHeader({
+  title,
+  burrow,
+  href = "/",
+  back,
+  end,
+  children,
+}: {
   /** the screen's h1; without one, the wordmark */
   title?: string;
   /** the line over the title, and where it leads: the burrow */
-  burrow?: string; href?: string;
+  burrow?: string;
+  href?: string;
   back?: () => void;
   end?: ReactNode;
   children?: ReactNode;
 }) {
   return (
     <header className="game-header">
-      {back ? <button type="button" className="screen-back" aria-label={copy['action.back']} onClick={back}><GameIcon name="left" /></button> : null}
-      {title === undefined
-        ? <div className="screen-mark"><span className="wordmark">{copy['app.name']}</span><BetaChip /></div>
-        : burrow
-          ? <div className="game-context"><div className="game-line"><Link className="game-burrow" href={href}>{burrow}</Link><BetaChip /></div><h1>{title}</h1></div>
-          : <div className="screen-title"><h1>{title}</h1><BetaChip /></div>}
+      {back ? (
+        <button
+          type="button"
+          className="screen-back"
+          aria-label={copy["action.back"]}
+          onClick={back}
+        >
+          <GameIcon name="left" />
+        </button>
+      ) : null}
+      {title === undefined ? (
+        <div className="screen-mark">
+          <span className="wordmark">{copy["app.name"]}</span>
+          <BetaChip />
+        </div>
+      ) : burrow ? (
+        <div className="game-context">
+          <div className="game-line">
+            <Link className="game-burrow" href={href}>
+              {burrow}
+            </Link>
+            <BetaChip />
+          </div>
+          <h1>{title}</h1>
+        </div>
+      ) : (
+        <div className="screen-title">
+          <h1>{title}</h1>
+          <BetaChip />
+        </div>
+      )}
       {children}
       {end}
     </header>

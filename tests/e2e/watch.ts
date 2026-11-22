@@ -1,4 +1,4 @@
-import type { Page } from 'playwright/test';
+import type { Page } from "playwright/test";
 
 /**
  * Keeps a record in the page, from here on, of the game screens it shows: each state in order, and each lapse, which is
@@ -9,20 +9,34 @@ import type { Page } from 'playwright/test';
  */
 export async function watchGameScreen(page: Page) {
   await page.evaluate(() => {
-    const seen = { states: [] as string[], lapses: [] as string[] }; Object.assign(window, { seen });
-    let was = '';
+    const seen = { states: [] as string[], lapses: [] as string[] };
+    Object.assign(window, { seen });
+    let was = "";
     const note = () => {
-      const screen = [...document.querySelectorAll('.game-body')].find(body => body.checkVisibility({ visibilityProperty: true }));
-      const state = screen?.getAttribute('data-game-state');
+      const screen = [...document.querySelectorAll(".game-body")].find((body) =>
+        body.checkVisibility({ visibilityProperty: true })
+      );
+      const state = screen?.getAttribute("data-game-state");
       if (state && state !== seen.states.at(-1)) seen.states.push(state);
-      const now = !screen ? `no game screen: ${document.querySelector<HTMLElement>('.game-content')?.innerText.trim() ?? ''}`
-        : screen.querySelector('.scene-backdrop')?.childElementCount ? '' : `no floor under the ${state} screen`;
+      const now = !screen
+        ? `no game screen: ${document.querySelector<HTMLElement>(".game-content")?.innerText.trim() ?? ""}`
+        : screen.querySelector(".scene-backdrop")?.childElementCount
+          ? ""
+          : `no floor under the ${state} screen`;
       if (now && now !== was) seen.lapses.push(now);
       was = now;
     };
-    new MutationObserver(note).observe(document.documentElement, { subtree: true, childList: true, attributes: true });
+    new MutationObserver(note).observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+    });
     note();
   });
-  const read = (list: 'states' | 'lapses') => () => page.evaluate(key => (window as unknown as { seen: Record<string, string[]> }).seen[key]!, list);
-  return { states: read('states'), lapses: read('lapses') };
+  const read = (list: "states" | "lapses") => () =>
+    page.evaluate(
+      (key) => (window as unknown as { seen: Record<string, string[]> }).seen[key]!,
+      list
+    );
+  return { states: read("states"), lapses: read("lapses") };
 }

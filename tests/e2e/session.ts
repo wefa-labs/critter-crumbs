@@ -1,4 +1,4 @@
-import { expect, type Page, type Locator } from 'playwright/test';
+import { expect, type Page, type Locator } from "playwright/test";
 /**
  * Authenticated reads go through the page itself. The session cookie is `Secure`, and Playwright's
  * request context withholds Secure cookies from http://127.0.0.1, so `page.request` would read the
@@ -6,7 +6,7 @@ import { expect, type Page, type Locator } from 'playwright/test';
  */
 export async function readJson<T>(page: Page, path: string): Promise<{ status: number; body: T }> {
   return page.evaluate(async (target: string) => {
-    const response = await fetch(target, { credentials: 'same-origin' });
+    const response = await fetch(target, { credentials: "same-origin" });
     return { status: response.status, body: (await response.json()) as T };
   }, path);
 }
@@ -14,29 +14,47 @@ export async function readJson<T>(page: Page, path: string): Promise<{ status: n
  * Connects through the one way in a screen offers: Connect on the launcher and on a public result, Connect to join on a
  * feast opened from a link. Waits for server profile state before deciding what the first meeting asks for.
  */
-export async function connectLocal(page: Page, index: number, name = 'Avery', click: (target:Locator)=>Promise<void> = target=>target.click()) {
-  const connect = page.getByRole('button', { name: /^Connect( to join)?$/ });
+export async function connectLocal(
+  page: Page,
+  index: number,
+  name = "Avery",
+  click: (target: Locator) => Promise<void> = (target) => target.click()
+) {
+  const connect = page.getByRole("button", { name: /^Connect( to join)?$/ });
   await expect(connect).toBeEnabled();
   await click(connect);
-  await click(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true }));
+  await click(page.getByRole("button", { name: `Rehearsal critter ${index}`, exact: true }));
   // connected: your critter's face in a header, or the first meeting over the screen
-  await expect(page.getByRole('button', { name: 'Your critter and settings', exact: true }).or(page.locator('.first-meeting')).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: `Rehearsal critter ${index}`, exact: true })).toHaveCount(0);
-  const { status, body: profile } = await readJson<{ ensName: string | null; displayName: string | null; critterLocked: boolean }>(page, '/api/me');
+  await expect(
+    page
+      .getByRole("button", { name: "Your critter and settings", exact: true })
+      .or(page.locator(".first-meeting"))
+      .first()
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: `Rehearsal critter ${index}`, exact: true })
+  ).toHaveCount(0);
+  const { status, body: profile } = await readJson<{
+    ensName: string | null;
+    displayName: string | null;
+    critterLocked: boolean;
+  }>(page, "/api/me");
   expect(status).toBe(200);
   if (!profile.ensName && !profile.displayName) {
-    await page.getByRole('textbox', { name: 'Display name', exact: true }).fill(name);
-    if (profile.critterLocked) await click(page.getByRole('button', { name: 'Save name', exact: true }));
+    await page.getByRole("textbox", { name: "Display name", exact: true }).fill(name);
+    if (profile.critterLocked)
+      await click(page.getByRole("button", { name: "Save name", exact: true }));
   }
-  if (!profile.critterLocked) await click(page.getByRole('button', { name: 'Keep this one', exact: true }));
-  await expect(page.locator('.first-meeting')).toHaveCount(0);
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  if (!profile.critterLocked)
+    await click(page.getByRole("button", { name: "Keep this one", exact: true }));
+  await expect(page.locator(".first-meeting")).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
 }
 
 /** Opens your critter's profile, whose switches are the settings, from the face in the header; returns the screen. */
 export async function openProfile(page: Page) {
-  await page.getByRole('button', { name: 'Your critter and settings', exact: true }).click();
-  const profile = page.getByRole('region', { name: 'Your critter', exact: true });
+  await page.getByRole("button", { name: "Your critter and settings", exact: true }).click();
+  const profile = page.getByRole("region", { name: "Your critter", exact: true });
   await expect(profile).toBeVisible();
   return profile;
 }
