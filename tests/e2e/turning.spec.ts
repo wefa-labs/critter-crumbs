@@ -29,21 +29,17 @@ test("turning the circle says who stands in focus now, and the confirmation is r
   const said = page.locator("#announce"),
     next = page.getByRole("button", { name: "Next", exact: true });
 
-  // the first critter in focus gets one crumb, typed
   const first = await focused(page),
     field = page.locator(".focus-count input");
   await field.fill("1");
   await field.press("Enter");
-  // › by keyboard: the next critter, nothing given to it yet
   await next.press("Enter");
   const second = await focused(page);
   expect(second).not.toBe(first);
   await expect(said).toHaveText(`${second}, 0 crumbs`);
-  // ← with focus still in the game: back to the first, its one crumb in the singular
   await next.press("ArrowLeft");
   await expect(page.locator(".focus-name")).toHaveText(first);
   await expect(said).toHaveText(`${first}, 1 crumb`);
-  // a name tag turns the circle to its critter and says the same
   const third = names.find((name) => name !== first && name !== second && name !== "Moss")!;
   await page.getByRole("button", { name: `${third}, 0 crumbs`, exact: true }).click();
   await expect(page.locator(".focus-name")).toHaveText(third);
@@ -52,7 +48,6 @@ test("turning the circle says who stands in focus now, and the confirmation is r
   for (let i = 0; i < names.length && (await focused(page)) !== "Moss"; i++)
     await next.press("Enter");
   await expect(said).toHaveText("Your critter");
-  // pressing it only stirs it, and says so
   await page.getByRole("button", { name: "You", exact: true }).press("Enter");
   await expect(said).toHaveText("Asleep, eating what the others give it.");
 

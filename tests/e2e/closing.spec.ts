@@ -22,7 +22,6 @@ async function holdKey(page: Page, feastId: string) {
   return { allow: () => allow(), asked: () => asked };
 }
 
-/** Watch the actual device painting requests before opening the game. */
 function watchPaintings(page: Page) {
   const requested: string[] = [];
   page.on("request", (request) => {
@@ -128,7 +127,6 @@ test("the deadline passing with the reveal open leaves it as it is until the fea
       .locator(".game-sheet")
       .getByRole("heading", { name: "The feast is being laid out", exact: true })
   ).toBeVisible({ timeout: 15000 });
-  // The reveal gave way to the laid-out sheet directly: no closed state of its own, no bare page between, no Dusk sting.
   expect(await screen.states()).toEqual(["reveal", "waiting"]);
   expect(await screen.lapses()).toEqual([]);
   expect(await played()).not.toContain("stings/dusk");

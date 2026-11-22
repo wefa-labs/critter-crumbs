@@ -55,7 +55,6 @@ test("statements remain private, cap safely, then reveal and read without WebGL 
   await expect(page.getByRole("button", { name: "Start reading", exact: true })).toBeFocused();
   await expect(page.locator("#announce")).toContainText("Statements are open");
   await page.getByRole("button", { name: "Start reading", exact: true }).click();
-  // Desktop keeps the focused critter's statement in the side panel; the dock's › steps through the circle.
   await expect(page.locator(".panel-statement")).toBeVisible();
   for (
     let i = 0;

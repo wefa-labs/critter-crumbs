@@ -39,7 +39,6 @@ test("a member hears the settled set in order: music by screen, each sting on it
     "/audio/music/feast.mp3",
   ]);
 
-  // In the burrow: The town square.
   await page.locator(`a[href="/burrows/${burrowId}"]`).click();
   await expect.poll(played, soon).toContain("music/square");
 
@@ -51,12 +50,10 @@ test("a member hears the settled set in order: music by screen, each sting on it
   await expect.poll(played, soon).toContain("music/feeding");
   expect(await played()).toContain("stings/reveal");
 
-  // A statement opens with the page flip.
   await page.getByRole("button", { name: "Start reading", exact: true }).click();
   await expect(page.locator(".phone-statement")).toBeVisible();
   await expect.poll(played, soon).toContain("sfx/page");
 
-  // Giving every crumb and saving: the bubbly pop on Scatter These, then the Scattered sting.
   await page.keyboard.press("Escape");
   if ((await page.locator(".focus-count input").count()) === 0)
     await page.locator(".dock-turn").last().click();
@@ -72,7 +69,6 @@ test("a member hears the settled set in order: music by screen, each sting on it
   await expect.poll(played, soon).toContain("stings/scattered");
   expect(await played()).toContain("sfx/pop");
 
-  // Scattering closes under the open screen: the Dusk sting, once, and Feeding time stops.
   expect(
     (
       await page.request.post("/api/dev/time", { data: { now: feast.scatteringEndsAt - 4000 } })
@@ -83,7 +79,6 @@ test("a member hears the settled set in order: music by screen, each sting on it
   await expect.poll(played, soon).toContain("stings/dusk");
   await expect.poll(stopped, soon).toContain("music/feeding");
 
-  // The feast: its cue, a nibble for the critter that was fed, the fanfare and the cheer at the settle, then Everyone is full.
   await expect(page.locator("[data-result-hash]")).toBeVisible({ timeout: 30000 });
   await expect(page.getByRole("heading", { name: "Results", exact: true })).toBeFocused(soon);
   await expect.poll(played, soon).toContain("music/full");
@@ -111,7 +106,6 @@ test("a member hears the settled set in order: music by screen, each sting on it
   // The settle fades the feast cue under the fanfare.
   expect(await stopped()).toContain("music/feast");
 
-  // Music off in Settings stops the loop and is remembered; on brings the screen's track back.
   const loops = heard.filter((file) => file === "music/full").length;
   await page.getByRole("button", { name: "Your critter and settings", exact: true }).click();
   const music = page

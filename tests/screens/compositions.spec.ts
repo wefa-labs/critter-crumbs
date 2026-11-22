@@ -186,13 +186,11 @@ test("the waiting sheet and the results lead to Why nobody can peek, and the fin
     expect(link.y).toBeGreaterThan(
       (await box(page, viewport === PHONE ? ".game-sheet p" : ".side-sheet p")).y
     );
-    // the key's sheet leads there too, under its reason, with the count and Try again still in it
     await open(page, "key", viewport);
     await expect(why).toHaveAttribute("href", "/how-it-works/why");
     await expect(page.getByRole("button", { name: "Try again", exact: true })).toBeVisible();
     await open(page, "results", viewport);
     await expect(why).toBeVisible();
-    // under the summary, over the ranked critters
     const under = (await why.boundingBox())!,
       summary = await box(page, ".results-sum"),
       first = await box(page, ".results-row");

@@ -67,7 +67,6 @@ test("the launcher is a title screen: the wordmark, the tagline once, one Connec
   const face = await page.request.get("/fonts/grandstander-wordmark.woff2");
   expect([face.status(), face.headers()["content-type"]]).toEqual([200, "font/woff2"]);
 
-  // the floor: four critters around a heap of ten crumbs, the outer two asleep
   await expect(page.locator(".launch-scene .floor-critter svg.portrait")).toHaveCount(4);
   expect(
     await page
@@ -176,16 +175,13 @@ test("How it works walks five steps, with practice crumbs, the week and a worked
   await expect(critters).toHaveCount(3);
   await expect(count).toHaveText("10 to go");
   await expect(heap).toHaveCount(10);
-  // a tap gives one crumb, which leaves the heap
   await critters.first().click();
   await expect(count).toHaveText("9 to go");
   await expect(heap).toHaveCount(9);
   await expect(page.locator("#announce")).toHaveText("9 to go");
-  // so does a key press on a critter
   await critters.nth(1).focus();
   await page.keyboard.press("Enter");
   await expect(count).toHaveText("8 to go");
-  // holding pours the rest, and the heap is left as three faint outlines
   const target = (await critters.nth(2).boundingBox())!;
   await page.mouse.move(target.x + target.width / 2, target.y + target.height / 2);
   await page.mouse.down();
@@ -193,12 +189,10 @@ test("How it works walks five steps, with practice crumbs, the week and a worked
   await page.mouse.up();
   await expect(heap).toHaveCount(0);
   await expect(page.locator("#announce")).toHaveText("All scattered");
-  // nothing is left flying, and nothing more can be given
   await expect(page.locator(".screen-floor .practice-crumb:not([hidden])")).toHaveCount(0);
   await critters.first().click();
   await expect(count).toHaveText("All scattered");
 
-  // the week: the four awake with every statement open, and the three phases as lines
   await page.getByRole("button", { name: "Next", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Three phases, two deadlines", exact: true })
@@ -219,8 +213,6 @@ test("How it works walks five steps, with practice crumbs, the week and a worked
   ).toBeFocused();
   await expect(page.locator(".screen-floor .scene-paint")).toHaveAttribute("data-painting", "dusk");
   await expect(page.locator('.screen-floor svg.portrait[data-asleep="true"]')).toHaveCount(4);
-  // the private step leads to the page behind Why nobody can peek, at the foot of its words over the actions, and the
-  // page comes back to this step
   const why = page.getByRole("link", { name: "Why nobody can peek", exact: true });
   const foot = (await why.boundingBox())!,
     actions = (await page.locator(".learn-actions").boundingBox())!;
@@ -258,14 +250,12 @@ test("How it works walks five steps, with practice crumbs, the week and a worked
   await expect(
     page.getByText("Fern didn’t scatter and still receives a share.", { exact: true })
   ).toBeVisible();
-  // the visit to the page leaves the steps' own way out as it was: back to the launcher, where they were opened
   await page.getByRole("button", { name: "Got it", exact: true }).click();
   await expect(page).toHaveURL(/^https?:\/\/[^/]+\/$/);
   await expect(
     page.getByRole("heading", { level: 1, name: "Critter Crumbs", exact: true })
   ).toBeVisible();
 
-  // Skip leaves from the first step, and the browser's Back returns to the steps
   await page.getByRole("link", { name: "How it works", exact: true }).click();
   await page.getByRole("button", { name: "Skip", exact: true }).click();
   await expect(page.getByRole("button", { name: "Connect", exact: true })).toBeVisible();
@@ -292,12 +282,10 @@ test("the Music button starts the music on the first press of a silent page, and
   await expect(page.getByRole("button", { name: "Connect", exact: true })).toBeEnabled();
   await expect(music).toHaveAttribute("aria-pressed", "false");
   expect(requested).toEqual([]);
-  // the first press starts the launcher's theme and leaves the setting on
   await music.click();
   await expect(music).toHaveAttribute("aria-pressed", "true");
   await expect.poll(played, soon).toContain("music/burrow");
   expect(await stored()).toBe("1");
-  // the next press stops it, and that is remembered
   await music.click();
   await expect(music).toHaveAttribute("aria-pressed", "false");
   await expect.poll(stopped, soon).toContain("music/burrow");
@@ -309,7 +297,6 @@ test("the Music button starts the music on the first press of a silent page, and
     "false"
   );
   expect(await played()).toEqual([]);
-  // and it comes back when asked for
   await page.getByRole("button", { name: "Music", exact: true }).click();
   await expect(page.getByRole("button", { name: "Music", exact: true })).toHaveAttribute(
     "aria-pressed",
@@ -342,13 +329,11 @@ test("choosing how to connect is a sheet of the apps on offer; a connection that
   await expect(
     sheet.getByRole("button", { name: "Rehearsal critter 1", exact: true })
   ).toBeVisible();
-  // a sheet from the foot of the phone's screen, inside it however long the list
   const frame = (await sheet.boundingBox())!;
   expect(frame.x).toBe(0);
   expect(frame.width).toBe(375);
   expect(frame.y).toBeGreaterThanOrEqual(0);
   expect(frame.y + frame.height).toBe(812);
-  // Cancel closes it and the launcher is as it was
   await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.locator(".launch-sheet .sheet-notice")).toHaveCount(0);
@@ -363,7 +348,6 @@ test("choosing how to connect is a sheet of the apps on offer; a connection that
   await expect(sheet).toContainText("Confirm in Rehearsal critter 1");
   await expect(sheet).toContainText("It costs nothing and nothing goes on-chain.");
   await expect(page.getByRole("dialog")).toHaveCount(0);
-  // the launcher says it above Connect, once, and it is read out
   await expect(page.locator(".launch-sheet .sheet-notice")).toHaveText(
     "Can't reach the burrow right now. Try again in a moment."
   );
@@ -372,7 +356,6 @@ test("choosing how to connect is a sheet of the apps on offer; a connection that
   );
   await expect(page.locator("#alert")).toHaveClass(/sr-only/);
   await expect(page.getByRole("button", { name: "Connect", exact: true })).toBeEnabled();
-  // trying again clears it
   await page.unroute("**/api/session/nonce");
   await connectLocal(page, 1);
   await expect(
@@ -404,7 +387,6 @@ test("dark follows the device until Settings chooses, and the choice is kept", a
     page.getByRole("heading", { level: 1, name: "Your burrows", exact: true })
   ).toBeVisible();
   expect(await ground(page)).toBe(LIGHT);
-  // and the other way: dark chosen on a device that is light
   await page.emulateMedia({ colorScheme: "light" });
   profile = await openProfile(page);
   await expect(dark).not.toBeChecked();
@@ -414,7 +396,6 @@ test("dark follows the device until Settings chooses, and the choice is kept", a
   await page.reload();
   await expect(profile).toBeVisible();
   expect(await ground(page)).toBe(DARK);
-  // it also leads to the first steps, which return to it
   await profile.getByRole("link", { name: "How it works", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Everyone gets the same handful", exact: true })
@@ -479,7 +460,6 @@ test("a feast opened from a link shows the burrow, the feast, both deadlines and
       expect(critter.y).toBeGreaterThanOrEqual(floor.y);
     }
   }
-  // the way to the first steps is under Connect to join, and leaving them returns to the feast
   await page.getByRole("link", { name: "How it works", exact: true }).click();
   await expect(
     page.getByRole("heading", { level: 1, name: "Everyone gets the same handful", exact: true })
@@ -489,7 +469,6 @@ test("a feast opened from a link shows the burrow, the feast, both deadlines and
   await expect(
     page.getByRole("heading", { level: 1, name: feast.title, exact: true })
   ).toBeVisible();
-  // connecting from the link lands in the feast itself
   await connectLocal(page, 1);
   await expect(page.getByRole("textbox", { name: "Your statement", exact: true })).toBeVisible();
 });

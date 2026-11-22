@@ -31,10 +31,8 @@ test("local connection, identity and creator removal leave a durable visible his
   await expect(add).toBeFocused();
   await add.fill("0x00000000000000000000000000000000000000ff");
   await page.getByRole("button", { name: "Add", exact: true }).click();
-  // A burrow of more than one keeps its critters on their own screen, behind the Critters card.
   await page.getByRole("link", { name: /^Critters/ }).click();
   await expect(page).toHaveURL(/\/burrows\/[0-9a-f-]{36}\/critters$/);
-  // Each row's control names its member; the dialog's control keeps the plain label.
   await page.getByRole("button", { name: "Remove from burrow: 0x0000…00ff", exact: true }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Remove", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Membership history" })).toBeVisible();

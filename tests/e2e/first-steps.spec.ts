@@ -14,7 +14,6 @@ test("an invited first-time member keeps their destination, draft name and critt
   const { burrowId, serverNow } = await seed.json();
   await page.goto(`/burrows/${burrowId}`);
   await connectLocal(page, 1);
-  // the burrow's critters are added on their own screen, and its back chevron returns to the burrow
   await page.getByRole("link", { name: /^Critters/ }).click();
   await page
     .getByRole("textbox", { name: "Address or ENS name", exact: true })
@@ -57,7 +56,6 @@ test("an invited first-time member keeps their destination, draft name and critt
   await page.reload();
   await page.getByRole("button", { name: "Connect", exact: true }).click();
   await page.getByRole("button", { name: "This browser", exact: true }).click();
-  // the first meeting is a whole screen over the page the member connected on, with no way past it but Keep
   const meeting = page.getByRole("region", { name: "Meet your critter", exact: true });
   await expect(meeting).toBeVisible();
   await expect(meeting.getByRole("button", { name: "Close", exact: true })).toHaveCount(0);
@@ -141,7 +139,6 @@ test("the first meeting can be left by disconnecting, back where a signed-out vi
   };
   const meeting = page.getByRole("region", { name: "Meet your critter", exact: true });
 
-  // from a feast's link: back on its invite, signed out
   await page.goto(`/feasts/${feast.id}`);
   await connect("Connect to join");
   await expect(meeting).toBeVisible();
@@ -162,7 +159,6 @@ test("the first meeting can be left by disconnecting, back where a signed-out vi
   await expect(page.getByRole("button", { name: "Connect to join", exact: true })).toBeVisible();
   expect((await readJson(page, "/api/me")).status).toBe(401);
 
-  // from the launcher: back on the launcher
   await page.goto("/");
   await connect("Connect");
   await expect(meeting).toBeVisible();
@@ -257,7 +253,6 @@ test("the page behind Why nobody can peek reads as one column with Got it in rea
       "What runs where",
       "The source",
     ]);
-    // the words scroll under the header, and Got it stays where it is at the foot
     expect(await words.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
     const foot = (await done.boundingBox())!;
     expect(foot.y + foot.height).toBeLessThanOrEqual(viewport.height);
@@ -268,7 +263,6 @@ test("the page behind Why nobody can peek reads as one column with Got it in rea
       page.getByRole("link", { name: "Read the technical spec on GitHub", exact: true })
     ).toBeInViewport();
     expect(await done.boundingBox()).toEqual(foot);
-    // one column of about 34 em, and nothing wider than the screen
     const column = (await page.locator(".why-column").boundingBox())!;
     expect(column.width).toBeLessThanOrEqual(34 * 16);
     expect(Math.abs(column.x + column.width / 2 - viewport.width / 2)).toBeLessThanOrEqual(10);
@@ -290,11 +284,8 @@ test("the page behind Why nobody can peek reads as one column with Got it in rea
     "https://github.com/wefa-labs/critter-crumbs/blob/main/docs/04-technical-spec.md"
   );
   await expect(page.locator(".why-page a")).toHaveCount(2);
-  // opened by its own address, Got it leads to the launcher
   await done.click();
   await expect(page.getByRole("button", { name: "Connect", exact: true })).toBeVisible();
-  // opened from the result step, the browser's Back returns to that step as Got it does, and the steps still lead out to
-  // the launcher they were opened from
   await page.getByRole("link", { name: "How it works", exact: true }).click();
   for (let step = 1; step < 5; step++)
     await page.getByRole("button", { name: "Next", exact: true }).click();

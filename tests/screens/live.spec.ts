@@ -52,7 +52,6 @@ for (const viewport of [
     const before = Number(await input.inputValue());
     await page.getByRole("button", { name: "Take a crumb back from Fern", exact: true }).click();
     await expect(input).toHaveValue(String(before - 1));
-    // The phone opens the statement from the thought bubble; desktop keeps it open in the side panel.
     if (desktop) {
       await expect(page.locator(".thought-target")).toHaveCount(0);
       await expect(page.locator(".panel-statement h2")).toHaveText("Fern");
@@ -87,7 +86,6 @@ for (const viewport of [
       "data-stir",
       "true"
     );
-    // Confirming is a dialog with Cancel; cancelling keeps the allocation and Scatter These.
     await page.getByRole("button", { name: "Scatter These", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Confirm your scatter" });
     await expect(dialog).toBeVisible();

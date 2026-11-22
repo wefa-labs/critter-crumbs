@@ -36,20 +36,17 @@ for (const viewport of [
         )
       ).toBeVisible();
       const copyLink = sheet.getByRole("button", { name: "Copy link", exact: true });
-      // inside the sheet on the phone, whatever its height
       const target = (await copyLink.boundingBox())!;
       expect(target.height).toBeGreaterThanOrEqual(44);
       expect(target.y + target.height).toBeLessThanOrEqual(viewport.height);
       await page.evaluate(() => navigator.clipboard.writeText(""));
       await copyLink.click();
-      // said where the button was pressed, once the browser has the address
       await expect(sheet.getByRole("group", { name: "Update", exact: true })).toContainText(
         "Link copied."
       );
       expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(page.url());
       await sheet.getByRole("button", { name: "Cancel", exact: true }).click();
       await expect(page.getByRole("dialog")).toHaveCount(0);
-      // How it works stays under the one way in
       await expect(page.getByRole("link", { name: "How it works", exact: true })).toBeVisible();
     }
   });

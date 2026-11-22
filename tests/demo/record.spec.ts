@@ -107,7 +107,6 @@ for (const viewport of [
       });
     });
     try {
-      // Statements open: the circle wakes, every critter but Juniper's own thinking.
       await page.goto(`/feasts/${feast.id}`);
       await connectLocal(page, 8, "Juniper", async (target) => {
         await tap(page, target);
@@ -118,7 +117,6 @@ for (const viewport of [
       ).toBeVisible();
       await hold(page, 2200);
       await tap(page, page.getByRole("button", { name: "Start reading", exact: true }));
-      // Reading: on the phone the statement opens as a thought bubble and the dock steps through the circle; desktop keeps it in the side panel.
       if (phone) {
         await expect(page.locator(".phone-statement")).toBeVisible();
         await hold(page, 2200);
@@ -138,7 +136,6 @@ for (const viewport of [
         await tap(page, page.locator(".dock-turn").last());
         await hold(page, 1500);
       }
-      // Scattering: a tap gives a crumb that flies from the heap, holding pours, − takes one back.
       if ((await page.locator(".focus-count input").count()) === 0)
         await tap(page, page.locator(".dock-turn").last());
       const give = page.locator('.focus-row [data-give="true"]');
@@ -175,7 +172,6 @@ for (const viewport of [
       );
       await expect(page.locator(".dock-scattered")).toBeVisible();
       await hold(page, 2400);
-      // Scattering closes: the circle sleeps at dusk while the feast is laid out, then wakes and grows.
       const keyGate = new Promise<void>((resolve) => {
         allowKey = resolve;
       });
@@ -207,7 +203,6 @@ for (const viewport of [
         timeout: 15000,
       });
       await hold(page, 2200);
-      // Results: the ranked list, then the huddle's Clock-driven play; closed, everyone stands grown with their totals.
       const list = page.locator(".results-scroll");
       await point(page, list);
       await page.mouse.wheel(0, phone ? 320 : 260);
