@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { use, useEffect, useState, type CSSProperties } from "react";
 import { defaultScene } from "./art.js";
 import { plateLift } from "./plate.js";
 import { otherPlateImages, sceneReader, type Scene } from "./scene-manifest.js";
@@ -77,7 +77,17 @@ const manifest = sceneReader(() =>
   fetch("/scenes/manifest.json").then((response) => response.json() as Promise<unknown>)
 );
 
+/* The page's first read of the scene list begins as this module loads, with the feast's code, while the first screen
+   that draws a scene is still on its way. Until it settles, a scene that mounts suspends: its Suspense boundary keeps the
+   opening screen up, so the first scene after a load stands on its floor from its first frame. A first read that fails
+   settles with no scenes and holds nothing; the next scene to mount asks again. */
+let firstReadDone = false;
+const firstRead = manifest.read().then(() => {
+  firstReadDone = true;
+});
+
 export function useScenes() {
+  if (!firstReadDone) use(firstRead);
   const [scenes, setScenes] = useState<Scene[]>(() => manifest.known() ?? []);
   useEffect(() => {
     let active = true;

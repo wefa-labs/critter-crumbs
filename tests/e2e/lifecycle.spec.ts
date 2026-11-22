@@ -119,7 +119,7 @@ for (const kind of ["people", "options"] as const)
         await first.request.post("/api/dev/release-key", {
           data: { identity: updated.registration.identity },
         });
-        // from the reload's first screen on its floor through the feast to the results, any lapse fails
+        // from the reload's first game screen through the feast to the results, any lapse fails
         for (const page of pages) {
           screens.push(await watchNextLoad(page));
           await page.reload();
