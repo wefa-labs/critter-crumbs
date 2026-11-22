@@ -205,4 +205,18 @@ describe("the scene manifest", () => {
     expect((await reader.read()).map((scene) => scene.id)).toContain("dusk");
     expect(reads).toBe(3);
   });
+
+  /* the first read runs as the feast's code loads, and a fetch can throw before it returns a promise (a test's page with
+     no network, a refused request): that throw settles the read with no scenes, as a failed request does */
+  it("settles a read that throws before it starts with no scenes, and asks again", async () => {
+    let reads = 0;
+    const reader = sceneReader(() => {
+      if (reads++ === 0) throw new TypeError("refused");
+      return Promise.resolve(shipped());
+    });
+    expect(await reader.read()).toEqual([]);
+    expect(reader.known()).toBeUndefined();
+    expect((await reader.read()).map((scene) => scene.id)).toContain("dusk");
+    expect(reads).toBe(2);
+  });
 });

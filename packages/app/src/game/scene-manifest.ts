@@ -76,16 +76,17 @@ export function validateScenes(value: unknown): asserts value is Scene[] {
 }
 
 /**
- * Reads the scenes once for the page. The first scene to draw waits on the read (useScenes in scenes.tsx suspends until
- * it settles); every scene after it has them at its first render, so each stands on its floor from its first frame. A
- * read that fails, or gives a manifest the app refuses, is forgotten, so the next scene to mount asks again.
+ * Reads the scenes once for the page. The feast's code waits on the first read as it loads (scenes.tsx), so every scene
+ * has them at its first render and stands on its floor from its first frame. A read that fails, throws before it starts,
+ * or gives a manifest the app refuses, is forgotten, so the next scene to mount asks again.
  */
 export function sceneReader(read: () => Promise<unknown>) {
   let known: Scene[] | undefined, reading: Promise<Scene[]> | undefined;
   return {
     known: () => known,
     read: () =>
-      (reading ??= read()
+      (reading ??= Promise.resolve()
+        .then(read)
         .then((value) => {
           validateScenes(value);
           return (known = value);

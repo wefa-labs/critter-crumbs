@@ -1,4 +1,4 @@
-import { use, useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { defaultScene } from "./art.js";
 import { plateLift } from "./plate.js";
 import { otherPlateImages, sceneReader, type Scene } from "./scene-manifest.js";
@@ -73,21 +73,21 @@ export function SceneBackdrop({
   );
 }
 
+/* how long the feast's code waits for the scene list before it draws its scenes without one */
+const SCENE_LIST_WAIT_MS = 3000;
 const manifest = sceneReader(() =>
-  fetch("/scenes/manifest.json").then((response) => response.json() as Promise<unknown>)
+  fetch("/scenes/manifest.json", { signal: AbortSignal.timeout(SCENE_LIST_WAIT_MS) }).then(
+    (response) => response.json() as Promise<unknown>
+  )
 );
 
-/* The page's first read of the scene list begins as this module loads, with the feast's code, while the first screen
-   that draws a scene is still on its way. Until it settles, a scene that mounts suspends: its Suspense boundary keeps the
-   opening screen up, so the first scene after a load stands on its floor from its first frame. A first read that fails
-   settles with no scenes and holds nothing; the next scene to mount asks again. */
-let firstReadDone = false;
-const firstRead = manifest.read().then(() => {
-  firstReadDone = true;
-});
+/* The page's first read of the scene list holds this module, and with it the feast's code, until it settles, so the
+   first scene after a load has the list at its first render and stands on its floor from its first frame: the opening
+   screen stays up meanwhile. Nothing renders and suspends, so no screen starts its stage early. A read that fails or
+   runs out of time settles with no scenes; the next scene to mount asks again. */
+await manifest.read();
 
 export function useScenes() {
-  if (!firstReadDone) use(firstRead);
   const [scenes, setScenes] = useState<Scene[]>(() => manifest.known() ?? []);
   useEffect(() => {
     let active = true;
