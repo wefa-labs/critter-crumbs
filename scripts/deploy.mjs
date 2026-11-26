@@ -104,14 +104,17 @@ else {
   const csp = config.headers
     .flatMap((rule) => rule.headers)
     .find((header) => header.key === "Content-Security-Policy");
-  if (
-    !csp?.value.includes("https://shutter-api.invalid") ||
-    !csp.value.includes("https://base-rpc.invalid")
-  )
-    throw new Error("Review the changed CSP template before deployment.");
-  csp.value = csp.value
-    .replace("https://shutter-api.invalid", shutterOrigin)
-    .replace("https://base-rpc.invalid", baseOrigin);
+  const changes = new Map([
+    ["https://shutter-api.chiado.staging.shutter.network", shutterOrigin],
+    ["https://sepolia.base.org", baseOrigin],
+  ]);
+  const directives = csp?.value.split("; ");
+  const connect = directives?.findIndex((part) => part.startsWith("connect-src ")) ?? -1;
+  const sources = directives?.[connect]?.split(" ") ?? [];
+  if (!csp || !directives || [...changes.keys()].some((source) => !sources.includes(source)))
+    throw new Error("Review the changed CSP connect-src before deployment.");
+  directives[connect] = sources.map((source) => changes.get(source) ?? source).join(" ");
+  csp.value = directives.join("; ");
   config.regions = [region];
   await mkdir(".scratch/deployment", { recursive: true });
   const path = ".scratch/deployment/vercel.json";
