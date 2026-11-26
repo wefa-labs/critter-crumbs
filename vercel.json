@@ -5,6 +5,7 @@
   "buildCommand": "bun run vercel-build",
   "devCommand": null,
   "outputDirectory": "dist",
+  "regions": ["iad1"],
   "rewrites": [
     {
       "source": "/favicon.ico",
@@ -41,7 +42,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://shutter-api.invalid https://base-rpc.invalid wss://relay.walletconnect.org wss://relay.walletconnect.com https://api.web3modal.org https://rpc.walletconnect.org https://verify.walletconnect.org; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src https://verify.walletconnect.org; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://shutter-api.chiado.staging.shutter.network https://sepolia.base.org wss://relay.walletconnect.org wss://relay.walletconnect.com https://api.web3modal.org https://rpc.walletconnect.org https://verify.walletconnect.org; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-src https://verify.walletconnect.org; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
         }
       ]
     },
