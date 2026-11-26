@@ -7,10 +7,15 @@ import { Loader, SheetNotice } from "../game/sheet-parts.js";
 import { useNotification } from "./announcements.js";
 import type { RunAction } from "./burrows.js";
 import { copyText } from "./clipboard.js";
-import { optionInitial, optionPicture } from "./connect-option.js";
+import { optionInitial, optionPicture, walletConnectOptionId } from "./connect-option.js";
 import { Dialog } from "./ui.js";
+import type { WalletConnectPairing } from "./walletconnect-runtime.js";
 
 function OptionGlyph({ option }: { option: AccountOption }) {
+  if (option.id === walletConnectOptionId)
+    return (
+      <img className="connect-glyph" src="/icons/walletconnect.svg" alt="" width={36} height={36} />
+    );
   const picture = optionPicture(option);
   return picture ? (
     <img className="connect-glyph" src={picture} alt="" width={36} height={36} />
@@ -35,6 +40,7 @@ export function ConnectSheet({
   discovering,
   reason,
   waiting,
+  pairing,
   busy,
   choose,
   cancel,
@@ -44,6 +50,7 @@ export function ConnectSheet({
   discovering: boolean;
   reason: string;
   waiting: AccountOption | null;
+  pairing?: WalletConnectPairing | null;
   busy: boolean;
   choose: (option: AccountOption) => void;
   cancel: () => void;
@@ -55,13 +62,42 @@ export function ConnectSheet({
     <Dialog
       title={copy["connect.title"]}
       className="connect-sheet"
-      onClose={cancel}
-      busy={busy}
+      onClose={pairing?.cancel ?? cancel}
+      busy={busy && !pairing}
       dismiss="action.cancel"
     >
-      <div className="stack" aria-busy={discovering || !!waiting}>
+      <div className="stack" aria-busy={discovering || (!!waiting && !pairing?.code)}>
         {reason ? <p>{reason}</p> : null}
-        {waiting ? (
+        {pairing?.code ? (
+          <>
+            {pairing.code.apps.map((app) => (
+              <a key={app.href} className="connect-option" href={app.href} onClick={app.remember}>
+                {formatCopy("connect.walletConnect.open", { name: app.name })}
+              </a>
+            ))}
+            <p>{copy["connect.walletConnect.scan"]}</p>
+            <img
+              src={pairing.code.image}
+              width={208}
+              height={208}
+              alt={copy["connect.walletConnect.code"]}
+            />
+            <button
+              type="button"
+              onClick={(event) => {
+                const origin = event.currentTarget,
+                  uri = pairing.code?.uri;
+                if (uri)
+                  void copyText(uri)
+                    .then(() => notify(copy["connect.link.copied"], origin))
+                    .catch(() => setRefusedLink(uri));
+              }}
+            >
+              {copy["connect.link.copy"]}
+            </button>
+            {refusedLink === pairing.code.uri ? <p className="address">{refusedLink}</p> : null}
+          </>
+        ) : waiting ? (
           <>
             <div className="connect-option">
               <OptionGlyph option={waiting} />
@@ -69,6 +105,9 @@ export function ConnectSheet({
               <span className="spinner" aria-hidden="true" />
             </div>
             <p className="sheet-help">{copy["connect.sign.body"]}</p>
+            {waiting.id === walletConnectOptionId ? (
+              <p className="sheet-help">{copy["connect.switchBack"]}</p>
+            ) : null}
           </>
         ) : discovering ? (
           <>
@@ -112,6 +151,20 @@ export function ConnectSheet({
             </button>
           </>
         )}
+        {!waiting &&
+        !discovering &&
+        options.some((option) => option.id === walletConnectOptionId) ? (
+          <p className="sheet-help">
+            {copy["connect.walletConnect.credit"]}{" "}
+            <a href="/licenses/walletconnect-LICENSE.txt" target="_blank" rel="noreferrer">
+              {copy["connect.walletConnect.license"]}
+            </a>
+            {" · "}
+            <a href="/licenses/reown-appkit-LICENSE.txt" target="_blank" rel="noreferrer">
+              {copy["connect.appKit.license"]}
+            </a>
+          </p>
+        ) : null}
       </div>
     </Dialog>
   );

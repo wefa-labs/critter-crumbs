@@ -694,6 +694,14 @@ The page behind Why nobody can peek keeps its own lines in `packages/shared/src/
 | `connect.link.copy` | Copy link (the page's own address; if the browser refuses the clipboard, the address shows under the notice, with `err.copy`) |
 | `connect.link.copied` | Link copied. |
 | `connect.injected` | This browser (the connect choice offered when the browser has a provider that does not announce itself, as some phone apps' built-in browsers do) |
+| `connect.walletConnect` | WalletConnect |
+| `connect.walletConnect.code` | WalletConnect pairing code |
+| `connect.walletConnect.open` | Open {name} |
+| `connect.walletConnect.scan` | Scan this code with the app you connect with. |
+| `connect.walletConnect.credit` | Portions © 2025 Reown, Inc. All Rights Reserved |
+| `connect.walletConnect.license` | WalletConnect licence |
+| `connect.appKit.license` | AppKit licence |
+| `connect.switchBack` | Confirm in the app you connected with, then switch back to Critter Crumbs. |
 | `connect.waiting` | Confirm in {name} |
 | `connect.sign.body` | You'll be asked to sign. It costs nothing and nothing goes on-chain. |
 | `name.title` | What should the burrow call you? |

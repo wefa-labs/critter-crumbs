@@ -9,16 +9,25 @@ import { mainnetEns } from "./ens.js";
 import { createServerClock } from "./clock.js";
 const clock = createServerClock();
 let handler: ReturnType<typeof nodeHandler> | undefined;
+export function deploymentOrigin(env: {
+  APP_ORIGIN?: string;
+  VERCEL_ENV?: string;
+  VERCEL_URL?: string;
+}) {
+  if (env.APP_ORIGIN) return env.APP_ORIGIN;
+  if (env.VERCEL_ENV === "preview" && /^[a-z0-9-]+\.vercel\.app$/.test(env.VERCEL_URL ?? ""))
+    return `https://${env.VERCEL_URL}`;
+}
 export default async function runtime(
   request: IncomingMessage,
   response: ServerResponse
 ): Promise<void> {
   try {
     if (!handler) {
+      const origin = deploymentOrigin(process.env);
       const {
         DATABASE_URL,
         SESSION_SECRET,
-        APP_ORIGIN,
         BASE_RPC_URL,
         SHUTTER_API_BASE,
         MAINNET_RPC_URL,
@@ -36,7 +45,7 @@ export default async function runtime(
         SHUTTER_KEY_BROADCAST_ADDRESS,
         SHUTTER_REGISTRANT_ADDRESS,
       } = process.env;
-      if (!DATABASE_URL || !SESSION_SECRET || !APP_ORIGIN)
+      if (!DATABASE_URL || !SESSION_SECRET || !origin)
         throw new Error("Missing server configuration");
       const connectOrigins = [BASE_RPC_URL, SHUTTER_API_BASE].filter((value): value is string =>
         Boolean(value)
@@ -77,7 +86,7 @@ export default async function runtime(
           ...(resultReader ? { resultReader } : {}),
           ...(eas ? { eas } : {}),
           sessionSecret: SESSION_SECRET,
-          origin: APP_ORIGIN,
+          origin,
           clock: clock.now,
           connectOrigins,
           ...(MAINNET_RPC_URL ? { ens: mainnetEns(MAINNET_RPC_URL) } : {}),

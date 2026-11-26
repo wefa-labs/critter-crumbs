@@ -34,7 +34,7 @@ Everyone gets the same number of crumbs and must allocate all of them. In a peop
 ## Try it
 
 - **No account needed.** [How it works](https://www.crittercrumbs.app/how-it-works) is five short screens with ten practice crumbs to give and a worked result. [Why nobody can peek](https://www.crittercrumbs.app/how-it-works/why) sets out what the app promises, and the one limit it does not hide.
-- **To join a feast**, connect an Ethereum account from a browser extension such as MetaMask. A wallet app's built-in browser on a phone should also work but has not yet been checked on real phones, and WalletConnect is not supported yet. Scattering is a signature, not a transaction, so members pay no gas.
+- **To join a feast**, connect an Ethereum account through your browser or, when configured, WalletConnect. Members can install Critter Crumbs from their browser and choose WalletConnect in the installed app. Signing a scatter costs no gas.
 - **To run it locally**, with simulated key release and eight test accounts, see [Run a local rehearsal](#run-a-local-rehearsal).
 
 ## Current status
@@ -45,7 +45,7 @@ A solo smoke feast ran on the beta on 29 October 2026, with a [successful regist
 
 The app implements burrows and membership, feast setup, statements, private scatters, local tallying, result fingerprints and CSV export. It currently produces an allocation decision; payments are made separately. Results are viewed within the burrow. Hosted public-result recording and visitor results remain integration work; local rehearsal recording uses a fixture.
 
-Mainnet integration, phone connection through WalletConnect, fund-holding contracts, automated payouts and Chinese localization are planned work. Permanent allocation privacy is a research goal.
+Mainnet integration, fund-holding contracts, automated payouts and Chinese localization are planned work. Permanent allocation privacy is a research goal.
 
 The [rehearsal run sheet](docs/build/rehearsal.md) and [phone and accessibility checks](docs/reviews/october-qa/phone-checks.md) describe the remaining validation with people and real devices.
 

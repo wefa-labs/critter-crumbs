@@ -17,7 +17,7 @@ export interface TxRequest {
 }
 export interface Account {
   address: Address;
-  kind: "injected" | "embedded";
+  kind: "injected" | "embedded" | "walletconnect";
   signMessage(message: string): Promise<Hex>;
   signTypedData(typed: TypedData): Promise<Hex>;
   sendTransaction?(tx: TxRequest): Promise<Hex>;

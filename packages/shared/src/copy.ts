@@ -65,6 +65,15 @@ export const copy = {
   "connect.empty":
     "No connection is available in this browser yet. Copy this page's link and open it in the app you connect with, on your phone or on a computer.",
   "connect.injected": "This browser",
+  "connect.walletConnect": "WalletConnect",
+  "connect.walletConnect.code": "WalletConnect pairing code",
+  "connect.walletConnect.open": "Open {name}",
+  "connect.walletConnect.scan": "Scan this code with the app you connect with.",
+  "connect.walletConnect.credit": "Portions © 2025 Reown, Inc. All Rights Reserved",
+  "connect.walletConnect.license": "WalletConnect licence",
+  "connect.appKit.license": "AppKit licence",
+  "connect.switchBack":
+    "Confirm in the app you connected with, then switch back to Critter Crumbs.",
   "connect.rejected": "Connection wasn't confirmed. Try again when you're ready.",
   "connect.resumed": "Connected. Try that again now — nothing you entered was lost.",
   "connect.waiting": "Confirm in {name}",

@@ -54,6 +54,7 @@ test("new markdown belongs in docs/ outside the report folders, in guidance fold
 
 test("new media belongs only with the app's own assets", () => {
   assert.equal(fileProblem("packages/app/public/scenes/dusk.webp"), null);
+  assert.equal(fileProblem("packages/app/public/icons/critter-512.png"), null);
   for (const file of [
     "docs/explorations/x/capture.jpg",
     "docs/pitch/deck.pdf",

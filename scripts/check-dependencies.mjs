@@ -33,7 +33,19 @@ const found = new Map();
 const fail = (message) => {
   throw new Error(message);
 };
-const permissive = new Set(["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "OFL-1.1"]);
+const permissive = new Set([
+  "MIT",
+  "Apache-2.0",
+  "BSD-2-Clause",
+  "BSD-3-Clause",
+  "ISC",
+  "OFL-1.1",
+  "(MIT OR Apache-2.0)",
+]);
+const approvedLicences = new Map([
+  ["@reown/appkit", "Reown Community License"],
+  ["@walletconnect/ethereum-provider", "WalletConnect Community License"],
+]);
 for (const file of manifests) {
   const manifest = json(file);
   for (const [name, version] of Object.entries(manifest.dependencies ?? {})) {
@@ -56,7 +68,10 @@ for (const item of runtime) {
   const installed = json(`${directory}/package.json`);
   if (installed.version !== item.version || installed.license !== item.manifestLicense)
     fail(`${item.name}: installed metadata changed.`);
-  if (!permissive.has(item.license) || !permissive.has(installed.license))
+  const approvedException =
+    approvedLicences.get(item.name) === item.license &&
+    installed.license === "SEE LICENSE IN LICENSE.md";
+  if (!approvedException && (!permissive.has(item.license) || !permissive.has(installed.license)))
     fail(`${item.name}: licence requires human review.`);
   if (noticeSha256(item) !== item.noticeSha256)
     fail(`${item.name}: own licence changed; verify it again.`);
@@ -92,7 +107,7 @@ for (const item of patched) {
     fail(`${item.name}: patch changed; review it again.`);
 }
 console.log(
-  `${runtime.length} exact runtime dependencies: own permissive licences, archive integrity, and gzip evidence verified; ${patched.length} reviewed ${patched.length === 1 ? "patch" : "patches"}.`
+  `${runtime.length} exact runtime dependencies: licences, archive integrity, and gzip evidence verified; ${patched.length} reviewed ${patched.length === 1 ? "patch" : "patches"}.`
 );
 
 async function refresh() {

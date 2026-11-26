@@ -1,5 +1,7 @@
 import type { AccountOption } from "@critter-crumbs/core";
 
+export const walletConnectOptionId = "walletconnect:remote";
+
 /**
  * A connect choice's picture comes from the app that announced itself, so it is used only when it is an image carried
  * in the address itself: nothing is fetched from anywhere on that app's say-so. Without one the choice shows its
