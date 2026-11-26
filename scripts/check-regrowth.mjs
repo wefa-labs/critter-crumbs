@@ -8,7 +8,7 @@
 // - New markdown under docs/reviews/ or docs/research/ (dated reports, which the purge moves out),
 //   and new markdown outside docs/ that reads as a report or is not a conventional name.
 // - New media and other binaries anywhere but the app's own assets (packages/app/public/audio,
-//   fonts and scenes), and reports in other text formats (.html, .txt).
+//   fonts, icons and scenes), and reports in other text formats (.html, .txt).
 //
 // Existing text is not judged: a file is compared with the merge base, so only its added lines
 // and added files count.
@@ -45,6 +45,7 @@ const MEDIA =
 const MEDIA_HOMES = [
   "packages/app/public/audio/",
   "packages/app/public/fonts/",
+  "packages/app/public/icons/",
   "packages/app/public/scenes/",
 ];
 

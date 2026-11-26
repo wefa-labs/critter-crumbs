@@ -1,5 +1,27 @@
 [
   {
+    "name": "@reown/appkit",
+    "version": "1.8.19",
+    "manifestLicense": "SEE LICENSE IN LICENSE.md",
+    "license": "Reown Community License",
+    "notice": "LICENSE.md",
+    "sourceNotice": null,
+    "noticeSha256": "8a0365510187692533107783261ccc4c0e7cc2b23d3003a7d153a4665d72b2eb",
+    "gzipArchiveBytes": 191706,
+    "integrity": "sha512-wB+xatkRbOy0AY1cZxxtcKzzPk3l3CTFulDbaISLVmZI6ZnQrOFuLnYc285zGsC6DB4d6bmwYUh89zcMLa4PvQ=="
+  },
+  {
+    "name": "@walletconnect/ethereum-provider",
+    "version": "2.26.0",
+    "manifestLicense": "SEE LICENSE IN LICENSE.md",
+    "license": "WalletConnect Community License",
+    "notice": "LICENSE.md",
+    "sourceNotice": null,
+    "noticeSha256": "1cb6f8cfe21f54ab1105105717eaa2ba08343037a2a9c41dfd5ab09e3ce270fc",
+    "gzipArchiveBytes": 1470320,
+    "integrity": "sha512-C6Ld+Gv1OurPYvAbFGXRuvthIp4datYqDlmRGjWRWXkkIerijo05vwrH5cGNj9bK93FSfGScqaL2Ig2LvX3QhQ=="
+  },
+  {
     "name": "react",
     "version": "19.3.1",
     "manifestLicense": "MIT",
@@ -101,5 +123,16 @@
     "noticeSha256": "52d77cad9a5d509fed860399f75f0798b24d27c49be5616f8ff15a42bd98c249",
     "gzipArchiveBytes": 135310,
     "integrity": "sha512-PI2JjuyEFE7oZDTkV/s6WP4KEceCwnjQHClfunhysuIATtvcVTBLdA4UgHTnJo7C0mkK+OZ6U7SV1NDnYa0HgA=="
+  },
+  {
+    "name": "qr",
+    "version": "0.7.2",
+    "manifestLicense": "(MIT OR Apache-2.0)",
+    "license": "MIT",
+    "notice": "LICENSE-MIT",
+    "sourceNotice": null,
+    "noticeSha256": "07a9f887e9215644439b808628b09f8eece932d79130ff563f958f3a1783e684",
+    "gzipArchiveBytes": 147953,
+    "integrity": "sha512-yovYRuacJBJkG9fWSwcB2bKZhr58c04DpOXguDU+rAAoJZdi6/J3DtlomkKqdd1MutIptIK+kigWmT7LKz8y7A=="
   }
 ]

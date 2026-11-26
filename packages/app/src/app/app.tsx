@@ -16,7 +16,7 @@ import { createSession } from "./session.js";
 import { createAudio, UNLOCK_EVENTS, type MusicTrack } from "../audio/index.js";
 import { AudioProvider } from "../audio/context.js";
 import { Announcements } from "./announcements.js";
-import { ConnectSheet } from "./connect.js";
+import type { WalletConnectPairing } from "./walletconnect-runtime.js";
 import { Launcher } from "./launcher.js";
 import { lazyScreen, retryOnce, ScreenBoundary } from "./lazy-screen.js";
 import { MusicButton } from "./music-button.js";
@@ -28,6 +28,9 @@ import { readDarkChoice, saveDarkChoice, showDarkChoice } from "./theme.js";
    does not arrive says so with Reload (lazy-screen.tsx) */
 const FeastRoute = lazyScreen(() =>
   import("./feast.js").then((module) => ({ default: module.FeastRoute }))
+);
+const ConnectSheet = lazyScreen(() =>
+  import("./connect.js").then((module) => ({ default: module.ConnectSheet }))
 );
 const LearnRoute = lazyScreen(() =>
   import("./learn.js").then((module) => ({ default: module.Learn }))
@@ -108,6 +111,7 @@ export function App() {
     [connectReason, setConnectReason] = useState("");
   /* the choice the connect sheet is waiting on, from its press until the app it names has answered */
   const [waiting, setWaiting] = useState<AccountOption | null>(null);
+  const [pairing, showPairing] = useState<WalletConnectPairing | null>(null);
   const [settings, setSettings] = useState(services.preferences.settings);
   /* dark follows the device until someone chooses (theme.ts) */
   const [darkChoice, setDarkChoice] = useState(() => readDarkChoice(services.preferences.storage)),
@@ -225,7 +229,23 @@ export function App() {
         const { createInjectedAccountProvider } = await retryOnce(
           () => import("../crypto/index.js")
         );
-        return [createInjectedAccountProvider({ chainId: 84532 })];
+        const chainId = 84532;
+        const available = [createInjectedAccountProvider({ chainId })];
+        const projectId = import.meta.env.VITE_WALLETCONNECT_PROJECT_ID?.trim();
+        if (projectId) {
+          const { createWalletConnectAccountProvider } = await retryOnce(
+            () => import("./walletconnect.js")
+          );
+          available.push(
+            createWalletConnectAccountProvider(async () => {
+              const { loadWalletConnect } = await retryOnce(
+                () => import("./walletconnect-runtime.js")
+              );
+              return loadWalletConnect(projectId, chainId, showPairing);
+            }, chainId)
+          );
+        }
+        return available;
       })();
       const found = await Promise.all(
         (await providers.current).map(async (provider) =>
@@ -530,16 +550,21 @@ export function App() {
             </div>
           ) : null}
           {connecting ? (
-            <ConnectSheet
-              options={choices.map((choice) => choice.option)}
-              discovering={discovering}
-              reason={connectReason}
-              waiting={waiting}
-              busy={working}
-              choose={connectWith}
-              cancel={closeConnect}
-              run={run}
-            />
+            <ScreenBoundary back={closeConnect}>
+              <Suspense fallback={null}>
+                <ConnectSheet
+                  options={choices.map((choice) => choice.option)}
+                  discovering={discovering}
+                  reason={connectReason}
+                  waiting={waiting}
+                  pairing={pairing}
+                  busy={working}
+                  choose={connectWith}
+                  cancel={closeConnect}
+                  run={run}
+                />
+              </Suspense>
+            </ScreenBoundary>
           ) : null}
         </NoticeProvider>
       </Announcements>

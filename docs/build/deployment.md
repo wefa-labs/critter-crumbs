@@ -159,7 +159,7 @@ The committed install/build/output settings are authoritative. Vercel manages No
 
 **Plan decision:** the current plain API layout has 22 function entrypoints; Hobby permits 12. Current deployment tooling therefore requires Pro. If using Hobby, consolidate API packaging in a separate reviewed change before deployment. No paid plan has been selected or purchased here. [Function limits](https://vercel.com/docs/functions/runtimes)
 
-Choose a stable staging branch URL or domain, and set `APP_ORIGIN` to that exact HTTPS origin, without a trailing slash. Use that URL for browser access. Arbitrary generated deployment URLs will fail mutation-origin checks when they differ. Automatic per-PR origins need their own reviewed configuration; do not add a wildcard. [Branch-specific variables](https://vercel.com/docs/environment-variables)
+For a stable staging URL, set `APP_ORIGIN` to its exact HTTPS origin without a trailing slash. When a Vercel preview has no explicit origin, use its unique deployment URL, which the server reads from `VERCEL_URL`. Production requires an explicit origin. [Branch-specific variables](https://vercel.com/docs/environment-variables)
 
 Set the following variables in **Preview**, scoped to the rehearsal Git branch. Production gets separate values later. Local command variables do not provision Vercel project variables.
 
@@ -167,7 +167,7 @@ Set the following variables in **Preview**, scoped to the rehearsal Git branch. 
 |---|---|
 | `DATABASE_URL` | Pooled connection for Neon `staging` |
 | `SESSION_SECRET` | Independent random secret, at least 32 characters; generate/store privately |
-| `APP_ORIGIN` | Exact stable rehearsal HTTPS origin |
+| `APP_ORIGIN` | Exact stable rehearsal HTTPS origin, or omit to use the Vercel preview deployment URL |
 | `DEV_ENDPOINTS_ENABLED` | `0` |
 | `SHUTTER_MODE` | `chiado` |
 | `SHUTTER_API_BASE` | `https://shutter-api.chiado.staging.shutter.network` |
@@ -181,6 +181,7 @@ Set the following variables in **Preview**, scoped to the rehearsal Git branch. 
 | `EAS_BALLOT_SCHEMA_UID`, `EAS_RESULT_SCHEMA_UID` | Exact UIDs printed by `bun run register-schemas --chain 84532` |
 | `BASE_RPC_URL` | Server-side Base Sepolia RPC |
 | `VITE_BASE_RPC_URL` | Browser-safe Base Sepolia RPC; any embedded token is public |
+| `VITE_WALLETCONNECT_PROJECT_ID` | Public Reown project ID. Allow the exact app origin in Reown and set this variable in Vercel before building. |
 | `MAINNET_RPC_URL` | Ethereum mainnet RPC for ENS, optional if ENS is not being exercised |
 
 Do not set `MOCK_SECRET`, Foundry account/password settings, or local dev overrides on Vercel. Hosted previews run with production-style runtime checks and cannot use mock mode. Use `bun run dev:local` for mock work.

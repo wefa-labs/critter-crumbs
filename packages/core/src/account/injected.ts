@@ -7,12 +7,12 @@ import {
 } from "viem";
 import { base, baseSepolia } from "viem/chains";
 import { copy } from "@critter-crumbs/shared";
-import { AccountUnavailableError, type AccountProvider } from "./index.js";
+import { AccountUnavailableError, type Account, type AccountProvider } from "./index.js";
 interface Announcement {
   info: { uuid: string; name: string; icon?: string };
   provider: EIP1193Provider;
 }
-type BaseChainId = 8453 | 84532;
+export type BaseChainId = 8453 | 84532;
 const chains = { 8453: base, 84532: baseSepolia } as const;
 /** The browser's own provider, offered only while no wallet has announced itself (some phone apps' built-in browsers never do). */
 const browserProvider = "injected:window.ethereum";
@@ -56,6 +56,72 @@ async function useChain(client: WalletClient, id: BaseChainId) {
     throw error;
   }
 }
+export async function connectEip1193Account(
+  provider: Pick<EIP1193Provider, "request"> &
+    Partial<Pick<EIP1193Provider, "on" | "removeListener">>,
+  chainId: BaseChainId,
+  kind: Account["kind"],
+  release?: () => Promise<void>
+): Promise<Account> {
+  const client = createWalletClient({ transport: custom(provider, { retryCount: 0 }) });
+  const [selected] = await client.requestAddresses();
+  if (!selected) throw new Error("No account selected");
+  const address = getAddress(selected),
+    ours = (other?: string) => other?.toLowerCase() === address.toLowerCase();
+  /* The account the wallet last said it is on, none while it is locked. Only our own disconnect is for good: a wallet
+     that locks or moves to another account can sign again once it is back (production-build-04). */
+  let current: string | undefined = address,
+    disconnected = false;
+  const changed = (addresses: string[]) => {
+    current = addresses[0];
+  };
+  const lost = () => {
+    current = undefined;
+  };
+  provider.on?.("accountsChanged", changed);
+  provider.on?.("disconnect", lost);
+  /** Ask the wallet only once it has said it left, since some come back without saying so; 4100, unauthorised, is a locked wallet. */
+  async function signing<T>(sign: () => Promise<T>) {
+    if (disconnected) throw new Error("Disconnected account");
+    if (!ours(current)) current = (await client.getAddresses().catch(() => [current]))[0];
+    if (!current) throw new AccountUnavailableError("locked");
+    if (!ours(current)) throw new AccountUnavailableError("otherAccount");
+    try {
+      return await sign();
+    } catch (error) {
+      throw rpcCodes(error).includes(4100) ? new AccountUnavailableError("locked") : error;
+    }
+  }
+  return {
+    address,
+    kind,
+    signMessage: (message) => signing(() => client.signMessage({ account: address, message })),
+    /* MetaMask refuses typed data whose domain chainId is not the active chain, so a ballot moves the wallet to its chain first */
+    signTypedData: (typed) =>
+      signing(async () => {
+        const target =
+          typed.domain?.chainId === undefined ? undefined : Number(typed.domain.chainId);
+        if (target !== undefined) {
+          if (target !== 8453 && target !== 84532) throw new TypeError("Unsupported signing chain");
+          await useChain(client, target);
+        }
+        return client.signTypedData({ ...typed, account: address });
+      }),
+    sendTransaction: (tx) =>
+      signing(async () => {
+        await useChain(client, chainId);
+        return client.sendTransaction({ ...tx, account: address, chain: chains[chainId] });
+      }),
+    async disconnect() {
+      if (disconnected) return;
+      disconnected = true;
+      provider.removeListener?.("accountsChanged", changed);
+      provider.removeListener?.("disconnect", lost);
+      await release?.();
+    },
+  };
+}
+
 /** Keep the discovery listener for the page lifetime, including late announcements. */
 export function createInjectedAccountProvider({
   events = window,
@@ -107,62 +173,7 @@ export function createInjectedAccountProvider({
     async connect(option) {
       const entry = found.get(option.id);
       if (!entry) throw new Error("Unknown account provider");
-      const client = createWalletClient({ transport: custom(entry.provider, { retryCount: 0 }) });
-      const [selected] = await client.requestAddresses();
-      if (!selected) throw new Error("No account selected");
-      const address = getAddress(selected),
-        ours = (other?: string) => other?.toLowerCase() === address.toLowerCase();
-      /* The account the wallet last said it is on, none while it is locked. Only our own disconnect is for good: a wallet
-         that locks or moves to another account can sign again once it is back (production-build-04). */
-      let current: string | undefined = address,
-        disconnected = false;
-      const changed = (addresses: string[]) => {
-        current = addresses[0];
-      };
-      const lost = () => {
-        current = undefined;
-      };
-      entry.provider.on?.("accountsChanged", changed);
-      entry.provider.on?.("disconnect", lost);
-      /** Ask the wallet only once it has said it left, since some come back without saying so; 4100, unauthorised, is a locked wallet. */
-      async function signing<T>(sign: () => Promise<T>) {
-        if (disconnected) throw new Error("Disconnected account");
-        if (!ours(current)) current = (await client.getAddresses().catch(() => [current]))[0];
-        if (!current) throw new AccountUnavailableError("locked");
-        if (!ours(current)) throw new AccountUnavailableError("otherAccount");
-        try {
-          return await sign();
-        } catch (error) {
-          throw rpcCodes(error).includes(4100) ? new AccountUnavailableError("locked") : error;
-        }
-      }
-      return {
-        address,
-        kind: "injected",
-        signMessage: (message) => signing(() => client.signMessage({ account: address, message })),
-        /* MetaMask refuses typed data whose domain chainId is not the active chain, so a ballot moves the wallet to its chain first */
-        signTypedData: (typed) =>
-          signing(async () => {
-            const target =
-              typed.domain?.chainId === undefined ? undefined : Number(typed.domain.chainId);
-            if (target !== undefined) {
-              if (target !== 8453 && target !== 84532)
-                throw new TypeError("Unsupported signing chain");
-              await useChain(client, target);
-            }
-            return client.signTypedData({ ...typed, account: address });
-          }),
-        sendTransaction: (tx) =>
-          signing(async () => {
-            await useChain(client, chainId);
-            return client.sendTransaction({ ...tx, account: address, chain: chains[chainId] });
-          }),
-        async disconnect() {
-          disconnected = true;
-          entry.provider.removeListener?.("accountsChanged", changed);
-          entry.provider.removeListener?.("disconnect", lost);
-        },
-      };
+      return connectEip1193Account(entry.provider, chainId, "injected");
     },
   };
 }

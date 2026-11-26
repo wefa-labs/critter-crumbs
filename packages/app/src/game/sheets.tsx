@@ -119,11 +119,13 @@ export const scatterSummary = (targets: readonly Target[], amounts: readonly num
  */
 export function SignDialog({
   summary,
+  remote,
   cancel,
   confirm,
   busy,
 }: {
   summary: string;
+  remote?: boolean;
   cancel: () => void;
   confirm: () => void;
   busy: boolean;
@@ -144,6 +146,7 @@ export function SignDialog({
       <div id={words} className="stack">
         <p>{summary}</p>
         <p>{copy["scatter.sign.body"]}</p>
+        {remote ? <p>{copy["connect.switchBack"]}</p> : null}
       </div>
     </GameDialog>
   );

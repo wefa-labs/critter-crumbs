@@ -82,7 +82,7 @@ Upstream: `01-prd.md` (rules §5, lifecycle §6, privacy §8, edge list, P1–P1
 
 **Untrusted text.** Statements and names render through `textContent`; URLs are auto-linked by one regex on `https?://` and rendered as elements, never as HTML strings (Design System D13). No `innerHTML` anywhere; lint rule.
 
-**Headers** (all responses, per current guidance): `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), geolocation=(), microphone=(), accelerometer=()`, `Cross-Origin-Opener-Policy: same-origin-allow-popups` (wallet popups), `Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' <shutter api> <base rpc>; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'`. Vite emits no inline scripts, so no nonces are needed; `'wasm-unsafe-eval'` is there for the Shutter SDK (**V1**: confirm it needs WASM). The policy has no `'unsafe-eval'`, so no script may make code from a string (`eval`, `new Function`): it would throw in the browser, and if it did so while loading, the page would stay blank. The dev server sends no policy and cannot show this, so the build refuses any script that does it (`scripts/build-policy.mjs`), and Koota, which did, is patched (§11). Fonts and the sound files are self-hosted; no third-party request is ever made from the page except Shutter and the Base RPC.
+`vercel.json` defines the document security headers and the deployment wrapper fills in the Shutter and Base RPC origins. WalletConnect uses the approved relay, RPC, connection-app directory and verification origins. Fonts and sound files are self-hosted. The policy permits WebAssembly for Shutter and the build rejects scripts that generate code from strings (`scripts/build-policy.mjs`).
 
 **No analytics, no telemetry** (R15): no error reporting service, no logging of behaviour server-side beyond request errors with addresses masked.
 
@@ -406,7 +406,9 @@ Runtime (10):
 | `@react-three/fiber` | The brief; React 19 line | MIT |
 | `@react-three/drei` | `View` (stage contract), `RoundedBox`; imported per-module so only those ship | MIT |
 | `koota` | The simulation core (Game Design G10); React bindings from `koota/react`. Patched (`patches/koota@0.6.6.patch`): it built its store accessors with `new Function`, which the §2 policy forbids | MIT |
-| `viem` | Signing, typed data, contract calls, ENS, EIP-6963 transport; the only web3 library | MIT |
+| `viem` | Signing, typed data, contract calls, ENS and EIP-1193 transport | MIT |
+| `@walletconnect/ethereum-provider`, `@reown/appkit` | WalletConnect transport and upstream attribution assets | WalletConnect and Reown Community Licenses (decision of 2026-10-08) |
+| `qr` | Renders the pairing code locally | MIT |
 | `@shutter-network/shutter-sdk` | Threshold encryption client; no substitute. Patched (`patches/`): `zip` written out in place of lodash, and the import of a second, Node-only curve library removed | **V1** (license and size) |
 | `@neondatabase/serverless` | The database driver in functions | Apache-2.0 |
 | `@vercel/functions`? — **not used**; plain handlers suffice | — | — |
@@ -453,6 +455,7 @@ critter-crumbs/
 | `SHUTTER_API_BASE`, `SHUTTER_API_KEY` | Chiado URL when not mock | mainnet URL, key (**V2**) |
 | `EAS_CHAIN_ID`, `EAS_ADDRESS`, `EAS_BALLOT_SCHEMA_UID`, `EAS_RESULT_SCHEMA_UID` | Base Sepolia | Base |
 | `BASE_RPC_URL` (server verification), `VITE_BASE_RPC_URL` (client) | Sepolia public RPC | a provider key |
+| `VITE_WALLETCONNECT_PROJECT_ID` | Optional public Reown project ID | Set at build time to offer WalletConnect. |
 | `MAINNET_RPC_URL` | any | a provider key (ENS) |
 | `LOCAL_ENS` | the local API (`scripts/local-api.ts`) has no mainnet RPC and finds no names, as production finds none for most addresses; `unavailable` fails every lookup instead, to show the ENS notice (`err.ensUnavailable`) | not read |
 | `DATABASE_URL` | Neon dev branch | Neon main |

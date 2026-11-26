@@ -531,6 +531,7 @@ export function Scatter({
             dialog: signing ? (
               <SignDialog
                 summary={scatterSummary(feast.targets, state.amounts)}
+                remote={account()?.kind === "walletconnect"}
                 busy={busy}
                 cancel={() => {
                   focusAccepted.current = false;

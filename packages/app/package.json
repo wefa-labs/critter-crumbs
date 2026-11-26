@@ -19,12 +19,15 @@
   },
   "dependencies": {
     "@critter-crumbs/core": "0.0.0",
+    "@critter-crumbs/shared": "0.0.0",
     "@react-three/drei": "10.7.9",
     "@react-three/fiber": "9.8.2",
+    "@reown/appkit": "1.8.19",
+    "@walletconnect/ethereum-provider": "2.26.0",
     "koota": "0.6.6",
+    "qr": "0.7.2",
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "three": "0.187.0",
-    "@critter-crumbs/shared": "0.0.0"
+    "three": "0.187.0"
   }
 }

@@ -35,6 +35,25 @@ const assets = [
     source: readFileSync(resolve(root, "../../docs/research/licenses/react-three-fiber-LICENSE")),
     contentType: "text/plain",
   },
+  {
+    fileName: "licenses/walletconnect-LICENSE.txt",
+    source: readFileSync(
+      resolve(dirname(require.resolve("@walletconnect/ethereum-provider")), "../LICENSE.md")
+    ),
+    contentType: "text/plain",
+  },
+  {
+    fileName: "licenses/reown-appkit-LICENSE.txt",
+    source: readFileSync(
+      resolve(dirname(require.resolve("@reown/appkit/core")), "../../../LICENSE.md")
+    ),
+    contentType: "text/plain",
+  },
+  {
+    fileName: "licenses/qr-LICENSE.txt",
+    source: readFileSync(resolve(dirname(require.resolve("qr")), "LICENSE-MIT")),
+    contentType: "text/plain",
+  },
 ];
 
 export default defineConfig(({ command }) => ({
