@@ -22,7 +22,7 @@
     "@critter-crumbs/shared": "0.0.0",
     "@react-three/drei": "10.7.9",
     "@react-three/fiber": "9.8.2",
-    "@reown/appkit": "1.8.19",
+    "@reown/appkit": "2.0.0",
     "@walletconnect/ethereum-provider": "2.26.0",
     "koota": "0.6.6",
     "qr": "0.7.2",
